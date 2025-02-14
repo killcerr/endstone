@@ -17,7 +17,7 @@ _Represents an Block-related event._
 Inherits the following classes: [endstone::Event](classendstone_1_1Event.md)
 
 
-Inherited by the following classes: [endstone::BlockBreakEvent](classendstone_1_1BlockBreakEvent.md),  [endstone::BlockPlaceEvent](classendstone_1_1BlockPlaceEvent.md)
+Inherited by the following classes: [endstone::Cancellable](classendstone_1_1Cancellable.md),  [endstone::BlockPistonEvent](classendstone_1_1BlockPistonEvent.md)
 
 
 
@@ -74,7 +74,7 @@ Inherited by the following classes: [endstone::BlockBreakEvent](classendstone_1_
 
 | Type | Name |
 | ---: | :--- |
-|   | [**BlockEvent**](#function-blockevent) ([**Block**](classendstone_1_1Block.md) & block) <br> |
+|   | [**BlockEvent**](#function-blockevent) (std::shared\_ptr&lt; [**Block**](classendstone_1_1Block.md) &gt; block) <br> |
 |  [**Block**](classendstone_1_1Block.md) & | [**getBlock**](#function-getblock) () const<br>_Gets the block involved in this event._  |
 |   | [**~BlockEvent**](#function-blockevent) () override<br> |
 
@@ -85,14 +85,11 @@ See [endstone::Event](classendstone_1_1Event.md)
 
 | Type | Name |
 | ---: | :--- |
-|   | [**Event**](classendstone_1_1Event.md#function-event-12) (bool async=false) <br> |
-|   | [**Event**](classendstone_1_1Event.md#function-event-22) (const [**Event**](classendstone_1_1Event.md) &) = delete<br> |
+|   | [**Event**](classendstone_1_1Event.md#function-event-12) ([**bool**](classendstone_1_1Vector.md) async=[**false**](classendstone_1_1Vector.md)) <br> |
+|   | [**Event**](classendstone_1_1Event.md#function-event-22) ([**const**](classendstone_1_1Vector.md) [**Event**](classendstone_1_1Event.md) &) = delete<br> |
 | virtual std::string | [**getEventName**](classendstone_1_1Event.md#function-geteventname) () const = 0<br> |
-|  bool | [**isAsynchronous**](classendstone_1_1Event.md#function-isasynchronous) () const<br> |
-| virtual bool | [**isCancellable**](classendstone_1_1Event.md#function-iscancellable) () const = 0<br> |
-|  bool | [**isCancelled**](classendstone_1_1Event.md#function-iscancelled) () const<br> |
-|  [**Event**](classendstone_1_1Event.md) & | [**operator=**](classendstone_1_1Event.md#function-operator) (const [**Event**](classendstone_1_1Event.md) &) = delete<br> |
-|  void | [**setCancelled**](classendstone_1_1Event.md#function-setcancelled) (bool cancel) <br> |
+|  [**bool**](classendstone_1_1Vector.md) | [**isAsynchronous**](classendstone_1_1Event.md#function-isasynchronous) () const<br> |
+|  [**Event**](classendstone_1_1Event.md) & | [**operator=**](classendstone_1_1Event.md#function-operator) ([**const**](classendstone_1_1Vector.md) [**Event**](classendstone_1_1Event.md) &) = delete<br> |
 | virtual  | [**~Event**](classendstone_1_1Event.md#function-event) () = default<br> |
 
 
@@ -157,7 +154,7 @@ See [endstone::Event](classendstone_1_1Event.md)
 
 ```C++
 inline explicit endstone::BlockEvent::BlockEvent (
-    Block & block
+    std::shared_ptr< Block > block
 ) 
 ```
 

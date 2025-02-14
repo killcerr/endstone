@@ -35,8 +35,10 @@ namespace endstone {
 
 class Actor;
 class ConsoleCommandSender;
+class Mob;
 class Server;
 class Player;
+class ProxiedCommandSender;
 
 class CommandSender : public Permissible {
 public:
@@ -56,7 +58,17 @@ public:
         return nullptr;
     }
 
+    [[nodiscard]] virtual Mob *asMob() const
+    {
+        return nullptr;
+    }
+
     [[nodiscard]] virtual Player *asPlayer() const
+    {
+        return nullptr;
+    }
+
+    [[nodiscard]] virtual ProxiedCommandSender *asProxiedCommandSender() const
     {
         return nullptr;
     }

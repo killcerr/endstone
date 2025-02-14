@@ -27,6 +27,7 @@
 
 | Type | Name |
 | ---: | :--- |
+| namespace | [**core**](namespaceendstone_1_1core.md) <br> |
 | namespace | [**detail**](namespaceendstone_1_1detail.md) <br> |
 
 
@@ -36,22 +37,27 @@
 | ---: | :--- |
 | class | [**ActionForm**](classendstone_1_1ActionForm.md) <br>_Represents a form with buttons that let the player take action._  |
 | class | [**Actor**](classendstone_1_1Actor.md) <br>_Represents a base actor in the level._  |
+| class | [**ActorDamageEvent**](classendstone_1_1ActorDamageEvent.md) <br>_Called when an_ [_**Actor**_](classendstone_1_1Actor.md) _is damaged._ |
 | class | [**ActorDeathEvent**](classendstone_1_1ActorDeathEvent.md) <br>_Called when an_ [_**Actor**_](classendstone_1_1Actor.md) _dies._ |
-| class | [**ActorEvent**](classendstone_1_1ActorEvent.md) <br>_Represents an Actor-related event._  |
+| class | [**ActorEvent**](classendstone_1_1ActorEvent.md) &lt;[**typename**](classendstone_1_1Vector.md) [**ActorType**](classendstone_1_1Vector.md)&gt;<br>_Represents an Actor-related event._  |
+| class | [**ActorExplodeEvent**](classendstone_1_1ActorExplodeEvent.md) <br>_Called when an actor explodes._  |
 | class | [**ActorKnockbackEvent**](classendstone_1_1ActorKnockbackEvent.md) <br>_Called when a living entity receives knockback._  |
 | class | [**ActorRemoveEvent**](classendstone_1_1ActorRemoveEvent.md) <br>_Called when an_ [_**Actor**_](classendstone_1_1Actor.md) _is removed._ |
 | class | [**ActorSpawnEvent**](classendstone_1_1ActorSpawnEvent.md) <br>_Called when an_ [_**Actor**_](classendstone_1_1Actor.md) _is spawned into a world._ |
 | class | [**ActorTeleportEvent**](classendstone_1_1ActorTeleportEvent.md) <br>_Called when a non-player entity is teleported from one location to another._  |
 | class | [**BanEntry**](classendstone_1_1BanEntry.md) <br>_A single entry from a ban list._  |
-| class | [**BanList**](classendstone_1_1BanList.md) &lt;typename T&gt;<br>_Represents a ban list, containing bans._  |
+| class | [**BanList**](classendstone_1_1BanList.md) &lt;[**typename**](classendstone_1_1Vector.md) [**T**](classendstone_1_1Vector.md)&gt;<br>_Represents a ban list, containing bans._  |
 | class | [**Block**](classendstone_1_1Block.md) <br>_Represents a block._  |
 | class | [**BlockBreakEvent**](classendstone_1_1BlockBreakEvent.md) <br>_Called when a block is broken by a player._  |
 | class | [**BlockData**](classendstone_1_1BlockData.md) <br>_Represents the data related to a live block._  |
 | class | [**BlockEvent**](classendstone_1_1BlockEvent.md) <br>_Represents an Block-related event._  |
+| class | [**BlockPistonEvent**](classendstone_1_1BlockPistonEvent.md) <br>_Called when a piston block is triggered._  |
 | class | [**BlockPlaceEvent**](classendstone_1_1BlockPlaceEvent.md) <br>_Called when a block is placed by a player._  |
 | class | [**BlockState**](classendstone_1_1BlockState.md) <br>_Represents a captured state of a block, which will not update automatically._  |
 | class | [**BossBar**](classendstone_1_1BossBar.md) <br>_Represents a boss bar that is displayed to players._  |
 | class | [**BroadcastMessageEvent**](classendstone_1_1BroadcastMessageEvent.md) <br>[_**Event**_](classendstone_1_1Event.md) _triggered for server broadcast messages such as from_[_**Server::broadcast**_](classendstone_1_1Server.md#function-broadcast) _._ |
+| class | [**Cancellable**](classendstone_1_1Cancellable.md) &lt;[**typename**](classendstone_1_1Vector.md) EventType&gt;<br>_A type characterizing events that may be cancelled by a plugin or the server._  |
+| class | [**Chunk**](classendstone_1_1Chunk.md) <br>_Represents a chunk of blocks._  |
 | struct | [**ColorFormat**](structendstone_1_1ColorFormat.md) <br>_All supported color and format codes._  |
 | class | [**Command**](classendstone_1_1Command.md) <br>_Represents a_ [_**Command**_](classendstone_1_1Command.md) _, which executes various tasks upon user input._ |
 | class | [**CommandExecutor**](classendstone_1_1CommandExecutor.md) <br>_Represents a class which contains a single method for executing commands._  |
@@ -60,13 +66,15 @@
 | class | [**CommandSenderWrapper**](classendstone_1_1CommandSenderWrapper.md) <br>_Represents a wrapper that forwards commands to the wrapped_ [_**CommandSender**_](classendstone_1_1CommandSender.md) _and captures its output._ |
 | class | [**ConsoleCommandSender**](classendstone_1_1ConsoleCommandSender.md) <br>_Represents a console command sender._  |
 | class | [**Criteria**](classendstone_1_1Criteria.md) <br>_Represents a scoreboard criteria._  |
+| class | [**DamageSource**](classendstone_1_1DamageSource.md) <br>_Represents a source of damage._  |
 | class | [**Dimension**](classendstone_1_1Dimension.md) <br>_Represents a dimension within a_ [_**Level**_](classendstone_1_1Level.md) _._ |
 | class | [**Dropdown**](classendstone_1_1Dropdown.md) <br>_Represents a dropdown with a set of predefined options._  |
 | class | [**Error**](classendstone_1_1Error.md) <br>_Represents an error with a message and the stack trace._  |
 | class | [**Event**](classendstone_1_1Event.md) <br>_Represents an event._  |
 | class | [**EventHandler**](classendstone_1_1EventHandler.md) <br>_Represents a registered_ [_**EventHandler**_](classendstone_1_1EventHandler.md) _which associates with a_[_**Plugin**_](classendstone_1_1Plugin.md) _._ |
-| class | [**Form**](classendstone_1_1Form.md) &lt;typename T&gt;<br>_Represents a generic form._  |
+| class | [**Form**](classendstone_1_1Form.md) &lt;[**typename**](classendstone_1_1Vector.md) [**T**](classendstone_1_1Vector.md)&gt;<br>_Represents a generic form._  |
 | class | [**HandlerList**](classendstone_1_1HandlerList.md) <br>_A list of event handlers. Should be instantiated on a per-event basis._  |
+| class | [**ICancellable**](classendstone_1_1ICancellable.md) <br> |
 | class | [**Inventory**](classendstone_1_1Inventory.md) <br>_Interface to the various inventories._  |
 | class | [**IpBanEntry**](classendstone_1_1IpBanEntry.md) <br> |
 | class | [**IpBanList**](classendstone_1_1IpBanList.md) <br>_Represents a ban list, containing banned IP addresses._  |
@@ -80,6 +88,7 @@
 | class | [**Mob**](classendstone_1_1Mob.md) <br>_Represents a mobile entity (i.e. living entity), such as a monster or player._  |
 | class | [**ModalForm**](classendstone_1_1ModalForm.md) <br>_Represents a modal form with controls._  |
 | class | [**Objective**](classendstone_1_1Objective.md) <br>_Represents an objective on a scoreboard that can show scores specific to entries._  |
+| class | [**OfflinePlayer**](classendstone_1_1OfflinePlayer.md) <br>_Represents a reference to a player identity and the data belonging to a player that is stored on the disk and can, thus, be retrieved without the player needing to be online._  |
 | class | [**Packet**](classendstone_1_1Packet.md) <br>_Represents a packet._  |
 | class | [**Permissible**](classendstone_1_1Permissible.md) <br>_Represents an object that may become a server operator and can be assigned permissions._  |
 | class | [**Permission**](classendstone_1_1Permission.md) <br>_Represents a unique permission that may be attached to a_ [_**Permissible**_](classendstone_1_1Permissible.md) _._ |
@@ -91,7 +100,9 @@
 | class | [**PlayerChatEvent**](classendstone_1_1PlayerChatEvent.md) <br>_Called when a player sends a chat message._  |
 | class | [**PlayerCommandEvent**](classendstone_1_1PlayerCommandEvent.md) <br>_Called whenever a player runs a command._  |
 | class | [**PlayerDeathEvent**](classendstone_1_1PlayerDeathEvent.md) <br>_Called when a_ [_**Player**_](classendstone_1_1Player.md) _dies._ |
+| class | [**PlayerEmoteEvent**](classendstone_1_1PlayerEmoteEvent.md) <br>_Called when a player uses an emote._  |
 | class | [**PlayerEvent**](classendstone_1_1PlayerEvent.md) <br>_Represents a player related event._  |
+| class | [**PlayerGameModeChangeEvent**](classendstone_1_1PlayerGameModeChangeEvent.md) <br>_Called when the GameMode of the player is changed._  |
 | class | [**PlayerInteractActorEvent**](classendstone_1_1PlayerInteractActorEvent.md) <br>_Represents an event that is called when a player right-clicks an actor._  |
 | class | [**PlayerInteractEvent**](classendstone_1_1PlayerInteractEvent.md) <br>_Represents an event that is called when a player right-clicks a block._  |
 | class | [**PlayerInventory**](classendstone_1_1PlayerInventory.md) <br>_Interface to the inventory of a_ [_**Player**_](classendstone_1_1Player.md) _, including the four armor slots and any extra slots._ |
@@ -99,6 +110,7 @@
 | class | [**PlayerKickEvent**](classendstone_1_1PlayerKickEvent.md) <br>_Called when a player gets kicked from the server._  |
 | class | [**PlayerLoginEvent**](classendstone_1_1PlayerLoginEvent.md) <br>_Called when a player attempts to login in._  |
 | class | [**PlayerQuitEvent**](classendstone_1_1PlayerQuitEvent.md) <br>_Called when a player leaves a server._  |
+| class | [**PlayerRespawnEvent**](classendstone_1_1PlayerRespawnEvent.md) <br>_Called when a player respawns._  |
 | class | [**PlayerTeleportEvent**](classendstone_1_1PlayerTeleportEvent.md) <br>_Called when a player is teleported from one location to another._  |
 | class | [**Plugin**](classendstone_1_1Plugin.md) <br>_Represents a_ [_**Plugin**_](classendstone_1_1Plugin.md) _._ |
 | class | [**PluginCommand**](classendstone_1_1PluginCommand.md) <br>_Represents a_ [_**Command**_](classendstone_1_1Command.md) _belonging to a_[_**Plugin**_](classendstone_1_1Plugin.md) _._ |
@@ -108,14 +120,14 @@
 | class | [**PluginLoader**](classendstone_1_1PluginLoader.md) <br>_Represents a plugin loader, which handles direct access to specific types of plugins._  |
 | class | [**PluginManager**](classendstone_1_1PluginManager.md) <br>_Represents a plugin manager that handles all plugins from the_ [_**Server**_](classendstone_1_1Server.md) _._ |
 | class | [**Position**](classendstone_1_1Position.md) <br>_Represents a 3-dimensional position in a dimension within a level._  |
-| class | [**ProxiedCommandSender**](classendstone_1_1ProxiedCommandSender.md) <br>_Interface for proxied command sender._  |
+| class | [**ProxiedCommandSender**](classendstone_1_1ProxiedCommandSender.md) <br>_Represents a proxied command sender._  |
 | class | [**Scheduler**](classendstone_1_1Scheduler.md) <br>_Represents a scheduler that executes various tasks._  |
 | class | [**Score**](classendstone_1_1Score.md) <br>_Represents a score for an objective on a scoreboard._  |
 | class | [**Scoreboard**](classendstone_1_1Scoreboard.md) <br>_Represents a scoreboard._  |
 | class | [**ScriptMessageEvent**](classendstone_1_1ScriptMessageEvent.md) <br>_Called when a message is sent by_ `/scriptevent` _command._ |
 | class | [**Server**](classendstone_1_1Server.md) <br>_Represents a server implementation._  |
 | class | [**ServerCommandEvent**](classendstone_1_1ServerCommandEvent.md) <br>_Called when the console runs a command, early in the process._  |
-| class | [**ServerEvent**](classendstone_1_1ServerEvent.md) <br>_Represents an Server-related event._  |
+| class | [**ServerEvent**](classendstone_1_1ServerEvent.md) <br>_Represents a Server-related event._  |
 | class | [**ServerListPingEvent**](classendstone_1_1ServerListPingEvent.md) <br>_Called when a server ping is coming in._  |
 | class | [**ServerLoadEvent**](classendstone_1_1ServerLoadEvent.md) <br>_Called when either the server startup or reload has completed._  |
 | class | [**Skin**](classendstone_1_1Skin.md) <br>_Represents a player skin._  |
@@ -129,7 +141,7 @@
 | class | [**Toggle**](classendstone_1_1Toggle.md) <br>_Represents a toggle button with a label._  |
 | class | [**Translatable**](classendstone_1_1Translatable.md) <br>_Represents an object with a text representation that can be translated by the Minecraft client._  |
 | class | [**UUID**](classendstone_1_1UUID.md) <br>_Implementation of Universally Unique Identifier (_ [_**UUID**_](classendstone_1_1UUID.md) _)_ |
-| class | [**Vector**](classendstone_1_1Vector.md) &lt;typename T&gt;<br>_Represents a 3-dimensional vector._  |
+| class | [**Vector**](classendstone_1_1Vector.md) &lt;[**typename**](classendstone_1_1Vector.md) [**T**](classendstone_1_1Vector.md)&gt;<br>_Represents a 3-dimensional vector._  |
 | class | [**WeatherChangeEvent**](classendstone_1_1WeatherChangeEvent.md) <br>_Called when the weather (rain) state in a world is changing._  |
 | class | [**WeatherEvent**](classendstone_1_1WeatherEvent.md) <br>_Represents a Weather-related event._  |
 | struct | [**overloaded**](structendstone_1_1overloaded.md) &lt;Func&gt;<br>_Helper type for visitors._  |
@@ -143,7 +155,7 @@
 | enum  | [**BarFlag**](#enum-barflag)  <br> |
 | enum  | [**BarStyle**](#enum-barstyle)  <br> |
 | enum  | [**BlockFace**](#enum-blockface)  <br> |
-| typedef std::unordered\_map&lt; std::string, std::variant&lt; bool, std::string, int &gt; &gt; | [**BlockStates**](#typedef-blockstates)  <br> |
+| typedef std::unordered\_map&lt; std::string, std::variant&lt; [**bool**](classendstone_1_1Vector.md), std::string, [**int**](classendstone_1_1Vector.md) &gt; &gt; | [**BlockStates**](#typedef-blockstates)  <br> |
 | enum  | [**DisplaySlot**](#enum-displayslot)  <br>_Locations for displaying objectives to the player._  |
 | enum  | [**EventPriority**](#enum-eventpriority)  <br>_Represents an event's priority in execution._  |
 | enum  | [**GameMode**](#enum-gamemode)  <br>_Represents the various type of game modes that Players may have._  |
@@ -151,10 +163,10 @@
 | enum  | [**ObjectiveSortOrder**](#enum-objectivesortorder)  <br>_Represents the sort order of objectives on a DisplaySlot._  |
 | enum  | [**PacketType**](#enum-packettype)  <br>_Represents the types of packets._  |
 | enum  | [**PermissionDefault**](#enum-permissiondefault)  <br>_Represents the possible default values for permissions._  |
-| typedef std::function&lt; void(const [**PermissionAttachment**](classendstone_1_1PermissionAttachment.md) &)&gt; | [**PermissionRemovedExecutor**](#typedef-permissionremovedexecutor)  <br> |
+| typedef std::function&lt; [**void**](classendstone_1_1Vector.md)([**const**](classendstone_1_1Vector.md) [**PermissionAttachment**](classendstone_1_1PermissionAttachment.md) &)&gt; | [**PermissionRemovedExecutor**](#typedef-permissionremovedexecutor)  <br> |
 | enum  | [**PluginLoadOrder**](#enum-pluginloadorder)  <br>_Represents the order in which a plugin should be initialized and enabled._  |
 | enum std::uint8\_t | [**RenderType**](#enum-rendertype)  <br>_Controls the way in which an_ [_**Objective**_](classendstone_1_1Objective.md) _is rendered on the client side._ |
-| typedef nonstd::expected&lt; T, [**Error**](classendstone_1_1Error.md) &gt; | [**Result**](#typedef-result)  <br> |
+| typedef nonstd::expected&lt; [**T**](classendstone_1_1Vector.md), [**Error**](classendstone_1_1Error.md) &gt; | [**Result**](#typedef-result)  <br> |
 | typedef std::variant&lt; [**Player**](classendstone_1_1Player.md) \*, [**Actor**](classendstone_1_1Actor.md) \*, std::string &gt; | [**ScoreEntry**](#typedef-scoreentry)  <br> |
 | typedef std::uint32\_t | [**TaskId**](#typedef-taskid)  <br> |
 
@@ -181,15 +193,15 @@
 
 | Type | Name |
 | ---: | :--- |
-|  std::size\_t | [**hash\_value**](#function-hash_value) ([**UUID**](classendstone_1_1UUID.md) const & u) noexcept<br> |
-|  bool | [**operator!=**](#function-operator) ([**UUID**](classendstone_1_1UUID.md) const & lhs, [**UUID**](classendstone_1_1UUID.md) const & rhs) noexcept<br> |
-|  bool | [**operator&lt;**](#function-operator_1) ([**UUID**](classendstone_1_1UUID.md) const & lhs, [**UUID**](classendstone_1_1UUID.md) const & rhs) noexcept<br> |
-|  bool | [**operator&lt;=**](#function-operator_2) ([**UUID**](classendstone_1_1UUID.md) const & lhs, [**UUID**](classendstone_1_1UUID.md) const & rhs) noexcept<br> |
-|  bool | [**operator==**](#function-operator_3) ([**UUID**](classendstone_1_1UUID.md) const & lhs, [**UUID**](classendstone_1_1UUID.md) const & rhs) noexcept<br> |
-|  bool | [**operator&gt;**](#function-operator_4) ([**UUID**](classendstone_1_1UUID.md) const & lhs, [**UUID**](classendstone_1_1UUID.md) const & rhs) noexcept<br> |
-|  bool | [**operator&gt;=**](#function-operator_5) ([**UUID**](classendstone_1_1UUID.md) const & lhs, [**UUID**](classendstone_1_1UUID.md) const & rhs) noexcept<br> |
+|  std::size\_t | [**hash\_value**](#function-hash_value) ([**UUID**](classendstone_1_1UUID.md) [**const**](classendstone_1_1Vector.md) & u) noexcept<br> |
+|  [**bool**](classendstone_1_1Vector.md) | [**operator!=**](#function-operator) ([**UUID**](classendstone_1_1UUID.md) [**const**](classendstone_1_1Vector.md) & lhs, [**UUID**](classendstone_1_1UUID.md) [**const**](classendstone_1_1Vector.md) & rhs) noexcept<br> |
+|  [**bool**](classendstone_1_1Vector.md) | [**operator&lt;**](#function-operator_1) ([**UUID**](classendstone_1_1UUID.md) [**const**](classendstone_1_1Vector.md) & lhs, [**UUID**](classendstone_1_1UUID.md) [**const**](classendstone_1_1Vector.md) & rhs) noexcept<br> |
+|  [**bool**](classendstone_1_1Vector.md) | [**operator&lt;=**](#function-operator_2) ([**UUID**](classendstone_1_1UUID.md) [**const**](classendstone_1_1Vector.md) & lhs, [**UUID**](classendstone_1_1UUID.md) [**const**](classendstone_1_1Vector.md) & rhs) noexcept<br> |
+|  [**bool**](classendstone_1_1Vector.md) | [**operator==**](#function-operator_3) ([**UUID**](classendstone_1_1UUID.md) [**const**](classendstone_1_1Vector.md) & lhs, [**UUID**](classendstone_1_1UUID.md) [**const**](classendstone_1_1Vector.md) & rhs) noexcept<br> |
+|  [**bool**](classendstone_1_1Vector.md) | [**operator&gt;**](#function-operator_4) ([**UUID**](classendstone_1_1UUID.md) [**const**](classendstone_1_1Vector.md) & lhs, [**UUID**](classendstone_1_1UUID.md) [**const**](classendstone_1_1Vector.md) & rhs) noexcept<br> |
+|  [**bool**](classendstone_1_1Vector.md) | [**operator&gt;=**](#function-operator_5) ([**UUID**](classendstone_1_1UUID.md) [**const**](classendstone_1_1Vector.md) & lhs, [**UUID**](classendstone_1_1UUID.md) [**const**](classendstone_1_1Vector.md) & rhs) noexcept<br> |
 |   | [**overloaded**](#function-overloaded) (Func...) <br>_Deduction guide._  |
-|  void | [**swap**](#function-swap) ([**UUID**](classendstone_1_1UUID.md) & lhs, [**UUID**](classendstone_1_1UUID.md) & rhs) noexcept<br> |
+|  [**void**](classendstone_1_1Vector.md) | [**swap**](#function-swap) ([**UUID**](classendstone_1_1UUID.md) & lhs, [**UUID**](classendstone_1_1UUID.md) & rhs) noexcept<br> |
 
 
 
@@ -535,7 +547,7 @@ using endstone::TaskId = typedef std::uint32_t;
 
 ```C++
 inline std::size_t endstone::hash_value (
-    UUID const & u
+    UUID  const & u
 ) noexcept
 ```
 
@@ -550,8 +562,8 @@ inline std::size_t endstone::hash_value (
 
 ```C++
 inline bool endstone::operator!= (
-    UUID const & lhs,
-    UUID const & rhs
+    UUID  const & lhs,
+    UUID  const & rhs
 ) noexcept
 ```
 
@@ -566,8 +578,8 @@ inline bool endstone::operator!= (
 
 ```C++
 inline bool endstone::operator< (
-    UUID const & lhs,
-    UUID const & rhs
+    UUID  const & lhs,
+    UUID  const & rhs
 ) noexcept
 ```
 
@@ -582,8 +594,8 @@ inline bool endstone::operator< (
 
 ```C++
 inline bool endstone::operator<= (
-    UUID const & lhs,
-    UUID const & rhs
+    UUID  const & lhs,
+    UUID  const & rhs
 ) noexcept
 ```
 
@@ -598,8 +610,8 @@ inline bool endstone::operator<= (
 
 ```C++
 inline bool endstone::operator== (
-    UUID const & lhs,
-    UUID const & rhs
+    UUID  const & lhs,
+    UUID  const & rhs
 ) noexcept
 ```
 
@@ -614,8 +626,8 @@ inline bool endstone::operator== (
 
 ```C++
 inline bool endstone::operator> (
-    UUID const & lhs,
-    UUID const & rhs
+    UUID  const & lhs,
+    UUID  const & rhs
 ) noexcept
 ```
 
@@ -630,8 +642,8 @@ inline bool endstone::operator> (
 
 ```C++
 inline bool endstone::operator>= (
-    UUID const & lhs,
-    UUID const & rhs
+    UUID  const & lhs,
+    UUID  const & rhs
 ) noexcept
 ```
 
