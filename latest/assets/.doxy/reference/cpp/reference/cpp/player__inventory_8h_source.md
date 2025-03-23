@@ -28,7 +28,24 @@
 
 namespace endstone {
 
-class PlayerInventory : public Inventory {};
+class PlayerInventory : public Inventory {
+public:
+    [[nodiscard]] virtual std::shared_ptr<ItemStack> getHelmet() const = 0;
+
+    [[nodiscard]] virtual std::shared_ptr<ItemStack> getChestplate() const = 0;
+
+    [[nodiscard]] virtual std::shared_ptr<ItemStack> getLeggings() const = 0;
+
+    [[nodiscard]] virtual std::shared_ptr<ItemStack> getBoots() const = 0;
+
+    [[nodiscard]] virtual std::shared_ptr<ItemStack> getItemInMainHand() const = 0;
+
+    [[nodiscard]] virtual std::shared_ptr<ItemStack> getItemInOffHand() const = 0;
+
+    [[nodiscard]] virtual int getHeldItemSlot() const = 0;
+
+    virtual void setHeldItemSlot(int slot) = 0;
+};
 
 }  // namespace endstone
 ```
