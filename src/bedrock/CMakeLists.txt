@@ -78,6 +78,7 @@ add_library(bedrock STATIC
         world/attribute/attribute_instance.cpp
         world/attribute/attribute_map.cpp
         world/inventory/network/item_stack_net_id_variant.cpp
+        world/inventory/network/item_stack_request_action_handler.cpp
         world/item/item.cpp
         world/item/item_descriptor.cpp
         world/item/item_instance.cpp

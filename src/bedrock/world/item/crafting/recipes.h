@@ -14,4 +14,22 @@
 
 #pragma once
 
-class Recipes {};
+#include "bedrock/resources/resource_pack_manager.h"
+#include "bedrock/world/item/crafting/recipe.h"
+class Level;
+class Recipes {
+public:
+    struct FurnaceRecipeKey {
+        int id;
+        HashedString tag;
+    };
+    ResourcePackManager *manager;
+    char pad1[8];
+    std::map<HashedString, std::map<std::string, std::shared_ptr<Recipe>>> recipes;
+    std::map<::Recipes::FurnaceRecipeKey, ::ItemInstance> furnace_recipes;
+    bool initializing;
+    char pad2[16];
+    std::unordered_map<::RecipeNetId, ::Recipe *> recipes_by_net_id;
+    char pad3[112];
+    Level *level;
+};
