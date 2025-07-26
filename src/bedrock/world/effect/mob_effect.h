@@ -14,6 +14,17 @@
 
 #pragma once
 
+#include <optional>
+#include <vector>
+
+#include "bedrock/core/math/color.h"
+#include "bedrock/core/string/string_hash.h"
+#include "bedrock/shared_types/legacy/level_sound_event.h"
+#include "bedrock/world/attribute/amplifier.h"
+#include "bedrock/world/attribute/attribute.h"
+#include "bedrock/world/attribute/attribute_buff.h"
+#include "bedrock/world/attribute/attribute_modifier.h"
+#include "bedrock/world/effect/effect_duration.h"
 class MobEffect {
 public:
     static constexpr std::size_t NUM_EFFECTS = 37;
@@ -30,4 +41,24 @@ public:
         bool had_effect_last_tick;
         bool had_applied;
     };
+    unsigned const id;
+    bool is_harmful;
+    mce::Color color;
+    HashedString particle_effect_id;
+    HashedString particle_effect_ambient_id;
+    std::string description_id;
+    int icon;
+    float duration_modifier;
+    bool is_disabled;
+    std::string resource_name;
+    std::string icon_name;
+    bool effect_visible;
+    std::optional<::SharedTypes::Legacy::LevelSoundEvent> on_apply_sound;
+    HashedString component_name;
+    std::shared_ptr<Amplifier> value_amplifier;
+    std::shared_ptr<Amplifier> duration_amplifier;
+    std::vector<std::pair<Attribute const *, std::shared_ptr<AttributeBuff>>> attribute_buffs;
+    std::vector<std::pair<Attribute const *, std::shared_ptr<AttributeModifier>>> attribute_modifiers;
+    FactorCalculationData factor_calculation_data;
+    std::add_lvalue_reference_t<std::unique_ptr<MobEffect>[]> getEffects();
 };

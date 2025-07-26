@@ -21,6 +21,8 @@
 namespace endstone {
 class Item;
 class Mob;
+class PotionEffect;
+class PotionEffectType;
 /**
  * @brief Represents a base actor in the level.
  */
@@ -256,6 +258,18 @@ public:
      * @param score The new score tag to set.
      */
     virtual void setScoreTag(std::string score) = 0;
+
+    virtual bool addPotionEffect(const std::shared_ptr<PotionEffect> &) = 0;
+
+    virtual bool addPotionEffects(const std::vector<std::shared_ptr<PotionEffect>> &) = 0;
+
+    virtual bool hasPotionEffect(const std::shared_ptr<PotionEffectType> &) = 0;
+
+    virtual std::shared_ptr<PotionEffect> getPotionEffect(const std::shared_ptr<PotionEffectType> &) = 0;
+
+    virtual void removePotionEffect(const std::shared_ptr<PotionEffectType> &) = 0;
+
+    virtual std::vector<std::shared_ptr<PotionEffect>> getActivePotionEffects() = 0;
 };
 
 }  // namespace endstone

@@ -405,6 +405,8 @@ public:
       */
     [[nodiscard]] virtual Registry<ItemType> &getItemRegistry() const = 0;
 
+    [[nodiscard]] virtual Registry<PotionEffectType> &getEffectRegistry() const = 0;
+
     /**
      * @brief Used for all administrative messages, such as an operator using a command.
      */
