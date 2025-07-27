@@ -60,5 +60,5 @@ public:
     std::vector<std::pair<Attribute const *, std::shared_ptr<AttributeBuff>>> attribute_buffs;
     std::vector<std::pair<Attribute const *, std::shared_ptr<AttributeModifier>>> attribute_modifiers;
     FactorCalculationData factor_calculation_data;
-    std::add_lvalue_reference_t<std::unique_ptr<MobEffect>[]> getEffects();
+    static std::add_lvalue_reference_t<std::unique_ptr<MobEffect>[]> getEffects();
 };

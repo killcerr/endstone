@@ -8,6 +8,7 @@ class Actor;
 class PotionEffect {
 public:
     static constexpr int INFINITE_DURATION = -1;  // todo: check mcbe value
+    virtual ~PotionEffect() = 0;
     [[nodiscard]] virtual int getAmplifier() = 0;
     [[nodiscard]] virtual int getDuration() const = 0;
     [[nodiscard]] virtual bool isShorterThan(const PotionEffect &other) const = 0;

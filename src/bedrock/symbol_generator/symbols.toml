@@ -110,6 +110,7 @@ version = "1.21.95"
 "getI18n::result" = 95406768
 "BlockState::StateListNode::mHead" = 94905496
 "Enchant::mEnchants" = 95287072
+"MobEffect::mMobEffects" = 95285104
 
 [linux]
 "_Z7getI18nv" = 97032336

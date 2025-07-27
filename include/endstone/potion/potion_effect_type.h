@@ -8,6 +8,7 @@ namespace endstone {
 class PotionEffect;
 class PotionEffectType {
 public:
+    virtual ~PotionEffectType() = 0;
     [[nodiscard]] virtual std::shared_ptr<PotionEffect> createEffect(int duration, int amplifier) = 0;
     [[nodiscard]] virtual bool isInstant() = 0;
     [[nodiscard]] virtual PotionEffectTypeCategory getCategory() = 0;

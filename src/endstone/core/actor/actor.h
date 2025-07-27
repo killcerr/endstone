@@ -86,6 +86,13 @@ public:
     void setNameTag(std::string name) override;
     [[nodiscard]] std::string getScoreTag() const override;
     void setScoreTag(std::string score) override;
+    [[nodiscard]] bool addPotionEffect(const std::shared_ptr<PotionEffect> &effect) override;
+    [[nodiscard]] bool addPotionEffects(const std::vector<std::shared_ptr<PotionEffect>> &effects) override;
+    [[nodiscard]] bool hasPotionEffect(const std::shared_ptr<PotionEffectType> &effect_type) const override;
+    [[nodiscard]] std::shared_ptr<PotionEffect> getPotionEffect(
+        const std::shared_ptr<PotionEffectType> &effect_type) const override;
+    void removePotionEffect(const std::shared_ptr<PotionEffectType> &effect_type) override;
+    [[nodiscard]] std::vector<std::shared_ptr<PotionEffect>> getActivePotionEffects() const override;
 
     ::Actor &getActor() const;
 
