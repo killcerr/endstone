@@ -14,6 +14,7 @@
 
 #include "endstone/core/actor/actor.h"
 
+#include "bedrock/entity/components/mob_effects_component.h"
 #include "bedrock/entity/components/offsets_component.h"
 #include "bedrock/entity/components/post_tick_position_delta_component.h"
 #include "bedrock/server/commands/command_utils.h"
@@ -306,6 +307,26 @@ PermissibleBase &EndstoneActor::getPermissibleBase()
 {
     static std::shared_ptr<PermissibleBase> perm = std::make_shared<PermissibleBase>(nullptr);
     return *perm;
+}
+
+bool EndstoneActor::addPotionEffect(const std::shared_ptr<PotionEffect> &effect)
+{
+    auto *component = getActor().tryGetComponent<MobEffectsComponent>();
+    return true;
+}
+
+bool EndstoneActor::addPotionEffects(const std::vector<std::shared_ptr<PotionEffect>> &effects)
+{
+    for (const auto &effect : effects) {
+        Actor::addPotionEffect(effect);
+    }
+    return true;
+}
+
+bool EndstoneActor::hasPotionEffect(const std::shared_ptr<PotionEffectType> &effect_type) const
+{
+    auto *component = getActor().tryGetComponent<MobEffectsComponent>();
+    return false;
 }
 
 ::Actor &EndstoneActor::getActor() const
