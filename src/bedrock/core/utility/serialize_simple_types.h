@@ -14,20 +14,18 @@
 
 #pragma once
 
-#include "endstone/command/console_command_sender.h"
-#include "endstone/core/command/server_command_sender.h"
+#include <string>
 
-namespace endstone::core {
+#include "bedrock/platform/result.h"
 
-class EndstoneConsoleCommandSender : public ServerCommandSender, public ConsoleCommandSender {
-public:
-    EndstoneConsoleCommandSender() = default;
+template <typename Type>
+struct serialize;
 
-    [[nodiscard]] ConsoleCommandSender *asConsole() const override;
-    void sendMessage(const Message &message) const override;
-    void sendErrorMessage(const Message &message) const override;
-    [[nodiscard]] std::string getName() const override;
-    [[nodiscard]] PermissionLevel getPermissionLevel() const override;
+class BinaryStream;
+class ReadOnlyBinaryStream;
+
+template <>
+struct serialize<std::string> {
+    static void write(const std::string &value, BinaryStream &stream);
+    static Bedrock::Result<std::string> read(ReadOnlyBinaryStream &);
 };
-
-}  // namespace endstone::core
