@@ -107,7 +107,9 @@ add_library(bedrock STATIC
         world/item/registry/item_registry_ref.cpp
         world/level/block_source.cpp
         world/level/explosion.cpp
+        world/level/difficulty_utils.cpp
         world/level/level.cpp
+        world/level/level_utils.cpp
         world/level/weather.cpp
         world/level/biome/registry/biome_registry.cpp
         world/level/block/bed_block.cpp

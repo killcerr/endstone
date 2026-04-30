@@ -24,6 +24,7 @@ class EndstoneServer;
 class Level : public ILevel {
 public:
     ENDSTONE_HOOK void tick() override;
+    [[nodiscard]] ENDSTONE_HOOK float getSpecialMultiplier(DimensionType dim_type) const override;
     // ENDSTONE_HOOK void onChunkDiscarded(LevelChunk &);
     // ENDSTONE_HOOK void onChunkLoaded(ChunkSource &, LevelChunk &);
 

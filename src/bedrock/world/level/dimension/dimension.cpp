@@ -14,6 +14,9 @@
 
 #include "bedrock/world/level/dimension/dimension.h"
 
+#include "bedrock/world/level/level.h"
+#include "bedrock/world/level/level_utils.h"
+
 bool Dimension::isBrightOutside() const
 {
     return isNaturalDimension() && sky_darken_.value < 4;
@@ -57,4 +60,11 @@ const std::string &Dimension::getName() const
 WeakRef<Dimension> Dimension::getWeakRef()
 {
     return WeakRef<Dimension>(weak_from_this());
+}
+
+const float Dimension::MOON_BRIGHTNESS_PER_PHASE[8] = {1.0F, 0.75F, 0.5F, 0.25F, 0.0F, 0.25F, 0.5F, 0.75F};
+
+float Dimension::getMoonBrightness() const
+{
+    return MOON_BRIGHTNESS_PER_PHASE[LevelUtils::getMoonPhase(*level_)];
 }

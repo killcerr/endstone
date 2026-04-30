@@ -16,6 +16,8 @@
 
 #include "bedrock/world/level/chunk/chunk_source.h"
 #include "bedrock/world/level/chunk/level_chunk.h"
+#include "bedrock/world/level/difficulty_utils.h"
+#include "bedrock/world/level/dimension/dimension.h"
 #include "endstone/core/level/chunk.h"
 #include "endstone/core/scheduler/scheduler.h"
 #include "endstone/core/server.h"
@@ -32,6 +34,17 @@ void Level::tick()
     auto &server = entt::locator<EndstoneServer>::value();
     server.tick(getCurrentServerTick().tick_id,
                 [&]() { ENDSTONE_HOOK_CALL_ORIGINAL_NAME(&Level::tick, symbol, this); });
+}
+
+float Level::getSpecialMultiplier(DimensionType dim_type) const
+{
+    auto weak_ref = getDimension(dim_type);
+    float moon_brightness = 0.0F;
+    if (weak_ref.isSet()) {
+        auto ref = weak_ref.unwrap();
+        moon_brightness = ref->getMoonBrightness();
+    }
+    return DifficultyUtils::getSpecialMultiplier(getDifficulty(), getTime(), moon_brightness);
 }
 
 // void Level::onChunkDiscarded(LevelChunk &lc)

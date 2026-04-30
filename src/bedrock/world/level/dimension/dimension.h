@@ -77,6 +77,9 @@ public:
     [[nodiscard]] const std::string &getName() const;
     WeakRef<Dimension> getWeakRef();
     [[nodiscard]] endstone::Dimension &getEndstoneDimension() const;  // Endstone
+    [[nodiscard]] ENDSTONE_HOOK float getMoonBrightness() const;
+
+    static const float MOON_BRIGHTNESS_PER_PHASE[8];
 
 private:
     std::vector<ActorChunkTransferEntry> actor_chunk_transfer_queue_;  // +104
