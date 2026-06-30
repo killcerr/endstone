@@ -780,7 +780,7 @@ extra = 0
 # 2. that lone code xref's `lea` is inside this function (which reads a cluster of short auth keys:
 #    auth/uuid/xid/realms/pid/nid)
 # 3. walk up to the prologue
-pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 4D 89 CE 4C 89 C3 48 89 D6 48 89 CF 48 8B 01"
+pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 4D 89 CE 4C 89 C7 49 89 D4"
 
 [[signatures]]
 name = "?disconnectClientWithMessage@ServerNetworkHandler@@QEAAXAEBVNetworkIdentifier@@W4SubClientId@@W4DisconnectFailReason@Connection@@AEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$optional@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@7@@Z"

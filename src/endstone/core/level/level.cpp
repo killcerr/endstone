@@ -42,7 +42,7 @@ EndstoneLevel::EndstoneLevel(::Level &level) : server_(EndstoneServer::getInstan
         return true;
     });
     level.getDimensionManager().getOnNewDimensionCreatedConnector().connect(
-        [&](::Dimension &dimension) { add_dimension(dimension); }, Bedrock::PubSub::ConnectPosition::AtBack, nullptr);
+        [=](::Dimension &dimension) { add_dimension(dimension); }, Bedrock::PubSub::ConnectPosition::AtBack, nullptr);
 }
 
 std::string EndstoneLevel::getName() const
