@@ -11,12 +11,14 @@
 
 namespace endstone::runtime {
 
-static constexpr std::array<std::pair<std::string_view, std::size_t>, 64> symbols = {{
+static constexpr std::array<std::pair<std::string_view, std::size_t>, 66> symbols = {{
     {"BlockState::StateListNode::mHead", 234491136},
     {"Enchant::mEnchants", 234331600},
+    {"MobEffect::mMobEffects", 234317024},
     {"getI18n::result", 233013352},
     // Actor
     {"_ZN5Actor10teleportToERK4Vec3biib", 163948416},
+    {"_ZN5Actor9addEffectERK17MobEffectInstance", 164088432},
     // ActorFactory
     {"_ZN12ActorFactory18createSpawnedActorERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2", 160538384},
     // BatchedNetworkPeer

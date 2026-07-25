@@ -34,6 +34,16 @@ rip_relative = true
 rip_offset = 11
 
 [[signatures]]
+name = "MobEffect::mMobEffects"
+relative = false
+extra = 0
+# the MobEffect registry init stores each effect into mMobEffects[id]; the id-0 slot store is the array base:
+# `mov cs:mMobEffects, r14` right after loading "potion.moveSpeed"
+pattern = "4C 89 35 ? ? ? ? F6 44 24 08 01 74 13 48 8B 74 24 08 48 8B 7C 24 18 48 83 E6 FE E8 C1 2F"
+rip_relative = true
+rip_offset = 3
+
+[[signatures]]
 name = "_ZN5Actor10teleportToERK4Vec3biib"
 relative = false
 extra = 0
@@ -44,6 +54,13 @@ extra = 0
 pattern = "E8 ? ? ? ? 48 8B BB ? ? ? ? ? ? ? FF 90 ? ? ? ? 84 C0 0F 85 ? ? ? ? 48 8B 93"
 rip_relative = true
 rip_offset = 1
+
+[[signatures]]
+name = "_ZN5Actor9addEffectERK17MobEffectInstance"
+relative = false
+extra = 0
+# function prologue
+pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC 08 02 00 00 48 89 F3 48 89"
 
 [[signatures]]
 name = "_ZN12ActorFactory18createSpawnedActorERK25ActorDefinitionIdentifierP5ActorRK4Vec3RK4Vec2"
