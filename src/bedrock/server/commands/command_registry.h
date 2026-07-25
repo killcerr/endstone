@@ -483,7 +483,8 @@ const CommandRegistry::Overload *CommandRegistry::registerOverload(const char *n
 
 template <>
 struct std::formatter<CommandRegistry::ParseToken> : std::formatter<std::string_view> {
-    auto format(const CommandRegistry::ParseToken &token, format_context &ctx) const -> format_context::iterator
+    template <typename FormatContext>
+    auto format(const CommandRegistry::ParseToken &token, FormatContext &ctx) const
     {
         auto out = std::format_to(ctx.out(), "[");
         for (const auto *it = &token; it; it = it->next.get()) {

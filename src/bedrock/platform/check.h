@@ -28,7 +28,7 @@
 template <>
 struct std::formatter<std::error_code> : std::formatter<std::string_view> {
     template <typename FormatContext>
-    auto format(const std::error_code &ec, FormatContext &ctx) const -> format_context::iterator
+    auto format(const std::error_code &ec, FormatContext &ctx) const
     {
         return std::format_to(ctx.out(), "{}:{}", ec.category().name(), ec.value());
     }

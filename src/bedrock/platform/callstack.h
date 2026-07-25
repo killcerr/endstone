@@ -66,7 +66,7 @@ struct CallStack {
 template <>
 struct std::formatter<Bedrock::CallStack::Context> : std::formatter<std::string_view> {
     template <typename FormatContext>
-    auto format(const Bedrock::CallStack::Context &val, FormatContext &ctx) const -> format_context::iterator
+    auto format(const Bedrock::CallStack::Context &val, FormatContext &ctx) const
     {
         auto out = std::format_to(ctx.out(), "{}", val.value);
         if (val.log_level.has_value()) {
@@ -82,7 +82,7 @@ struct std::formatter<Bedrock::CallStack::Context> : std::formatter<std::string_
 template <>
 struct std::formatter<Bedrock::CallStack::Frame> : std::formatter<std::string_view> {
     template <typename FormatContext>
-    auto format(const Bedrock::CallStack::Frame &val, FormatContext &ctx) const -> format_context::iterator
+    auto format(const Bedrock::CallStack::Frame &val, FormatContext &ctx) const
     {
         return std::format_to(ctx.out(), "{{ {}, {}, {} }}", val.filename_hash, val.filename, val.line);
     }
@@ -91,7 +91,7 @@ struct std::formatter<Bedrock::CallStack::Frame> : std::formatter<std::string_vi
 template <>
 struct std::formatter<Bedrock::CallStack::FrameWithContext> : std::formatter<std::string_view> {
     template <typename FormatContext>
-    auto format(const Bedrock::CallStack::FrameWithContext &val, FormatContext &ctx) const -> format_context::iterator
+    auto format(const Bedrock::CallStack::FrameWithContext &val, FormatContext &ctx) const
     {
         auto out = std::format_to(ctx.out(), "{{ {}", val.frame);
         if (val.context.has_value()) {
@@ -104,7 +104,7 @@ struct std::formatter<Bedrock::CallStack::FrameWithContext> : std::formatter<std
 template <>
 struct std::formatter<Bedrock::CallStack> : std::formatter<std::string_view> {
     template <typename FormatContext>
-    auto format(const Bedrock::CallStack &val, FormatContext &ctx) const -> format_context::iterator
+    auto format(const Bedrock::CallStack &val, FormatContext &ctx) const
     {
         auto out = std::format_to(ctx.out(), "[\n");
         bool first = true;

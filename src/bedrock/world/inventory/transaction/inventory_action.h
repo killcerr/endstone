@@ -50,7 +50,7 @@ private:
 template <>
 struct std::formatter<InventoryAction> : std::formatter<std::string_view> {
     template <typename FormatContext>
-    auto format(const InventoryAction &action, FormatContext &ctx) const -> format_context::iterator
+    auto format(const InventoryAction &action, FormatContext &ctx) const
     {
         return std::format_to(ctx.out(), "InventoryAction(source={}, slot={}, from={}, to={})", action.getSource(),
                               action.getSlot(), action.getFromItem().toString(), action.getToItem().toString());

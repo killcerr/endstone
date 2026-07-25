@@ -190,7 +190,7 @@ struct std::formatter<BlockPos> : std::formatter<std::string_view> {
     using Type = BlockPos;
 
     template <typename FormatContext>
-    auto format(const Type &val, FormatContext &ctx) const -> format_context::iterator
+    auto format(const Type &val, FormatContext &ctx) const
     {
         return std::format_to(ctx.out(), "BlockPos(x={}, y={}, z={})", val.x, val.y, val.z);
     }
