@@ -69,6 +69,7 @@ EndstonePluginManager::EndstonePluginManager(Server &server) : server_(server)
     default_perms_[PermissionLevel::Operator] = {};
     default_perms_[PermissionLevel::Console] = {};
 }
+
 EndstonePluginManager::~EndstonePluginManager()
 {
     while (!plugin_loaders_.empty()) {

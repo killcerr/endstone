@@ -31,8 +31,7 @@ elseif (UNIX)
             "Reconfigure with CC=clang and CXX=clang++."
         )
     endif ()
-    # Force use libc++ for ABI compatibility with BDS
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -fPIC" CACHE STRING "" FORCE)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 else ()
     message(FATAL_ERROR "Endstone: ${CMAKE_SYSTEM_NAME} (${CMAKE_SYSTEM_PROCESSOR}) is not supported")
 endif ()

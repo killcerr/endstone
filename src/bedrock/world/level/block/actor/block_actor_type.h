@@ -74,5 +74,6 @@ enum class BlockActorType : std::uint8_t {
     Shelf = 59,
     CopperGolemStatue = 60,
     PotentSulfurBlock = 61,
-    _count = 62,
+    DataDriven = 62,
+    _count = 63,
 };

@@ -134,6 +134,15 @@ bool ActorDamageSource::isFallDamage() const
 std::pair<std::string, std::vector<std::string>> ActorDamageSource::getDeathMessage(const std::string &dead_name,
                                                                                     Actor *dead) const
 {
+    if (!death_message_override_.empty()) {
+        return {death_message_override_, {dead_name}};
+    }
+    return _getDeathMessageInternal(dead_name, dead);
+}
+
+std::pair<std::string, std::vector<std::string>> ActorDamageSource::_getDeathMessageInternal(
+    const std::string &dead_name, Actor *dead) const
+{
     std::pair<std::string, std::vector<std::string>> result;
     switch (cause_) {
     case ActorDamageCause::Suffocation: {
@@ -303,12 +312,6 @@ ActorCategory ActorDamageSource::getDamagingEntityCategories() const
 std::unique_ptr<ActorDamageSource> ActorDamageSource::clone() const
 {
     return std::make_unique<ActorDamageSource>(*this);
-}
-
-std::pair<std::string, std::vector<std::string>> ActorDamageSource::_getDeathMessageInternal(
-    const std::string &dead_name, Actor *dead) const
-{
-    return getDeathMessage(dead_name, dead);
 }
 
 const Block &ActorDamageByBlockSource::getBlock() const

@@ -25,6 +25,11 @@ target_include_directories(endstone INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>)
 target_link_libraries(endstone INTERFACE nonstd::expected-lite)
+if (UNIX)
+    # Force use libc++ for ABI compatibility with BDS
+    target_compile_options(endstone INTERFACE -stdlib=libc++)
+    target_link_options(endstone INTERFACE -stdlib=libc++)
+endif ()
 
 function(endstone_add_plugin target_name)
     cmake_parse_arguments(PARSE_ARGV 1 ARG "" "" "")

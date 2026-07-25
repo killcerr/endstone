@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a `Container` block state for reading and modifying the contents of container blocks such as chests, barrels, hoppers, dispensers, droppers, shulker boxes, and furnaces. `block.capture_state()` now returns a `Container` for these blocks, exposing the block's items via `container.inventory`.
 - Added a `Biome` type and `Block.biome` for reading the biome at a block. Biomes can be looked up by name with `Biome.get("minecraft:plains")` and enumerated via `server.get_registry(Biome)`.
 - Added an effect API: `Mob.add_effect()`, `Mob.remove_effect()`, `Mob.has_effect()`, `Mob.get_effect()`, and `Mob.active_effects` apply, remove, and query a living entity's status effects (speed, regeneration, poison, etc.). Effects are described by the new `Effect` type, carrying an effect type, duration in ticks, amplifier, and ambient/particles/icon display flags.
+- Added a chunk loading API: `Dimension.load_chunk()`, `Dimension.unload_chunk()`, and `Dimension.is_chunk_loaded()`. `load_chunk()` keeps a chunk loaded for as long as your plugin needs it (taking effect on the next tick), and `unload_chunk()` releases it again so it can unload once nothing else (a nearby player, the spawn area, etc.) is keeping it loaded.
 
 ### Changed
 
@@ -51,9 +52,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed type annotations for `Plugin` and `event_handler`.
-- Fixed `Player.send_message` accepting empty messages.
-- Fixed command argument parsing dropping optional message parameters with empty tokens.
-- Fixed plugin manager destruction order causing access violations on shutdown.
+- Fixed an access-violation crash when converting NBT data containing an empty byte array to a string, for example the item NBT of a firework star (#443).
+- Fixed death messages for entity and projectile kills always showing the generic "Player died" instead of the detailed vanilla message, such as "Player was slain by Zombie". Death message overrides set on the damage source are now honored as well (#438).
+- Fixed C++ plugins failing to compile against the public headers with libc++ 18, which rejected the `std::formatter` specializations due to their declared return type (#437).
+- Fixed C++ plugin builds on Linux silently compiling against libstdc++ when Endstone is consumed via CMake FetchContent. The `endstone::endstone` target now propagates `-stdlib=libc++` to every target that links against it, so plugin projects no longer need to pass the flag themselves.
+
+## [0.11.6] - 2026-07-10
+
+### Added
+
+- Added support for BDS version 1.26.33.
+
+### Changed
+
+- The interactive console is now enabled by default on all platforms, including Linux (previously Windows-only). Pass `--no-interactive` to disable it, for example when running under a process manager that captures stdin.
+
+### Fixed
+
+- Fixed the Windows standalone bundle's `start.cmd` potentially launching the Microsoft Store Python stub. Both `start.cmd` and `start.sh` now provision a uv-managed Python (`--managed-python`, downloaded on demand) into a reusable `.venv` in the server folder instead of picking up whatever interpreter happens to be on `PATH`, which also makes subsequent startups faster.
+- Fixed the interactive console (`-i`) not submitting commands under panels such as Pterodactyl. The console only accepted a line on carriage return, but web consoles send a line feed, so typed commands piled up without ever running. It now accepts either.
+- Fixed the crash reporter failing to start with `error while loading shared libraries: libc++-*.so` on Linux (e.g. under the Pterodactyl egg). The crash handler is now loaded from its bundled location instead of being copied into the server folder, so it can find its vendored `libc++` (#429).
+- Fixed custom map renderers not being called when the map had no decorations, leaving the map blank instead of showing the rendered image (#426).
+- Fixed death messages no longer showing in chat. A new vanilla game rule shifted the internal game-rule indices, so Endstone was reading the wrong rule when deciding whether to broadcast death messages (#424).
+- Fixed an access-violation crash on server shutdown when plugins were loaded, caused by plugin loaders being destroyed in the wrong order (#339).
 
 ## [0.11.5] - 2026-07-05
 
@@ -1113,7 +1134,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic plugin loader for C++ and Python plugins.
 - Basic command system that allows plugins to register custom commands.
 
-[Unreleased]: https://github.com/EndstoneMC/endstone/compare/v0.11.5...HEAD
+[Unreleased]: https://github.com/EndstoneMC/endstone/compare/v0.11.6...HEAD
+[0.11.6]: https://github.com/EndstoneMC/endstone/compare/v0.11.5...v0.11.6
 [0.11.5]: https://github.com/EndstoneMC/endstone/compare/v0.11.4...v0.11.5
 [0.11.4]: https://github.com/EndstoneMC/endstone/compare/v0.11.3...v0.11.4
 [0.11.3]: https://github.com/EndstoneMC/endstone/compare/v0.11.2...v0.11.3
