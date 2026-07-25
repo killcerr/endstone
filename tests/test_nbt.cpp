@@ -290,6 +290,15 @@ TEST(NbtEquality, DeepStructural)
     EXPECT_TRUE(a != b);
 }
 
+TEST(NbtFormat, ArrayTags)
+{
+    EXPECT_EQ(std::format("{}", ByteArrayTag{}), "[B;]");
+    EXPECT_EQ(std::format("{}", ByteArrayTag{1}), "[B;1b]");
+    EXPECT_EQ(std::format("{}", ByteArrayTag{1, 2, 3}), "[B;1b,2b,3b]");
+    EXPECT_EQ(std::format("{}", IntArrayTag{}), "[I;]");
+    EXPECT_EQ(std::format("{}", IntArrayTag{1, 2, 3}), "[I;1,2,3]");
+}
+
 TEST(NbtCompoundTag, SelfAssignment)
 {
     CompoundTag a{{"a", IntTag{1}}};

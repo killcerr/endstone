@@ -652,15 +652,12 @@ struct std::formatter<endstone::ByteArrayTag> : std::formatter<std::string_view>
     {
         auto out = ctx.out();
         out = std::format_to(out, "[B;");
-        auto it = tag.begin();
-        out = std::format_to(out, "{}b", *it);
-        ++it;
-        while (it != tag.end()) {
-            std::format_to(out, ",{}b", *it);
-            ++it;
+        std::string_view sep;
+        for (const auto v : tag) {
+            out = std::format_to(out, "{}{}b", sep, v);
+            sep = ",";
         }
-        out = std::format_to(out, "]");
-        return out;
+        return std::format_to(out, "]");
     }
 };
 
