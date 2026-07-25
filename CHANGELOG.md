@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed an access-violation crash when converting NBT data containing an empty byte array to a string, for example the item NBT of a firework star (#443).
+- Fixed death messages for entity and projectile kills always showing the generic "Player died" instead of the detailed vanilla message, such as "Player was slain by Zombie". Death message overrides set on the damage source are now honored as well (#438).
 
 ## [0.11.6] - 2026-07-10
 
