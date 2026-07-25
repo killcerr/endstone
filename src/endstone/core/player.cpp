@@ -412,6 +412,15 @@ void EndstonePlayer::setScoreboard(Scoreboard &scoreboard)
     server_.setPlayerBoard(*this, scoreboard);
 }
 
+void EndstonePlayer::sendActionBar(std::string message) const
+{
+    auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::SetTitle);
+    auto pk = std::static_pointer_cast<SetTitlePacket>(packet);
+    pk->payload.type = SetTitlePacketPayload::TitleType::Actionbar;
+    pk->payload.title_text = std::move(message);
+    getHandle().sendNetworkPacket(*packet);
+}
+
 void EndstonePlayer::sendPopup(std::string message) const
 {
     auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::Text);

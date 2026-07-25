@@ -671,6 +671,12 @@ void init_player(py::module_ &m, py_class<Player> &player)
         sound: The sound to stop.
 )doc")
         .def("stop_all_sounds", &Player::stopAllSounds, "Stop all sounds from playing.")
+        .def("send_action_bar", &Player::sendActionBar, py::arg("message"), R"doc(
+    Sends this player an action bar message.
+
+    Args:
+        message: Message to be displayed.
+)doc")
         .def("send_popup", &Player::sendPopup, py::arg("message"), R"doc(
     Sends this player a popup message.
 

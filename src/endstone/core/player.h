@@ -95,6 +95,7 @@ public:
     void setWalkSpeed(float value) const override;
     [[nodiscard]] Scoreboard &getScoreboard() const override;
     void setScoreboard(Scoreboard &scoreboard) override;
+    void sendActionBar(std::string message) const override;
     void sendPopup(std::string message) const override;
     void sendTip(std::string message) const override;
     void sendToast(std::string title, std::string content) const override;

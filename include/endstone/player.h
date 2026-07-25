@@ -291,6 +291,13 @@ public:
     void virtual setScoreboard(Scoreboard &scoreboard) = 0;
 
     /**
+     * Sends this player an action bar message.
+     *
+     * @param message Message to be displayed
+     */
+    virtual void sendActionBar(std::string message) const = 0;
+
+    /**
      * Sends this player a popup message.
      *
      * @param message Message to be displayed
