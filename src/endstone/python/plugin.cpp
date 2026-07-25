@@ -191,7 +191,7 @@ void init_plugin(py::module &m)
         .def("load_plugins", &PluginLoader::loadPlugins, py::arg("directory"),
              py::return_value_policy::reference_internal, "Loads the plugin contained within the specified directory")
         .def("enable_plugin", &PluginLoader::enablePlugin, py::arg("plugin"), "Enables the specified plugin")
-        .def("disable_plugin", &PluginLoader::enablePlugin, py::arg("plugin"), "Disables the specified plugin")
+        .def("disable_plugin", &PluginLoader::disablePlugin, py::arg("plugin"), "Disables the specified plugin")
         .def_property_readonly("plugin_file_filters", &PluginLoader::getPluginFileFilters,
                                "Returns a list of all filename filters expected by this PluginLoader")
         .def_property_readonly("server", &PluginLoader::getServer, py::return_value_policy::reference,
