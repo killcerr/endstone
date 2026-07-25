@@ -14,11 +14,17 @@
 
 #pragma once
 
+#include <cstdint>
+#include <memory>
+#include <unordered_map>
+
 #include "bedrock/world/level/dimension/dimension.h"
 #include "endstone/actor/actor.h"
 #include "endstone/actor/item.h"
 #include "endstone/core/server.h"
 #include "endstone/level/dimension.h"
+
+class LevelChunk;
 
 namespace endstone::core {
 class EndstoneDimension : public Dimension {
@@ -47,5 +53,6 @@ public:
 private:
     WeakRef<::Dimension> dimension_;
     EndstoneLevel &level_;
+    std::unordered_map<std::uint64_t, std::shared_ptr<::LevelChunk>> loaded_chunks_;
 };
 }  // namespace endstone::core
