@@ -1,6 +1,7 @@
 import _winapi
 import ctypes
 import os
+import signal
 import subprocess
 import sys
 import warnings
@@ -197,4 +198,6 @@ class WindowsBootstrap(Bootstrap):
             *args,
             **kwargs,
         )
+        # let the server process handle Ctrl+C, then relay its exit code
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
         return process.wait()

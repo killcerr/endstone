@@ -1,4 +1,5 @@
 import os
+import signal
 import stat
 import subprocess
 import sysconfig
@@ -45,4 +46,6 @@ class LinuxBootstrap(Bootstrap):
             *args,
             **kwargs,
         )
+        # let the server process handle Ctrl+C, then relay its exit code
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
         return process.wait()
