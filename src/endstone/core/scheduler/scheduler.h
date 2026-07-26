@@ -22,8 +22,10 @@
 
 #include <moodycamel/concurrentqueue.h>
 
+#include "endstone/core/scheduler/async_task.h"
 #include "endstone/core/scheduler/task.h"
 #include "endstone/core/scheduler/thread_pool_executor.h"
+#include "endstone/core/scheduler/worker.h"
 #include "endstone/scheduler/scheduler.h"
 
 namespace endstone::core {
@@ -50,6 +52,8 @@ public:
     void addTask(std::shared_ptr<EndstoneTask> task);
     void mainThreadHeartbeat(std::uint64_t current_tick);
     void removeTask(TaskId id);
+    void removeCancelledTasks();
+    std::vector<EndstoneWorker> getActiveWorkers();
 
 private:
     TaskId nextId();
@@ -65,8 +69,13 @@ private:
     std::mutex tasks_mtx_{};
     std::map<std::uint64_t, std::vector<std::shared_ptr<EndstoneTask>>> queue_{};
     std::optional<std::uint64_t> base_tick_{};
-    std::uint64_t current_tick_{0};
+    std::atomic<std::uint64_t> current_tick_{0};
     std::atomic<TaskId> current_task_{0};
+    // Set by cancelTask/cancelTasks on any thread, consumed by the main thread each heartbeat. The
+    // boolean stand-in for CraftScheduler queuing a -1 task to remove cancelled tasks from queue_; a
+    // flag suffices because the heartbeat is our one main-thread entry point. atomic (Bukkit's
+    // volatile) carries the cross-thread visibility, like current_tick_/current_task_.
+    std::atomic<bool> has_cancelled_tasks_{false};
     TaskComparator cmp_{};
     ThreadPoolExecutor executor_;
 };

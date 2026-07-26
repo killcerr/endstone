@@ -14,11 +14,11 @@
 
 #pragma once
 
-#pragma once
-
 #include <atomic>
+#include <condition_variable>
 #include <functional>
 #include <future>
+#include <mutex>
 #include <thread>
 #include <vector>
 
@@ -41,7 +41,6 @@ public:
 
         auto result = task->get_future();
         tasks.enqueue([task]() { (*task)(); });
-
         condition.notify_one();
         return result;
     }

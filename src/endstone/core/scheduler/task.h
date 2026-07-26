@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <chrono>
 #include <functional>
 
@@ -51,7 +52,7 @@ public:
 
 private:
     EndstoneScheduler &scheduler_;
-    Plugin *plugin_;
+    Plugin *plugin_{nullptr};
     std::function<void()> task_;
     TaskId id_;
     CreatedAt created_at_{TaskClock::now()};

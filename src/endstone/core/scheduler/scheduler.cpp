@@ -14,6 +14,8 @@
 
 #include "endstone/core/scheduler/scheduler.h"
 
+#include <algorithm>
+
 #include "endstone/core/scheduler/async_task.h"
 
 namespace endstone::core {
@@ -47,7 +49,7 @@ std::shared_ptr<Task> EndstoneScheduler::runTaskTimer(Plugin &plugin, std::funct
     }
 
     auto t = std::make_shared<EndstoneTask>(*this, plugin, task, nextId(), period);
-    t->setNextRun(current_tick_ + delay);
+    t->setNextRun(current_tick_.load(std::memory_order_acquire) + delay);
     addTask(t);
     return t;
 }
@@ -71,7 +73,7 @@ std::shared_ptr<Task> EndstoneScheduler::runTaskTimerAsync(Plugin &plugin, std::
     }
 
     auto t = std::make_shared<EndstoneAsyncTask>(*this, plugin, task, nextId(), period);
-    t->setNextRun(current_tick_ + delay);
+    t->setNextRun(current_tick_.load(std::memory_order_acquire) + delay);
     addTask(t);
     return t;
 }
@@ -93,6 +95,9 @@ void EndstoneScheduler::cancelTask(TaskId id)
     // Cancel outside the lock: an async task's doCancel() may call back into removeTask(),
     // which re-locks tasks_mtx_ and would deadlock if we still held it here.
     task->doCancel();
+    // CraftScheduler#cancelTask queues a -1 task to drop the cancelled task from queue_ on the main
+    // thread; we ask the main thread with a flag instead.
+    has_cancelled_tasks_.store(true, std::memory_order_release);
 }
 
 void EndstoneScheduler::cancelTasks(Plugin &plugin)
@@ -119,6 +124,9 @@ void EndstoneScheduler::cancelTasks(Plugin &plugin)
     for (const auto &task : cancelling) {
         task->doCancel();
     }
+    // CraftScheduler#cancelTasks queues a -1 task to drop the cancelled tasks from queue_ on the main
+    // thread; we ask the main thread with a flag instead.
+    has_cancelled_tasks_.store(true, std::memory_order_release);
 }
 
 bool EndstoneScheduler::isRunning(TaskId id)
@@ -132,12 +140,12 @@ bool EndstoneScheduler::isRunning(TaskId id)
         }
         task = it->second;
         if (task->isSync()) {
-            return current_task_ == id;
+            return current_task_.load(std::memory_order_acquire) == id;
         }
     }
     // Query the workers outside the lock: getWorkers() takes the task's own mutex, which must
     // never be held together with tasks_mtx_ (see run()/doCancel()).
-    return std::static_pointer_cast<EndstoneAsyncTask>(task)->getWorkers().empty();
+    return !std::static_pointer_cast<EndstoneAsyncTask>(task)->getWorkers().empty();
 }
 
 bool EndstoneScheduler::isQueued(TaskId id)
@@ -165,16 +173,18 @@ std::shared_ptr<Task> EndstoneScheduler::runTask(std::function<void()> task)
         return nullptr;
     }
     auto t = std::make_shared<EndstoneTask>(*this, task, nextId(), 0);
-    t->setNextRun(current_tick_);
+    t->setNextRun(current_tick_.load(std::memory_order_acquire));
     addTask(t);
     return t;
 }
 
 void EndstoneScheduler::addTask(std::shared_ptr<EndstoneTask> task)
 {
+    {
+        std::lock_guard lock{tasks_mtx_};
+        tasks_[task->getTaskId()] = task;
+    }
     pending_.enqueue(task);
-    std::lock_guard lock{tasks_mtx_};
-    tasks_[task->getTaskId()] = task;
 }
 
 void EndstoneScheduler::mainThreadHeartbeat(std::uint64_t current_tick)
@@ -191,6 +201,12 @@ void EndstoneScheduler::mainThreadHeartbeat(std::uint64_t current_tick)
     // +1 so the first heartbeat is tick 1: the counter advances 0 -> 1 on the first tick, matching
     // the contract that a task registered with delay N runs on the Nth tick.
     current_tick = current_tick - *base_tick_ + 1;
+    current_tick_.store(current_tick, std::memory_order_release);
+
+    // CraftScheduler#parsePending runs the queued -1 removal tasks here; we coalesce them to one flag.
+    if (has_cancelled_tasks_.exchange(false, std::memory_order_acquire)) {
+        removeCancelledTasks();
+    }
 
     // Consume the tasks in the pending queue
     std::shared_ptr<EndstoneTask> pending_task;
@@ -223,20 +239,20 @@ void EndstoneScheduler::mainThreadHeartbeat(std::uint64_t current_tick)
             }
 
             if (task->isSync()) {
-                current_task_ = task->getTaskId();
+                current_task_.store(task->getTaskId(), std::memory_order_release);
                 try {
                     task->run();
                 }
                 catch (std::exception &e) {
                     server_.getLogger().error("Could not execute task with id {}: {}", task->getTaskId(), e.what());
                 }
-                current_task_ = 0;
+                current_task_.store(0, std::memory_order_release);
             }
             else {
                 executor_.submit([task]() { task->run(); });
             }
 
-            if (task->getPeriod() > 0) {  // repeating task
+            if (!task->isCancelled() && task->getPeriod() > 0) {  // repeating task
                 task->setNextRun(current_tick + task->getPeriod());
                 pending_.enqueue(task);
                 continue;
@@ -249,7 +265,36 @@ void EndstoneScheduler::mainThreadHeartbeat(std::uint64_t current_tick)
 
         it = queue_.erase(it);
     }
-    current_tick_ = current_tick;
+}
+
+void EndstoneScheduler::removeCancelledTasks()
+{
+    // The has_cancelled_tasks_ action, shared by the heartbeat and reload(): drop cancelled tasks from the
+    // pending and scheduled queues so their callbacks release promptly (before reload unloads the
+    // owning plugins). Main thread only, like everything that touches queue_.
+    std::vector<std::shared_ptr<EndstoneTask>> pending;
+    std::shared_ptr<EndstoneTask> task;
+    while (pending_.try_dequeue(task)) {
+        if (!task->isCancelled()) {
+            pending.push_back(std::move(task));
+        }
+    }
+    task.reset();
+    for (auto &pending_task : pending) {
+        pending_.enqueue(std::move(pending_task));
+    }
+
+    for (auto it = queue_.begin(); it != queue_.end();) {
+        auto &tasks = it->second;
+        std::erase_if(tasks, [](const auto &queued) { return queued->isCancelled(); });
+        if (tasks.empty()) {
+            it = queue_.erase(it);
+        }
+        else {
+            std::make_heap(tasks.begin(), tasks.end(), cmp_);
+            ++it;
+        }
+    }
 }
 
 void EndstoneScheduler::removeTask(TaskId id)
@@ -260,6 +305,27 @@ void EndstoneScheduler::removeTask(TaskId id)
         return;
     }
     tasks_.erase(it);
+}
+
+std::vector<EndstoneWorker> EndstoneScheduler::getActiveWorkers()
+{
+    std::vector<std::shared_ptr<EndstoneAsyncTask>> tasks;
+    {
+        std::lock_guard lock{tasks_mtx_};
+        for (const auto &[id, task] : tasks_) {
+            if (!task->isSync()) {
+                tasks.push_back(std::static_pointer_cast<EndstoneAsyncTask>(task));
+            }
+        }
+    }
+    // Query the workers outside the lock: getWorkers() takes the task's own mutex, which must
+    // never be held together with tasks_mtx_ (see run()/doCancel()).
+    std::vector<EndstoneWorker> workers;
+    for (const auto &task : tasks) {
+        auto task_workers = task->getWorkers();
+        workers.insert(workers.end(), task_workers.begin(), task_workers.end());
+    }
+    return workers;
 }
 
 TaskId EndstoneScheduler::nextId()

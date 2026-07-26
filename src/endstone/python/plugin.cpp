@@ -229,7 +229,7 @@ void init_plugin(py::module &m)
     Args:
         plugin: Plugin to enable.
 )doc")
-        .def("disable_plugin", &PluginLoader::enablePlugin, py::arg("plugin"), R"doc(
+        .def("disable_plugin", &PluginLoader::disablePlugin, py::arg("plugin"), R"doc(
     Disables the specified plugin.
 
     Attempting to disable a plugin that is not enabled will have no effect.
