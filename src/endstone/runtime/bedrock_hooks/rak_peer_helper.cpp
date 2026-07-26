@@ -68,70 +68,153 @@ static endstone::ServerListPingEvent callServerListPingEvent(endstone::SocketAdd
 
 RakNet::RakPeer *gRakPeer = nullptr;
 
-bool handleIncomingDatagram(RakNet::RNS2RecvStruct *recv)
+// Upstream RakNet walks every datagram number in an ACK or NAK range with no bound on the width.
+// Datagram numbers are a 24-bit wrapping type, so `for (n = min; n >= min && n <= max; n++)` never
+// terminates when min == 0 and max == 0xFFFFFF (reachable via NAK) and spins for millions of
+// iterations for any oversized range. RakNet guards only ACK, and only the exact 0xFFFFFF wrap, so
+// an ACK of [0, 0xFFFFFE] still stalls ~16M times. At most RESEND_BUFFER_ARRAY_LENGTH datagrams are
+// ever outstanding, so a wider range is bogus; drop the datagram before the peer sees it.
+// The ACK header assumes sliding-window congestion control (the BDS default), which omits the
+// per-datagram timestamp.
+static bool hasOversizedAcknowledgementRange(RakNet::RNS2RecvStruct *recv)
 {
-    // #blameMojang - MCPE-228407: Mojang's custom RakNet packet 0x86 handler reads SystemAddress
-    // without checking if the packet is large enough to contain one. Networking 101: validate before read.
-    // Reported to Mojang, closed as "Won't Fix". Classic.
-    // Fix: drop undersized packets before they reach the vulnerable code path.
-    if (static_cast<unsigned char>(recv->data[0]) == 0x86) {
-        int expected_size = sizeof(unsigned char) + sizeof(unsigned char);
-        if (recv->data[1] == 4) {  // ipv4
-            expected_size += sizeof(std::uint32_t) + sizeof(std::uint16_t);
+    RakNet::BitStream in(reinterpret_cast<unsigned char *>(recv->data), recv->bytesRead, false);
+    bool is_valid = false;
+    bool is_ack = false;
+    if (!in.Read(is_valid) || !is_valid) {
+        return false;
+    }
+    if (!in.Read(is_ack)) {
+        return false;
+    }
+    if (is_ack) {
+        bool has_b_and_as = false;
+        if (!in.Read(has_b_and_as)) {
+            return false;
         }
-        else {  // ipv6
-            expected_size += sizeof(sockaddr_in6);
+        in.AlignReadToByteBoundary();
+        if (has_b_and_as) {
+            float arrival_rate = 0.0F;
+            if (!in.Read(arrival_rate)) {
+                return false;
+            }
         }
-        if (recv->bytesRead < expected_size) {
+    }
+    else {
+        bool is_nak = false;
+        if (!in.Read(is_nak) || !is_nak) {  // a normal data datagram, nothing to check
             return false;
         }
     }
-    if (recv->data[0] == ID_UNCONNECTED_PING &&
-        recv->bytesRead >= sizeof(unsigned char) + sizeof(RakNet::Time) + sizeof(OFFLINE_MESSAGE_DATA_ID)) {
-        char *ping_data;
-        std::uint32_t ping_size;
-        gRakPeer->GetOfflinePingResponse(&ping_data, &ping_size);
-        if (ping_size < 2 || (ping_data[0] << 8 | ping_data[1]) != ping_size - 2) {
-            return true;
-        }
 
-        // call ServerListPingEvent with the default offline ping response
-        auto address = endstone::core::EndstoneSocketAddress::fromSystemAddress(recv->systemAddress);
-        auto event = callServerListPingEvent(address, std::string_view(ping_data + 2, ping_size - 2));
-        if (event.isCancelled()) {
+    // ACK/NAK range list, same wire format as DataStructures::RangeList::Deserialize
+    in.AlignReadToByteBoundary();
+    std::uint16_t count = 0;
+    if (!in.Read(count)) {
+        return false;
+    }
+    for (std::uint16_t i = 0; i < count; ++i) {
+        unsigned char max_equal_to_min = 0;
+        RakNet::uint24_t min;
+        RakNet::uint24_t max;
+        in.Read(max_equal_to_min);
+        if (!in.Read(min)) {
             return false;
         }
+        if (max_equal_to_min == 0) {
+            if (!in.Read(max)) {
+                return false;
+            }
+        }
+        else {
+            max = min;
+        }
+        // Unsigned: an inverted (max < min) range underflows to a huge value and trips the same bound.
+        if (max.val - min.val >= RESEND_BUFFER_ARRAY_LENGTH) {
+            return true;
+        }
+    }
+    return false;
+}
 
-        // parse ping request
-        RakNet::BitStream is((unsigned char *)recv->data, recv->bytesRead, false);
-        is.IgnoreBits(8);
-        RakNet::Time sendPingTime;
-        is.Read(sendPingTime);
-        is.IgnoreBytes(sizeof(OFFLINE_MESSAGE_DATA_ID));
-        auto remoteGuid = RakNet::UNASSIGNED_RAKNET_GUID;
-        is.Read(remoteGuid);
-
-        // prepare ping response
-        auto response =
-            std::format("MCPE;{};{};{};{};{};{};{};{};1;{};{};0;", event.getMotd(), event.getNetworkProtocolVersion(),
-                        event.getMinecraftVersionNetwork(), event.getNumPlayers(), event.getMaxPlayers(),
-                        event.getServerGuid(), event.getLevelName(), magic_enum::enum_name(event.getGameMode()),
-                        event.getLocalPort(), event.getLocalPortV6());
-        RakNet::BitStream os;
-        os.Write(static_cast<RakNet::MessageID>(ID_UNCONNECTED_PONG));
-        os.Write(sendPingTime);
-        os.Write(gRakPeer->GetMyGUID());
-        os.WriteAlignedBytes(OFFLINE_MESSAGE_DATA_ID, sizeof(OFFLINE_MESSAGE_DATA_ID));
-        os.Write(static_cast<std::uint16_t>(response.size()));
-        os.Write(response.data(), response.size());
-
-        // send directly via socket
-        RakNet::RNS2_SendParameters bsp;
-        bsp.data = reinterpret_cast<char *>(os.GetData());
-        bsp.length = os.GetNumberOfBytesUsed();
-        bsp.systemAddress = recv->systemAddress;
-        recv->socket->Send(&bsp, _FILE_AND_LINE_);
+// #blameMojang - MCPE-228407: Mojang's custom RakNet packet 0x86 handler reads SystemAddress
+// without checking if the packet is large enough to contain one. Networking 101: validate before read.
+// Reported to Mojang, closed as "Won't Fix". Classic.
+// Fix: drop undersized packets before they reach the vulnerable code path.
+static bool hasTruncatedSystemAddress(RakNet::RNS2RecvStruct *recv)
+{
+    if (static_cast<unsigned char>(recv->data[0]) != 0x86) {
         return false;
+    }
+    int expected_size = sizeof(unsigned char) + sizeof(unsigned char);
+    if (recv->data[1] == 4) {  // ipv4
+        expected_size += sizeof(std::uint32_t) + sizeof(std::uint16_t);
+    }
+    else {  // ipv6
+        expected_size += sizeof(sockaddr_in6);
+    }
+    return recv->bytesRead < expected_size;
+}
+
+static bool handleUnconnectedPing(RakNet::RNS2RecvStruct *recv)
+{
+    if (recv->bytesRead < sizeof(unsigned char) + sizeof(RakNet::Time) + sizeof(OFFLINE_MESSAGE_DATA_ID)) {
+        return true;
+    }
+    char *ping_data;
+    std::uint32_t ping_size;
+    gRakPeer->GetOfflinePingResponse(&ping_data, &ping_size);
+    if (ping_size < 2 || (ping_data[0] << 8 | ping_data[1]) != ping_size - 2) {
+        return true;
+    }
+
+    // call ServerListPingEvent with the default offline ping response
+    auto address = endstone::core::EndstoneSocketAddress::fromSystemAddress(recv->systemAddress);
+    auto event = callServerListPingEvent(address, std::string_view(ping_data + 2, ping_size - 2));
+    if (event.isCancelled()) {
+        return false;
+    }
+
+    // parse ping request
+    RakNet::BitStream is((unsigned char *)recv->data, recv->bytesRead, false);
+    is.IgnoreBits(8);
+    RakNet::Time sendPingTime;
+    is.Read(sendPingTime);
+    is.IgnoreBytes(sizeof(OFFLINE_MESSAGE_DATA_ID));
+    auto remoteGuid = RakNet::UNASSIGNED_RAKNET_GUID;
+    is.Read(remoteGuid);
+
+    // prepare ping response
+    auto response =
+        std::format("MCPE;{};{};{};{};{};{};{};{};1;{};{};0;", event.getMotd(), event.getNetworkProtocolVersion(),
+                    event.getMinecraftVersionNetwork(), event.getNumPlayers(), event.getMaxPlayers(),
+                    event.getServerGuid(), event.getLevelName(), magic_enum::enum_name(event.getGameMode()),
+                    event.getLocalPort(), event.getLocalPortV6());
+    RakNet::BitStream os;
+    os.Write(static_cast<RakNet::MessageID>(ID_UNCONNECTED_PONG));
+    os.Write(sendPingTime);
+    os.Write(gRakPeer->GetMyGUID());
+    os.WriteAlignedBytes(OFFLINE_MESSAGE_DATA_ID, sizeof(OFFLINE_MESSAGE_DATA_ID));
+    os.Write(static_cast<std::uint16_t>(response.size()));
+    os.Write(response.data(), response.size());
+
+    // send directly via socket
+    RakNet::RNS2_SendParameters bsp;
+    bsp.data = reinterpret_cast<char *>(os.GetData());
+    bsp.length = os.GetNumberOfBytesUsed();
+    bsp.systemAddress = recv->systemAddress;
+    recv->socket->Send(&bsp, _FILE_AND_LINE_);
+    return false;
+}
+
+bool handleIncomingDatagram(RakNet::RNS2RecvStruct *recv)
+{
+    // Malformed acknowledgements (ACK/NAK) and undersized address packets are dropped outright.
+    if (hasOversizedAcknowledgementRange(recv) || hasTruncatedSystemAddress(recv)) {
+        return false;
+    }
+    if (recv->data[0] == ID_UNCONNECTED_PING) {
+        return handleUnconnectedPing(recv);
     }
     return true;
 }
