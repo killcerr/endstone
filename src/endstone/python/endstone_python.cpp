@@ -37,6 +37,7 @@ void init_enchantments(py::module_ &);
 void init_event(py::module_ &, py::class_<Event, PyEvent> &event);
 void init_form(py::module_ &);
 void init_game_mode(py::module_ &);
+void init_game_rule(py::module_ &);
 void init_inventory(py::module_ &, py::class_<ItemStack> &item_stack);
 void init_lang(py::module_ &);
 void init_level(py::module_ &, py::classh<Level> &level, py::classh<Dimension> &dimension,
@@ -113,6 +114,7 @@ PYBIND11_MODULE(_python, m)  // NOLINT(*-use-anonymous-namespace)
         m.def_submodule("enchantments", "Classes relating to the specialized enhancements to ItemStacks.");
     auto m_event = m.def_submodule("event", "Classes relating to handling triggered code executions.");
     auto m_form = m.def_submodule("form");
+    auto m_gamerule = m.def_submodule("gamerule", "Classes relevant to game rules.");
     auto m_inventory = m.def_submodule("inventory", "Classes relating to player inventories and item interactions.");
     auto m_lang = m.def_submodule("lang");
     auto m_level = m.def_submodule("level");
@@ -198,6 +200,7 @@ PYBIND11_MODULE(_python, m)  // NOLINT(*-use-anonymous-namespace)
     init_color_format(m);
     init_damage(m_damage);
     init_game_mode(m);
+    init_game_rule(m_gamerule);
     init_logger(m);
     init_lang(m_lang);
     init_form(m_form);

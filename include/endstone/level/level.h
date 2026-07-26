@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "endstone/actor/actor.h"
+#include "endstone/game_rule.h"
 #include "endstone/level/dimension.h"
 #include "endstone/level/dimension_creator.h"
 
@@ -96,6 +97,44 @@ public:
      * @return This level's Seed
      */
     [[nodiscard]] virtual std::int64_t getSeed() const = 0;
+
+    /**
+     * Checks if a game rule exists.
+     *
+     * @param rule The Minecraft game rule to check
+     * @return True if the game rule exists
+     */
+    [[nodiscard]] virtual bool hasGameRule(Identifier<GameRule> rule) const = 0;
+
+    /**
+     * Gets the value of a game rule.
+     *
+     * @param rule The Minecraft game rule to get
+     * @return
+     * The current game rule value
+     */
+    template <typename T>
+    [[nodiscard]] T getGameRule(GameRuleId<T> rule) const
+    {
+        return std::get<T>(getGameRuleValue(rule));
+    }
+
+    /**
+     * Sets the value of a game rule.
+     *
+     * @param rule The Minecraft game rule to set
+     * @param
+     * value The new value
+     * @return True if the value was accepted
+     */
+    template <typename T>
+    bool setGameRule(GameRuleId<T> rule, T value)
+    {
+        return setGameRuleValue(rule, value);
+    }
+
+    [[nodiscard]] virtual GameRuleValue getGameRuleValue(Identifier<GameRule> rule) const = 0;
+    virtual bool setGameRuleValue(Identifier<GameRule> rule, GameRuleValue value) = 0;
 };
 
 }  // namespace endstone

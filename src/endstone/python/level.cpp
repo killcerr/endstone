@@ -22,6 +22,23 @@ Location create_location(const Nullable<Dimension> &dimension, float x, float y,
 {
     return {dimension, x, y, z, pitch, yaw};
 }
+
+class GameRules {
+public:
+    explicit GameRules(Level &level) : level_(level) {}
+
+    [[nodiscard]] bool contains(Identifier<GameRule> rule) const { return level_.hasGameRule(rule); }
+    [[nodiscard]] GameRuleValue get(Identifier<GameRule> rule) const { return level_.getGameRuleValue(rule); }
+    void set(Identifier<GameRule> rule, GameRuleValue value) const
+    {
+        if (!level_.setGameRuleValue(rule, std::move(value))) {
+            throw py::value_error(std::format("Unable to set game rule {}.", rule));
+        }
+    }
+
+private:
+    Level &level_;
+};
 }  // namespace
 
 void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> &dimension,
@@ -179,6 +196,13 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
                                "The identifier of the dimension that is being created.");
     py::implicitly_convertible<DimensionId, DimensionCreator>();
 
+    py::class_<GameRules>(m, "GameRules", "Provides access to the game rules of a level.")
+        .def("__contains__", &GameRules::contains, py::arg("rule"))
+        .def("__getitem__", &GameRules::get, py::arg("rule"))
+        .def("__setitem__", &GameRules::set, py::arg("rule"), py::arg("value"))
+        .def("get", &GameRules::get, py::arg("rule"), "Gets the value of a game rule.")
+        .def("set", &GameRules::set, py::arg("rule"), py::arg("value"), "Sets the value of a game rule.");
+
     level.def_property_readonly("name", &Level::getName, "The unique name of this level.")
         .def_property_readonly("actors", &Level::getActors, "A list of all actors currently residing in this level.")
         .def_property("time", &Level::getTime, &Level::setTime, "The relative in-game time of this level.")
@@ -207,7 +231,10 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
         The newly created (or existing) `Dimension`, or `None` if it could not be created.
 )doc",
              py::return_value_policy::reference)
-        .def_property_readonly("seed", &Level::getSeed, "The Seed for this level.");
+        .def_property_readonly("seed", &Level::getSeed, "The Seed for this level.")
+        .def_property_readonly(
+            "game_rules", [](Level &self) { return GameRules(self); }, py::keep_alive<0, 1>(),
+            "The game rules of this level.");
 
     location
         .def(py::init(&create_location), py::arg("dimension"), py::arg("x"), py::arg("y"), py::arg("z"),
