@@ -15,11 +15,13 @@
 #include "endstone/core/server.h"
 
 #include <algorithm>
+#include <chrono>
 #include <filesystem>
 #include <format>
 #include <iostream>
 #include <memory>
 #include <ranges>
+#include <thread>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -70,6 +72,7 @@
 #include "endstone/event/server/server_load_event.h"
 #include "endstone/plugin/plugin.h"
 #include "endstone/runtime/runtime.h"
+#include "endstone/util/format.h"
 
 namespace fs = std::filesystem;
 namespace py = pybind11;
@@ -487,10 +490,24 @@ void EndstoneServer::shutdown()
 void EndstoneServer::reload()
 {
     command_map_->clearCommands();
+
+    // Wait for at most 2.5 seconds for plugins to close their async tasks
+    plugin_manager_->disablePlugins();
+    auto &scheduler = static_cast<EndstoneScheduler &>(getScheduler());
+    for (int poll_count = 0; poll_count < 50 && !scheduler.getActiveWorkers().empty(); ++poll_count) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+    for (const auto &worker : scheduler.getActiveWorkers()) {
+        const auto &description = worker.owner_->getDescription();
+        getLogger().error("Nag author(s): '{}' of '{}' about the following: {}",
+                          detail::join(description.getAuthors(), ", "), description.getFullName(),
+                          "This plugin is not properly shutting down its async tasks when it is being reloaded. This "
+                          "may cause conflicts with the newly loaded version of the plugin");
+    }
+    scheduler.removeCancelledTasks();
+
     plugin_manager_->clearPlugins();
     reloadData();
-
-    // TODO(server): Wait for at most 2.5 seconds for all async tasks to finish, otherwise issue a warning
     loadPlugins();
     enablePlugins(PluginLoadOrder::Startup);
     enablePlugins(PluginLoadOrder::PostWorld);

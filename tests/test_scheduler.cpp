@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <chrono>
+#include <future>
 #include <memory>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -57,6 +60,23 @@ TEST_F(SchedulerTest, RunTask)
     EXPECT_TRUE(executed);
 }
 
+TEST_F(SchedulerTest, RunTaskAsync)
+{
+    std::promise<void> executed;
+    auto future = executed.get_future();
+    auto task = scheduler_->runTaskAsync(plugin_, [&]() { executed.set_value(); });
+    ASSERT_TRUE(task != nullptr);
+    task.reset();
+
+    scheduler_->mainThreadHeartbeat(++tick_count_);
+
+    if (future.wait_for(std::chrono::seconds(5)) != std::future_status::ready) {
+        // Quiesce before the stack captures die, or the executor drain runs a dangling lambda.
+        scheduler_.reset();
+        FAIL() << "Async task did not run";
+    }
+}
+
 // Test running a task later
 TEST_F(SchedulerTest, RunTaskLater)
 {
@@ -67,6 +87,21 @@ TEST_F(SchedulerTest, RunTaskLater)
         scheduler_->mainThreadHeartbeat(++tick_count_);
         EXPECT_FALSE(executed);
     }
+    scheduler_->mainThreadHeartbeat(++tick_count_);
+    EXPECT_TRUE(executed);
+}
+
+// Regression test for #436: a delay scheduled from inside a task callback ran one tick early
+// because current_tick_ was published at the end of the heartbeat instead of the start.
+TEST_F(SchedulerTest, RunTaskLaterFromCallback)
+{
+    bool executed = false;
+    scheduler_->runTask(plugin_, [&]() { scheduler_->runTaskLater(plugin_, [&]() { executed = true; }, 2); });
+
+    scheduler_->mainThreadHeartbeat(++tick_count_);
+    EXPECT_FALSE(executed);
+    scheduler_->mainThreadHeartbeat(++tick_count_);
+    EXPECT_FALSE(executed);
     scheduler_->mainThreadHeartbeat(++tick_count_);
     EXPECT_TRUE(executed);
 }
@@ -126,6 +161,55 @@ TEST_F(SchedulerTest, CancelTasks)
     EXPECT_FALSE(scheduler_->isQueued(task3->getTaskId()));
 }
 
+TEST_F(SchedulerTest, CancelTasksKeepsInternalTasks)
+{
+    bool internal_executed = false;
+    bool plugin_executed = false;
+    auto internal_task = scheduler_->runTask([&]() { internal_executed = true; });
+    auto plugin_task = scheduler_->runTask(plugin_, [&]() { plugin_executed = true; });
+    ASSERT_TRUE(internal_task != nullptr);
+    ASSERT_TRUE(plugin_task != nullptr);
+
+    scheduler_->cancelTasks(plugin_);
+
+    EXPECT_TRUE(scheduler_->isQueued(internal_task->getTaskId()));
+    EXPECT_FALSE(scheduler_->isQueued(plugin_task->getTaskId()));
+    scheduler_->mainThreadHeartbeat(++tick_count_);
+    EXPECT_TRUE(internal_executed);
+    EXPECT_FALSE(plugin_executed);
+}
+
+// Regression test for #436: a cancelled task's callback is released by the next heartbeat's
+// main-thread cleanup (the CraftBukkit pending/temp removal), not kept until its scheduled tick.
+TEST_F(SchedulerTest, CancelTaskReleasesQueuedCallback)
+{
+    auto sentinel = std::make_shared<bool>(false);
+    std::weak_ptr<bool> sentinel_ref = sentinel;
+    bool other_executed = false;
+    auto cancelled = scheduler_->runTaskLater(plugin_, [sentinel]() { *sentinel = true; }, 3);
+    auto kept = scheduler_->runTaskLater(plugin_, [&]() { other_executed = true; }, 3);
+    ASSERT_TRUE(cancelled != nullptr);
+    ASSERT_TRUE(kept != nullptr);
+    sentinel.reset();
+    const auto cancelled_id = cancelled->getTaskId();
+    const auto kept_id = kept->getTaskId();
+    // Drop our task handles: the callback must be released by the scheduler alone.
+    cancelled.reset();
+    kept.reset();
+
+    scheduler_->mainThreadHeartbeat(++tick_count_);  // move both into the scheduled queue
+    scheduler_->cancelTask(cancelled_id);
+    EXPECT_FALSE(sentinel_ref.expired());
+
+    scheduler_->mainThreadHeartbeat(++tick_count_);  // removes the cancelled task
+    EXPECT_TRUE(sentinel_ref.expired());
+    EXPECT_TRUE(scheduler_->isQueued(kept_id));
+
+    scheduler_->mainThreadHeartbeat(++tick_count_);
+    EXPECT_TRUE(other_executed);
+    EXPECT_FALSE(scheduler_->isQueued(kept_id));
+}
+
 // Regression test for #351: cancelling an idle async task via cancelTasks() used to re-lock
 // tasks_mtx_ recursively (doCancel() -> removeTask()), throwing "resource deadlock would occur".
 TEST_F(SchedulerTest, CancelAsyncTasksDoesNotDeadlock)
@@ -139,6 +223,46 @@ TEST_F(SchedulerTest, CancelAsyncTasksDoesNotDeadlock)
     EXPECT_FALSE(scheduler_->isQueued(task2->getTaskId()));
 }
 
+// Regression test for #436: cancelling a mid-flight async task lets it finish and reports it
+// running until its worker exits.
+TEST_F(SchedulerTest, CancelRunningAsyncTask)
+{
+    std::promise<void> started;
+    std::promise<void> release;
+    std::promise<void> finished;
+    auto started_future = started.get_future();
+    auto release_future = release.get_future().share();
+    auto finished_future = finished.get_future();
+    auto task = scheduler_->runTaskAsync(plugin_, [&]() {
+        started.set_value();
+        release_future.wait();
+        finished.set_value();
+    });
+    ASSERT_TRUE(task != nullptr);
+
+    scheduler_->mainThreadHeartbeat(++tick_count_);
+    if (started_future.wait_for(std::chrono::seconds(5)) != std::future_status::ready) {
+        release.set_value();
+        scheduler_.reset();
+        FAIL() << "Async task did not start";
+    }
+
+    scheduler_->cancelTasks(plugin_);
+
+    EXPECT_TRUE(scheduler_->isRunning(task->getTaskId()));
+    release.set_value();
+    if (finished_future.wait_for(std::chrono::seconds(5)) != std::future_status::ready) {
+        scheduler_.reset();
+        FAIL() << "Async task did not finish";
+    }
+
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+    while (scheduler_->isRunning(task->getTaskId()) && std::chrono::steady_clock::now() < deadline) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    EXPECT_FALSE(scheduler_->isRunning(task->getTaskId()));
+}
+
 // Test to check if a task is running
 TEST_F(SchedulerTest, TaskIsRunning)
 {
@@ -150,6 +274,43 @@ TEST_F(SchedulerTest, TaskIsRunning)
     });
     scheduler_->mainThreadHeartbeat(++tick_count_);
     EXPECT_TRUE(executed);
+    EXPECT_FALSE(scheduler_->isRunning(task->getTaskId()));
+}
+
+// Regression test for #436: isRunning() was inverted for async tasks (true while idle).
+TEST_F(SchedulerTest, AsyncTaskIsRunning)
+{
+    std::promise<void> started;
+    std::promise<void> release;
+    std::promise<void> finished;
+    auto started_future = started.get_future();
+    auto release_future = release.get_future().share();
+    auto finished_future = finished.get_future();
+    auto task = scheduler_->runTaskAsync(plugin_, [&]() {
+        started.set_value();
+        release_future.wait();
+        finished.set_value();
+    });
+    ASSERT_TRUE(task != nullptr);
+
+    scheduler_->mainThreadHeartbeat(++tick_count_);
+
+    if (started_future.wait_for(std::chrono::seconds(5)) != std::future_status::ready) {
+        release.set_value();
+        scheduler_.reset();
+        FAIL() << "Async task did not start";
+    }
+    EXPECT_TRUE(scheduler_->isRunning(task->getTaskId()));
+    release.set_value();
+    if (finished_future.wait_for(std::chrono::seconds(5)) != std::future_status::ready) {
+        scheduler_.reset();
+        FAIL() << "Async task did not finish";
+    }
+
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+    while (scheduler_->isRunning(task->getTaskId()) && std::chrono::steady_clock::now() < deadline) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
     EXPECT_FALSE(scheduler_->isRunning(task->getTaskId()));
 }
 
