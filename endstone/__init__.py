@@ -6,6 +6,7 @@ __getattr__, __dir__, __all__ = lazy.attach(
         "_python": [
             "ColorFormat",
             "GameMode",
+            "GameRule",
             "Identifier",
             "Logger",
             "OfflinePlayer",

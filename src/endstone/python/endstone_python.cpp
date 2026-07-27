@@ -114,7 +114,6 @@ PYBIND11_MODULE(_python, m)  // NOLINT(*-use-anonymous-namespace)
         m.def_submodule("enchantments", "Classes relating to the specialized enhancements to ItemStacks.");
     auto m_event = m.def_submodule("event", "Classes relating to handling triggered code executions.");
     auto m_form = m.def_submodule("form");
-    auto m_gamerule = m.def_submodule("gamerule", "Classes relevant to game rules.");
     auto m_inventory = m.def_submodule("inventory", "Classes relating to player inventories and item interactions.");
     auto m_lang = m.def_submodule("lang");
     auto m_level = m.def_submodule("level");
@@ -200,7 +199,7 @@ PYBIND11_MODULE(_python, m)  // NOLINT(*-use-anonymous-namespace)
     init_color_format(m);
     init_damage(m_damage);
     init_game_mode(m);
-    init_game_rule(m_gamerule);
+    init_game_rule(m);
     init_logger(m);
     init_lang(m_lang);
     init_form(m_form);
