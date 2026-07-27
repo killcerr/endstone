@@ -14,14 +14,11 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cctype>
 #include <functional>
 #include <map>
 #include <memory>
 #include <optional>
 #include <string>
-#include <utility>
 #include <variant>
 #include <vector>
 
@@ -105,36 +102,7 @@ public:
         return default_value;
     }
 
-    // Endstone begins
-    [[nodiscard]] const GameRule *getGameRule(GameRuleId id) const
-    {
-        if (id < 0 || id >= game_rules_.size()) {
-            return nullptr;
-        }
-        return &game_rules_[id];
-    }
-    [[nodiscard]] const GameRule *getGameRule(const std::string &name) const
-    {
-        for (const auto &game_rule : game_rules_) {
-            if (game_rule.getName().size() == name.size() &&
-                std::equal(game_rule.getName().begin(), game_rule.getName().end(), name.begin(),
-                           [](char lhs, char rhs) {
-                               return std::tolower(static_cast<unsigned char>(lhs)) ==
-                                      std::tolower(static_cast<unsigned char>(rhs));
-                           })) {
-                return &game_rule;
-            }
-        }
-        return nullptr;
-    }
-    [[nodiscard]] GameRule *getGameRule(const std::string &name)
-    {
-        return const_cast<GameRule *>(std::as_const(*this).getGameRule(name));
-    }
-    std::shared_ptr<GameRulesChangedPacket> setGameRule(const std::string &name, GameRule::Value value,
-                                                        bool return_packet, bool *value_validated, bool *value_changed,
-                                                        GameRule::ValidationError *error_output);
-    // Endstone ends
+    [[nodiscard]] const GameRuleMap &getRules() const { return game_rules_; }
 
     enum GameRulesIndex : int {  // NOLINTBEGIN
         INVALID_GAME_RULE = -1,
@@ -177,8 +145,8 @@ public:
         PLAYER_SLEEPING_PERCENTAGE = 36,
         PROJECTILES_CAN_BREAK_BLOCKS = 37,
         TNT_EXPLOSION_DROP_DECAY = 38,
-        VANILLA_GAME_RULE_COUNT = 39,
-        GLOBAL_MUTE = 39,
+        VANILLA_GAME_RULE_COUNT,
+        GLOBAL_MUTE = VANILLA_GAME_RULE_COUNT,
         ALLOW_DESTRUCTIVE_OBJECTS = 40,
         ALLOW_MOBS = 41,
         CODE_BUILDER = 42,

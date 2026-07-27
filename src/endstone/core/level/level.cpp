@@ -17,9 +17,6 @@
 #include <cstdlib>
 #include <ranges>
 #include <stdexcept>
-#include <utility>
-
-#include <boost/algorithm/string.hpp>
 
 #include "bedrock/entity/gamerefs_entity/gamerefs_entity.h"
 #include "bedrock/network/packet/game_rules_changed_packet.h"
@@ -30,6 +27,7 @@
 #include "bedrock/world/level/level.h"
 #include "bedrock/world/level/storage/game_rules.h"
 #include "endstone/core/actor/actor.h"
+#include "endstone/core/game_rule.h"
 #include "endstone/core/level/dimension.h"
 #include "endstone/level/dimension.h"
 
@@ -134,23 +132,17 @@ std::int64_t EndstoneLevel::getSeed() const
 
 bool EndstoneLevel::_hasGameRule(Identifier<GameRule> rule) const
 {
-    if (rule.getNamespace() != Identifier<GameRule>::Minecraft) {
-        return false;
-    }
-    return level_.getGameRules().getGameRule(std::string(rule.getKey())) != nullptr;
+    return server_.getRegistry<GameRule>().get(rule) != nullptr;
 }
 
 GameRuleValue EndstoneLevel::_getGameRule(Identifier<GameRule> rule) const
 {
-    if (rule.getNamespace() != Identifier<GameRule>::Minecraft) {
+    const auto *entry = server_.getRegistry<GameRule>().get(rule);
+    if (entry == nullptr) {
         throw std::out_of_range("Game rule is not available.");
     }
 
-    const auto *game_rule = level_.getGameRules().getGameRule(std::string(rule.getKey()));
-    if (game_rule == nullptr) {
-        throw std::out_of_range("Game rule is not available.");
-    }
-
+    const auto *game_rule = &static_cast<const EndstoneGameRule *>(entry)->getHandle();
     const auto &value = game_rule->getValue();
     switch (game_rule->getType()) {
     case ::GameRule::Type::Bool:
@@ -166,15 +158,14 @@ GameRuleValue EndstoneLevel::_getGameRule(Identifier<GameRule> rule) const
 
 bool EndstoneLevel::_setGameRule(Identifier<GameRule> rule, GameRuleValue value)
 {
-    if (rule.getNamespace() != Identifier<GameRule>::Minecraft) {
+    const auto *entry = server_.getRegistry<GameRule>().get(rule);
+    if (entry == nullptr) {
         return false;
     }
 
     auto &game_rules = level_.getGameRules();
-    auto *game_rule = game_rules.getGameRule(std::string(rule.getKey()));
-    if (game_rule == nullptr) {
-        return false;
-    }
+    const auto *game_rule = &static_cast<const EndstoneGameRule *>(entry)->getHandle();
+    const ::GameRuleId id{static_cast<int>(game_rule - game_rules.getRules().data())};
 
     ::GameRule::Value native_value;
     switch (game_rule->getType()) {
@@ -202,8 +193,7 @@ bool EndstoneLevel::_setGameRule(Identifier<GameRule> rule, GameRuleValue value)
 
     bool validated = false;
     bool changed = false;
-    const auto packet = game_rules.setGameRule(std::string(rule.getKey()), std::move(native_value), true, &validated,
-                                               &changed, nullptr);
+    const auto packet = game_rules.setGameRule(id, native_value, true, &validated, &changed, nullptr);
     if (!validated) {
         return false;
     }

@@ -62,25 +62,6 @@ bool GameRule::_set(const Value &value, bool *validated, ValidationError *error_
     return true;
 }
 
-std::shared_ptr<GameRulesChangedPacket> GameRules::setGameRule(const std::string &name, GameRule::Value value,
-                                                               bool return_packet, bool *value_validated,
-                                                               bool *value_changed,
-                                                               GameRule::ValidationError *error_output)
-{
-    auto *game_rule = getGameRule(name);
-    if (game_rule == nullptr) {
-        if (value_validated != nullptr) {
-            *value_validated = false;
-        }
-        if (value_changed != nullptr) {
-            *value_changed = false;
-        }
-        return nullptr;
-    }
-    return _setGameRule(game_rule, value, game_rule->getType(), return_packet, value_validated, value_changed,
-                        error_output);
-}
-
 std::shared_ptr<GameRulesChangedPacket> GameRules::setGameRule(GameRuleId rule, GameRule::Value value,
                                                                bool return_packet, bool *value_validated,
                                                                bool *value_changed,

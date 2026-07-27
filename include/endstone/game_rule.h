@@ -17,14 +17,19 @@
 #include <type_traits>
 #include <variant>
 
-#include "endstone/identifier.h"
+#include "endstone/registry.h"
 
 namespace endstone {
 
 using GameRuleValue = std::variant<bool, int, float>;
 
+class GameRule;
+
+/**
+ * Represents the identifier of a game rule, carrying the type of the rule's value.
+ */
 template <typename T>
-class GameRuleId : public Identifier<class GameRule> {
+class GameRuleId : public Identifier<GameRule> {
 public:
     using Identifier::Identifier;
 
@@ -32,88 +37,88 @@ public:
 };
 
 /**
- * All game rules.
+ * Represents a game rule.
  */
-class GameRule {
+class GameRule : public Registry<GameRule>::Type {
 public:
     /** Whether command blocks notify administrators when they execute commands. */
-    static constexpr auto CommandBlockOutput = GameRuleId<bool>::minecraft("commandBlockOutput");
+    static constexpr auto CommandBlockOutput = GameRuleId<bool>::minecraft("commandblockoutput");
     /** Whether command blocks can execute commands. */
-    static constexpr auto CommandBlocksEnabled = GameRuleId<bool>::minecraft("commandBlocksEnabled");
+    static constexpr auto CommandBlocksEnabled = GameRuleId<bool>::minecraft("commandblocksenabled");
     /** Whether the day and night cycles progress. */
-    static constexpr auto DoDayLightCycle = GameRuleId<bool>::minecraft("doDayLightCycle");
+    static constexpr auto DoDayLightCycle = GameRuleId<bool>::minecraft("dodaylightcycle");
     /** Whether non-mob entities drop items. */
-    static constexpr auto DoEntityDrops = GameRuleId<bool>::minecraft("doEntityDrops");
+    static constexpr auto DoEntityDrops = GameRuleId<bool>::minecraft("doentitydrops");
     /** Whether fire spreads. */
-    static constexpr auto DoFireTick = GameRuleId<bool>::minecraft("doFireTick");
+    static constexpr auto DoFireTick = GameRuleId<bool>::minecraft("dofiretick");
     /** Whether players immediately respawn. */
-    static constexpr auto DoImmediateRespawn = GameRuleId<bool>::minecraft("doImmediateRespawn");
+    static constexpr auto DoImmediateRespawn = GameRuleId<bool>::minecraft("doimmediaterespawn");
     /** Whether players experience insomnia. */
-    static constexpr auto DoInsomnia = GameRuleId<bool>::minecraft("doInsomnia");
+    static constexpr auto DoInsomnia = GameRuleId<bool>::minecraft("doinsomnia");
     /** Whether players can craft only unlocked recipes. */
-    static constexpr auto DoLimitedCrafting = GameRuleId<bool>::minecraft("doLimitedCrafting");
+    static constexpr auto DoLimitedCrafting = GameRuleId<bool>::minecraft("dolimitedcrafting");
     /** Whether mobs drop loot. */
-    static constexpr auto DoMobLoot = GameRuleId<bool>::minecraft("doMobLoot");
+    static constexpr auto DoMobLoot = GameRuleId<bool>::minecraft("domobloot");
     /** Whether mobs spawn naturally. */
-    static constexpr auto DoMobSpawning = GameRuleId<bool>::minecraft("doMobSpawning");
+    static constexpr auto DoMobSpawning = GameRuleId<bool>::minecraft("domobspawning");
     /** Whether blocks drop items when destroyed. */
-    static constexpr auto DoTileDrops = GameRuleId<bool>::minecraft("doTileDrops");
+    static constexpr auto DoTileDrops = GameRuleId<bool>::minecraft("dotiledrops");
     /** Whether the weather changes naturally. */
-    static constexpr auto DoWeatherCycle = GameRuleId<bool>::minecraft("doWeatherCycle");
+    static constexpr auto DoWeatherCycle = GameRuleId<bool>::minecraft("doweathercycle");
     /** Whether entities take drowning damage. */
-    static constexpr auto DrowningDamage = GameRuleId<bool>::minecraft("drowningDamage");
+    static constexpr auto DrowningDamage = GameRuleId<bool>::minecraft("drowningdamage");
     /** Whether entities take fall damage. */
-    static constexpr auto FallDamage = GameRuleId<bool>::minecraft("fallDamage");
+    static constexpr auto FallDamage = GameRuleId<bool>::minecraft("falldamage");
     /** Whether entities take fire damage. */
-    static constexpr auto FireDamage = GameRuleId<bool>::minecraft("fireDamage");
+    static constexpr auto FireDamage = GameRuleId<bool>::minecraft("firedamage");
     /** Whether entities take freezing damage. */
-    static constexpr auto FreezeDamage = GameRuleId<bool>::minecraft("freezeDamage");
+    static constexpr auto FreezeDamage = GameRuleId<bool>::minecraft("freezedamage");
     /** The maximum number of commands executed by a function per tick. */
-    static constexpr auto FunctionCommandLimit = GameRuleId<int>::minecraft("functionCommandLimit");
+    static constexpr auto FunctionCommandLimit = GameRuleId<int>::minecraft("functioncommandlimit");
     /** Whether players keep their inventory on death. */
-    static constexpr auto KeepInventory = GameRuleId<bool>::minecraft("keepInventory");
+    static constexpr auto KeepInventory = GameRuleId<bool>::minecraft("keepinventory");
     /** Whether the locator bar is displayed. */
     static constexpr auto LocatorBar = GameRuleId<bool>::minecraft("locatorbar");
     /** The maximum number of chained commands executed per tick. */
-    static constexpr auto MaxCommandChainLength = GameRuleId<int>::minecraft("maxCommandChainLength");
+    static constexpr auto MaxCommandChainLength = GameRuleId<int>::minecraft("maxcommandchainlength");
     /** Whether mobs can modify the world. */
-    static constexpr auto MobGriefing = GameRuleId<bool>::minecraft("mobGriefing");
+    static constexpr auto MobGriefing = GameRuleId<bool>::minecraft("mobgriefing");
     /** Whether players regenerate health naturally. */
-    static constexpr auto NaturalRegeneration = GameRuleId<bool>::minecraft("naturalRegeneration");
+    static constexpr auto NaturalRegeneration = GameRuleId<bool>::minecraft("naturalregeneration");
     /** The percentage of players that must sleep to skip the night. */
-    static constexpr auto PlayersSleepingPercentage = GameRuleId<int>::minecraft("playersSleepingPercentage");
+    static constexpr auto PlayersSleepingPercentage = GameRuleId<int>::minecraft("playerssleepingpercentage");
     /** Whether player waypoints are added to locator bars. */
-    static constexpr auto PlayerWaypoints = GameRuleId<int>::minecraft("playerWaypoints");
+    static constexpr auto PlayerWaypoints = GameRuleId<int>::minecraft("playerwaypoints");
     /** Whether projectiles can break supported blocks. */
-    static constexpr auto ProjectilesCanBreakBlocks = GameRuleId<bool>::minecraft("projectilesCanBreakBlocks");
+    static constexpr auto ProjectilesCanBreakBlocks = GameRuleId<bool>::minecraft("projectilescanbreakblocks");
     /** Whether players can damage each other. */
     static constexpr auto Pvp = GameRuleId<bool>::minecraft("pvp");
     /** The frequency of random block ticks. */
-    static constexpr auto RandomTickSpeed = GameRuleId<int>::minecraft("randomTickSpeed");
+    static constexpr auto RandomTickSpeed = GameRuleId<int>::minecraft("randomtickspeed");
     /** Whether built-in recipes unlock as players progress. */
-    static constexpr auto RecipesUnlock = GameRuleId<bool>::minecraft("recipesUnlock");
+    static constexpr auto RecipesUnlock = GameRuleId<bool>::minecraft("recipesunlock");
     /** Whether respawn blocks explode in other dimensions. */
-    static constexpr auto RespawnBlocksExplode = GameRuleId<bool>::minecraft("respawnBlocksExplode");
+    static constexpr auto RespawnBlocksExplode = GameRuleId<bool>::minecraft("respawnblocksexplode");
     /** Whether command feedback is displayed to players. */
-    static constexpr auto SendCommandFeedback = GameRuleId<bool>::minecraft("sendCommandFeedback");
+    static constexpr auto SendCommandFeedback = GameRuleId<bool>::minecraft("sendcommandfeedback");
     /** Whether border block effects are shown. */
-    static constexpr auto ShowBorderEffect = GameRuleId<bool>::minecraft("showBorderEffect");
+    static constexpr auto ShowBorderEffect = GameRuleId<bool>::minecraft("showbordereffect");
     /** Whether player coordinates are displayed. */
-    static constexpr auto ShowCoordinates = GameRuleId<bool>::minecraft("showCoordinates");
+    static constexpr auto ShowCoordinates = GameRuleId<bool>::minecraft("showcoordinates");
     /** Whether the number of days played is displayed. */
-    static constexpr auto ShowDaysPlayed = GameRuleId<bool>::minecraft("showDaysPlayed");
+    static constexpr auto ShowDaysPlayed = GameRuleId<bool>::minecraft("showdaysplayed");
     /** Whether death messages are displayed in chat. */
-    static constexpr auto ShowDeathMessages = GameRuleId<bool>::minecraft("showDeathMessages");
+    static constexpr auto ShowDeathMessages = GameRuleId<bool>::minecraft("showdeathmessages");
     /** Whether recipe unlock notifications are shown. */
-    static constexpr auto ShowRecipeMessages = GameRuleId<bool>::minecraft("showRecipeMessages");
+    static constexpr auto ShowRecipeMessages = GameRuleId<bool>::minecraft("showrecipemessages");
     /** Whether item tags are shown. */
-    static constexpr auto ShowTags = GameRuleId<bool>::minecraft("showTags");
+    static constexpr auto ShowTags = GameRuleId<bool>::minecraft("showtags");
     /** The radius around world spawn in which players can spawn. */
-    static constexpr auto SpawnRadius = GameRuleId<int>::minecraft("spawnRadius");
+    static constexpr auto SpawnRadius = GameRuleId<int>::minecraft("spawnradius");
     /** Whether TNT blocks can be lit. */
-    static constexpr auto TntExplodes = GameRuleId<bool>::minecraft("tntExplodes");
+    static constexpr auto TntExplodes = GameRuleId<bool>::minecraft("tntexplodes");
     /** Whether explosion drop decay is enabled for TNT. */
-    static constexpr auto TntExplosionDropDecay = GameRuleId<bool>::minecraft("tntExplosionDropDecay");
+    static constexpr auto TntExplosionDropDecay = GameRuleId<bool>::minecraft("tntexplosiondropdecay");
 };
 
 static_assert(std::is_same_v<decltype(GameRule::DoFireTick), const GameRuleId<bool>>);

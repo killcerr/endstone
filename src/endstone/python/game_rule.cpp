@@ -20,6 +20,22 @@ namespace endstone::python {
 void init_game_rule(py::module_ &m)
 {
     py::class_<GameRule>(m, "GameRule", "Represents a game rule.")
+        .def_property_readonly("id", &GameRule::getId, "The identifier of this game rule.")
+        .def_property_readonly("translation_key", &GameRule::getTranslationKey,
+                               "The translation key, suitable for use in a translation component.")
+        .def_static("get", &GameRule::get, py::arg("name"), R"doc(
+    Attempts to get the `GameRule` with the given name.
+
+    Args:
+        name: The identifier of the game rule (e.g. `minecraft:dofiretick`).
+
+    Returns:
+        The `GameRule`, or `None` if no game rule with that name exists.
+)doc",
+                    py::return_value_policy::reference)
+        .def("__str__", [](const GameRule &self) { return std::string(self.getId()); })
+        .def("__repr__", [](const GameRule &self) { return std::format("GameRule({})", self.getId()); })
+        .def("__hash__", [](const GameRule &self) { return py::hash(py::str(std::string(self.getId()))); })
         .def_property_readonly_static("COMMAND_BLOCK_OUTPUT",
                                       [](const py::object &) { return GameRule::CommandBlockOutput; })
         .def_property_readonly_static("DO_DAY_LIGHT_CYCLE",
