@@ -52,6 +52,22 @@ InventoryTransactionError InventoryTransaction::executeWorldInteraction(void *, 
         if (player.drop(action.getToItem(), randomly)) {
             result = InventoryTransactionError::NoError;
         }
+        else {
+            const auto slot = player.getSelectedItemSlot();
+            auto item = player.getInventory().getItem(slot);
+            if (item.isNull()) {
+                item = action.getToItem();
+                player.getInventory().setItem(slot, item);
+            }
+            else if (item.matchesItem(action.getToItem())) {
+                item.set(item.getCount() + action.getToItem().getCount());
+                player.getInventory().setItem(slot, item);
+            }
+            else {
+                item = action.getToItem();
+                player.getInventory().addItem(item);
+            }
+        }
     }
     // Slot 1: Pick up
     else if (action.getSlot() == 1 && action.getFromItem() && !action.getToItem()) {
