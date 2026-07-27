@@ -132,7 +132,7 @@ std::int64_t EndstoneLevel::getSeed() const
     return level_.getLevelSeed64();
 }
 
-bool EndstoneLevel::hasGameRule(Identifier<GameRule> rule) const
+bool EndstoneLevel::_hasGameRule(Identifier<GameRule> rule) const
 {
     if (rule.getNamespace() != Identifier<GameRule>::Minecraft) {
         return false;
@@ -140,7 +140,7 @@ bool EndstoneLevel::hasGameRule(Identifier<GameRule> rule) const
     return level_.getGameRules().getGameRule(std::string(rule.getKey())) != nullptr;
 }
 
-GameRuleValue EndstoneLevel::getGameRuleValue(Identifier<GameRule> rule) const
+GameRuleValue EndstoneLevel::_getGameRule(Identifier<GameRule> rule) const
 {
     if (rule.getNamespace() != Identifier<GameRule>::Minecraft) {
         throw std::out_of_range("Game rule is not available.");
@@ -164,7 +164,7 @@ GameRuleValue EndstoneLevel::getGameRuleValue(Identifier<GameRule> rule) const
     }
 }
 
-bool EndstoneLevel::setGameRuleValue(Identifier<GameRule> rule, GameRuleValue value)
+bool EndstoneLevel::_setGameRule(Identifier<GameRule> rule, GameRuleValue value)
 {
     if (rule.getNamespace() != Identifier<GameRule>::Minecraft) {
         return false;

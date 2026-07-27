@@ -104,37 +104,64 @@ public:
      * @param rule The Minecraft game rule to check
      * @return True if the game rule exists
      */
-    [[nodiscard]] virtual bool hasGameRule(Identifier<GameRule> rule) const = 0;
+    [[nodiscard]] virtual bool _hasGameRule(Identifier<GameRule> rule) const = 0;
+
+    /**
+     * Checks if a game rule exists.
+     *
+     * @tparam T The type of the game rule's value.
+     * @param rule The Minecraft game rule to check
+     * @return True if the game rule exists
+     */
+    template <typename T>
+    [[nodiscard]] bool hasGameRule(GameRuleId<T> rule) const
+    {
+        return _hasGameRule(rule);
+    }
 
     /**
      * Gets the value of a game rule.
      *
      * @param rule The Minecraft game rule to get
-     * @return
-     * The current game rule value
+     * @return The current game rule value
+     */
+    [[nodiscard]] virtual GameRuleValue _getGameRule(Identifier<GameRule> rule) const = 0;
+
+    /**
+     * Gets the value of a game rule.
+     *
+     * @tparam T The type of the game rule's value.
+     * @param rule The Minecraft game rule to get
+     * @return The current game rule value
      */
     template <typename T>
     [[nodiscard]] T getGameRule(GameRuleId<T> rule) const
     {
-        return std::get<T>(getGameRuleValue(rule));
+        return std::get<T>(_getGameRule(rule));
     }
 
     /**
      * Sets the value of a game rule.
      *
      * @param rule The Minecraft game rule to set
-     * @param
-     * value The new value
+     * @param value The new value
+     * @return True if the value was accepted
+     */
+    virtual bool _setGameRule(Identifier<GameRule> rule, GameRuleValue value) = 0;
+
+    /**
+     * Sets the value of a game rule.
+     *
+     * @tparam T The type of the game rule's value.
+     * @param rule The Minecraft game rule to set
+     * @param value The new value
      * @return True if the value was accepted
      */
     template <typename T>
     bool setGameRule(GameRuleId<T> rule, T value)
     {
-        return setGameRuleValue(rule, value);
+        return _setGameRule(rule, value);
     }
-
-    [[nodiscard]] virtual GameRuleValue getGameRuleValue(Identifier<GameRule> rule) const = 0;
-    virtual bool setGameRuleValue(Identifier<GameRule> rule, GameRuleValue value) = 0;
 };
 
 }  // namespace endstone

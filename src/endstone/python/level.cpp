@@ -27,11 +27,11 @@ class GameRules {
 public:
     explicit GameRules(Level &level) : level_(level) {}
 
-    [[nodiscard]] bool contains(Identifier<GameRule> rule) const { return level_.hasGameRule(rule); }
-    [[nodiscard]] GameRuleValue get(Identifier<GameRule> rule) const { return level_.getGameRuleValue(rule); }
+    [[nodiscard]] bool contains(Identifier<GameRule> rule) const { return level_._hasGameRule(rule); }
+    [[nodiscard]] GameRuleValue get(Identifier<GameRule> rule) const { return level_._getGameRule(rule); }
     void set(Identifier<GameRule> rule, GameRuleValue value) const
     {
-        if (!level_.setGameRuleValue(rule, std::move(value))) {
+        if (!level_._setGameRule(rule, std::move(value))) {
             throw py::value_error(std::format("Unable to set game rule {}.", rule));
         }
     }
