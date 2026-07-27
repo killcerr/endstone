@@ -30,16 +30,6 @@ struct GameRulesChangedPacketPayload {
 
 class GameRulesChangedPacket : public Packet {
 public:
-    [[nodiscard]] MinecraftPacketIds getId() const override = 0;
-    [[nodiscard]] std::string_view getName() const override = 0;
-    [[nodiscard]] SerializationMode getSerializationMode() const override = 0;
-    void setSerializationMode(SerializationMode mode) override = 0;
-    void write(BinaryStream &stream) const override = 0;
-
-private:
-    Bedrock::Result<void> _read(ReadOnlyBinaryStream &stream) override = 0;
-
-public:
     GameRulesChangedPacketPayload payload;
     SerializationMode serialization_mode{SerializationMode::CerealOnly};
 };

@@ -183,8 +183,8 @@ public:
         ALLOW_MOBS = 41,
         CODE_BUILDER = 42,
         EDU_CLOUD_SAVE = 43,
-        EDU_GAME_RULE_COUNT = 44,
-        GAME_RULE_COUNT = 44,
+        EDU_GAME_RULE_COUNT,
+        GAME_RULE_COUNT = EDU_GAME_RULE_COUNT,
     };  // NOLINTEND
 
     // Endstone begins
