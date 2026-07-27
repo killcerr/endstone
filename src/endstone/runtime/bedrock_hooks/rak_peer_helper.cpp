@@ -68,25 +68,6 @@ static endstone::ServerListPingEvent callServerListPingEvent(endstone::SocketAdd
 
 RakNet::RakPeer *gRakPeer = nullptr;
 
-// #blameMojang - MCPE-228407: Mojang's custom RakNet packet 0x86 handler reads SystemAddress
-// without checking if the packet is large enough to contain one. Networking 101: validate before read.
-// Reported to Mojang, closed as "Won't Fix". Classic.
-// Fix: drop undersized packets before they reach the vulnerable code path.
-static bool hasTruncatedSystemAddress(RakNet::RNS2RecvStruct *recv)
-{
-    if (static_cast<unsigned char>(recv->data[0]) != 0x86) {
-        return false;
-    }
-    int expected_size = sizeof(unsigned char) + sizeof(unsigned char);
-    if (recv->data[1] == 4) {  // ipv4
-        expected_size += sizeof(std::uint32_t) + sizeof(std::uint16_t);
-    }
-    else {  // ipv6
-        expected_size += sizeof(sockaddr_in6);
-    }
-    return recv->bytesRead < expected_size;
-}
-
 static bool handleUnconnectedPing(RakNet::RNS2RecvStruct *recv)
 {
     if (recv->bytesRead < sizeof(unsigned char) + sizeof(RakNet::Time) + sizeof(OFFLINE_MESSAGE_DATA_ID)) {
@@ -140,10 +121,6 @@ static bool handleUnconnectedPing(RakNet::RNS2RecvStruct *recv)
 
 bool handleIncomingDatagram(RakNet::RNS2RecvStruct *recv)
 {
-    // Undersized address packets are dropped outright.
-    if (hasTruncatedSystemAddress(recv)) {
-        return false;
-    }
     if (recv->data[0] == ID_UNCONNECTED_PING) {
         return handleUnconnectedPing(recv);
     }
