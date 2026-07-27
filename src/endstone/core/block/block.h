@@ -48,7 +48,7 @@ public:
     static BlockFace toBlockFace(Direction::Type direction);
 
 protected:
-    std::reference_wrapper<BlockSource> block_source_;
+    BlockSource &block_source_;
     BlockPos block_pos_;
 };
 }  // namespace endstone::core

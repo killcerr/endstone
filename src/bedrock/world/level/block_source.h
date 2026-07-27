@@ -140,6 +140,12 @@ public:
     BlockSource(Level &, Dimension &, ChunkSource &, bool, bool, bool);
     BlockSource(ILevel &, ChunkSource &, bool, bool);
 
+    using IConstBlockSource::getBlockEntity;
+    [[nodiscard]] BlockActor *getBlockEntity(const BlockPos &pos)
+    {
+        return const_cast<BlockActor *>(static_cast<const IConstBlockSource *>(this)->getBlockEntity(pos));
+    }
+
     [[nodiscard]] bool isEmptyBlock(const BlockPos &pos) const;
     [[nodiscard]] const Biome &getBiome(const BlockPos &) const;
 };
