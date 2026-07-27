@@ -70,10 +70,11 @@ RakNet::RakPeer *gRakPeer = nullptr;
 
 // Upstream RakNet walks every datagram number in an ACK or NAK range with no bound on the width.
 // Datagram numbers are a 24-bit wrapping type, so `for (n = min; n >= min && n <= max; n++)` never
-// terminates when min == 0 and max == 0xFFFFFF (reachable via NAK) and spins for millions of
-// iterations for any oversized range. RakNet guards only ACK, and only the exact 0xFFFFFF wrap, so
-// an ACK of [0, 0xFFFFFE] still stalls ~16M times. At most RESEND_BUFFER_ARRAY_LENGTH datagrams are
-// ever outstanding, so a wider range is bogus; drop the datagram before the peer sees it.
+// terminates when max == 0xFFFFFF (reachable via NAK) and spins for millions of iterations for any
+// oversized range. RakNet guards only ACK, and only the exact 0xFFFFFF wrap, so an ACK of
+// [0, 0xFFFFFE] still stalls ~16M times. At most RESEND_BUFFER_ARRAY_LENGTH datagrams are ever
+// outstanding, so reject 0xFFFFFF outright and drop the datagram once its ranges acknowledge more
+// than that in total; a per-range check alone lets an attacker split one wide span into many.
 // The ACK header assumes sliding-window congestion control (the BDS default), which omits the
 // per-datagram timestamp.
 static bool hasOversizedAcknowledgementRange(RakNet::RNS2RecvStruct *recv)
@@ -113,6 +114,7 @@ static bool hasOversizedAcknowledgementRange(RakNet::RNS2RecvStruct *recv)
     if (!in.Read(count)) {
         return false;
     }
+    std::uint32_t acknowledged = 0;
     for (std::uint16_t i = 0; i < count; ++i) {
         unsigned char max_equal_to_min = 0;
         RakNet::uint24_t min;
@@ -129,8 +131,13 @@ static bool hasOversizedAcknowledgementRange(RakNet::RNS2RecvStruct *recv)
         else {
             max = min;
         }
-        // Unsigned: an inverted (max < min) range underflows to a huge value and trips the same bound.
-        if (max.val - min.val >= RESEND_BUFFER_ARRAY_LENGTH) {
+        // max == 0xFFFFFF is the loop's own upper bound, so the counter wraps under it forever.
+        if (max.val == 0x00FFFFFF) {
+            return true;
+        }
+        // Accumulate across ranges; an inverted (max < min) range underflows to a huge value here too.
+        acknowledged += max.val - min.val + 1;
+        if (acknowledged > RESEND_BUFFER_ARRAY_LENGTH) {
             return true;
         }
     }
