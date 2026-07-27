@@ -1,0 +1,77 @@
+--- a/Source/ReliabilityLayer.cpp
++++ b/Source/ReliabilityLayer.cpp
+@@ -632,6 +632,10 @@ void ReliabilityLayer::FreeThreadSafeMemory( void )
+ // because some data is used internally, such as packet acknowledgment and
+ //split packets
+ //-------------------------------------------------------------------------------------------------------
++// Mojang bounds acknowledgement processing so a malformed ACK/NAK cannot drive the datagram-number
++// walk into a runaway loop. At most RESEND_BUFFER_ARRAY_LENGTH datagrams are ever outstanding.
++#define MAX_ACKNOWLEDGEMENT_RANGES_PER_DATAGRAM 0x400
++#define MAX_ACKNOWLEDGEMENTS_PER_DATAGRAM 0x4000
+ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer(
+ 	const char *buffer, unsigned int length, SystemAddress &systemAddress, DataStructures::List<PluginInterface2*> &messageHandlerList, int MTUSize,
+ 	RakNetSocket2 *s, RakNetRandom *rnr, CCTimeType timeRead,
+@@ -733,6 +737,13 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer(
+ 
+ 			return false;
+ 		}
++		if (incomingAcks.ranges.Size() > MAX_ACKNOWLEDGEMENT_RANGES_PER_DATAGRAM)
++		{
++			for (unsigned int messageHandlerIndex=0; messageHandlerIndex < messageHandlerList.Size(); messageHandlerIndex++)
++				messageHandlerList[messageHandlerIndex]->OnReliabilityLayerNotification("number of ACK ranges in this datagram exceeds the maximum allowed", BYTES_TO_BITS(length), systemAddress, true);
++			return false;
++		}
++		uint32_t totalAcknowledgementsThisDatagram=0;
+ 		for (i=0; i<incomingAcks.ranges.Size();i++)
+ 		{
+             if (incomingAcks.ranges[i].minIndex>incomingAcks.ranges[i].maxIndex || (incomingAcks.ranges[i].maxIndex == (uint24_t)(0xFFFFFFFF)))
+@@ -740,7 +751,14 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer(
+ 				RakAssert(incomingAcks.ranges[i].minIndex<=incomingAcks.ranges[i].maxIndex);
+ 
+ 				for (unsigned int messageHandlerIndex=0; messageHandlerIndex < messageHandlerList.Size(); messageHandlerIndex++)
+-					messageHandlerList[messageHandlerIndex]->OnReliabilityLayerNotification("incomingAcks minIndex > maxIndex or maxIndex is max value", BYTES_TO_BITS(length), systemAddress, true);
++					messageHandlerList[messageHandlerIndex]->OnReliabilityLayerNotification("incomingAcks minIndex > maxIndex or maxIndex is too large", BYTES_TO_BITS(length), systemAddress, true);
++				return false;
++			}
++			totalAcknowledgementsThisDatagram += incomingAcks.ranges[i].maxIndex.val - incomingAcks.ranges[i].minIndex.val + 1;
++			if (totalAcknowledgementsThisDatagram > MAX_ACKNOWLEDGEMENTS_PER_DATAGRAM)
++			{
++				for (unsigned int messageHandlerIndex=0; messageHandlerIndex < messageHandlerList.Size(); messageHandlerIndex++)
++					messageHandlerList[messageHandlerIndex]->OnReliabilityLayerNotification("datagram contains too many ACKs, exceeding MAX_TOTAL_ACKS_PER_DATAGRAM", BYTES_TO_BITS(length), systemAddress, true);
+ 				return false;
+ 			}
+ 			for (datagramNumber=incomingAcks.ranges[i].minIndex; datagramNumber >= incomingAcks.ranges[i].minIndex && datagramNumber <= incomingAcks.ranges[i].maxIndex; datagramNumber++)
+@@ -815,17 +833,31 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer(
+ 
+ 			return false;
+ 		}
++		if (incomingNAKs.ranges.Size() > MAX_ACKNOWLEDGEMENT_RANGES_PER_DATAGRAM)
++		{
++			for (unsigned int messageHandlerIndex=0; messageHandlerIndex < messageHandlerList.Size(); messageHandlerIndex++)
++				messageHandlerList[messageHandlerIndex]->OnReliabilityLayerNotification("number of NAK ranges in this datagram exceeds the maximum allowed", BYTES_TO_BITS(length), systemAddress, true);
++			return false;
++		}
++		uint32_t totalAcknowledgementsThisDatagram=0;
+ 		for (i=0; i<incomingNAKs.ranges.Size();i++)
+ 		{
+-			if (incomingNAKs.ranges[i].minIndex>incomingNAKs.ranges[i].maxIndex)
++			if (incomingNAKs.ranges[i].minIndex>incomingNAKs.ranges[i].maxIndex || (incomingNAKs.ranges[i].maxIndex == (uint24_t)(0xFFFFFFFF)))
+ 			{
+ 				RakAssert(incomingNAKs.ranges[i].minIndex<=incomingNAKs.ranges[i].maxIndex);
+ 
+ 				for (unsigned int messageHandlerIndex=0; messageHandlerIndex < messageHandlerList.Size(); messageHandlerIndex++)
+-					messageHandlerList[messageHandlerIndex]->OnReliabilityLayerNotification("incomingNAKs minIndex>maxIndex", BYTES_TO_BITS(length), systemAddress, true);			
++					messageHandlerList[messageHandlerIndex]->OnReliabilityLayerNotification("incomingNAKs minIndex>maxIndex or maxIndex is too large", BYTES_TO_BITS(length), systemAddress, true);			
+ 
+ 				return false;
+ 			}
++			totalAcknowledgementsThisDatagram += incomingNAKs.ranges[i].maxIndex.val - incomingNAKs.ranges[i].minIndex.val + 1;
++			if (totalAcknowledgementsThisDatagram > MAX_ACKNOWLEDGEMENTS_PER_DATAGRAM)
++			{
++				for (unsigned int messageHandlerIndex=0; messageHandlerIndex < messageHandlerList.Size(); messageHandlerIndex++)
++					messageHandlerList[messageHandlerIndex]->OnReliabilityLayerNotification("datagram contains too many NAKs, exceeding MAX_TOTAL_NAKS_PER_DATAGRAM", BYTES_TO_BITS(length), systemAddress, true);
++				return false;
++			}
+ 			// Sanity check
+ 			//RakAssert(incomingNAKs.ranges[i].maxIndex.val-incomingNAKs.ranges[i].minIndex.val<1000);
+ 			for (messageNumber=incomingNAKs.ranges[i].minIndex; messageNumber >= incomingNAKs.ranges[i].minIndex && messageNumber <= incomingNAKs.ranges[i].maxIndex; messageNumber++)

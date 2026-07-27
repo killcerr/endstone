@@ -23,10 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed C++ plugins failing to compile against the public headers with libc++ 18, which rejected the `std::formatter` specializations due to their declared return type (#437).
 - Fixed C++ plugin builds on Linux silently compiling against libstdc++ when Endstone is consumed via CMake FetchContent. The `endstone::endstone` target now propagates `-stdlib=libc++` to every target that links against it, so plugin projects no longer need to pass the flag themselves.
 
-### Security
-
-- Fixed a remotely-triggerable denial of service in RakNet. A single malformed ACK or NAK packet with an oversized acknowledgement range sent the reliability layer into a runaway loop over the datagram-number space, pinning the server at full CPU with no crash. A NAK could hang it outright. Acknowledgement ranges wider than the resend buffer can hold are now dropped before they reach the reliability layer.
-
 ## [0.11.6] - 2026-07-10
 
 ### Added

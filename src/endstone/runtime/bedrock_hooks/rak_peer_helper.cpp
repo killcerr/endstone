@@ -68,82 +68,6 @@ static endstone::ServerListPingEvent callServerListPingEvent(endstone::SocketAdd
 
 RakNet::RakPeer *gRakPeer = nullptr;
 
-// Upstream RakNet walks every datagram number in an ACK or NAK range with no bound on the width.
-// Datagram numbers are a 24-bit wrapping type, so `for (n = min; n >= min && n <= max; n++)` never
-// terminates when max == 0xFFFFFF (reachable via NAK) and spins for millions of iterations for any
-// oversized range. RakNet guards only ACK, and only the exact 0xFFFFFF wrap, so an ACK of
-// [0, 0xFFFFFE] still stalls ~16M times. At most RESEND_BUFFER_ARRAY_LENGTH datagrams are ever
-// outstanding, so reject 0xFFFFFF outright and drop the datagram once its ranges acknowledge more
-// than that in total; a per-range check alone lets an attacker split one wide span into many.
-// The ACK header assumes sliding-window congestion control (the BDS default), which omits the
-// per-datagram timestamp.
-static bool hasOversizedAcknowledgementRange(RakNet::RNS2RecvStruct *recv)
-{
-    RakNet::BitStream in(reinterpret_cast<unsigned char *>(recv->data), recv->bytesRead, false);
-    bool is_valid = false;
-    bool is_ack = false;
-    if (!in.Read(is_valid) || !is_valid) {
-        return false;
-    }
-    if (!in.Read(is_ack)) {
-        return false;
-    }
-    if (is_ack) {
-        bool has_b_and_as = false;
-        if (!in.Read(has_b_and_as)) {
-            return false;
-        }
-        in.AlignReadToByteBoundary();
-        if (has_b_and_as) {
-            float arrival_rate = 0.0F;
-            if (!in.Read(arrival_rate)) {
-                return false;
-            }
-        }
-    }
-    else {
-        bool is_nak = false;
-        if (!in.Read(is_nak) || !is_nak) {  // a normal data datagram, nothing to check
-            return false;
-        }
-    }
-
-    // ACK/NAK range list, same wire format as DataStructures::RangeList::Deserialize
-    in.AlignReadToByteBoundary();
-    std::uint16_t count = 0;
-    if (!in.Read(count)) {
-        return false;
-    }
-    std::uint32_t acknowledged = 0;
-    for (std::uint16_t i = 0; i < count; ++i) {
-        unsigned char max_equal_to_min = 0;
-        RakNet::uint24_t min;
-        RakNet::uint24_t max;
-        in.Read(max_equal_to_min);
-        if (!in.Read(min)) {
-            return false;
-        }
-        if (max_equal_to_min == 0) {
-            if (!in.Read(max)) {
-                return false;
-            }
-        }
-        else {
-            max = min;
-        }
-        // max == 0xFFFFFF is the loop's own upper bound, so the counter wraps under it forever.
-        if (max.val == 0x00FFFFFF) {
-            return true;
-        }
-        // Accumulate across ranges; an inverted (max < min) range underflows to a huge value here too.
-        acknowledged += max.val - min.val + 1;
-        if (acknowledged > RESEND_BUFFER_ARRAY_LENGTH) {
-            return true;
-        }
-    }
-    return false;
-}
-
 // #blameMojang - MCPE-228407: Mojang's custom RakNet packet 0x86 handler reads SystemAddress
 // without checking if the packet is large enough to contain one. Networking 101: validate before read.
 // Reported to Mojang, closed as "Won't Fix". Classic.
@@ -216,8 +140,8 @@ static bool handleUnconnectedPing(RakNet::RNS2RecvStruct *recv)
 
 bool handleIncomingDatagram(RakNet::RNS2RecvStruct *recv)
 {
-    // Malformed acknowledgements (ACK/NAK) and undersized address packets are dropped outright.
-    if (hasOversizedAcknowledgementRange(recv) || hasTruncatedSystemAddress(recv)) {
+    // Undersized address packets are dropped outright.
+    if (hasTruncatedSystemAddress(recv)) {
         return false;
     }
     if (recv->data[0] == ID_UNCONNECTED_PING) {
