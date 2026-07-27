@@ -44,6 +44,8 @@ public:
         bool had_applied;
     };
 
+    MobEffect(MobEffectId, const std::string &, const std::string &, bool, int, int, const std::string &, bool);
+
     // Endstone: vtable reconstruction. Declared in BDS order (~MobEffect, applyEffects, removeEffects) so a virtual
     //           call to removeEffects dispatches to the correct slot. applyEffects is a placeholder occupying its
     //           slot and is never called; a MobEffect is never constructed here (instances come from the registry).
