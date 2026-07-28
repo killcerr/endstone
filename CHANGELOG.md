@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added equality comparison and hashing to `endstone::SocketAddress` (C++), so it can be used directly as a key in `std::unordered_map` and `std::unordered_set`.
+- Added equality comparison, hashing, and `std::format` support to `endstone::SocketAddress` (C++), so it can be used directly as a key in `std::unordered_map`/`std::unordered_set` and formatted as `hostname:port`.
 
 ### Changed
 

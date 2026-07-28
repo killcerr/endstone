@@ -15,6 +15,7 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+#include <format>
 #include <functional>
 #include <string>
 #include <utility>
@@ -59,5 +60,14 @@ struct std::hash<endstone::SocketAddress> {
         std::size_t seed = std::hash<std::string>{}(address.getHostname());
         seed ^= std::hash<std::uint32_t>{}(address.getPort()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
         return seed;
+    }
+};
+
+template <>
+struct std::formatter<endstone::SocketAddress> : std::formatter<std::string_view> {
+    template <typename FormatContext>
+    auto format(const endstone::SocketAddress &address, FormatContext &ctx) const
+    {
+        return std::format_to(ctx.out(), "{}:{}", address.getHostname(), address.getPort());
     }
 };
