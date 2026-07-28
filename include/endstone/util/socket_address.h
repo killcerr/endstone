@@ -13,7 +13,9 @@
 // limitations under the License.
 
 #pragma once
+#include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <utility>
 
@@ -41,9 +43,21 @@ public:
      */
     [[nodiscard]] std::uint32_t getPort() const { return port_; }
 
+    bool operator==(const SocketAddress &other) const = default;
+
 private:
     std::string hostname_;
     std::uint32_t port_;
 };
 
 }  // namespace endstone
+
+template <>
+struct std::hash<endstone::SocketAddress> {
+    std::size_t operator()(const endstone::SocketAddress &address) const noexcept
+    {
+        std::size_t seed = std::hash<std::string>{}(address.getHostname());
+        seed ^= std::hash<std::uint32_t>{}(address.getPort()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        return seed;
+    }
+};
