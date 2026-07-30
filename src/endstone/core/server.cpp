@@ -87,7 +87,9 @@ EndstoneServer::EndstoneServer() : logger_(LoggerFactory::getLogger(""))
     crash_handler_ = std::make_unique<CrashHandler>();
     signal_handler_ = std::make_unique<SignalHandler>();
     player_ban_list_ = std::make_unique<EndstonePlayerBanList>("banned-players.json");
+    player_ban_list_->load();
     ip_ban_list_ = std::make_unique<EndstoneIpBanList>("banned-ips.json");
+    ip_ban_list_->load();
     language_ = std::make_unique<EndstoneLanguage>();
     plugin_manager_ = std::make_unique<EndstonePluginManager>(*this);
     service_manager_ = std::make_unique<EndstoneServiceManager>();
@@ -102,6 +104,8 @@ EndstoneServer::EndstoneServer() : logger_(LoggerFactory::getLogger(""))
     catch (const toml::parse_error &err) {
         EndstoneServer::getLogger().error("Failed to parse config file: {}", err.what());
     }
+
+    loadPlugins();
 }
 
 EndstoneServer::~EndstoneServer() = default;
@@ -114,9 +118,6 @@ void EndstoneServer::init(ServerInstance &server_instance)
     server_instance_ = &server_instance;
     command_sender_ = std::make_shared<EndstoneConsoleCommandSender>();
     command_sender_->recalculatePermissions();
-    player_ban_list_->load();
-    ip_ban_list_->load();
-    loadPlugins();
     enablePlugins(PluginLoadOrder::Startup);
 }
 
@@ -635,10 +636,7 @@ std::unique_ptr<BlockData> EndstoneServer::createBlockData(std::string type, Blo
 {
     std::unordered_map<std::string, std::variant<int, std::string, bool>> states;
     for (const auto &state : block_states) {
-        std::visit(overloaded{[&](auto &&arg) {
-                       states.emplace(state.first, arg);
-                   }},
-                   state.second);
+        std::visit(overloaded{[&](auto &&arg) { states.emplace(state.first, arg); }}, state.second);
     }
     const auto block_descriptor = ScriptModuleMinecraft::ScriptBlockUtils::createBlockDescriptor(type, states);
     const auto *block = block_descriptor.tryGetBlockNoLogging();
