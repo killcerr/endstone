@@ -17,6 +17,7 @@
 #include <chrono>
 #include <memory>
 #include <string>
+#include <thread>
 #include <unordered_map>
 
 #include "bedrock/core/utility/pub_sub/subscription.h"
@@ -137,11 +138,14 @@ public:
     [[nodiscard]] RakNetConnector &getRakNetConnector() const;
 
     [[nodiscard]] static EndstoneServer &getInstance();
+    static void setMainThread(std::thread::id thread_id);
 
 private:
     friend class EndstonePlayer;
     void enablePlugin(Plugin &plugin);
     void loadResourcePacks();
+
+    static std::thread::id main_thread_;
 
     ServerInstance *server_instance_{nullptr};
     Logger &logger_;

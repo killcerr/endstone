@@ -78,6 +78,9 @@ namespace fs = std::filesystem;
 namespace py = pybind11;
 
 namespace endstone::core {
+
+std::thread::id EndstoneServer::main_thread_;
+
 EndstoneServer::EndstoneServer() : logger_(LoggerFactory::getLogger(""))
 {
     EndstoneServer::getLogger().info("{}This server is running {} version: {} (Minecraft: {})",
@@ -554,9 +557,23 @@ void EndstoneServer::broadcastMessage(const Message &message) const
     broadcast(message, BroadcastChannelUser);
 }
 
+void EndstoneServer::setMainThread(std::thread::id thread_id)
+{
+    main_thread_ = thread_id;
+}
+
 bool EndstoneServer::isPrimaryThread() const
 {
-    return std::this_thread::get_id() == server_instance_->server_instance_thread_.get_id();
+    static const std::thread::id invalid;
+    if (main_thread_ == invalid) {
+        return false;
+    }
+    const auto server_thread =
+        server_instance_ != nullptr ? server_instance_->server_instance_thread_.get_id() : invalid;
+    if (server_thread == invalid) {
+        return std::this_thread::get_id() == main_thread_;
+    }
+    return std::this_thread::get_id() == server_thread;
 }
 
 ItemFactory &EndstoneServer::getItemFactory() const
