@@ -19,6 +19,7 @@
 #include <entt/locator/locator.hpp>
 #include <pybind11/embed.h>
 
+#include "bedrock/core/debug/debug_utils.h"
 #include "endstone/core/devtools/devtools.h"
 #include "endstone/core/logger_factory.h"
 #include "endstone/runtime/hook.h"
@@ -29,6 +30,8 @@ namespace py = pybind11;
 DedicatedServer::ServerExitCode DedicatedServer::start(const std::string &session_id,
                                                        const Bedrock::ActivationArguments &args)
 {
+    DebugUtils::setThreadName("Main");
+
     // Save the current stdin, as it will be altered after the initialisation of python interpreter
     endstone::runtime::stdin_save();
 

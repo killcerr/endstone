@@ -14,6 +14,7 @@ add_library(bedrock STATIC
         shared_constants.cpp
         certificates/web_token.cpp
         config/player_capabilities.cpp
+        core/debug/debug_utils.cpp
         core/file/path.cpp
         core/math/color.cpp
         core/resource/resource_helper.cpp
