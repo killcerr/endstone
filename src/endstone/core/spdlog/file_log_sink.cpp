@@ -25,6 +25,7 @@
 
 #include "endstone/core/spdlog/level_formatter.h"
 #include "endstone/core/spdlog/text_formatter.h"
+#include "endstone/core/spdlog/thread_formatter.h"
 
 namespace endstone::core {
 
@@ -47,6 +48,7 @@ FileLogSink::FileLogSink(spdlog::filename_t base_filename, spdlog::filename_t fi
     for (auto &formatter : formatters_) {
         formatter.add_flag<LevelFormatter>('L');
         formatter.add_flag<TextFormatter>('v', false);
+        formatter.add_flag<ThreadFormatter>('t');
     }
     formatters_[0].set_pattern("%^[%H:%M:%S] [%t/%L]: [%n] %v%$");
     formatters_[1].set_pattern("%^[%H:%M:%S] [%t/%L]: %v%$");

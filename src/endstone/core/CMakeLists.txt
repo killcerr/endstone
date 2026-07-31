@@ -101,6 +101,7 @@ add_library(endstone_core
         spdlog/level_formatter.cpp
         spdlog/spdlog_adapter.cpp
         spdlog/text_formatter.cpp
+        spdlog/thread_formatter.cpp
         util/socket_address.cpp
         util/uuid.cpp
 )
