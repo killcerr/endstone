@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed events fired from a plugin's `on_load`, or from the `on_enable` of a plugin with `load: startup`, being rejected with "must be triggered synchronously from server thread". Both run before the server thread exists, so the main thread is now reported as the primary thread until it does, matching Spigot.
 
+- Fixed every script log line being followed by a blank line in the console and log file. Script output arrives with a trailing line break, which is now stripped before the message is logged.
 - Fixed the `endstone` launcher exiting with `Aborted!` and code 1 when the server is stopped with Ctrl+C. The launcher now lets the server handle Ctrl+C, waits for it to shut down gracefully, and reports its actual exit code.
 - Fixed `Scheduler.is_running()` returning the opposite of the truth for async tasks: `True` while the task was idle and `False` while it was actually executing.
 - Fixed a class of scheduler crashes and leaks around async tasks: a task submitted to the thread pool could be destroyed while still queued, a task cancelled at the wrong moment could still run, and tasks scheduled from another thread or from inside a task callback could leak or fire one tick early (#436).
