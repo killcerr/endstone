@@ -145,8 +145,6 @@ private:
     void enablePlugin(Plugin &plugin);
     void loadResourcePacks();
 
-    static std::thread::id main_thread_;
-
     ServerInstance *server_instance_{nullptr};
     Logger &logger_;
     std::unique_ptr<CrashHandler> crash_handler_;

@@ -79,7 +79,13 @@ namespace py = pybind11;
 
 namespace endstone::core {
 
-std::thread::id EndstoneServer::main_thread_;
+namespace {
+std::thread::id &mainThread()
+{
+    static std::thread::id thread_id;
+    return thread_id;
+}
+}  // namespace
 
 EndstoneServer::EndstoneServer() : logger_(LoggerFactory::getLogger(""))
 {
@@ -559,19 +565,20 @@ void EndstoneServer::broadcastMessage(const Message &message) const
 
 void EndstoneServer::setMainThread(std::thread::id thread_id)
 {
-    main_thread_ = thread_id;
+    mainThread() = thread_id;
 }
 
 bool EndstoneServer::isPrimaryThread() const
 {
-    static const std::thread::id invalid;
-    if (main_thread_ == invalid) {
+    const std::thread::id invalid;
+    const auto main_thread = mainThread();
+    if (main_thread == invalid) {
         return false;
     }
     const auto server_thread =
         server_instance_ != nullptr ? server_instance_->server_instance_thread_.get_id() : invalid;
     if (server_thread == invalid) {
-        return std::this_thread::get_id() == main_thread_;
+        return std::this_thread::get_id() == main_thread;
     }
     return std::this_thread::get_id() == server_thread;
 }
