@@ -61,6 +61,11 @@ void BedrockLog::LogDetails::_log_va(LogAreaID area, unsigned int priority, cons
     va_end(args_copy);
 
     std::string_view message(buf.data(), len);
+    if (area == LogAreaID::Scripting) {
+        // script output comes with a trailing "\n\r"
+        message = message.substr(0, message.find_last_not_of("\r\n") + 1);
+    }
+
     auto lines = message | std::ranges::views::split('\n');
     for (const auto &l : lines) {
         logger.log(log_level, std::string_view(l.begin(), l.end()));
