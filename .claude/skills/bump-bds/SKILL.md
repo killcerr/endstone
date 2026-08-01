@@ -628,6 +628,64 @@ Build (`cmake --build --preset conan-release`), run tests, add a CHANGELOG entry
 
 ## Gotchas (shared)
 
+### Whole-binary diff: clearing a hotfix release without IDA
+
+When the new release is a hotfix off the current one, `lief` alone can *prove*
+the bump is ABI-free in minutes - no IDA database, no header diff, no PDB. Both
+binaries are already in `~/.bedrock_server/<platform>/`; unzip the old and new
+side by side and run these three checks. They also catch the Scenario-B trap
+where a stale pattern silently matches a *different* function, so run them on
+any pattern-only table however the version was resolved.
+
+1. **RVA-delta bands.** Sort every resolved offset by RVA and print
+   `new - old` against the previous committed table. A rebuild with a handful of
+   insertions gives a small set of deltas that only ever step *up* with RVA
+   (1.26.36: Linux +192/+208/+240 code, +880/+896 `.bss`; Windows +64 then
+   +576). A negative delta, a wild outlier, or a flipped relative order is a
+   pattern that matched the wrong place.
+   - **Section bases move too.** A Linux symbol's delta is *section shift +
+     intra-section shift*, so compare `.text`/`.bss` virtual addresses between
+     the two ELFs before calling a delta anomalous (1.26.36 `.text` itself moved
+     +192, so a +48 insertion inside `.text` reads as +240 on every symbol).
+   - On PE, sections are page-aligned, so `.text` growing within its current
+     page count leaves `.data` *unmoved* - a global's delta of exactly 0 while
+     code shifted is correct, not a stale hit.
+2. **Body comparison names the function without a name.** For each entry read
+   ~256 bytes at the *new* offset in the new binary and at the *old* offset in
+   the old one, and require >=90% byte equality. Same function = near-identical
+   prologue and body (only relocated displacements differ); a pattern that
+   collided with a different function scores far below. This is the cheap
+   stand-in for *decompile-and-compare* ([[feedback_decompile_to_confirm]]) when
+   the function is untouched by the release. Data symbols in `.bss` have no file
+   content - expect them to read back as unreadable and check their section
+   membership and delta instead.
+3. **Vtable-invariant sweep proves no slot moved anywhere in the binary** -
+   far stronger than checking the classes you happen to suspect:
+   - **Linux:** walk `.data.rel.ro` as a qword array and compare index-by-index,
+     accepting only the known section shifts as differences. If the section
+     stays index-aligned end to end, **no pointer was inserted or removed**, so
+     no vtable changed length and none was added or removed. Residual
+     divergences are plain data - a packed version constant
+     (`0x0001_00<patch>_001a_0001` is major/minor/patch, and it flipping
+     `21`->`24` is just 26.33 -> 26.36), counters, build hashes.
+   - **Windows:** `.rdata` interleaves vtables with string/float blobs, so a
+     changed blob breaks index alignment without meaning anything. Classify each
+     qword instead (points into `.text` / into `.rdata` / zero / plain data) and
+     compare the **total count of code pointers**. Equal counts across versions
+     = no vtable slot added or removed binary-wide.
+4. **Protocol version, statically.** `SharedConstants::NetworkProtocolVersion`
+   is compared directly inside
+   `ServerNetworkHandler::_validateLoginPacket`, whose offset the table already
+   holds. Disassemble it (capstone) and collect `cmp` immediates in ~900-3000;
+   the protocol version is in that set. Run it against the *previous* version
+   first to confirm the method reproduces the known-good value, then the new
+   one. Counting raw dwords of a candidate value across `.text` does **not**
+   work - the value collides with thousands of unrelated constants.
+
+Do not skip the source-side bump because the offsets moved uniformly:
+`shared_constants.h` (`PatchVersion`, and `NetworkProtocolVersion` if it moved)
+and the README Minecraft badge still need updating.
+
 ### Real BDS changes that still need no `src/bedrock/` action
 
 Endstone deliberately models only a subset. Rule these out before editing:
