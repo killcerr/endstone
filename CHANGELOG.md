@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/reload` now waits up to 2.5 seconds for running async tasks to finish, then logs a warning naming the plugin ("Nag author(s) ...") and proceeds, matching CraftBukkit. Previously the reload tore plugins down immediately, so a still-running async task could crash the server.
 - A shared library in `plugins/` without an entry point is now only reported as an error if its name starts with `endstone_`. `endstone_add_plugin` gives every plugin that prefix, so a prefixed file missing `ENDSTONE_PLUGIN` is still called out by name; anything else is treated as a library a plugin ships alongside itself and skipped quietly. Previously every such file produced a "Did you forget ENDSTONE_PLUGIN?" error, so plugins could not place their own libraries in the folder.
 - Log files now show the thread name instead of a numeric thread id. Threads without a name still fall back to the id.
+- `endstone_add_plugin` now builds plugins with hidden symbol visibility on Linux, so a plugin exports only its `ENDSTONE_PLUGIN` entry point, as it already did on Windows. This stops a plugin's own symbols, and those of the libraries it bundles, from colliding with the server's copies inside the BDS process. A plugin that deliberately exports more can set `CXX_VISIBILITY_PRESET default` on its target.
 
 ### Fixed
 

@@ -36,7 +36,10 @@ function(endstone_add_plugin target_name)
 
     add_library(${target_name} SHARED ${ARG_UNPARSED_ARGUMENTS})
     target_link_libraries(${target_name} PRIVATE endstone::endstone)
-    set_target_properties(${target_name} PROPERTIES PREFIX "endstone_")
+    set_target_properties(${target_name} PROPERTIES
+            PREFIX "endstone_"
+            CXX_VISIBILITY_PRESET hidden
+            VISIBILITY_INLINES_HIDDEN ON)
 
     if (UNIX AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         target_link_libraries(${target_name} PRIVATE -static-libgcc -static-libstdc++ libc++.a libc++abi.a)
