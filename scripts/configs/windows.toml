@@ -553,23 +553,6 @@ rip_relative = true
 rip_offset = 17
 
 [[signatures]]
-name = "?createPack@Pack@@SA?AV?$unique_ptr@VPack@@U?$default_delete@VPack@@@std@@@std@@AEBVIPackIOProvider@@AEBVResourceLocation@@W4PackType@@W4PackOrigin@@AEAVIPackManifestFactory@@V?$NonOwnerPointer@$$CBVIContentKeyProvider@@@Bedrock@@PEAVPackSourceReport@@AEBVPath@Core@@@Z"
-relative = false
-extra = 0
-# 1. Pack::EDUCATION_METADATA_FILE is a Core::PathBuffer global = "education.json", zero in the static
-#    image and built inline by a Pack-paths unity initializer (_GLOBAL__sub_I_unity_*) via two movabs
-#    immediates 0x6F69746163756465 ("educatio") + 0x6E6F736A2E6E6F69 ("ion.json"); land on that init via
-#    its real strcpy literals "pack_manifest.json\0" / "lock_template_options" / "base_game_version" (or
-#    the Mario/LittleBigPlanet pack UUIDs it also builds) - the store target of the "education.json" build
-#    is the EDUCATION_METADATA_FILE global
-# 2. that global's only reader (besides the init and its atexit dtor) is Pack::createPackMetadata, which
-#    loads it as an SSO string then calls accessStrategy->getAsset + EducationMetadataUtils::parse
-# 3. createPackMetadata has two callers; Pack::createPack is the large static factory (~0x802, returns
-#    unique_ptr<Pack>) - the other is a PackSource load lambda
-# 4. confirm vs the old named DB
-pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 45 88 CD 4D 89 C6 48 89 D7 48 89 8D ? ? ? ? 48 C7 01"
-
-[[signatures]]
 name = "?tick@PistonBlockActor@@UEAAXAEAVBlockSource@@@Z"
 relative = false
 extra = 0
@@ -692,8 +675,8 @@ rip_offset = 1
 name = "?createSources@RepositoryFactory@@UEBA?AV?$shared_ptr@VRepositorySources@@@std@@AEBVIResourcePackRepository@@@Z"
 relative = false
 extra = 0
-# 1. reach the ResourcePackRepository ctor via the unique string "Resource Repository Async Group" (see
-#    initializePackSource@RepositorySources for that anchor)
+# 1. reach the ResourcePackRepository ctor via the unique string "Resource Repository Async Group" (the
+#    async TaskGroup name); its lone data xref is a `lea` inside that ctor
 # 2. in the ctor, when the supplied IRepositoryFactory arg is null, it `operator new(8)` a default
 #    RepositoryFactory, stores &RepositoryFactory::vftable into it (-> mFactory), then immediately makes a
 #    virtual call through that vtable's SLOT 1 to build the shared_ptr<RepositorySources> that becomes
@@ -703,47 +686,6 @@ extra = 0
 # 4. confirm by its body: lock_shared ServiceLocator<AppPlatform>, RepositorySourceOptions::create(
 #    repository, platform), then make_shared<RepositorySources>(options); confirm vs the old named DB
 pattern = "55 41 56 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 4C 89 C7 48 89 D6 4C 8D 35"
-
-[[signatures]]
-name = "?initializePackSource@RepositorySources@@QEAAXAEAVPackSourceFactory@@@Z"
-relative = false
-extra = 0
-# 1. find the unique string "Resource Repository Async Group" (the async TaskGroup name); its lone data
-#    xref is a `lea` inside the ResourcePackRepository ctor, which make_unique's that TaskGroup ~20 insns
-#    above the target call
-# 2. just below, the ctor makes two back-to-back member calls: RepositorySources::initializePackSource(
-#    mSources, mPackSourceFactory) then ResourcePackRepositoryRefreshQueue::initialize(mRefresher, _,
-#    mTaskGroup). initializePackSource is the FIRST of the pair - the second (whose lone caller is this
-#    ctor) pins it; RefreshQueue::initialize is itself recognizable by the pretty-function task label
-#    "ResourcePackRepositoryRefreshQueue::initialize(TaskGroup &)::(anonymous class)::operator()(
-#    PreviousTasks &) const"
-# 3. confirm initializePackSource by its body: it rebuilds the pack-source tree via repeated
-#    PackSourceFactory::createCompositePackSource (mWorldPackSource / mPremiumWorldTemplatePackSource /
-#    mTempWorldTemplatePackSource / mCachePackSource / mPackSource) plus two createInPackagePackSource
-#    calls (args 6 and 4). NOTE: it has a second caller, a RepositoryLoading async lambda - the pattern
-#    below matches that call site, not the ctor one
-# 4. confirm vs the old named DB
-pattern = "E8 ? ? ? ? 0F 57 C0 0F 29 44 24 ? 48 8B 47"
-rip_relative = true
-rip_offset = 1
-
-[[signatures]]
-name = "?deserialize@ResourcePackStack@@SA?AV?$unique_ptr@VResourcePackStack@@U?$default_delete@VResourcePackStack@@@std@@@std@@AEAV?$basic_istream@DU?$char_traits@D@std@@@3@AEBV?$not_null@V?$NonOwnerPointer@$$CBVIResourcePackRepository@@@Bedrock@@@gsl@@V?$optional@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@3@@Z"
-relative = false
-extra = 0
-# 1. find bytes "73 75 62 70 61 63 6B 00" = "subpack" (unique); referenced INSIDE
-#    ResourceHelper::deserializePackStackEntry - more distinctive than the "pack_id" key it also reads
-#    ("pack_id" has a 2nd instance passed AS the param, so anchor on subpack, not pack_id)
-# 2. deserializePackStackEntry (~500 insns in 1.26.32; hashes the pack_id value with a salt into a UUID
-#    PackInstanceId) is xref'd by the forEachPackId loop
-# 3. in 1.26.20 forEachPackId is a separate ResourcePackStackAnon helper whose lone caller is
-#    deserialize; in 1.26.32 forEachPackId is INLINED into deserialize, so the chain SHORTENS - the
-#    loop's caller IS deserialize directly (it parses the istream via Json::Reader::parse, reads
-#    "pack_id", logs "Configured pack (id: {}, version: {}) was not found and was ignored"). The size
-#    balloons (named 0x15e -> 0xa74) from absorbing the helper
-# 4. confirm vs the old named DB: static returning unique_ptr<ResourcePackStack> from an istream; its
-#    direct callers are ServerInstance::initializeServer + FileArchiver::_exportLevelFiles
-pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 66 44 0F 29 85 ? ? ? ? 66 0F 29 BD ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 4C 89 8D ? ? ? ? 4C 89 C7 48 89 D6 49 89 CE 48 8B 0D ? ? ? ? 48 8B 01 48 8B 40 ? BA ? ? ? ? FF 15"
 
 [[signatures]]
 name = "?_sendMessage@SayCommand@@CAXAEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV?$optional@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@3@0AEBUCommandOriginIdentity@@AEAVLevel@@@Z"

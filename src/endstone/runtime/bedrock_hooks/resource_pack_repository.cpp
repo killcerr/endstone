@@ -16,7 +16,6 @@
 
 #include <entt/locator/locator.hpp>
 
-#include "endstone/core/packs/endstone_pack_source.h"
 #include "endstone/core/server.h"
 #include "endstone/runtime/hook.h"
 

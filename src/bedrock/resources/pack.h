@@ -20,12 +20,8 @@
 #include "bedrock/core/utility/enable_non_owner_references.h"
 #include "bedrock/core/utility/non_owner_pointer.h"
 #include "bedrock/forward.h"
-#include "bedrock/resources/content_key_provider.h"
 #include "bedrock/resources/pack_access_strategy.h"
 #include "bedrock/resources/pack_manifest.h"
-#include "bedrock/resources/pack_manifest_factory.h"
-
-class PackSourceReport;
 
 class IPackIOProvider {
 public:
@@ -44,11 +40,6 @@ class Pack {
 public:
     [[nodiscard]] PackManifest const &getManifest() const;
     PackManifest &getManifest();
-
-    static std::unique_ptr<Pack> createPack(const IPackIOProvider &io, const ResourceLocation &file_location,
-                                            PackType type, PackOrigin origin, IPackManifestFactory &manifest_factory,
-                                            Bedrock::NonOwnerPointer<const IContentKeyProvider> key_provider,
-                                            PackSourceReport *report, const Core::Path &zip_sub_dir);
 
 private:
     std::unique_ptr<PackManifest> manifest_;

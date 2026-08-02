@@ -18,6 +18,7 @@
 #include "bedrock/core/utility/non_owner_pointer.h"
 #include "bedrock/resources/pack.h"
 #include "bedrock/resources/pack_access_strategy.h"
+#include "bedrock/resources/pack_error.h"
 #include "bedrock/resources/resource_signature.h"
 
 class ResourcePack {

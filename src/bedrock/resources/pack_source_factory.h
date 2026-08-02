@@ -31,11 +31,6 @@ public:
         std::unique_ptr<RealmsUnknownPackSource> realms_unknown_behavior_pack_source;
     };
 
-    [[nodiscard]] std::unique_ptr<IPackIOProvider> createPackIOProvider() const  // Endstone
-    {
-        return io->clone();
-    }
-
 private:
     template <typename PackSourceT>
     struct SourcesList {

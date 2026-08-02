@@ -11,7 +11,7 @@
 
 namespace endstone::runtime {
 
-static constexpr std::array<std::pair<std::string_view, std::size_t>, 64> symbols = {{
+static constexpr std::array<std::pair<std::string_view, std::size_t>, 61> symbols = {{
     {"BlockState::StateListNode::mHead", 234492032},
     {"Enchant::mEnchants", 234332496},
     {"getI18n::result", 233014248},
@@ -82,8 +82,6 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 64> symbol
     {"_ZN3Mob9knockbackEP5ActoriffRK19KnockbackParameters", 159339040},
     // NetworkSystem
     {"_ZN13NetworkSystem4sendERK17NetworkIdentifierRK6Packet11SubClientId", 124194528},
-    // Pack
-    {"_ZN4Pack10createPackERK15IPackIOProviderRK16ResourceLocation8PackType10PackOriginR20IPackManifestFactoryN7Bedrock15NonOwnerPointerIK19IContentKeyProviderEEP16PackSourceReportRKN4Core4PathE", 141689424},
     // PistonBlockActor
     {"_ZN16PistonBlockActor4tickER11BlockSource", 199210960},
     // Player
@@ -99,10 +97,6 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 64> symbol
     {"_ZN13RakPeerHelper11peerStartupEPN6RakNet16RakPeerInterfaceERK20ConnectionDefinitionNS_11PeerPurposeE", 124325216},
     // RepositoryFactory
     {"_ZNK17RepositoryFactory13createSourcesERK23IResourcePackRepository", 141585296},
-    // RepositorySources
-    {"_ZN17RepositorySources20initializePackSourceER17PackSourceFactory", 141238016},
-    // ResourcePackStack
-    {"_ZN17ResourcePackStack11deserializeERNSt3__113basic_istreamIcNS0_11char_traitsIcEEEERKN3gsl8not_nullIN7Bedrock15NonOwnerPointerIK23IResourcePackRepositoryEEEENS0_8optionalINS0_12basic_stringIcS3_NS0_9allocatorIcEEEEEE", 141332000},
     // SayCommand
     {"_ZN10SayCommand12_sendMessageERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEERKNS0_8optionalIS6_EES8_RK21CommandOriginIdentityR5Level", 142338784},
     // ScriptModuleMinecraft::ScriptBlockUtils

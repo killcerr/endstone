@@ -28,7 +28,6 @@
 #include "endstone/core/crash_handler.h"
 #include "endstone/core/lang/language.h"
 #include "endstone/core/level/level.h"
-#include "endstone/core/packs/endstone_pack_source.h"
 #include "endstone/core/plugin/plugin_manager.h"
 #include "endstone/core/plugin/service_manager.h"
 #include "endstone/core/scheduler/scheduler.h"
@@ -128,8 +127,7 @@ public:
     void setLevel(::Level &level);
     void initRegistries();
     void setResourcePackRepository(IResourcePackRepository &repo);
-    void initPackSource(const PackSourceFactory &pack_source_factory);
-    [[nodiscard]] PackSource &getPackSource() const;
+    [[nodiscard]] const std::string *getContentKey(const PackIdVersion &pack_id) const;
     [[nodiscard]] bool getAllowClientPacks() const;
     [[nodiscard]] bool logCommands() const;
     [[nodiscard]] bool isServerTextEnabled(ServerTextEvent event) const;
@@ -164,7 +162,7 @@ private:
     std::unordered_map<UUID, std::shared_ptr<EndstoneScoreboard>> player_boards_;
     std::chrono::system_clock::time_point start_time_;
     IResourcePackRepository *resource_pack_repository_ = nullptr;
-    std::unique_ptr<EndstonePackSource> resource_pack_source_;
+    std::unordered_map<PackIdVersion, std::string> content_keys_;
     int tick_counter_ = 0;
     float current_mspt_ = SharedConstants::MilliSecondsPerTick * 1.0F;
     float average_mspt_[SharedConstants::TicksPerSecond] = {SharedConstants::MilliSecondsPerTick};

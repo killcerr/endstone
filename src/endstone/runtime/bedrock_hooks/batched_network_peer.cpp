@@ -43,8 +43,13 @@ void patchPacket(const StartGamePacket &packet)
 
 void patchPacket(const ResourcePacksInfoPacket &packet)
 {
-    (void)packet;
-    // TODO(refactor): inject content key here instead of adding to ServerNetworkHandler
+    const auto &server = endstone::core::EndstoneServer::getInstance();
+    auto &pk = const_cast<ResourcePacksInfoPacket &>(packet);
+    for (auto &pack_info : pk.data.resource_packs) {
+        if (const auto *key = server.getContentKey(pack_info.m_pack_id_version)) {
+            pack_info.content_key = *key;
+        }
+    }
 }
 
 void patchPacket(const ResourcePackStackPacket &packet)

@@ -483,19 +483,6 @@ extra = 0
 pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 89 CD 48 89 D3 49 89 F6 49 89 FF 48 8D 7C 24 ?"
 
 [[signatures]]
-name = "_ZN4Pack10createPackERK15IPackIOProviderRK16ResourceLocation8PackType10PackOriginR20IPackManifestFactoryN7Bedrock15NonOwnerPointerIK19IContentKeyProviderEEP16PackSourceReportRKN4Core4PathE"
-relative = false
-extra = 0
-# 1. find bytes "Cannot determine which pack manifest to use: Multiple manifests found at the same directory
-#    level in the pack's folder hierarchy.\0" (unique)
-# 2. its lone data xref is a `lea` inside Pack::createPackMetadata
-# 3. createPackMetadata's larger of two callers is Pack::createPack (the static factory returning
-#    unique_ptr<Pack>); it sits immediately before createPackMetadata in .text
-# 4. confirm: builds a pack-context struct, calls createPackMetadata, allocs a 24-byte report, copies manifest
-#    fields (offsets 296/312/320/328/336), stores packType@+180 / packOrigin@+176, returns unique_ptr<Pack>
-pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 4D 89 CC 44 89 44 24 ? 89 CB 49 89 D5 49 89 F6 49 89 FF 48 C7 07 00 00 00 00"
-
-[[signatures]]
 name = "_ZN16PistonBlockActor4tickER11BlockSource"
 relative = false
 extra = 0
@@ -603,34 +590,6 @@ extra = 0
 # 3. confirm by its body: lock AppPlatform, RepositorySourceOptions::create, make_shared<RepositorySources>
 # 4. confirm vs the old named DB
 pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 49 89 D7 49 89 FD 48 8D 3D ? ? ? ?"
-
-[[signatures]]
-name = "_ZN17RepositorySources20initializePackSourceER17PackSourceFactory"
-relative = false
-extra = 0
-# 1. find the unique string "Resource Repository Async Group"; its lone data xref is a `lea` inside the
-#    ResourcePackRepository ctor, which make_unique's that TaskGroup just above the target call
-# 2. below, the ctor makes two back-to-back member calls: RepositorySources::initializePackSource(mSources,
-#    mPackSourceFactory) then the RefreshQueue initialize; initializePackSource is the FIRST of the pair
-# 3. confirm initializePackSource by its body (rebuilds the pack-source tree via repeated
-#    createCompositePackSource + createInPackagePackSource)
-# 4. confirm vs the old named DB
-pattern = "E8 ? ? ? ? 4C 8B A3 ? ? ? ? 48 8B AB ? ? ? ? 4C 8B 7D"
-rip_relative = true
-rip_offset = 1
-
-[[signatures]]
-name = "_ZN17ResourcePackStack11deserializeERNSt3__113basic_istreamIcNS0_11char_traitsIcEEEERKN3gsl8not_nullIN7Bedrock15NonOwnerPointerIK23IResourcePackRepositoryEEEENS0_8optionalINS0_12basic_stringIcS3_NS0_9allocatorIcEEEEEE"
-relative = false
-extra = 0
-# 1. find bytes "73 75 62 70 61 63 6B 00" = "subpack\0" (unique); referenced inside
-#    ResourceHelper::deserializePackStackEntry (anchor on subpack, not the shared "pack_id" key)
-# 2. deserializePackStackEntry is reached from the pack-id loop; on linux ResourcePackStack::deserialize is the
-#    thin static wrapper that drives it (returns unique_ptr<ResourcePackStack> from an istream)
-# 3. confirm vs the old named DB (direct callers ServerInstance::initializeServer + FileArchiver::_exportLevelFiles)
-pattern = "E8 ? ? ? ? 48 8B 84 24 ? ? ? ? 48 C7 84 24 ? ? ? ? ? ? ? ? 48 8B BC 24 ? ? ? ? 48 89 84 24 ? ? ? ? 48 85 FF 74 ? ? ? ? FF 50 ? 48 8B BC 24"
-rip_relative = true
-rip_offset = 1
 
 [[signatures]]
 name = "_ZN10SayCommand12_sendMessageERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEERKNS0_8optionalIS6_EES8_RK21CommandOriginIdentityR5Level"
