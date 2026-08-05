@@ -766,7 +766,14 @@ the `SerializationMode` accessors.
    the single `.text` rip-`lea` to the `"<Name>Packet"` literal lands on
    `getName` and the next two stubs give the packet id and the `SerializationMode`
    offset for free. On Windows those stubs are leaves with **no `.pdata` record**,
-   so a function-range filter silently drops them.
+   so a function-range filter silently drops them - and the cluster itself is only
+   dependable on Linux: ICF folds `mov eax,[rcx+OFF]; ret` across every packet
+   sharing `OFF`, so on Windows the mode stubs usually live elsewhere and only
+   `getId`/`getName` sit beside the literal. Take the mode from vftable slots
+   12/13 there (MSVC spends one slot on the dtor, Itanium two). Where `OFF` is
+   unique to the packet nothing folds and the Windows cluster does carry all four
+   (`+0x178` / `+0x8a8` for `InventoryTransactionPacket` / `StartGamePacket` @
+   1.26.40); `getId` sits before `getName` as often as after.
 5. **A packet still in a side-by-side mode keeps its hand-written `write` - and
    that is the best member oracle there is.** Only a `CerealOnly` packet's
    `write` is the thin wrapper point 1 warns about; a
@@ -865,7 +872,11 @@ the `SerializationMode` accessors.
    the missing wrapper is cosmetic, not a bug. Point 12's "forced to 48" holds
    only when the payload contains an 8-aligned member. Settle it by dumping both
    models in one `-fdump-record-layouts` run per target rather than reasoning
-   from the leading member.
+   from the leading member. The displacement is also confined to the members
+   *before* the first 8-aligned one - that member re-aligns to the same offset in
+   both models - so a flat declaration can be wrong in its leading scalars and
+   right from there on (`BossEventPacket` @ 1.26.40: two leading `const int`s at
+   44/48 instead of 48/52, `boss_id` at 56 either way, `sizeof` 152 either way).
 17. **`createPacket`'s `make_shared` is a free default-member map - and the
    `SerializationMode`'s initial value is not always `CerealOnly`.** The factory
    stores every member, PODs included, so one decompile gives the sentinel
@@ -893,6 +904,30 @@ the `SerializationMode` accessors.
    instead. And a `mov [rsp+10h], rdx; push...; lea rbp, [rdx+N]` block sitting
    just before the function is an **MSVC EH funclet** re-establishing the parent
    frame - `N` is a stack offset, not point 11's payload-base `lea`.
+20. **A shortfall of exactly 8, EQUAL on both platforms, is the payload's tail
+   padding - every member is right except the packet-level `SerializationMode`.**
+   When the flat model's leading member is already 8-aligned (a polymorphic
+   `TypedClientNetId`, a struct holding one 8-byte seed) point 16's head
+   displacement never happens and the only divergence is at the end: BDS rounds
+   the payload sub-object up to its own alignment before appending the mode,
+   while a flat declaration packs the mode into the trailing `bool`'s padding.
+   `InventoryTransactionPacket @ 1.26.40` is 376/336 flat against 384/344 real,
+   with only `serialization_mode` misplaced (372/332). Read the direction: a
+   shortfall on one platform is a head misalignment, an equal shortfall on both
+   is a missing wrapper at the tail.
+21. **Name an unnamed payload member from the offset of ITS OWN first owned
+   member.** A payload dtor's *last* call takes whatever sits at payload+0;
+   decompile that callee, find its first non-trivial teardown, and match that one
+   number against the last PDB-bearing release's record for the type you expect.
+   `StartGamePacketPayload`'s tail call lands on a dtor whose first owned member
+   is a `Json::Value` at +32 - exactly `LevelSettings::mFlatWorldOptions` in the
+   1.26.32 PDB - which names an 1100-byte sub-object with no symbol and proves
+   its POD head did not move at the same time. Corroborate on the callee's xref
+   count: a type used binary-wide has dozens, a packet-local struct has three.
+   The same walk settles point 9 either way - `StartGamePacket @ 1.26.40` kept
+   its declaration order (teardown offsets map 1:1 onto the 1.26.32 order) even
+   though `settings` is the *sixth* field on the wire, because registration order
+   is chosen independently of declaration order.
 
 Worked example: **BossEventPacket @ 1.26.32** - migrated to cereal-only;
 `color`/`overlay` narrowed 4B->1B, both `darken`/`fog` bools removed, a

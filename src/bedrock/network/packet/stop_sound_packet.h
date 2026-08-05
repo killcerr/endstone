@@ -16,15 +16,19 @@
 
 #include <string>
 
-#include "bedrock/network/network_block_position.h"
 #include "bedrock/network/packet.h"
 #include "bedrock/network/packet/cerealize/core/serialization_mode.h"
 
+struct StopSoundPacketPayload {
+    std::string name;        // +0
+    bool stop_all;           // +32
+    bool stop_music_legacy;  // +33
+};
+BEDROCK_STATIC_ASSERT_SIZE(StopSoundPacketPayload, 40, 32);
+
 class StopSoundPacket : public Packet {
 public:
-    std::string name;
-    bool stop_all;
-    bool stop_music_legacy;
-    SerializationMode serialization_mode{SerializationMode::CerealOnly};
-    // ...
+    StopSoundPacketPayload payload;                                                    // +48
+    SerializationMode serialization_mode{SerializationMode::SideBySide_LogOnMismatch};  // +88
 };
+BEDROCK_STATIC_ASSERT_SIZE(StopSoundPacket, 96, 88);

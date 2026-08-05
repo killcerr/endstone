@@ -299,7 +299,7 @@ void EndstonePlayer::stopSound(std::string sound)
 {
     const auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::StopSound);
     const auto pk = std::static_pointer_cast<StopSoundPacket>(packet);
-    pk->name = sound;
+    pk->payload.name = sound;
     getHandle().sendNetworkPacket(*packet);
 }
 
@@ -307,7 +307,7 @@ void EndstonePlayer::stopAllSounds()
 {
     const auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::StopSound);
     const auto pk = std::static_pointer_cast<StopSoundPacket>(packet);
-    pk->stop_all = true;
+    pk->payload.stop_all = true;
     getHandle().sendNetworkPacket(*packet);
 }
 
@@ -734,16 +734,16 @@ bool EndstonePlayer::handlePacket(Packet &packet)
         if (pk.isServerSide()) {
             return true;
         }
-        PlayerEmoteEvent e(*this, pk.piece_id, pk.isEmoteChatMuted());
+        PlayerEmoteEvent e(*this, pk.payload.piece_id, pk.isEmoteChatMuted());
         getServer().getPluginManager().callEvent(e);
         if (e.isCancelled()) {
             return false;
         }
         if (e.isMuted()) {
-            pk.flags |= static_cast<uint8_t>(EmotePacket::Flags::MUTE_EMOTE_CHAT);
+            pk.payload.flags |= static_cast<uint8_t>(EmotePacket::Flags::MUTE_EMOTE_CHAT);
         }
         else {
-            pk.flags &= ~static_cast<uint8_t>(EmotePacket::Flags::MUTE_EMOTE_CHAT);
+            pk.payload.flags &= ~static_cast<uint8_t>(EmotePacket::Flags::MUTE_EMOTE_CHAT);
         }
         return true;
     }
