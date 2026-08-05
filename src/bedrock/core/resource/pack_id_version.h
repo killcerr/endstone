@@ -21,7 +21,7 @@
 struct PackIdVersion {
     mce::UUID id;        // +0
     SemVersion version;  // +16
-    PackType pack_type;  // +128
+    PackType pack_type;  // +40
 
     bool operator==(const PackIdVersion &other) const
     {

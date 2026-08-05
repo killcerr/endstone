@@ -776,7 +776,10 @@ the `SerializationMode` accessors.
    touches, so it settles the mid-struct-insertion question a dtor walk cannot.
    The `<Name>Payload` type name and its member display names also appear
    verbatim in the entt/cereal registration function - one `lea` per name with
-   the length in `ecx`, in declaration order.
+   the length in `ecx`. That order is the **wire** order, which is not always
+   declaration order (`ResourcePackStackPacketPayload` @ 1.26.40 registers its
+   `bool` first while the constructor stores the vector first). Take names from
+   the registration, offsets from the constructor.
 6. **Cross-check the wire with protocol-docs.** The cereal field set == the
    serialized fields; `EndstoneMC/protocol-docs` (`<branch>/packets/<Name>.json`)
    lists them in order, mapping the copy's offsets to names and flagging
@@ -872,6 +875,24 @@ the `SerializationMode` accessors.
    BDS (`SetSpawnPositionPacket`/`SubClientLoginPacket` @ 1.26.40, both 1).
    `operator new`'s immediate in the same function is `sizeof` plus the control
    block - 16 on MSVC, 24 on libc++.
+18. **When the factory calls an out-of-line ctor taking the payload BY VALUE,
+   that ctor is the complete member map - `dst - src` is the payload base.**
+   `make_shared` zeroes an N-byte payload on the stack and passes it, so every
+   store reads `*(this + off + BASE) = *(payload + off)` and the constant
+   difference *is* the payload offset (48), while the store widths give each
+   member's size: `mov dword` = the packed leading bools, `movups`+`mov` pairs =
+   a 24-byte vector move, an 8-byte move plus a `0x80000000000000`-bit teardown =
+   `Bedrock::StaticOptimizedString`. It works on a `CerealOnly` packet, which has
+   no hand-written `write` (point 5) to read. The trailing `operator delete`
+   loop in the same function hands you the element stride of any vector member
+   for free (`ResourcePacksInfoPacket` @ 1.26.40: `PackInfoData` 184/160).
+19. **Two things in the registration path that waste time.** The per-member
+   accessor thunks are generic entt meta wrappers for a plainly-stored member -
+   they walk the meta node and carry no literal displacement, so unlike point 14's
+   gated accessors they tell you nothing about the offset; go to the constructor
+   instead. And a `mov [rsp+10h], rdx; push...; lea rbp, [rdx+N]` block sitting
+   just before the function is an **MSVC EH funclet** re-establishing the parent
+   frame - `N` is a stack offset, not point 11's payload-base `lea`.
 
 Worked example: **BossEventPacket @ 1.26.32** - migrated to cereal-only;
 `color`/`overlay` narrowed 4B->1B, both `darken`/`fog` bools removed, a
