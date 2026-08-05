@@ -25,12 +25,17 @@ enum class SpawnPositionType : int {
     WorldSpawn = 1,
 };
 
+struct SetSpawnPositionPacketPayload {
+    NetworkBlockPosition pos;              // +0
+    SpawnPositionType spawn_pos_type;      // +12
+    DimensionType dimension_type;          // +16
+    NetworkBlockPosition spawn_block_pos;  // +20
+};
+BEDROCK_STATIC_ASSERT_SIZE(SetSpawnPositionPacketPayload, 32, 32);
+
 class SetSpawnPositionPacket : public Packet {
 public:
-    NetworkBlockPosition pos;
-    SpawnPositionType spawn_pos_type;
-    DimensionType dimension_type;
-    NetworkBlockPosition spawn_block_pos;
-    SerializationMode serialization_mode{SerializationMode::CerealOnly};
+    SetSpawnPositionPacketPayload payload;                                             // +48 Windows, +44 Linux
+    SerializationMode serialization_mode{SerializationMode::SideBySide_LogOnMismatch};  // +80 Windows, +76 Linux
 };
 BEDROCK_STATIC_ASSERT_SIZE(SetSpawnPositionPacket, 88, 80);

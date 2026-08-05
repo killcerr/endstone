@@ -854,6 +854,24 @@ the `SerializationMode` accessors.
    any Endstone code that rewrites one must rewrite the other. The reader never
    validates the lengths, so a mismatch is a well-formed packet that breaks the
    client instead of erroring.
+16. **The PAYLOAD's alignment decides the Linux shift, not the first member's.**
+   An all-scalar payload (`SetSpawnPositionPacketPayload` - two
+   `NetworkBlockPosition`s and two `int` enums) has alignment 4, so Itanium packs
+   it into `Packet`'s tail padding at **44** - exactly where the flat members
+   land. Inline and payload models are then byte-identical on both platforms and
+   the missing wrapper is cosmetic, not a bug. Point 12's "forced to 48" holds
+   only when the payload contains an 8-aligned member. Settle it by dumping both
+   models in one `-fdump-record-layouts` run per target rather than reasoning
+   from the leading member.
+17. **`createPacket`'s `make_shared` is a free default-member map - and the
+   `SerializationMode`'s initial value is not always `CerealOnly`.** The factory
+   stores every member, PODs included, so one decompile gives the sentinel
+   defaults (`dimension_type = -1`, `spawn_block_pos = INT_MIN^3`) and the mode.
+   A packet that still carries a hand-written `write` branch is constructed
+   `SideBySide_LogOnMismatch` (1), so a header initialised `CerealOnly` misstates
+   BDS (`SetSpawnPositionPacket`/`SubClientLoginPacket` @ 1.26.40, both 1).
+   `operator new`'s immediate in the same function is `sizeof` plus the control
+   block - 16 on MSVC, 24 on libc++.
 
 Worked example: **BossEventPacket @ 1.26.32** - migrated to cereal-only;
 `color`/`overlay` narrowed 4B->1B, both `darken`/`fog` bools removed, a
