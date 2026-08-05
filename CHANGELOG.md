@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added support for BDS version 1.26.36.
+- Added support for BDS version 1.26.40.
 - Added equality comparison, hashing, and `std::format` support to `endstone::SocketAddress` (C++), so it can be used directly as a key in `std::unordered_map`/`std::unordered_set` and formatted as `hostname:port`.
 
 ### Changed
@@ -23,6 +23,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed a resource pack being applied twice when it is both listed in `world_resource_packs.json` and present as an archive in `resource_packs/`. Archives that are already on the world's pack stack are now left alone.
 
+- Fixed memory corruption on Linux whenever a soft enum was updated, which happens every time a command's dynamic choices change. The update packet was written at the wrong offsets and overran the end of the packet.
+
+- Fixed `PlayerMoveEvent` and `PlayerJumpEvent` on Linux reporting a garbage destination, and rejecting movement the player had actually made. The player's position and rotation were read from the wrong offsets in the movement packet, so the rotation came from uninitialised memory.
+
+- Fixed clients being disconnected by a custom map render when the map tracks no entities. The map packet carries its decorations and their tracked actor ids as parallel lists, and the rendered cursors were replacing only the decorations, leaving the two lists at different lengths (#459).
+
 - Fixed events fired from a plugin's `on_load`, or from the `on_enable` of a plugin with `load: startup`, being rejected with "must be triggered synchronously from server thread". Both run before the server thread exists, so the main thread is now reported as the primary thread until it does, matching Spigot.
 
 - Fixed every script log line being followed by a blank line in the console and log file. Script output arrives with a trailing line break, which is now stripped before the message is logged.
@@ -35,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed death messages for entity and projectile kills always showing the generic "Player died" instead of the detailed vanilla message, such as "Player was slain by Zombie". Death message overrides set on the damage source are now honored as well (#438).
 - Fixed C++ plugins failing to compile against the public headers with libc++ 18, which rejected the `std::formatter` specializations due to their declared return type (#437).
 - Fixed C++ plugin builds on Linux silently compiling against libstdc++ when Endstone is consumed via CMake FetchContent. The `endstone::endstone` target now propagates `-stdlib=libc++` to every target that links against it, so plugin projects no longer need to pass the flag themselves.
+- Fixed the public C++ headers pulling in `<Windows.h>`, which leaked macros such as `min`, `max` and `ERROR` into every plugin that includes an Endstone header. The headers now declare the two Win32 functions they need themselves, and the `endstone::endstone` target defines `NOMINMAX` and `WIN32_LEAN_AND_MEAN`, so a `<Windows.h>` the plugin includes itself stays out of the way too.
 
 ## [0.11.6] - 2026-07-10
 

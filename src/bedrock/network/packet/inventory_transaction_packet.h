@@ -54,6 +54,7 @@ public:
     std::unique_ptr<ComplexInventoryTransaction> transaction;
     bool is_client_side;
     SerializationMode serialization_mode{SerializationMode::CerealOnly};
+    // ...
 
 private:
     Bedrock::Result<void> _read(ReadOnlyBinaryStream &stream) override;

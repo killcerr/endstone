@@ -16,8 +16,7 @@
 
 #include "bedrock/symbol.h"
 
-std::unique_ptr<CraftingDataPacket> CraftingDataPacket::prepareFromRecipes(const Recipes &recipe,
-                                                                           bool only_crafting_recipes)
+CraftingDataPacketPayload CraftingDataPacket::prepareFromRecipes(const Recipes &recipe, bool only_crafting_recipes)
 {
     return BEDROCK_CALL(&CraftingDataPacket::prepareFromRecipes, recipe, only_crafting_recipes);
 }

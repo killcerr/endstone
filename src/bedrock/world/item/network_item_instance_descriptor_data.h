@@ -14,22 +14,18 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 
-namespace Common {
-std::string getGameVersionString();
-}  // namespace Common
+#include "bedrock/bedrock.h"
 
-namespace SharedConstants {
-constexpr int TicksPerSecond = 20;
-constexpr float SecondsPerTick = 1.0 / TicksPerSecond;
-constexpr float MilliSecondsPerTick = SecondsPerTick * 1000;
-constexpr int TicksPerMinute = TicksPerSecond * 60;
-constexpr int TotalTrialTicks = TicksPerMinute * 90;
-constexpr uint8_t NetworkMaxSubClients = 4;
-constexpr int NetworkDefaultMaxConnections = 200;  // Endstone: 40 -> 200
-constexpr int MajorVersion = 1;
-constexpr int MinorVersion = 26;
-constexpr int PatchVersion = 40;
-constexpr int NetworkProtocolVersion = 2168;
-}  // namespace SharedConstants
+// TODO(fixme): check the name - the cereal scope name is read from the binary, but its identity with
+// this element could not be proven; only the layout is confirmed.
+struct NetworkItemInstanceDescriptorData {
+    int id;                       // +0
+    std::int16_t stack_size;      // +4
+    int aux_value;                // +8
+    int block_runtime_id;         // +12
+    std::string user_data_buffer;  // +16, an already-serialized NBT blob
+};
+BEDROCK_STATIC_ASSERT_SIZE(NetworkItemInstanceDescriptorData, 48, 40);

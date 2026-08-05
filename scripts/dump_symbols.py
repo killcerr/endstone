@@ -91,6 +91,9 @@ DEFAULT_CONFIGS = (CONFIGS_DIR / "windows.toml", CONFIGS_DIR / "linux.toml")
 
 # Raw file root of the EndstoneMC/bedrock-server-data repo.
 BASE_RAW_URL = "https://raw.githubusercontent.com/EndstoneMC/bedrock-server-data/v2"
+# Mojang's official download links, used when bedrock-server-data has no metadata yet.
+MOJANG_LINKS_URL = "https://net-secondary.web.minecraft-services.net/api/v1.0/download/links"
+MOJANG_DOWNLOAD_TYPES = {"windows": "serverBedrockWindows", "linux": "serverBedrockLinux"}
 # Cached server zips live here, keyed by SHA256.
 CACHE_DIR = Path.home() / ".bedrock_server"
 HEADERS = {
@@ -165,6 +168,8 @@ def download_server(version: str, platform: str) -> Path:
     """
     url = f"{BASE_RAW_URL}/release/{version}/metadata.json"
     resp = requests.get(url, headers=HEADERS)
+    if resp.status_code == 404:
+        return download_server_from_mojang(version, platform)
     resp.raise_for_status()
     info = resp.json().get("binary", {}).get(platform)
     if not info or "url" not in info or "sha256" not in info:
@@ -175,6 +180,34 @@ def download_server(version: str, platform: str) -> Path:
     dest_path = CACHE_DIR / platform / os.path.basename(download_url)
 
     if dest_path.exists() and compute_sha256(dest_path).lower() == expected_hash.lower():
+        logger.info(f"Using cached {platform} binary: {dest_path}")
+        return dest_path
+
+    return download_file(download_url, dest_path)
+
+
+def download_server_from_mojang(version: str, platform: str) -> Path:
+    """
+    Resolve a release straight from Mojang's download links, for a version
+    bedrock-server-data has not published metadata for yet. There is no
+    published SHA256 to check against, so a cached copy is reused as-is.
+    """
+    resp = requests.get(MOJANG_LINKS_URL, headers=HEADERS)
+    resp.raise_for_status()
+    links = resp.json().get("result", {}).get("links", [])
+    wanted = MOJANG_DOWNLOAD_TYPES[platform]
+    download_url = next((link["downloadUrl"] for link in links if link.get("downloadType") == wanted), None)
+    if not download_url:
+        raise KeyError(f"No {platform} download link for version {version}")
+
+    # Mojang's link is the 4-component build of whatever is current; only take it for the version asked for.
+    name = os.path.basename(download_url)
+    if not name.startswith(f"bedrock-server-{version}."):
+        raise KeyError(f"Mojang's current {platform} release is {name}, not version {version}")
+
+    logger.warning(f"bedrock-server-data has no metadata for {version}; falling back to {download_url} (unverified)")
+    dest_path = CACHE_DIR / platform / name
+    if dest_path.exists():
         logger.info(f"Using cached {platform} binary: {dest_path}")
         return dest_path
 
@@ -306,35 +339,49 @@ def find_signature(section: lief.Section, sig: Signature) -> int:
     mem = section.content
     base_addr = section.virtual_address
 
-    match = re.search(byte_pattern, mem.tobytes(), re.DOTALL)
-    if not match:
+    matches = [m.start() for m in re.finditer(byte_pattern, mem.tobytes(), re.DOTALL)]
+    if not matches:
         raise NameError(f"Pattern not found: {sig.pattern} for {sig.name}")
-    addr = match.start()
 
-    logger.debug(f"Pattern found at: 0x{addr:x} (+ base = 0x{(addr + base_addr):x})")
+    def resolve(addr: int) -> int:
+        for i, o in enumerate(sig.offsets or []):
+            logger.debug(f"Offset {i}: ptr: 0x{addr:x} offset: 0x{o:x}")
+            pos = addr + o
+            addr = struct.unpack_from("<I", mem, pos)[0]
+            logger.debug(f"Offset {i}: => 0x{addr:x}")
 
-    for i, o in enumerate(sig.offsets or []):
-        logger.debug(f"Offset {i}: ptr: 0x{addr:x} offset: 0x{o:x}")
-        pos = addr + o
-        addr = struct.unpack_from("<I", mem, pos)[0]
-        logger.debug(f"Offset {i}: => 0x{addr:x}")
+        if sig.rip_relative:
+            logger.debug(f"rip_relative: addr 0x{addr:x} + rip_offset 0x{sig.rip_offset:x}")
+            addr = addr + sig.rip_offset
+            rip = struct.unpack_from("<i", mem, addr)[0]
+            logger.debug(f"rip_relative: addr 0x{addr:x} + rip 0x{rip:x} + 4")
+            addr = addr + rip + 4
+            logger.debug(f"rip_relative: addr => 0x{addr:x}")
 
-    if sig.rip_relative:
-        logger.debug(f"rip_relative: addr 0x{addr:x} + rip_offset 0x{sig.rip_offset:x}")
-        addr = addr + sig.rip_offset
-        rip = struct.unpack_from("<i", mem, addr)[0]
-        logger.debug(f"rip_relative: addr 0x{addr:x} + rip 0x{rip:x} + 4")
-        addr = addr + rip + 4
-        logger.debug(f"rip_relative: addr => 0x{addr:x}")
+        logger.debug(f"Adding extra: 0x{sig.extra:x}")
+        addr = addr + sig.extra
 
-    logger.debug(f"Adding extra: 0x{sig.extra:x}")
-    addr = addr + sig.extra
+        if not sig.relative:
+            logger.debug(f"Not relative, addr 0x{addr:x} + base 0x{base_addr:x}")
+            addr = addr + base_addr
 
-    if not sig.relative:
-        logger.debug(f"Not relative, addr 0x{addr:x} + base 0x{base_addr:x}")
-        addr = addr + base_addr
+        return addr
 
-    return addr
+    logger.debug(f"Pattern found at: 0x{matches[0]:x} (+ base = 0x{(matches[0] + base_addr):x})")
+
+    # A pattern matching several places resolves to whichever comes first in the section, which is only
+    # right by luck - say so rather than picking one silently.
+    chosen = resolve(matches[0])
+    candidates = {resolve(m) for m in matches}
+    if len(candidates) > 1:
+        others = ", ".join(f"0x{c:x}" for c in sorted(candidates - {chosen})[:8])
+        logger.warning(
+            f"Ambiguous pattern for {sig.name}: {len(matches)} matches resolving to {len(candidates)} "
+            f"distinct addresses; taking 0x{chosen:x}, rejecting {others}"
+            f"{', ...' if len(candidates) > 9 else ''}. Tighten the pattern or anchor it on a call site."
+        )
+
+    return chosen
 
 
 def scan_signatures(section: lief.Section, config: dict) -> dict[str, int]:

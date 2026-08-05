@@ -38,4 +38,5 @@ public:
     std::string platform_id;
     uint8_t flags;
     SerializationMode serialization_mode{SerializationMode::CerealOnly};
+    // ...
 };

@@ -17,8 +17,7 @@
 #include "bedrock/core/utility/buffer_span.h"
 #include "bedrock/world/level/saveddata/map_item_saved_data.h"
 
-class ClientboundMapItemDataPacket : public Packet {
-public:
+struct ClientboundMapItemDataPacketPayload {
     enum class Type : int32_t {
         Invalid = 0,
         TextureUpdate = 2,
@@ -26,13 +25,34 @@ public:
         Creation = 8,
     };
 
+    ActorUniqueID map_id;                                     // +0
+    Type type;                                                // +8
+    uint8_t dimension;                                        // +12
+    bool locked;                                              // +13
+    BlockPos map_origin;                                      // +16
+    std::vector<ActorUniqueID> map_ids;                       // +32, only filled on the creation path
+    int8_t scale;                                             // +56
+    std::vector<MapItemTrackedActor::UniqueId> unique_ids;    // +64
+    std::vector<std::shared_ptr<MapDecoration>> decorations;  // +88
+    int width;                                                // +112
+    int height;                                               // +116
+    int start_x;                                              // +120
+    int start_y;                                              // +124
+    std::vector<unsigned int> map_pixels;                     // +128
+};
+BEDROCK_STATIC_ASSERT_SIZE(ClientboundMapItemDataPacketPayload, 152, 152);
+
+class ClientboundMapItemDataPacket : public Packet {
+public:
+    using Type = ClientboundMapItemDataPacketPayload::Type;
+
     ClientboundMapItemDataPacket();
     ClientboundMapItemDataPacket(ActorUniqueID, int8_t, const MapItemSavedData::DecorationCollection &,
                                  buffer_span<unsigned int>, int, int, int, int, DimensionType, bool, const BlockPos &);
     ClientboundMapItemDataPacket(gsl::not_null<MapItemSavedData *>, Level &);
-    ActorUniqueID getMapId() const { return map_ids_.front(); }
+    ActorUniqueID getMapId() const { return payload.map_id; }
     const std::vector<ActorUniqueID> &getMapIds() const;
-    DimensionType getDimensionId() const { return DimensionType(dimension_); }
+    DimensionType getDimensionId() const { return DimensionType(payload.dimension); }
     int8_t getScale() const;
     void applyToMap(MapItemSavedData &, const bool) const;
     void resampleClientMap(MapItemSavedData &, BlockSource &, const BlockPos &, int) const;
@@ -43,21 +63,10 @@ public:
     bool hasEmptyOrBlackPixels() const;
 
     // protected: ENDSTONE: protected -> public
-    std::vector<ActorUniqueID> map_ids_;
-    int8_t scale_;
-    std::vector<std::shared_ptr<MapDecoration>> decorations_;
-    std::vector<MapItemTrackedActor::UniqueId> unique_ids_;
-    int start_x_;
-    int start_y_;
-    BlockPos map_origin_;
-    uint8_t dimension_;
-    int width_;
-    int height_;
-    Type type_;
-    std::vector<unsigned int> map_pixels_;
-    bool locked_;
+    ClientboundMapItemDataPacketPayload payload;                          // +48
+    SerializationMode serialization_mode{SerializationMode::CerealOnly};  // +200
 };
-static_assert(sizeof(ClientboundMapItemDataPacket) == 200);
+BEDROCK_STATIC_ASSERT_SIZE(ClientboundMapItemDataPacket, 208, 208);
 
 inline ClientboundMapItemDataPacket::Type operator|(ClientboundMapItemDataPacket::Type a,
                                                     ClientboundMapItemDataPacket::Type b)

@@ -14,17 +14,15 @@
 
 #pragma once
 
-#include "bedrock/network/connection_request.h"
-#include "bedrock/network/packet.h"
+#include "bedrock/bedrock.h"
 
-struct LoginPacketPayload {
-    int client_network_version;
-    std::unique_ptr<ConnectionRequest> connection_request;
-};
+namespace ServerInitialization {
 
-class LoginPacket : public Packet {
-public:
-    LoginPacketPayload payload;
-    SerializationMode serialization_mode;
+struct ServerInitResult {
+    // Two shared-pointer-shaped pairs. Kept opaque and trivially copyable: Endstone only forwards the
+    // value, and destroying it here would release refcounts this layer does not own.
+    void *unknown_0_[4];
 };
-BEDROCK_STATIC_ASSERT_SIZE(LoginPacket, 72, 72);
+BEDROCK_STATIC_ASSERT_SIZE(ServerInitResult, 32, 32);
+
+}  // namespace ServerInitialization

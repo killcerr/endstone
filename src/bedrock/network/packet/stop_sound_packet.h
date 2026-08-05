@@ -26,4 +26,5 @@ public:
     bool stop_all;
     bool stop_music_legacy;
     SerializationMode serialization_mode{SerializationMode::CerealOnly};
+    // ...
 };
