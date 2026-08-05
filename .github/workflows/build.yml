@@ -284,6 +284,8 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/wheels
+          # A partial upload is recoverable by re-running this job.
+          skip-existing: true
 
       - name: Extract version from tag
         run: |
