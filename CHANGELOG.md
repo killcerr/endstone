@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.7] - 2026-08-05
+
 ### Added
 
 - Added support for BDS version 1.26.40.
@@ -24,8 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed a resource pack being applied twice when it is both listed in `world_resource_packs.json` and present as an archive in `resource_packs/`. Archives that are already on the world's pack stack are now left alone.
 
 - Fixed memory corruption on Linux whenever a soft enum was updated, which happens every time a command's dynamic choices change. The update packet was written at the wrong offsets and overran the end of the packet.
-
-- Fixed `PlayerMoveEvent` and `PlayerJumpEvent` on Linux reporting a garbage destination, and rejecting movement the player had actually made. The player's position and rotation were read from the wrong offsets in the movement packet, so the rotation came from uninitialised memory.
 
 - Fixed clients being disconnected by a custom map render when the map tracks no entities. The map packet carries its decorations and their tracked actor ids as parallel lists, and the rendered cursors were replacing only the decorations, leaving the two lists at different lengths (#459).
 
@@ -1120,7 +1120,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic plugin loader for C++ and Python plugins.
 - Basic command system that allows plugins to register custom commands.
 
-[Unreleased]: https://github.com/EndstoneMC/endstone/compare/v0.11.6...HEAD
+[Unreleased]: https://github.com/EndstoneMC/endstone/compare/v0.11.7...HEAD
+[0.11.7]: https://github.com/EndstoneMC/endstone/compare/v0.11.6...v0.11.7
 [0.11.6]: https://github.com/EndstoneMC/endstone/compare/v0.11.5...v0.11.6
 [0.11.5]: https://github.com/EndstoneMC/endstone/compare/v0.11.4...v0.11.5
 [0.11.4]: https://github.com/EndstoneMC/endstone/compare/v0.11.3...v0.11.4
