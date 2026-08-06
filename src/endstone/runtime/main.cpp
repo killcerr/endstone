@@ -15,10 +15,12 @@
 #include <chrono>
 #include <cstdlib>
 #include <exception>
+#include <thread>
 
 #include <pybind11/embed.h>
 #include <spdlog/spdlog.h>
 
+#include "bedrock/core/debug/debug_utils.h"
 #include "endstone/core/devtools/devtools.h"
 #include "endstone/core/logger_factory.h"
 #include "endstone/core/server.h"
@@ -29,6 +31,9 @@ namespace py = pybind11;
 
 int init()
 {
+    DebugUtils::setThreadName("Main");
+    endstone::core::EndstoneServer::setMainThread(std::this_thread::get_id());
+
     try {
         spdlog::flush_every(std::chrono::seconds(5));
         endstone::runtime::hook::install();

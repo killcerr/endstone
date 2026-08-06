@@ -20,6 +20,7 @@
 
 class UpdateAbilitiesPacket : public Packet {
 public:
-    SerializedAbilitiesData data;
-    SerializationMode serialization_mode{SerializationMode::CerealOnly};
+    SerializedAbilitiesData data;                                                      // +48
+    SerializationMode serialization_mode{SerializationMode::SideBySide_LogOnMismatch};  // +88
 };
+BEDROCK_STATIC_ASSERT_SIZE(UpdateAbilitiesPacket, 96, 96);

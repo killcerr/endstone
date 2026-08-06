@@ -16,19 +16,16 @@
 
 #include <string>
 
-#include "bedrock/network/packet.h"
-#include "bedrock/network/packet/cerealize/core/serialization_mode.h"
+#include <spdlog/pattern_formatter.h>
+#include <spdlog/spdlog.h>
 
-struct StopSoundPacketPayload {
-    std::string name;        // +0
-    bool stop_all;           // +32
-    bool stop_music_legacy;  // +33
-};
-BEDROCK_STATIC_ASSERT_SIZE(StopSoundPacketPayload, 40, 32);
+namespace endstone::core {
 
-class StopSoundPacket : public Packet {
+class ThreadFormatter : public spdlog::custom_flag_formatter {
 public:
-    StopSoundPacketPayload payload;                                                    // +48
-    SerializationMode serialization_mode{SerializationMode::SideBySide_LogOnMismatch};  // +88
+    void format(const spdlog::details::log_msg &msg, const std::tm &, spdlog::memory_buf_t &dest) override;
+
+    [[nodiscard]] std::unique_ptr<custom_flag_formatter> clone() const override;
 };
-BEDROCK_STATIC_ASSERT_SIZE(StopSoundPacket, 96, 88);
+
+}  // namespace endstone::core

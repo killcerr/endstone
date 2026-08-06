@@ -47,15 +47,15 @@ class LinuxBootstrap(Bootstrap):
             **kwargs,
         )
 
-        # Forward termination signals to the Bedrock server so it can shut down
-        # gracefully and save the world (e.g. on `docker stop`).
+        # `docker stop` only signals the launcher, so pass SIGTERM on for a graceful shutdown.
         def _forward(signum, _frame):  # type: ignore[no-untyped-def]
             try:
                 self._process.send_signal(signum)
             except ProcessLookupError:
                 pass
 
-        for sig in (signal.SIGTERM, signal.SIGINT):
-            signal.signal(sig, _forward)
+        signal.signal(signal.SIGTERM, _forward)
+        # Ctrl+C already reaches the server directly; let it handle it, then relay its exit code
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
 
         return int(self._process.wait())

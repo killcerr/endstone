@@ -57,8 +57,10 @@ class PackManifest : public Bedrock::EnableNonOwnerReferences {
 public:
     PackManifest(ManifestType type) : manifest_type_(type) {}
 
+    [[nodiscard]] ResourceLocation const &getLocation() const;
     [[nodiscard]] PackIdVersion const &getIdentity() const;
     [[nodiscard]] std::string getName() const;
+    [[nodiscard]] PackType getPackType() const;
 
 private:
     ManifestType manifest_type_;

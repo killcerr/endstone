@@ -18,9 +18,12 @@
 #include <chrono>
 #include <filesystem>
 #include <format>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <ranges>
+#include <regex>
+#include <sstream>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
@@ -81,6 +84,56 @@ namespace fs = std::filesystem;
 namespace py = pybind11;
 
 namespace endstone::core {
+
+namespace {
+std::thread::id &mainThread()
+{
+    static std::thread::id thread_id;
+    return thread_id;
+}
+
+// Only archives are auto-activated; an extracted pack still goes through world_resource_packs.json
+bool isArchivePack(const ResourceLocation &location)
+{
+    static const std::regex archive(R"(\.(mcpack|zip)$)", std::regex::icase);
+    return std::regex_search(location.getRelativePath().getContainer(), archive);
+}
+
+// An encrypted pack carries its content key in a sidecar file next to it, e.g. my_pack.mcpack.key
+std::string readContentKey(const ResourceLocation &location, Logger &logger)
+{
+    const auto path = location.getRelativePath().getContainer() + ".key";
+    if (!fs::exists(path)) {
+        return {};
+    }
+
+    try {
+        std::ifstream file(path);
+        if (!file.is_open()) {
+            logger.error("Could not open encryption key file: '{}'.", path);
+            return {};
+        }
+
+        std::ostringstream ss;
+        ss << file.rdbuf();
+        auto key = ss.str();
+        boost::algorithm::trim(key);
+
+        if (key.length() != 32) {
+            logger.error(
+                "Could not open encryption key file: '{}'. Invalid encryption key length, must be exactly 32 bytes.",
+                path);
+            return {};
+        }
+        return key;
+    }
+    catch (const std::exception &e) {
+        logger.error("Could not open encryption key file: '{}'. {}.", path, e.what());
+        return {};
+    }
+}
+}  // namespace
+
 EndstoneServer::EndstoneServer() : logger_(LoggerFactory::getLogger(""))
 {
     registerTypes();
@@ -91,7 +144,9 @@ EndstoneServer::EndstoneServer() : logger_(LoggerFactory::getLogger(""))
     crash_handler_ = std::make_unique<CrashHandler>();
     signal_handler_ = std::make_unique<SignalHandler>();
     player_ban_list_ = std::make_unique<EndstonePlayerBanList>("banned-players.json");
+    player_ban_list_->load();
     ip_ban_list_ = std::make_unique<EndstoneIpBanList>("banned-ips.json");
+    ip_ban_list_->load();
     language_ = std::make_unique<EndstoneLanguage>();
     plugin_manager_ = std::make_unique<EndstonePluginManager>(*this);
     service_manager_ = std::make_unique<EndstoneServiceManager>();
@@ -106,6 +161,8 @@ EndstoneServer::EndstoneServer() : logger_(LoggerFactory::getLogger(""))
     catch (const toml::parse_error &err) {
         EndstoneServer::getLogger().error("Failed to parse config file: {}", err.what());
     }
+
+    loadPlugins();
 }
 
 EndstoneServer::~EndstoneServer() = default;
@@ -118,9 +175,6 @@ void EndstoneServer::init(ServerInstance &server_instance)
     server_instance_ = &server_instance;
     command_sender_ = std::make_shared<EndstoneConsoleCommandSender>();
     command_sender_->recalculatePermissions();
-    player_ban_list_->load();
-    ip_ban_list_->load();
-    loadPlugins();
     enablePlugins(PluginLoadOrder::Startup);
 }
 
@@ -224,24 +278,10 @@ void EndstoneServer::setResourcePackRepository(IResourcePackRepository &repo)
     resource_pack_repository_ = &repo;
 }
 
-void EndstoneServer::initPackSource(const PackSourceFactory &pack_source_factory)
+const std::string *EndstoneServer::getContentKey(const PackIdVersion &pack_id) const
 {
-    if (resource_pack_source_) {
-        throw std::runtime_error("Resource pack source already created.");
-    }
-    if (!resource_pack_repository_) {
-        throw std::runtime_error(
-            "Resource pack repository not set. Check the hook for RepositoryFactory::createSources.");
-    }
-    auto io = pack_source_factory.createPackIOProvider();
-    resource_pack_source_ = std::make_unique<EndstonePackSource>(EndstonePackSourceOptions(
-        PackSourceOptions(std::move(io)), resource_pack_repository_->getResourcePacksPath().getContainer(),
-        PackType::Resources));
-}
-
-PackSource &EndstoneServer::getPackSource() const
-{
-    return *resource_pack_source_;
+    const auto it = content_keys_.find(pack_id);
+    return it == content_keys_.end() ? nullptr : &it->second;
 }
 
 bool EndstoneServer::getAllowClientPacks() const
@@ -262,37 +302,54 @@ bool EndstoneServer::isServerTextEnabled(ServerTextEvent event) const
 
 void EndstoneServer::loadResourcePacks()
 {
+    auto &repo = *resource_pack_repository_;
     const auto *manager = level_->getHandle().getClientResourcePackManager();
+    auto &level_stack = const_cast<ResourcePackStack &>(manager->getStack(ResourcePackStackType::LEVEL));
 
-    // Load zipped packs
-    nlohmann::json json;
-    resource_pack_source_->forEachPackConst([&json](auto &pack) {
-        auto &identity = pack.getManifest().getIdentity();
-        json.push_back({
-            {"pack_id", identity.id.asString()},
-            {"version", {identity.version.getMajor(), identity.version.getMinor(), identity.version.getPatch()}},
-        });
-    });
-    std::stringstream ss(json.dump());
-    const auto pack_stack =
-        ResourcePackStack::deserialize(ss, *resource_pack_repository_, level_->getHandle().getLevelId());
-
-    // Add encryption keys to network handler to be sent to clients
-    auto content_keys = resource_pack_source_->getContentKeys();
-    getServer().getMinecraft()->getServerNetworkHandler()->pack_id_to_content_key_.insert(content_keys.begin(),
-                                                                                          content_keys.end());
-    for (const auto &pack_instance : pack_stack->stack) {
-        const auto &manifest = pack_instance.getManifest();
-        const bool encrypted = content_keys.contains(manifest.getIdentity());
-        getLogger().info("Loaded {} v{} (Pack ID: {}) {}", manifest.getName(),
-                         manifest.getIdentity().version.asString(), manifest.getIdentity().id.asString(),
-                         encrypted ? ColorFormat::Green + "[encrypted]" : "");
+    // Packs listed in world_resource_packs.json are already on the stack
+    std::unordered_set<PackIdVersion> seen;
+    for (const auto &pack_instance : level_stack.stack) {
+        seen.insert(pack_instance.getManifest().getIdentity());
     }
 
-    // Append loaded packs to level pack stack
-    auto &level_stack = const_cast<ResourcePackStack &>(manager->getStack(ResourcePackStackType::LEVEL));
-    level_stack.stack.insert(level_stack.stack.end(), std::make_move_iterator(pack_stack->stack.begin()),
-                             std::make_move_iterator(pack_stack->stack.end()));
+    // Activate the archives dropped into resource_packs, which BDS discovers but leaves off the stack
+    std::vector<PackInstanceId> pack_ids;
+    for (const auto *pack : repo.getPacksByResourceLocation(PackOrigin::User)) {
+        const auto &manifest = pack->getManifest();
+
+        // Behavior packs live in the same origin, but belong to the server, not the client stack
+        if (manifest.getPackType() != PackType::Resources) {
+            continue;
+        }
+
+        // An extracted pack is left to world_resource_packs.json, as it is in vanilla
+        if (!isArchivePack(manifest.getLocation())) {
+            continue;
+        }
+
+        // Already activated, either by world_resource_packs.json or by a duplicate of this pack
+        if (!seen.insert(manifest.getIdentity()).second) {
+            continue;
+        }
+
+        if (auto key = readContentKey(manifest.getLocation(), getLogger()); !key.empty()) {
+            content_keys_[manifest.getIdentity()] = std::move(key);
+        }
+        pack_ids.emplace_back(manifest.getIdentity(), std::string{});
+    }
+
+    std::vector<PackInstance> pack_instances;
+    pack_instances.reserve(pack_ids.size());
+    repo.getResourcePacksByPackId(pack_ids, pack_instances);
+
+    for (auto &pack_instance : pack_instances) {
+        const auto &manifest = pack_instance.getManifest();
+        const bool encrypted = content_keys_.contains(manifest.getIdentity());
+        getLogger().info("Loading resource pack {} v{}{}", manifest.getName(),
+                         manifest.getIdentity().version.asString(),
+                         encrypted ? ColorFormat::Green + " [encrypted]" : "");
+        level_stack.stack.push_back(std::move(pack_instance));
+    }
 }
 
 std::string EndstoneServer::getName() const
@@ -566,9 +623,24 @@ void EndstoneServer::broadcastMessage(const Message &message) const
     broadcast(message, BroadcastChannelUser);
 }
 
+void EndstoneServer::setMainThread(std::thread::id thread_id)
+{
+    mainThread() = thread_id;
+}
+
 bool EndstoneServer::isPrimaryThread() const
 {
-    return std::this_thread::get_id() == server_instance_->server_instance_thread_.get_id();
+    const std::thread::id invalid;
+    const auto main_thread = mainThread();
+    if (main_thread == invalid) {
+        return false;
+    }
+    const auto server_thread =
+        server_instance_ != nullptr ? server_instance_->server_instance_thread_.get_id() : invalid;
+    if (server_thread == invalid) {
+        return std::this_thread::get_id() == main_thread;
+    }
+    return std::this_thread::get_id() == server_thread;
 }
 
 ItemFactory &EndstoneServer::getItemFactory() const
@@ -648,10 +720,7 @@ std::unique_ptr<BlockData> EndstoneServer::createBlockData(BlockTypeId type, Blo
 {
     std::unordered_map<std::string, std::variant<int, std::string, bool>> states;
     for (const auto &state : block_states) {
-        std::visit(overloaded{[&](auto &&arg) {
-                       states.emplace(state.first, arg);
-                   }},
-                   state.second);
+        std::visit(overloaded{[&](auto &&arg) { states.emplace(state.first, arg); }}, state.second);
     }
     const auto block_descriptor =
         ScriptModuleMinecraft::ScriptBlockUtils::createBlockDescriptor(std::string(type), states);

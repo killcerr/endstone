@@ -1,4 +1,4 @@
-version = "1.26.33"
+version = "1.26.40"
 platform = "linux"
 executable = "bedrock_server"
 filename = "bedrock_server"
@@ -91,7 +91,7 @@ extra = 0
 # 1. use BatchedNetworkPeer's RTTI vtable `_ZTV18BatchedNetworkPeer` (see sendPacket)
 # 2. read _receivePacket's slot index in it in the old named DB (a few past sendPacket) and take the same slot
 #    in the new vtable
-pattern = "41 56 53 48 81 EC ? ? ? ? 49 89 F6 48 89 FB 48 8B 8F ? ? ? ?"
+pattern = "41 57 41 56 53 48 81 EC ? ? ? ? 49 89 F6 48 89 FB 48 8B 8F ? ? ? ?"
 
 [[signatures]]
 name = "_ZN10BedrockLog10LogDetails7_log_vaE9LogAreaIDjPKciiS3_P13__va_list_tag"
@@ -285,7 +285,7 @@ extra = 0
 #    large builder that constructs the packet inline and returns a unique_ptr<CraftingDataPacket>
 # 3. take the large non-ctor/dtor one
 # 4. confirm vs the old named DB
-pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 89 94 24 ? ? ? ? 48 89 F3"
+pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 89 94 24 ? ? ? ? 49 89 F6"
 
 [[signatures]]
 name = "_ZN15DedicatedServer5startERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEERKN7Bedrock19ActivationArgumentsE"
@@ -479,14 +479,14 @@ extra = 0
 pattern = "53 48 89 FB 81 FE ? ? ? ? 77 ?"
 
 [[signatures]]
-name = "_ZN3Mob9knockbackEP5ActoriffRK19KnockbackParameters"
+name = "_ZN3Mob9knockbackEP5ActorfffRK19KnockbackParameters"
 relative = false
 extra = 0
 # 1. Player's vtable is RTTI-named `_ZTV6Player`; knockback is a Mob virtual inherited into Player's vtable
 #    (Mob's own vtable is `_ZTV3Mob`)
 # 2. read knockback's slot index in `_ZTV6Player` in the old named DB and take the same slot in the new vtable
 # 3. confirm vs the old named DB (damps motion + applies knockback rules)
-pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 49 89 CF 0F 29 4C 24 ?"
+pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 49 89 D7 0F 29 54 24 ? 0F 29 4C 24"
 
 [[signatures]]
 name = "_ZN13NetworkSystem4sendERK17NetworkIdentifierRK6Packet11SubClientId"
@@ -498,19 +498,6 @@ extra = 0
 #    a single id
 # 3. confirm by diffing both vs the old named DB
 pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 89 CD 48 89 D3 49 89 F6 49 89 FF 48 8D 7C 24 ?"
-
-[[signatures]]
-name = "_ZN4Pack10createPackERK15IPackIOProviderRK16ResourceLocation8PackType10PackOriginR20IPackManifestFactoryN7Bedrock15NonOwnerPointerIK19IContentKeyProviderEEP16PackSourceReportRKN4Core4PathE"
-relative = false
-extra = 0
-# 1. find bytes "Cannot determine which pack manifest to use: Multiple manifests found at the same directory
-#    level in the pack's folder hierarchy.\0" (unique)
-# 2. its lone data xref is a `lea` inside Pack::createPackMetadata
-# 3. createPackMetadata's larger of two callers is Pack::createPack (the static factory returning
-#    unique_ptr<Pack>); it sits immediately before createPackMetadata in .text
-# 4. confirm: builds a pack-context struct, calls createPackMetadata, allocs a 24-byte report, copies manifest
-#    fields (offsets 296/312/320/328/336), stores packType@+180 / packOrigin@+176, returns unique_ptr<Pack>
-pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 4D 89 CC 44 89 44 24 ? 89 CB 49 89 D5 49 89 F6 49 89 FF 48 C7 07 00 00 00 00"
 
 [[signatures]]
 name = "_ZN16PistonBlockActor4tickER11BlockSource"
@@ -533,7 +520,7 @@ extra = 0
 # 1. find bytes "33 20 50 6C 61 79 65 72 20 74 65 6C 65 70 6F 72 74 54 6F 00" = "3 Player teleportTo\0" (unique)
 # 2. its lone data xref (a validateVec3Position label arg) is a `lea` inside this function
 # 3. walk up to the prologue
-pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 45 89 CC 44 89 C5 41 89 CE"
+pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 45 89 CC 45 89 C6 89 CD 41 89 D5"
 
 [[signatures]]
 name = "_ZN6Player14stopSleepInBedEbb"
@@ -547,13 +534,13 @@ rip_relative = true
 rip_offset = 7
 
 [[signatures]]
-name = "_ZN6Player15startSleepInBedERK8BlockPos"
+name = "_ZN6Player15startSleepInBedERK8BlockPosbf"
 relative = false
 extra = 0
 # 1. find bytes "31 20 73 74 61 72 74 53 6C 65 65 70 49 6E 42 65 64 00" = "1 startSleepInBed\0" (unique)
 # 2. its lone data xref (a validateBlockPos label arg) is a `lea` inside this function
 # 3. walk up to the prologue
-pattern = "55 41 57 41 56 41 55 41 54 53 48 83 EC ? 49 89 F6 48 89 FB 41 BD ? ? ? ? 48 8D 35"
+pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 0F 29 84 24 ? ? ? ? 89 D5 49 89 F6"
 
 [[signatures]]
 name = "_ZN6Player17completeUsingItemEv"
@@ -622,34 +609,6 @@ extra = 0
 pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 49 89 D7 49 89 FD 48 8D 3D ? ? ? ?"
 
 [[signatures]]
-name = "_ZN17RepositorySources20initializePackSourceER17PackSourceFactory"
-relative = false
-extra = 0
-# 1. find the unique string "Resource Repository Async Group"; its lone data xref is a `lea` inside the
-#    ResourcePackRepository ctor, which make_unique's that TaskGroup just above the target call
-# 2. below, the ctor makes two back-to-back member calls: RepositorySources::initializePackSource(mSources,
-#    mPackSourceFactory) then the RefreshQueue initialize; initializePackSource is the FIRST of the pair
-# 3. confirm initializePackSource by its body (rebuilds the pack-source tree via repeated
-#    createCompositePackSource + createInPackagePackSource)
-# 4. confirm vs the old named DB
-pattern = "E8 ? ? ? ? 4C 8B A3 ? ? ? ? 48 8B AB ? ? ? ? 4C 8B 7D"
-rip_relative = true
-rip_offset = 1
-
-[[signatures]]
-name = "_ZN17ResourcePackStack11deserializeERNSt3__113basic_istreamIcNS0_11char_traitsIcEEEERKN3gsl8not_nullIN7Bedrock15NonOwnerPointerIK23IResourcePackRepositoryEEEENS0_8optionalINS0_12basic_stringIcS3_NS0_9allocatorIcEEEEEE"
-relative = false
-extra = 0
-# 1. find bytes "73 75 62 70 61 63 6B 00" = "subpack\0" (unique); referenced inside
-#    ResourceHelper::deserializePackStackEntry (anchor on subpack, not the shared "pack_id" key)
-# 2. deserializePackStackEntry is reached from the pack-id loop; on linux ResourcePackStack::deserialize is the
-#    thin static wrapper that drives it (returns unique_ptr<ResourcePackStack> from an istream)
-# 3. confirm vs the old named DB (direct callers ServerInstance::initializeServer + FileArchiver::_exportLevelFiles)
-pattern = "E8 ? ? ? ? 48 8B 84 24 ? ? ? ? 48 C7 84 24 ? ? ? ? ? ? ? ? 48 8B BC 24 ? ? ? ? 48 89 84 24 ? ? ? ? 48 85 FF 74 ? ? ? ? FF 50 ? 48 8B BC 24"
-rip_relative = true
-rip_offset = 1
-
-[[signatures]]
 name = "_ZN10SayCommand12_sendMessageERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEERKNS0_8optionalIS6_EES8_RK21CommandOriginIdentityR5Level"
 relative = false
 extra = 0
@@ -682,7 +641,7 @@ extra = 0
 # 1. find "Experiment(s) active: " + a 00 (unique; logged by initializeServer when experiments are on)
 # 2. its data xref is a `lea` inside ServerInstance::initializeServer
 # 3. walk up to the prologue (it calls ResourcePackStack::deserialize)
-pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 49 89 FE 48 89 74 24 ? 48 8D 9E"
+pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 48 89 14 24 48 89 74 24 ? 48 89 BC 24"
 
 [[signatures]]
 name = "_ZN20ServerNetworkHandler15tryToLoadPlayerER12ServerPlayerRK17ConnectionRequestRK24PlayerAuthenticationInfo"
@@ -691,9 +650,7 @@ extra = 0
 # 1. find bytes "6D 69 6E 65 63 72 61 66 74 3A 70 6C 61 79 65 72 2E 30 00" = "minecraft:player.0\0" (unique)
 # 2. its data xrefs are `lea`s inside this function
 # 3. walk up to the prologue
-pattern = "E8 ? ? ? ? 89 C5 84 C0 75 ? 49 8B 84 24"
-rip_relative = true
-rip_offset = 1
+pattern = "55 41 57 41 56 41 55 41 54 53 48 83 EC ? 49 89 CC 49 89 D7 49 89 F6 49 89 FD 48 81 C7"
 
 [[signatures]]
 name = "_ZN20ServerNetworkHandler20_validateLoginPacketERK17NetworkIdentifierRK11LoginPacket"

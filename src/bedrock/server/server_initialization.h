@@ -14,21 +14,15 @@
 
 #pragma once
 
-#include <string>
+#include "bedrock/bedrock.h"
 
-#include "bedrock/network/packet.h"
-#include "bedrock/network/packet/cerealize/core/serialization_mode.h"
+namespace ServerInitialization {
 
-struct StopSoundPacketPayload {
-    std::string name;        // +0
-    bool stop_all;           // +32
-    bool stop_music_legacy;  // +33
+struct ServerInitResult {
+    // Two shared-pointer-shaped pairs. Kept opaque and trivially copyable: Endstone only forwards the
+    // value, and destroying it here would release refcounts this layer does not own.
+    void *unknown_0_[4];
 };
-BEDROCK_STATIC_ASSERT_SIZE(StopSoundPacketPayload, 40, 32);
+BEDROCK_STATIC_ASSERT_SIZE(ServerInitResult, 32, 32);
 
-class StopSoundPacket : public Packet {
-public:
-    StopSoundPacketPayload payload;                                                    // +48
-    SerializationMode serialization_mode{SerializationMode::SideBySide_LogOnMismatch};  // +88
-};
-BEDROCK_STATIC_ASSERT_SIZE(StopSoundPacket, 96, 88);
+}  // namespace ServerInitialization

@@ -18,24 +18,39 @@
 #include "bedrock/network/packet/cerealize/core/serialization_mode.h"
 #include "bedrock/world/actor/actor_runtime_id.h"
 
-class EmotePacket : public Packet {
-public:
+struct EmotePacketPayload {
     enum class Flags : uint8_t {
         SERVER_SIDE = 1,
         MUTE_EMOTE_CHAT = 2,
     };
 
+    ActorRuntimeID runtime_id;  // +0
+    std::string piece_id;       // +8
+    uint32_t emote_ticks;       // +40
+    std::string xuid;           // +48
+    std::string platform_id;    // +80
+    uint8_t flags;              // +112
+};
+BEDROCK_STATIC_ASSERT_SIZE(EmotePacketPayload, 120, 96);
+
+class EmotePacket : public Packet {
+public:
+    using Flags = EmotePacketPayload::Flags;
+
     EmotePacket();
     EmotePacket(ActorRuntimeID, const std::string &, uint32_t, const std::string &, const std::string &);
     void setServerSide();
-    [[nodiscard]] bool isServerSide() const { return (flags & static_cast<uint8_t>(Flags::SERVER_SIDE)) != 0; }
+    [[nodiscard]] bool isServerSide() const
+    {
+        return (payload.flags & static_cast<uint8_t>(Flags::SERVER_SIDE)) != 0;
+    }
     void setEmoteChatMute();
-    [[nodiscard]] bool isEmoteChatMuted() const { return (flags & static_cast<uint8_t>(Flags::MUTE_EMOTE_CHAT)) != 0; }
-    ActorRuntimeID runtime_id;
-    std::string piece_id;
-    uint32_t emote_ticks;
-    std::string xuid;
-    std::string platform_id;
-    uint8_t flags;
-    SerializationMode serialization_mode{SerializationMode::CerealOnly};
+    [[nodiscard]] bool isEmoteChatMuted() const
+    {
+        return (payload.flags & static_cast<uint8_t>(Flags::MUTE_EMOTE_CHAT)) != 0;
+    }
+
+    EmotePacketPayload payload;                                                        // +48
+    SerializationMode serialization_mode{SerializationMode::SideBySide_LogOnMismatch};  // +168
 };
+BEDROCK_STATIC_ASSERT_SIZE(EmotePacket, 176, 152);

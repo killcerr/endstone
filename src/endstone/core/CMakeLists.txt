@@ -86,7 +86,6 @@ add_library(endstone_core
         map/map_renderer.cpp
         map/map_view.cpp
         network/data_packet.cpp
-        packs/endstone_pack_source.cpp
         permissions/default_permissions.cpp
         permissions/permissible_base.cpp
         plugin/cpp_plugin_loader.cpp
@@ -107,6 +106,7 @@ add_library(endstone_core
         spdlog/level_formatter.cpp
         spdlog/spdlog_adapter.cpp
         spdlog/text_formatter.cpp
+        spdlog/thread_formatter.cpp
         util/socket_address.cpp
         util/uuid.cpp
 )

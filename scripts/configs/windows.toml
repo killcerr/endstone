@@ -1,4 +1,4 @@
-version = "1.26.33"
+version = "1.26.40"
 platform = "windows"
 executable = "bedrock_server.exe"
 filename = "bedrock_server"
@@ -39,13 +39,28 @@ rip_offset = 3
 name = "?getI18n@@YAAEAVI18n@@XZ"
 relative = false
 extra = 0
-# 1. find bytes "70 61 63 6B 2E 64 65 73 63 72 69 70 74 69 6F 6E 00" = "pack.description\0" (unique); its
-#    lone data xref is inside I18nImpl::I18nImpl, which seeds the default manifest-localization keys
-# 2. I18nImpl::I18nImpl has two callers; getI18n is the tiny one (~0x86) that thread-safe-initializes a
-#    static I18nImpl (Init_thread_header/footer + atexit) and returns its fixed address - the I18n
-#    singleton accessor (the other caller, Localization::_replaceUTCDateTimeIdentifier, is large)
-# 3. confirm the target vs the old named DB (returns I18n&, i.e. the static I18nImpl)
-pattern = "55 48 83 EC ? 48 8D 6C 24 ? 48 C7 45 ? ? ? ? ? 8B 05 ? ? ? ? 8B 0D ? ? ? ? 65 48 8B 14 25 ? ? ? ? 48 8B 0C CA 3B 81 ? ? ? ? 7F ? 48 8D 05 ? ? ? ? 48 83 C4 ? 5D C3"
+# WARNING: getI18n is one of a whole FAMILY of byte-identical thread-safe-static singleton accessors -
+# MSVC emits the same `if (guard > tls_epoch) { header; ctor; footer; atexit } return &obj` shape for
+# every one of them, and the only difference is which globals they touch, i.e. rip displacements a
+# pattern must wildcard. 18 of them matched the old prologue pattern in 1.26.40 and find_signature takes
+# the LOWEST .text hit, which was right in 1.26.32/1.26.36 by luck and wrong in 1.26.40. so this entry is
+# anchored on a CALL SITE, and any candidate MUST be confirmed by its call-closure marker strings
+# ("pack.description", "pack.name", the locale table "da_DK de_DE el_GR es_ES ...") - never by pattern
+# shape, size or alignment, which all silently agreed with the wrong address.
+# 1. find bytes "63 6F 6D 6D 61 6E 64 73 2E 67 69 76 65 2E 73 75 63 63 65 73 73 00"
+#    = "commands.give.success\0" (unique); its lone data xref is inside GiveCommand::execute (~0x1754)
+# 2. inside it find bytes "48 B9 69 74 65 6D 2E 61 69 72" = `mov rcx, 'item.air'` (unique binary-wide,
+#    as is the `mov rcx, 'air.name'` right after it) - that pair is the SSO literal "item.air.name" being
+#    built for getI18n().get("item.air.name", ...); the `call getI18n` sits 0x2d bytes above it, and the
+#    pattern below spans call -> literal, resolving through the E8 rel32
+# 3. confirm the decoded target: a ~0x7b fn that thread-safe-initializes a static and returns its fixed
+#    address (Init_thread_header/footer + atexit), whose lone non-CRT callee is I18nImpl::I18nImpl (~0x42a)
+# 4. confirm THAT ctor holds "pack.description" and "pack.name" directly, and reaches the locale table
+#    ("da_DK de_DE el_GR es_ES ...") deeper in its closure - the sibling accessors reach none of these
+# 5. confirm vs the old named DB (returns I18n&, i.e. the static I18nImpl)
+pattern = "E8 ? ? ? ? 0F 57 C0 0F 29 45 ? 48 C7 85 ? ? ? ? 00 00 00 00 48 C7 85 ? ? ? ? 0D 00 00 00 48 C7 85 ? ? ? ? 0F 00 00 00 48 B9 69 74 65 6D 2E 61 69 72"
+rip_relative = true
+rip_offset = 1
 
 [[signatures]]
 name = "MobEffect::mMobEffects"
@@ -103,7 +118,7 @@ extra = 0
 #    string -> ctor -> __vftable store)
 # 2. _receivePacket is the 9th slot (offset +0x40), a few slots past sendPacket; cross-check the slot
 #    index against the old named DB
-pattern = "41 56 56 57 53 48 81 EC ? ? ? ? 48 89 D7 48 89 CE 48 8B 91 ? ? ? ? 48 8B 89 ? ? ? ? 48 39 CA 0F 85 ? ? ? ? 48 8B 4E ? 48 8D 5E ? 48 8B 01 48 8B 40 ? 48 89 DA FF 15"
+pattern = "56 57 53 48 81 EC ? ? ? ? 48 89 D7 48 89 CE 48 8B 91 ? ? ? ? 48 8B 89 ? ? ? ? 48 39 CA 0F 85 ? ? ? ? 48 8B 4E ? 48 8D 5E ? 48 8B 01 48 8B 40 ? 48 89 DA FF 15"
 
 [[signatures]]
 name = "?_log_va@LogDetails@BedrockLog@@AEAAXW4LogAreaID@@IPEBDHH1PEAD@Z"
@@ -166,9 +181,9 @@ extra = 0
 # 2. landmark: in initBlockEnum that string is strcpy'd right after the forEachBlockType call, so the
 #    `call` just before the strcpy is the target
 # 3. confirm vs the old named DB
-pattern = "48 8D 85 ? ? ? ? 48 89 45 ? 48 8D 0D ? ? ? ? 48 8D 55 ? E8 ? ? ? ? 0F 29 B5 20 01 00 00"
+pattern = "48 8D 85 ? ? ? ? 48 89 85 ? ? ? ? 48 8D 0D ? ? ? ? 48 8D 95 ? ? ? ? E8 ? ? ? ? 0F 29 B5 20 01 00 00"
 rip_relative = true
-rip_offset = 23
+rip_offset = 29
 
 [[signatures]]
 name = "?_finishCooking@CampfireBlockActor@@AEAAXAEAVBlockSource@@H@Z"
@@ -228,7 +243,7 @@ extra = 0
 #    = "Register Command <{}> Alias <{}>\0" (unique)
 # 2. its lone data xref is a `lea` inside this function
 # 3. walk up to the prologue
-pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 80 00 00 00 48 C7 45 ? FE FF FF FF 49 89 CF 48 8B 42 10 48 83"
+pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 80 00 00 00 48 C7 45 ? FE FF FF FF 49 89 CC 48 8B 42 10 48 83"
 
 [[signatures]]
 name = "?registerCommand@CommandRegistry@@QEAAXAEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PEBDW4CommandPermissionLevel@@UCommandFlag@@3@Z"
@@ -300,7 +315,7 @@ extra = 0
 pattern = "55 41 57 41 56 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 48 C7 45 ? ? ? ? ? 48 89 D3 48 89 CE 48 89 D1 BA ? ? ? ? E8"
 
 [[signatures]]
-name = "?prepareFromRecipes@CraftingDataPacket@@SA?AV?$unique_ptr@VCraftingDataPacket@@U?$default_delete@VCraftingDataPacket@@@std@@@std@@AEBVRecipes@@_N@Z"
+name = "?prepareFromRecipes@CraftingDataPacket@@SA?AUCraftingDataPacketPayload@@AEBVRecipes@@_N@Z"
 relative = false
 extra = 0
 # 1. find bytes "43 72 61 66 74 69 6E 67 44 61 74 61 50 61 63 6B 65 74 00" = "CraftingDataPacket\0" (unique)
@@ -310,7 +325,7 @@ extra = 0
 #    the dtor, and THIS function, which builds the packet inline and stores the vtable ptr
 # 3. this function is the non-ctor/dtor one (returns a unique_ptr<CraftingDataPacket>, larger)
 # 4. confirm vs the old named DB
-pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 44 88 85 ? ? ? ? 48 89 D7 48 89 8D ? ? ? ? 48 8B 0D"
+pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 44 88 85 ? ? ? ? 48 89 D6"
 
 [[signatures]]
 name = "?start@DedicatedServer@@QEAA?AW4ServerExitCode@1@AEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBVActivationArguments@Bedrock@@@Z"
@@ -389,7 +404,7 @@ extra = 0
 # 2. landmark: MerchantRecipe::load reads the "buyA"/"buyB" child tags and calls this on each to build the
 #    trade ItemInstances - so the `call` right after a buyA/buyB tag lookup is the target
 # 3. confirm the callee vs the old named DB (static, takes a CompoundTag, returns an ItemInstance)
-pattern = "E8 ? ? ? ? 48 8D 4D ? 48 89 F2 E8 ? ? ? ? 48 89 F1 E8"
+pattern = "55 41 56 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 48 C7 45 ? ? ? ? ? 48 89 D6 49 89 CE 48 8D 3D"
 rip_relative = true
 rip_offset = 1
 
@@ -528,7 +543,7 @@ extra = 0
 #    = "commands.generic.invalidOrigin\0" (unique)
 # 2. its lone data xref is a `lea` inside this function
 # 3. walk up to the prologue
-pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 80 00 00 00 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? FE FF FF FF 44 89 CE 48 89 95 ? ? ? ? 48 89 8D ? ? ? ? 4C 89 85 ? ? ? ? 49 8B 48 20 48 8B 01 48 8B 80 A8 00 00 00"
+pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 80 00 00 00 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? FE FF FF FF 45 89 CF 4C 89 C3 48 89 D6 48 89 CF 49 8B 48 20 48 8B 01 48 8B 80 B0 00 00 00"
 
 [[signatures]]
 name = "?createPacket@MinecraftPackets@@SA?AV?$shared_ptr@VPacket@@@std@@W4MinecraftPacketIds@@@Z"
@@ -544,7 +559,7 @@ extra = 0
 pattern = "56 48 83 EC ? 48 89 CE 81 FA ? ? ? ? 77 ? 89 D0 48 8D 0D ? ? ? ? 48 63 04 81 48 01 C8 FF E0 0F 57 C0 0F 11 06 48 89 F0 48 83 C4 ? 5E C3 48 89 F1 E8 ? ? ? ? EB ? 48 89 F1 E8"
 
 [[signatures]]
-name = "?knockback@Mob@@UEAAXPEAVActor@@HMMAEBUKnockbackParameters@@@Z"
+name = "?knockback@Mob@@UEAAXPEAVActor@@MMMAEBUKnockbackParameters@@@Z"
 relative = false
 extra = 0
 # 1. knockback is a Mob virtual (UEAA). Player derives from Mob, so Player's vtable carries Mob's slots -
@@ -553,7 +568,7 @@ extra = 0
 #    teleportTo's slot)
 # 3. read the same slot in the new vtable -> Mob::knockback (ServerPlayer::knockback is a 5-byte thunk to it)
 # 4. confirm vs the old named DB
-pattern = "55 41 57 41 56 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 44 0F 29 95 ? ? ? ? 44 0F 29 8D ? ? ? ? 44 0F 29 85 ? ? ? ? 0F 29 BD ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 0F 28 F3 44 89 C3 48 89 D7 48 89 CE 4C 8B A5 ? ? ? ? 48 85 D2 74 ? 41 80 7C 24"
+pattern = "55 41 57 41 56 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 44 0F 29 8D ? ? ? ? 44 0F 29 85 ? ? ? ? 0F 29 BD ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 0F 28 F3"
 
 [[signatures]]
 name = "?send@NetworkSystem@@QEAAXAEBVNetworkIdentifier@@AEBVPacket@@W4SubClientId@@@Z"
@@ -567,23 +582,6 @@ extra = 0
 pattern = "48 8B 4E ? 48 83 C1 ? 48 83 C4 ? 5B 5D 5F 5E E9 ? ? ? ?"
 rip_relative = true
 rip_offset = 17
-
-[[signatures]]
-name = "?createPack@Pack@@SA?AV?$unique_ptr@VPack@@U?$default_delete@VPack@@@std@@@std@@AEBVIPackIOProvider@@AEBVResourceLocation@@W4PackType@@W4PackOrigin@@AEAVIPackManifestFactory@@V?$NonOwnerPointer@$$CBVIContentKeyProvider@@@Bedrock@@PEAVPackSourceReport@@AEBVPath@Core@@@Z"
-relative = false
-extra = 0
-# 1. Pack::EDUCATION_METADATA_FILE is a Core::PathBuffer global = "education.json", zero in the static
-#    image and built inline by a Pack-paths unity initializer (_GLOBAL__sub_I_unity_*) via two movabs
-#    immediates 0x6F69746163756465 ("educatio") + 0x6E6F736A2E6E6F69 ("ion.json"); land on that init via
-#    its real strcpy literals "pack_manifest.json\0" / "lock_template_options" / "base_game_version" (or
-#    the Mario/LittleBigPlanet pack UUIDs it also builds) - the store target of the "education.json" build
-#    is the EDUCATION_METADATA_FILE global
-# 2. that global's only reader (besides the init and its atexit dtor) is Pack::createPackMetadata, which
-#    loads it as an SSO string then calls accessStrategy->getAsset + EducationMetadataUtils::parse
-# 3. createPackMetadata has two callers; Pack::createPack is the large static factory (~0x802, returns
-#    unique_ptr<Pack>) - the other is a PackSource load lambda
-# 4. confirm vs the old named DB
-pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 45 88 CD 4D 89 C6 48 89 D7 48 89 8D ? ? ? ? 48 C7 01"
 
 [[signatures]]
 name = "?tick@PistonBlockActor@@UEAAXAEAVBlockSource@@@Z"
@@ -621,7 +619,7 @@ extra = 0
 #    the in-use item's id and sends it via mPacketSender->sendToClient (it also fires
 #    ItemEventCoordinator::sendEvent and ends by calling Player::stopUsingItem)
 # 4. confirm vs the old named DB (Player member, no args, returns void)
-pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 48 89 CE 48 8D B9 ? ? ? ? 48 8D 9D ? ? ? ? 48 89 D9 E8 ? ? ? ? 4C 8D 35 ? ? ? ? 4C 89 B5 ? ? ? ? 48 89 D9 48 89 FA E8 ? ? ? ? 48 8B 46 ? 4C 8B 68"
+pattern = "55 41 57 41 56 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 48 89 CE 48 8D 91"
 
 [[signatures]]
 name = "?drop@Player@@UEAA_NAEBVItemStack@@_N@Z"
@@ -634,16 +632,16 @@ extra = 0
 #    / ~95 entries above teleportTo's, in both the Player and derived ServerPlayer vtables)
 # 3. read the same slot in the new DB's Player vtable -> drop@Player; virtual order barely drifts per version
 # 4. confirm vs the old named DB (the neighbouring slots should line up)
-pattern = "55 41 57 41 56 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 48 89 CE 48 8B 89 ? ? ? ? 48 85 C9 0F 84 ? ? ? ? 8B 41 ? 66 0F 1F 44 00"
+pattern = "55 41 57 41 56 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 48 89 CE 48 8B 89 ? ? ? ? 48 85 C9"
 
 [[signatures]]
-name = "?startSleepInBed@Player@@UEAA?AW4BedSleepingResult@@AEBVBlockPos@@@Z"
+name = "?startSleepInBed@Player@@UEAA?AW4BedSleepingResult@@AEBVBlockPos@@_NM@Z"
 relative = false
 extra = 0
 # 1. find bytes "31 20 73 74 61 72 74 53 6C 65 65 70 49 6E 42 65 64 00" = "1 startSleepInBed\0" (unique)
 # 2. its lone data xref (a validateBlockPos label arg) is a `lea` inside this function
 # 3. walk up to the prologue
-pattern = "55 41 57 41 56 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 44 0F 29 55 ? 44 0F 29 4D ? 44 0F 29 45 ? 0F 29 7D ? 0F 29 75 ? 48 C7 45 ? FE FF FF FF 48 89 D7 48 89 CE"
+pattern = "55 41 57 41 56 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 44 0F 29 9D ? ? ? ? 44 0F 29 95 ? ? ? ? 44 0F 29 8D ? ? ? ? 44 0F 29 45"
 
 [[signatures]]
 name = "?stopSleepInBed@Player@@UEAAX_N0@Z"
@@ -680,7 +678,7 @@ extra = 0
 # 1. find bytes "33 20 50 6C 61 79 65 72 20 74 65 6C 65 70 6F 72 74 54 6F 00" = "3 Player teleportTo\0" (unique)
 # 2. its lone data xref (a validateVec3Position label arg) is a `lea` inside this function
 # 3. walk up to the prologue
-pattern = "41 57 41 56 56 57 55 53 48 81 EC ? ? ? ? 44 0F 29 9C 24 ? ? ? ? 44 0F 29 94 24 ? ? ? ? 44 0F 29 8C 24 ? ? ? ? 66 44 0F 7F 84 24"
+pattern = "55 41 57 41 56 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 44 0F 29 9D ? ? ? ? 44 0F 29 95 ? ? ? ? 44 0F 29 8D ? ? ? ? 66 44 0F 7F 85 ? ? 00 00"
 
 [[signatures]]
 name = "?Send_Windows_Linux_360NoVDP@RNS2_Windows_Linux_360@RakNet@@KAHHPEAURNS2_SendParameters@2@PEBDI@Z"
@@ -708,8 +706,8 @@ rip_offset = 1
 name = "?createSources@RepositoryFactory@@UEBA?AV?$shared_ptr@VRepositorySources@@@std@@AEBVIResourcePackRepository@@@Z"
 relative = false
 extra = 0
-# 1. reach the ResourcePackRepository ctor via the unique string "Resource Repository Async Group" (see
-#    initializePackSource@RepositorySources for that anchor)
+# 1. reach the ResourcePackRepository ctor via the unique string "Resource Repository Async Group" (the
+#    async TaskGroup name); its lone data xref is a `lea` inside that ctor
 # 2. in the ctor, when the supplied IRepositoryFactory arg is null, it `operator new(8)` a default
 #    RepositoryFactory, stores &RepositoryFactory::vftable into it (-> mFactory), then immediately makes a
 #    virtual call through that vtable's SLOT 1 to build the shared_ptr<RepositorySources> that becomes
@@ -719,47 +717,6 @@ extra = 0
 # 4. confirm by its body: lock_shared ServiceLocator<AppPlatform>, RepositorySourceOptions::create(
 #    repository, platform), then make_shared<RepositorySources>(options); confirm vs the old named DB
 pattern = "55 41 56 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 4C 89 C7 48 89 D6 4C 8D 35"
-
-[[signatures]]
-name = "?initializePackSource@RepositorySources@@QEAAXAEAVPackSourceFactory@@@Z"
-relative = false
-extra = 0
-# 1. find the unique string "Resource Repository Async Group" (the async TaskGroup name); its lone data
-#    xref is a `lea` inside the ResourcePackRepository ctor, which make_unique's that TaskGroup ~20 insns
-#    above the target call
-# 2. just below, the ctor makes two back-to-back member calls: RepositorySources::initializePackSource(
-#    mSources, mPackSourceFactory) then ResourcePackRepositoryRefreshQueue::initialize(mRefresher, _,
-#    mTaskGroup). initializePackSource is the FIRST of the pair - the second (whose lone caller is this
-#    ctor) pins it; RefreshQueue::initialize is itself recognizable by the pretty-function task label
-#    "ResourcePackRepositoryRefreshQueue::initialize(TaskGroup &)::(anonymous class)::operator()(
-#    PreviousTasks &) const"
-# 3. confirm initializePackSource by its body: it rebuilds the pack-source tree via repeated
-#    PackSourceFactory::createCompositePackSource (mWorldPackSource / mPremiumWorldTemplatePackSource /
-#    mTempWorldTemplatePackSource / mCachePackSource / mPackSource) plus two createInPackagePackSource
-#    calls (args 6 and 4). NOTE: it has a second caller, a RepositoryLoading async lambda - the pattern
-#    below matches that call site, not the ctor one
-# 4. confirm vs the old named DB
-pattern = "E8 ? ? ? ? 0F 57 C0 0F 29 44 24 ? 48 8B 47"
-rip_relative = true
-rip_offset = 1
-
-[[signatures]]
-name = "?deserialize@ResourcePackStack@@SA?AV?$unique_ptr@VResourcePackStack@@U?$default_delete@VResourcePackStack@@@std@@@std@@AEAV?$basic_istream@DU?$char_traits@D@std@@@3@AEBV?$not_null@V?$NonOwnerPointer@$$CBVIResourcePackRepository@@@Bedrock@@@gsl@@V?$optional@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@3@@Z"
-relative = false
-extra = 0
-# 1. find bytes "73 75 62 70 61 63 6B 00" = "subpack" (unique); referenced INSIDE
-#    ResourceHelper::deserializePackStackEntry - more distinctive than the "pack_id" key it also reads
-#    ("pack_id" has a 2nd instance passed AS the param, so anchor on subpack, not pack_id)
-# 2. deserializePackStackEntry (~500 insns in 1.26.32; hashes the pack_id value with a salt into a UUID
-#    PackInstanceId) is xref'd by the forEachPackId loop
-# 3. in 1.26.20 forEachPackId is a separate ResourcePackStackAnon helper whose lone caller is
-#    deserialize; in 1.26.32 forEachPackId is INLINED into deserialize, so the chain SHORTENS - the
-#    loop's caller IS deserialize directly (it parses the istream via Json::Reader::parse, reads
-#    "pack_id", logs "Configured pack (id: {}, version: {}) was not found and was ignored"). The size
-#    balloons (named 0x15e -> 0xa74) from absorbing the helper
-# 4. confirm vs the old named DB: static returning unique_ptr<ResourcePackStack> from an istream; its
-#    direct callers are ServerInstance::initializeServer + FileArchiver::_exportLevelFiles
-pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 66 44 0F 29 85 ? ? ? ? 66 0F 29 BD ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 4C 89 8D ? ? ? ? 4C 89 C7 48 89 D6 49 89 CE 48 8B 0D ? ? ? ? 48 8B 01 48 8B 40 ? BA ? ? ? ? FF 15"
 
 [[signatures]]
 name = "?_sendMessage@SayCommand@@CAXAEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV?$optional@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@3@0AEBUCommandOriginIdentity@@AEAVLevel@@@Z"
@@ -796,7 +753,7 @@ extra = 0
 # 2. walk up to the prologue. The arg-shuffle after the frame setup is codegen-volatile: 1.26.20 was
 #    4C89C3/4889D6/4889CF, 1.26.30 is 4C89C7/4989D4/4889CB - re-derive per version, else the pattern
 #    false-matches an unrelated function that kept the old shuffle (the 1.26.20 pattern hit sub @0x1F5ADE0)
-pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? FE FF FF FF 4D 89 CE 4C 89 C7 49 89 D4 48 89 CB 48 8B 01"
+pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? FE FF FF FF 4D 89 CE 4C 89 C7 48 89 D6 48 89 CB 48 8B 01"
 
 [[signatures]]
 name = "?disconnectClientWithMessage@ServerNetworkHandler@@QEAAXAEBVNetworkIdentifier@@W4SubClientId@@W4DisconnectFailReason@Connection@@AEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$optional@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@7@@Z"
@@ -813,7 +770,7 @@ rip_relative = true
 rip_offset = 17
 
 [[signatures]]
-name = "?initializeServer@ServerInstance@@QEAA_N$$QEAUServerInstanceInitArguments@@@Z"
+name = "?initializeServer@ServerInstance@@QEAA?AUServerInitResult@ServerInitialization@@$$QEAUServerInstanceInitArguments@@@Z"
 relative = false
 extra = 0
 # 1. find bytes "53 65 72 76 65 72 49 6E 73 74 61 6E 63 65 20 54 68 72 65 61 64 00" = "ServerInstance Thread\0"
@@ -821,7 +778,7 @@ extra = 0
 #    strings/lambda names and is only unique with its trailing 00)
 # 2. its lone data xref is a `lea` inside this function
 # 3. walk up to the prologue
-pattern = "55 41 57 41 56 41 55 41 54 56 57 53 B8 ? ? ? ? E8 ? ? ? ? 48 29 C4 48 8D AC 24 80 00 00 00 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? FE FF FF FF 48 89 95 ? ? ? ? 48 8D 9A 30 05 00 00"
+pattern = "55 41 57 41 56 41 55 41 54 56 57 53 B8 ? ? ? ? E8 ? ? ? ? 48 29 C4 48 8D AC 24 80 00 00 00 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? FE FF FF FF 4C 89 85 ? ? ? ? 48 89 95 ? ? ? ? 48 89 8D ? ? ? ? 48 8B 0D"
 
 [[signatures]]
 name = "?tryToLoadPlayer@ServerNetworkHandler@@QEAA_NAEAVServerPlayer@@AEBVConnectionRequest@@AEBUPlayerAuthenticationInfo@@@Z"
@@ -830,9 +787,7 @@ extra = 0
 # 1. find bytes "6D 69 6E 65 63 72 61 66 74 3A 70 6C 61 79 65 72 2E 30 00" = "minecraft:player.0\0" (unique)
 # 2. its data xrefs (both of them) are `lea`s inside this function
 # 3. walk up to the prologue
-pattern = "E8 ? ? ? ? 84 C0 74 ? 44 0F B6 BB ? ? ? ?"
-rip_relative = true
-rip_offset = 1
+pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 80 00 00 00 48 C7 45 ? FE FF FF FF 4D 89 CE 4C 89 C7 48 89 D6 49 89 CF 48 81 C1"
 
 [[signatures]]
 name = "?updateServerAnnouncement@ServerNetworkHandler@@QEAAXXZ"
@@ -846,7 +801,7 @@ extra = 0
 #    (string-locatable); in its caller sendLoginMessageLocal, updateServerAnnouncement is the very FIRST
 #    call (just above _sendLevelData/_sendAdditionalLevelData)
 # 4. confirm vs the old named DB
-pattern = "41 57 41 56 41 55 41 54 56 57 55 53 48 83 EC ? 80 B9 ? ? ? ? ? 0F 85 ? ? ? ? 48 89 CE 48 83 B9 ? ? ? ? ? 0F 84 ? ? ? ? 48 83 BE ? ? ? ? ? 75 ? 48 8D 05 ? ? ? ? 48 89 44 24"
+pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 80 00 00 00 48 C7 45 ? FE FF FF FF 80 B9 ? ? ? ? ? 0F 85 ? ? ? ? 48 89 CE 48 83 B9 ? ? ? ? ? 0F 84"
 
 [[signatures]]
 name = "?changeDimension@ServerPlayer@@UEAAXUDimensionType@@@Z"

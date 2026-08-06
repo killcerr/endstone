@@ -20,6 +20,9 @@ patches:
     - patch_file: "patches/4.081-disable-plugins.patch"
       patch_description: "Disable all optional RakNet plugins"
       patch_type: "conan"
+    - patch_file: "patches/4.081-acknak-range-bound.patch"
+      patch_description: "Bound ACK/NAK acknowledgement ranges (count, per-datagram total, reject 0xFFFFFF on NAK) so a malformed datagram cannot drive the reliability layer into a runaway loop; mirrors Mojang's BDS fix"
+      patch_type: "security"
   "4.081-mojang":
     - patch_file: "patches/4.081-fix-gettimeofday-include.patch"
       patch_description: "Fix malformed `#include < time.h >` (spaces inside angle brackets) that modern preprocessors reject."
@@ -36,6 +39,9 @@ patches:
     - patch_file: "patches/4.081-mojang-define-overrides.patch"
       patch_description: "Mojang RakNet define overrides (protocol version 11, 20 internal IDs, MTU 1600)"
       patch_type: "conan"
+    - patch_file: "patches/4.081-acknak-range-bound.patch"
+      patch_description: "Bound ACK/NAK acknowledgement ranges (count, per-datagram total, reject 0xFFFFFF on NAK) so a malformed datagram cannot drive the reliability layer into a runaway loop; mirrors Mojang's BDS fix"
+      patch_type: "security"
 
 mojang_vtable_patches:
   "r26u2":

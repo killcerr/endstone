@@ -296,7 +296,7 @@ void EndstonePlayer::stopSound(std::string sound)
 {
     const auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::StopSound);
     const auto pk = std::static_pointer_cast<StopSoundPacket>(packet);
-    pk->name = sound;
+    pk->payload.name = sound;
     getHandle().sendNetworkPacket(*packet);
 }
 
@@ -304,7 +304,7 @@ void EndstonePlayer::stopAllSounds()
 {
     const auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::StopSound);
     const auto pk = std::static_pointer_cast<StopSoundPacket>(packet);
-    pk->stop_all = true;
+    pk->payload.stop_all = true;
     getHandle().sendNetworkPacket(*packet);
 }
 
@@ -619,11 +619,7 @@ void EndstonePlayer::sendForm(FormVariant form)
     auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::ShowModalForm);
     std::shared_ptr<ModalFormRequestPacket> pk = std::static_pointer_cast<ModalFormRequestPacket>(packet);
     pk->payload.form_id = ++form_ids_;
-    pk->payload.form_json = std::visit(overloaded{[](auto &&arg) {
-                                           return FormCodec::toJson(arg);
-                                       }},
-                                       form)
-                                .dump();
+    pk->payload.form_json = std::visit(overloaded{[](auto &&arg) { return FormCodec::toJson(arg); }}, form).dump();
     forms_.emplace(pk->payload.form_id, std::move(form));
     getHandle().sendNetworkPacket(*packet);
 }
@@ -646,23 +642,23 @@ void EndstonePlayer::sendMap(MapView &map)
     auto &view = static_cast<EndstoneMapView &>(map);
     auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::MapData);
     auto &pk = static_cast<ClientboundMapItemDataPacket &>(*packet);
-    pk.map_ids_.clear();
-    pk.map_ids_.emplace_back(view.map_.getMapId());
-    pk.scale_ = view.map_.getScale();
-    pk.start_x_ = 0;
-    pk.start_y_ = 0;
-    pk.map_origin_ = view.map_.getOrigin();
-    pk.dimension_ = view.map_.getDimensionId().value;
-    pk.width_ = MapConstants::MAP_SIZE;
-    pk.height_ = MapConstants::MAP_SIZE;
-    pk.type_ = ClientboundMapItemDataPacket::Type::TextureUpdate | ClientboundMapItemDataPacket::Type::DecorationUpdate;
-    pk.locked_ = view.map_.isLocked();
+    pk.payload.map_id = view.map_.getMapId();
+    pk.payload.scale = view.map_.getScale();
+    pk.payload.start_x = 0;
+    pk.payload.start_y = 0;
+    pk.payload.map_origin = view.map_.getOrigin();
+    pk.payload.dimension = view.map_.getDimensionId().value;
+    pk.payload.width = MapConstants::MAP_SIZE;
+    pk.payload.height = MapConstants::MAP_SIZE;
+    pk.payload.type =
+        ClientboundMapItemDataPacket::Type::TextureUpdate | ClientboundMapItemDataPacket::Type::DecorationUpdate;
+    pk.payload.locked = view.map_.isLocked();
 
     for (const auto &[unique_id, decoration] : view.map_.getDecorations()) {
-        pk.unique_ids_.emplace_back(unique_id);
-        pk.decorations_.emplace_back(decoration);
+        pk.payload.unique_ids.emplace_back(unique_id);
+        pk.payload.decorations.emplace_back(decoration);
     }
-    pk.map_pixels_.resize(pk.width_ * pk.height_);
+    pk.payload.map_pixels.resize(pk.payload.width * pk.payload.height);
     getHandle().sendNetworkPacket(*packet);
 }
 
@@ -740,39 +736,39 @@ bool EndstonePlayer::handlePacket(Packet &packet)
         if (pk.isServerSide()) {
             return true;
         }
-        PlayerEmoteEvent e(*this, pk.piece_id, pk.isEmoteChatMuted());
+        PlayerEmoteEvent e(*this, pk.payload.piece_id, pk.isEmoteChatMuted());
         getServer().getPluginManager().callEvent(e);
         if (e.isCancelled()) {
             return false;
         }
         if (e.isMuted()) {
-            pk.flags |= static_cast<uint8_t>(EmotePacket::Flags::MUTE_EMOTE_CHAT);
+            pk.payload.flags |= static_cast<uint8_t>(EmotePacket::Flags::MUTE_EMOTE_CHAT);
         }
         else {
-            pk.flags &= ~static_cast<uint8_t>(EmotePacket::Flags::MUTE_EMOTE_CHAT);
+            pk.payload.flags &= ~static_cast<uint8_t>(EmotePacket::Flags::MUTE_EMOTE_CHAT);
         }
         return true;
     }
     case MinecraftPacketIds::PlayerAuthInputPacket: {
         auto &pk = static_cast<PlayerAuthInputPacket &>(packet);
-        if (pk.getInput(PlayerAuthInputPacket::StartSprinting) && !getHandle().isSprinting()) {
+        if (pk.getInput(PlayerAuthInputPacket::InputData::StartSprinting) && !getHandle().isSprinting()) {
             PlayerSprintEvent e(*this, true);
             getServer().getPluginManager().callEvent(e);
         }
-        if (pk.getInput(PlayerAuthInputPacket::StopSprinting) && getHandle().isSprinting()) {
+        if (pk.getInput(PlayerAuthInputPacket::InputData::StopSprinting) && getHandle().isSprinting()) {
             PlayerSprintEvent e(*this, false);
             getServer().getPluginManager().callEvent(e);
         }
-        if (pk.getInput(PlayerAuthInputPacket::StartSneaking) && !getHandle().isSneaking()) {
+        if (pk.getInput(PlayerAuthInputPacket::InputData::StartSneaking) && !getHandle().isSneaking()) {
             PlayerSneakEvent e(*this, true);
             getServer().getPluginManager().callEvent(e);
         }
-        if (pk.getInput(PlayerAuthInputPacket::StopSneaking) && getHandle().isSneaking()) {
+        if (pk.getInput(PlayerAuthInputPacket::InputData::StopSneaking) && getHandle().isSneaking()) {
             PlayerSneakEvent e(*this, false);
             getServer().getPluginManager().callEvent(e);
         }
 
-        auto &actions = pk.player_block_actions.actions_;
+        auto &actions = pk.payload.player_block_actions.actions_;
         for (auto it = actions.begin(); it != actions.end();) {
             const auto &action = *it;
             if (action.player_action_type == PlayerActionType::StartDestroyBlock) {
@@ -798,14 +794,19 @@ bool EndstonePlayer::handlePacket(Packet &packet)
         auto &actor = getHandle();
         const auto pos = actor.getPosition();
         const auto rot = actor.getRotation();
-        const auto delta = pk.pos - pos;
-        const auto delta_angle = pk.rot - rot;
+        const auto &input = pk.payload;
+        const auto delta = input.pos - pos;
+        const auto delta_angle = input.rot - rot;
         const auto on_ground = actor.isOnGround();
 
         const Location from = getLocation();
         const auto height_offset = ActorOffset::getHeightOffset(actor.getEntity());
-        const Location to{
-            getDimension().shared_from_this(), pk.pos.x, pk.pos.y - height_offset, pk.pos.z, pk.rot.x, pk.rot.y};
+        const Location to{getDimension().shared_from_this(),
+                          input.pos.x,
+                          input.pos.y - height_offset,
+                          input.pos.z,
+                          input.rot.x,
+                          input.rot.y};
 
         if (pk.getInput(PlayerAuthInputPacket::InputData::Jumping) && on_ground && delta.y > 0.0F) {
             PlayerJumpEvent e{*this, from, to};
@@ -834,7 +835,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
                     payload.pos_delta = Vec3::ZERO;
                     payload.vehicle_rotation = Vec2::ZERO;
                     payload.vehicle_angular_velocity = std::nullopt;
-                    payload.tick = pk.client_tick;
+                    payload.tick = input.client_tick;
                     payload.on_ground = on_ground;
                     payload.prediction_type = RewindType::Player;
                     actor.sendNetworkPacket(*correction);

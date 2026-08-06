@@ -14,6 +14,11 @@
 
 #include "bedrock/resources/pack_manifest.h"
 
+ResourceLocation const &PackManifest::getLocation() const
+{
+    return location_;
+}
+
 PackIdVersion const &PackManifest::getIdentity() const
 {
     return identity_;
@@ -22,4 +27,9 @@ PackIdVersion const &PackManifest::getIdentity() const
 std::string PackManifest::getName() const
 {
     return name_;
+}
+
+PackType PackManifest::getPackType() const
+{
+    return pack_type_;
 }

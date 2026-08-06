@@ -15,9 +15,17 @@
 #pragma once
 
 #include "bedrock/network/packet.h"
+#include "bedrock/network/packet/cerealize/core/serialization_mode.h"
 #include "bedrock/network/sub_client_connection_request.h"
+
+struct SubClientLoginPacketPayload {
+    std::unique_ptr<SubClientConnectionRequest> connection_request;  // +0
+};
+BEDROCK_STATIC_ASSERT_SIZE(SubClientLoginPacketPayload, 8, 8);
 
 class SubClientLoginPacket : public Packet {
 public:
-    std::unique_ptr<SubClientConnectionRequest> connection_request;
+    SubClientLoginPacketPayload payload;                                               // +48
+    SerializationMode serialization_mode{SerializationMode::SideBySide_LogOnMismatch};  // +56
 };
+BEDROCK_STATIC_ASSERT_SIZE(SubClientLoginPacket, 64, 64);

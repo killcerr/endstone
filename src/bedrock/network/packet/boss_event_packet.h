@@ -20,17 +20,22 @@
 #include "bedrock/safety/redactable_string.h"
 #include "bedrock/world/actor/actor_unique_id.h"
 
+struct BossEventPacketPayload {
+    const int FLAG_DARKEN{1};                // +0
+    const int FLAG_FOG{2};                   // +4
+    ActorUniqueID boss_id;                   // +8
+    ActorUniqueID player_id;                 // +16
+    BossEventUpdateType event_type;          // +24
+    Bedrock::Safety::RedactableString name;  // +32
+    float health_percent;                    // +104
+    BossBarColor color;                      // +108
+    BossBarOverlay overlay;                  // +109
+};
+BEDROCK_STATIC_ASSERT_SIZE(BossEventPacketPayload, 112, 96);
+
 class BossEventPacket : public Packet {
 public:
-    const int FLAG_DARKEN{1};
-    const int FLAG_FOG{2};
-    ActorUniqueID boss_id;
-    ActorUniqueID player_id;
-    BossEventUpdateType event_type;
-    Bedrock::Safety::RedactableString name;
-    float health_percent;
-    BossBarColor color;
-    BossBarOverlay overlay;
-    SerializationMode serialization_mode{SerializationMode::CerealOnly};
+    BossEventPacketPayload payload;                                       // +48
+    SerializationMode serialization_mode{SerializationMode::CerealOnly};  // +160
 };
 BEDROCK_STATIC_ASSERT_SIZE(BossEventPacket, 168, 152);

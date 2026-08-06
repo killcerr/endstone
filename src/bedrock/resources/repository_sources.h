@@ -17,14 +17,12 @@
 #include <memory>
 
 #include "bedrock/resources/pack_source.h"
-#include "bedrock/resources/pack_source_factory.h"
 
 struct RepositorySourceOptions;
 
 class RepositorySources {
 public:
     RepositorySources(RepositorySourceOptions &&options);
-    ENDSTONE_HOOK void initializePackSource(PackSourceFactory &pack_source_factory);
 
 private:
     std::unique_ptr<const RepositorySourceOptions> options_;

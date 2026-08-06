@@ -1,5 +1,5 @@
 [build-system]
-requires = ["conan-py-build>=0.6.0", "cmake", "ninja", "setuptools-scm"]
+requires = ["conan-py-build>=0.6.1", "setuptools-scm"]
 build-backend = "conan_py_build.build"
 
 [project]
@@ -98,6 +98,8 @@ repair-wheel-command = [
 [tool.cibuildwheel.linux]
 manylinux-x86_64-image = "ghcr.io/endstonemc/manylinux_2_31_x86_64"
 environment = { LLVM_VERSION = 20, CC = "/usr/bin/clang", CXX = "/usr/bin/clang++" }
+# The runner's ninja is outside the container, and the conan profile needs one on PATH.
+before-build = "pip install ninja"
 before-all = [
     "apt-get update -y -q && apt-get install -y -q build-essential lsb-release wget software-properties-common gnupg",
     "wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh ${LLVM_VERSION}",

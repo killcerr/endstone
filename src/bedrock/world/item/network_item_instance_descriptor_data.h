@@ -14,21 +14,18 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 
-#include "bedrock/network/packet.h"
-#include "bedrock/network/packet/cerealize/core/serialization_mode.h"
+#include "bedrock/bedrock.h"
 
-struct StopSoundPacketPayload {
-    std::string name;        // +0
-    bool stop_all;           // +32
-    bool stop_music_legacy;  // +33
+// TODO(fixme): check the name - the cereal scope name is read from the binary, but its identity with
+// this element could not be proven; only the layout is confirmed.
+struct NetworkItemInstanceDescriptorData {
+    int id;                       // +0
+    std::int16_t stack_size;      // +4
+    int aux_value;                // +8
+    int block_runtime_id;         // +12
+    std::string user_data_buffer;  // +16, an already-serialized NBT blob
 };
-BEDROCK_STATIC_ASSERT_SIZE(StopSoundPacketPayload, 40, 32);
-
-class StopSoundPacket : public Packet {
-public:
-    StopSoundPacketPayload payload;                                                    // +48
-    SerializationMode serialization_mode{SerializationMode::SideBySide_LogOnMismatch};  // +88
-};
-BEDROCK_STATIC_ASSERT_SIZE(StopSoundPacket, 96, 88);
+BEDROCK_STATIC_ASSERT_SIZE(NetworkItemInstanceDescriptorData, 48, 40);

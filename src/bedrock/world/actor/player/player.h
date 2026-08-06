@@ -101,7 +101,7 @@ public:
     virtual void displayTextObjectWhisperMessage(std::string const &, std::string const &, std::string const &) = 0;
     virtual void displayWhisperMessage(std::string const &, std::string const &, std::string const &,
                                        std::string const &) = 0;
-    ENDSTONE_HOOK virtual BedSleepingResult startSleepInBed(BlockPos const &bed_block_pos);
+    ENDSTONE_HOOK virtual BedSleepingResult startSleepInBed(BlockPos const &bed_block_pos, bool a2, float a3);
     virtual void stopSleepInBed(bool, bool) = 0;
     virtual bool canStartSleepInBed() = 0;
     virtual void openSign(BlockPos const &, bool) = 0;
@@ -135,12 +135,18 @@ public:
     virtual bool isSimulated() = 0;
     [[nodiscard]] virtual std::string getXuid() const = 0;
     [[nodiscard]] virtual PlayerMovementSettings getMovementSettings() const = 0;
+    // TODO(fixme): check the name
+    virtual void unknown234() const = 0;  // returns a nested optional; zeroes engaged flags at +0 and +0x20
     virtual void requestMissingSubChunk(SubChunkPos const &) = 0;
     [[nodiscard]] virtual std::uint8_t getMaxChunkBuildRadius() const = 0;
     virtual void setBehaviorCommandStatus(const std::string &, BehaviorStatus) = 0;
     virtual void setRemotePlayerTicked(bool) = 0;
+    // TODO(fixme): check the name
+    virtual void unknown239() = 0;  // returns a null unique_ptr
 
 protected:
+    // TODO(fixme): check the name
+    virtual void unknown240() = 0;  // added in 1.26.40; void, takes one reference
     virtual void onMovePlayerPacketNormal(Vec3 const &, Vec2 const &, float) = 0;
     virtual std::shared_ptr<ChunkViewSource> _createChunkSource(ChunkSource &) = 0;
 
@@ -149,11 +155,6 @@ public:
     [[nodiscard]] virtual void *getEditorPlayer() const = 0;
     virtual void destroyEditorPlayer() = 0;
 
-protected:
-    [[nodiscard]] virtual int _getSpawnChunkLimit() const = 0;
-    virtual void updateChunkPublisherView(Vec3 const &, float) = 0;
-
-public:
     static Player *tryGetFromEntity(EntityContext &entity, bool include_removed = false);
 
     [[nodiscard]] bool hasBedPosition() const;

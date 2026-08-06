@@ -38,6 +38,17 @@ struct InventoryMismatchData {
     InventoryTransaction transaction;
 };
 
+struct InventoryTransactionPacketPayload {
+    ItemStackLegacyRequestId legacy_request_id;                                                   // +0
+    std::vector<std::pair<ContainerEnumName, std::vector<unsigned char>>> legacy_set_item_slots;  // +16
+    std::variant<NormalTransactionData, InventoryMismatchData, ItemUseInventoryTransaction,
+                 ItemUseOnActorInventoryTransaction, ItemReleaseInventoryTransaction>
+        variant_transaction;                                   // +40
+    std::unique_ptr<ComplexInventoryTransaction> transaction;  // +312
+    bool is_client_side;                                       // +320
+};
+BEDROCK_STATIC_ASSERT_SIZE(InventoryTransactionPacketPayload, 328, 288);
+
 class InventoryTransactionPacket : public Packet {
 public:
     [[nodiscard]] MinecraftPacketIds getId() const override;
@@ -46,15 +57,10 @@ public:
     void handle(ServerPlayer &player, BlockPalette &block_palette, const MoveInputComponent &move_input,
                 ActorRotationComponent &actor_rotation, bool is_aim_assist) const;
 
-    ItemStackLegacyRequestId legacy_request_id;
-    std::vector<std::pair<ContainerEnumName, std::vector<unsigned char>>> legacy_set_item_slots;
-    std::variant<NormalTransactionData, InventoryMismatchData, ItemUseInventoryTransaction,
-                 ItemUseOnActorInventoryTransaction, ItemReleaseInventoryTransaction>
-        variant_transaction;
-    std::unique_ptr<ComplexInventoryTransaction> transaction;
-    bool is_client_side;
-    SerializationMode serialization_mode{SerializationMode::CerealOnly};
+    InventoryTransactionPacketPayload payload;                            // +48
+    SerializationMode serialization_mode{SerializationMode::CerealOnly};  // +376
 
 private:
     Bedrock::Result<void> _read(ReadOnlyBinaryStream &stream) override;
 };
+BEDROCK_STATIC_ASSERT_SIZE(InventoryTransactionPacket, 384, 344);

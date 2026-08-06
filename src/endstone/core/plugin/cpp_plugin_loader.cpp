@@ -95,8 +95,13 @@ Plugin *CppPluginLoader::loadPlugin(std::string file)
     auto init_plugin = GET_FUNCTION(module, "init_endstone_plugin");
     if (!init_plugin) {
         CLOSE_LIBRARY(module);
-        logger.error("Failed to load c++ plugin from {}: No entry point. Did you forget ENDSTONE_PLUGIN?",
-                     path.string());
+        // endstone_add_plugin prefixes everything it builds, so a file that kept the prefix and has
+        // no entry point is a plugin that forgot ENDSTONE_PLUGIN. One without it is somebody else's
+        // library sitting in the folder, and whoever dropped the prefix knew what they were doing.
+        if (path.filename().string().starts_with("endstone_")) {
+            logger.error("Failed to load c++ plugin from {}: No entry point. Did you forget ENDSTONE_PLUGIN?",
+                         path.string());
+        }
         return nullptr;
     }
 

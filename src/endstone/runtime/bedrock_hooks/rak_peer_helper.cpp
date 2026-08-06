@@ -68,70 +68,61 @@ static endstone::ServerListPingEvent callServerListPingEvent(endstone::SocketAdd
 
 RakNet::RakPeer *gRakPeer = nullptr;
 
+static bool handleUnconnectedPing(RakNet::RNS2RecvStruct *recv)
+{
+    if (recv->bytesRead < sizeof(unsigned char) + sizeof(RakNet::Time) + sizeof(OFFLINE_MESSAGE_DATA_ID)) {
+        return true;
+    }
+    char *ping_data;
+    std::uint32_t ping_size;
+    gRakPeer->GetOfflinePingResponse(&ping_data, &ping_size);
+    if (ping_size < 2 || (ping_data[0] << 8 | ping_data[1]) != ping_size - 2) {
+        return true;
+    }
+
+    // call ServerListPingEvent with the default offline ping response
+    auto address = endstone::core::EndstoneSocketAddress::fromSystemAddress(recv->systemAddress);
+    auto event = callServerListPingEvent(address, std::string_view(ping_data + 2, ping_size - 2));
+    if (event.isCancelled()) {
+        return false;
+    }
+
+    // parse ping request
+    RakNet::BitStream is((unsigned char *)recv->data, recv->bytesRead, false);
+    is.IgnoreBits(8);
+    RakNet::Time sendPingTime;
+    is.Read(sendPingTime);
+    is.IgnoreBytes(sizeof(OFFLINE_MESSAGE_DATA_ID));
+    auto remoteGuid = RakNet::UNASSIGNED_RAKNET_GUID;
+    is.Read(remoteGuid);
+
+    // prepare ping response
+    auto response =
+        std::format("MCPE;{};{};{};{};{};{};{};{};1;{};{};0;", event.getMotd(), event.getNetworkProtocolVersion(),
+                    event.getMinecraftVersionNetwork(), event.getNumPlayers(), event.getMaxPlayers(),
+                    event.getServerGuid(), event.getLevelName(), magic_enum::enum_name(event.getGameMode()),
+                    event.getLocalPort(), event.getLocalPortV6());
+    RakNet::BitStream os;
+    os.Write(static_cast<RakNet::MessageID>(ID_UNCONNECTED_PONG));
+    os.Write(sendPingTime);
+    os.Write(gRakPeer->GetMyGUID());
+    os.WriteAlignedBytes(OFFLINE_MESSAGE_DATA_ID, sizeof(OFFLINE_MESSAGE_DATA_ID));
+    os.Write(static_cast<std::uint16_t>(response.size()));
+    os.Write(response.data(), response.size());
+
+    // send directly via socket
+    RakNet::RNS2_SendParameters bsp;
+    bsp.data = reinterpret_cast<char *>(os.GetData());
+    bsp.length = os.GetNumberOfBytesUsed();
+    bsp.systemAddress = recv->systemAddress;
+    recv->socket->Send(&bsp, _FILE_AND_LINE_);
+    return false;
+}
+
 bool handleIncomingDatagram(RakNet::RNS2RecvStruct *recv)
 {
-    // #blameMojang - MCPE-228407: Mojang's custom RakNet packet 0x86 handler reads SystemAddress
-    // without checking if the packet is large enough to contain one. Networking 101: validate before read.
-    // Reported to Mojang, closed as "Won't Fix". Classic.
-    // Fix: drop undersized packets before they reach the vulnerable code path.
-    if (static_cast<unsigned char>(recv->data[0]) == 0x86) {
-        int expected_size = sizeof(unsigned char) + sizeof(unsigned char);
-        if (recv->data[1] == 4) {  // ipv4
-            expected_size += sizeof(std::uint32_t) + sizeof(std::uint16_t);
-        }
-        else {  // ipv6
-            expected_size += sizeof(sockaddr_in6);
-        }
-        if (recv->bytesRead < expected_size) {
-            return false;
-        }
-    }
-    if (recv->data[0] == ID_UNCONNECTED_PING &&
-        recv->bytesRead >= sizeof(unsigned char) + sizeof(RakNet::Time) + sizeof(OFFLINE_MESSAGE_DATA_ID)) {
-        char *ping_data;
-        std::uint32_t ping_size;
-        gRakPeer->GetOfflinePingResponse(&ping_data, &ping_size);
-        if (ping_size < 2 || (ping_data[0] << 8 | ping_data[1]) != ping_size - 2) {
-            return true;
-        }
-
-        // call ServerListPingEvent with the default offline ping response
-        auto address = endstone::core::EndstoneSocketAddress::fromSystemAddress(recv->systemAddress);
-        auto event = callServerListPingEvent(address, std::string_view(ping_data + 2, ping_size - 2));
-        if (event.isCancelled()) {
-            return false;
-        }
-
-        // parse ping request
-        RakNet::BitStream is((unsigned char *)recv->data, recv->bytesRead, false);
-        is.IgnoreBits(8);
-        RakNet::Time sendPingTime;
-        is.Read(sendPingTime);
-        is.IgnoreBytes(sizeof(OFFLINE_MESSAGE_DATA_ID));
-        auto remoteGuid = RakNet::UNASSIGNED_RAKNET_GUID;
-        is.Read(remoteGuid);
-
-        // prepare ping response
-        auto response =
-            std::format("MCPE;{};{};{};{};{};{};{};{};1;{};{};0;", event.getMotd(), event.getNetworkProtocolVersion(),
-                        event.getMinecraftVersionNetwork(), event.getNumPlayers(), event.getMaxPlayers(),
-                        event.getServerGuid(), event.getLevelName(), magic_enum::enum_name(event.getGameMode()),
-                        event.getLocalPort(), event.getLocalPortV6());
-        RakNet::BitStream os;
-        os.Write(static_cast<RakNet::MessageID>(ID_UNCONNECTED_PONG));
-        os.Write(sendPingTime);
-        os.Write(gRakPeer->GetMyGUID());
-        os.WriteAlignedBytes(OFFLINE_MESSAGE_DATA_ID, sizeof(OFFLINE_MESSAGE_DATA_ID));
-        os.Write(static_cast<std::uint16_t>(response.size()));
-        os.Write(response.data(), response.size());
-
-        // send directly via socket
-        RakNet::RNS2_SendParameters bsp;
-        bsp.data = reinterpret_cast<char *>(os.GetData());
-        bsp.length = os.GetNumberOfBytesUsed();
-        bsp.systemAddress = recv->systemAddress;
-        recv->socket->Send(&bsp, _FILE_AND_LINE_);
-        return false;
+    if (recv->data[0] == ID_UNCONNECTED_PING) {
+        return handleUnconnectedPing(recv);
     }
     return true;
 }

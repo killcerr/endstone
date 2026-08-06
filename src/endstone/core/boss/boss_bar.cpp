@@ -155,13 +155,13 @@ void EndstoneBossBar::send(BossEventUpdateType event_type, Player &player)
     const auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::BossEvent);
     const auto pk = std::static_pointer_cast<BossEventPacket>(packet);
     const auto &handle = static_cast<EndstonePlayer &>(player).getHandle();
-    pk->boss_id = handle.getOrCreateUniqueID();
-    pk->player_id = handle.getOrCreateUniqueID();
-    pk->event_type = event_type;
-    pk->name = title_;
-    pk->health_percent = progress_;
-    pk->color = static_cast<BossBarColor>(color_);
-    pk->overlay = static_cast<BossBarOverlay>(style_);
+    pk->payload.boss_id = handle.getOrCreateUniqueID();
+    pk->payload.player_id = handle.getOrCreateUniqueID();
+    pk->payload.event_type = event_type;
+    pk->payload.name = title_;
+    pk->payload.health_percent = progress_;
+    pk->payload.color = static_cast<BossBarColor>(color_);
+    pk->payload.overlay = static_cast<BossBarOverlay>(style_);
     // BarFlag::DarkenSky / CreateFog dropped from BossEventPacket in BDS 1.26.32 (cereal-only migration)
     handle.sendNetworkPacket(*packet);
 }

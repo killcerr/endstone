@@ -28,12 +28,12 @@ class RakNetConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "minecraft_version": ["r26u2", "r26u3"],
+        "minecraft_version": [None, "r26u2", "r26u3"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "minecraft_version": "r26u3",
+        "minecraft_version": None,
     }
 
     def config_options(self):
@@ -73,8 +73,9 @@ class RakNetConan(ConanFile):
         CMakeDeps(self).generate()
 
     def build(self):
-        if self.version == "4.081-mojang":
-            vtable = self.conan_data["mojang_vtable_patches"][str(self.options.minecraft_version)]
+        minecraft_version = self.options.get_safe("minecraft_version")
+        if minecraft_version:
+            vtable = self.conan_data["mojang_vtable_patches"][str(minecraft_version)]
             patch(self, patch_file=os.path.join(self.export_sources_folder, vtable["patch_file"]))
         cmake = CMake(self)
         cmake.configure()

@@ -12,18 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "bedrock/resources/repository_sources.h"
+#pragma once
 
-#include <entt/locator/locator.hpp>
+#include <string>
 
-#include "endstone/core/packs/endstone_pack_source.h"
-#include "endstone/core/server.h"
-#include "endstone/runtime/hook.h"
+namespace DebugUtils {
 
-void RepositorySources::initializePackSource(PackSourceFactory &pack_source_factory)
-{
-    ENDSTONE_HOOK_CALL_ORIGINAL(&RepositorySources::initializePackSource, this, pack_source_factory);
-    auto &server = entt::locator<endstone::core::EndstoneServer>::value_or();
-    server.initPackSource(pack_source_factory);
-    pack_source_->addPackSource(&server.getPackSource());
-}
+void setThreadName(const std::string &name);
+
+}  // namespace DebugUtils

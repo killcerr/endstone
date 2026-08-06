@@ -16,6 +16,7 @@
 
 #include <cstdint>
 
+#include "bedrock/bedrock.h"
 #include "bedrock/core/utility/non_owner_pointer.h"
 #include "bedrock/resources/pack_error.h"
 #include "bedrock/resources/pack_settings.h"
@@ -47,16 +48,13 @@ private:
     int subpack_index_;
     std::uint8_t revision_;
 };
+BEDROCK_STATIC_ASSERT_SIZE(PackInstance, 296, 272);
 
 class ResourcePackStack {
     using PackInstanceStack = std::vector<PackInstance>;
 
 public:
     virtual ~ResourcePackStack() = 0;
-
-    static std::unique_ptr<ResourcePackStack> deserialize(
-        std::istream &file_stream, Bedrock::NotNullNonOwnerPtr<const IResourcePackRepository> const &repo,
-        std::optional<std::string> level_id);
 
     PackInstanceStack stack;
 

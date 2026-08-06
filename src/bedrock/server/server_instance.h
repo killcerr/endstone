@@ -23,6 +23,7 @@
 #include "bedrock/platform/threading/thread.h"
 #include "bedrock/scripting/server_script_manager.h"
 #include "bedrock/server/cdn_config.h"
+#include "bedrock/server/server_initialization.h"
 #include "bedrock/server/server_text_settings.h"
 #include "bedrock/util/timer.h"
 #include "bedrock/world/events/server_instance_event_coordinator.h"
@@ -37,7 +38,7 @@ class ServerInstance : public Bedrock::EnableNonOwnerReferences,
                        public GameCallbacks,
                        public Core::StorageAreaStateListener {
 public:
-    ENDSTONE_HOOK bool initializeServer(ServerInstanceInitArguments &&args);
+    ENDSTONE_HOOK ServerInitialization::ServerInitResult initializeServer(ServerInstanceInitArguments &&args);
     ServerInstance(IMinecraftApp &, const Bedrock::NotNullNonOwnerPtr<ServerInstanceEventCoordinator> &);
     enum InstanceState : unsigned int {
         Running = 0,
@@ -63,7 +64,7 @@ private:
     std::unique_ptr<Minecraft> minecraft_;
     // std::unique_ptr<ProfilingManager> profiling_manager;
     // ServiceRegistrationToken<ProfilingManager> profiling_manager_service_registration_token_;
-    std::unique_ptr<ServerNetworkSystem> network_;
+    std::shared_ptr<ServerNetworkSystem> network_;
     std::unique_ptr<LoopbackPacketSender> packet_sender_;
     std::unique_ptr<Timer> sim_timer_;
     std::unique_ptr<Timer> real_timer_;
@@ -103,4 +104,5 @@ private:
     Bedrock::NonOwnerPointer<ServerTextSettings> server_text_settings_;
     Bedrock::NotNullNonOwnerPtr<cereal::ReflectionCtx> cereal_context_;
     std::unique_ptr<LinkedAssetValidator> linked_asset_validator_;
+    // ...
 };
