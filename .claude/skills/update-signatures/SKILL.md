@@ -59,6 +59,26 @@ session exited uncleanly). idalib has no "open anyway?" override, so recover:
    kill again, then move.
 3. Reopen the `.i64`. It re-unpacks cleanly from the packed snapshot.
 
+**When you are FORBIDDEN to kill the holder** (another agent is driving its own
+workers off the same MCP plugin, so step 1 is off the table), copy the packed
+`.i64` into a sibling scratch folder and open the copy - the `.i64` itself is not
+locked, only the unpacked files. Delete the copy when done: a duplicate `.i64`
+under `bedrock-symbols/<platform>/<ver>/` is a stale-artifact trap. Restore any
+unpacked file you did manage to move, so the folder is left as you found it.
+
+Three notes on that path:
+- **Name the holding PID, don't infer it.** The Restart Manager API from PowerShell
+  (`RmStartSession` / `RmRegisterResources` / `RmGetList` via `Add-Type`) reports
+  the exact PID per file, which is what distinguishes a live foreign worker from a
+  zombie. `Get-CimInstance` only lists candidates.
+- **Don't move the unpacked files piecemeal first.** `id2`/`til` are often not held
+  and *will* move, leaving the live worker's set half-gone. Move all-or-nothing and
+  restore immediately if only some succeed.
+- **You cannot adopt the foreign worker.** The supervisor keeps its worker table in
+  memory only, so a second MCP frontend sees `idalib_list` = 0 sessions while the
+  workers are alive, and driving the worker's own `POST /mcp` port directly is
+  blocked by the permission classifier.
+
 A fresh-from-`.exe` open is a non-starter: with no `.pdb` beside it, re-analysis
 won't recognize functions by mangled name and `make_signature_for_function`
 fails. The existing `.i64` (PDB-derived names) is required.
@@ -347,9 +367,33 @@ instructions are rip-relative `mov`/`lea` (`48 8B 0D`, `48 8B 1D`, `48 8D 3D`,
 the first bytes). These have few xrefs, so `find_xref_signatures(<address>)` also
 works if you prefer. (If the VA isn't known, find it via
 `list_globals(filter:"*mEnchants*")` etc., or `find_xref_signatures("<pretty
-name>")`.) Any rip ref to a given global computes the same address, so a
-first-match ref is fine. To find the global itself from scratch in a no-PDB DB
+name>")`.) Any rip ref to a given global computes the same address, so *which*
+ref you pick doesn't matter - but the **pattern must still be unique**, because a
+data-global pattern's extra matches are refs to *other* globals, and the first one
+wins. This is the opposite of the call-site licence above; don't carry the
+first-match habit over. To find the global itself from scratch in a no-PDB DB
 (via its initializer), see **locate-function**.
+
+**Never anchor on an initializer STORE; anchor on the indexed READ.** A registry
+init writes the array base and a run of neighbouring named statics with identical
+`mov [rip+d], reg` shapes, so a store-anchored pattern silently lands on a
+neighbour. For an array global, cut from the inlined bounds-checked load instead -
+`cmp <id>, <N-1>; ja; lea <reg>, [base]; mov <reg>, [<reg>+<id>*8]; test` - which
+*proves* base-ness (the index is the semantic id) and carries its uniqueness in a
+recompilation-invariant bound immediate, so drift gives a loud no-match rather
+than a wrong global. It also tends to be a version-union pattern. Triage the
+candidates by xref shape: the base has hundreds of xrefs, all indexed loads; a
+neighbouring named static has a handful, and they are `cmp reg, [rip+d]` pointer
+compares plus `mov qword [rip+d], 0` teardown stores.
+(`MobEffect::mMobEffects` was cut from `mov cs:X, r14` after `"potion.moveSpeed"`
+and resolved to `MobEffect::MOVEMENT_SPEED`, 0x190 below the real base.)
+
+The indexed-read idiom is **not** function-specific, so record the caller you
+actually cut from - several unrelated functions perform the same bounded load, and
+only register allocation makes any one of them unique. (The windows
+`mMobEffects` entry claimed `MobEffect::getById`; the bytes were really from
+`_tickTradeableComponent`, and by 1.26.40 the surviving cut sites were
+`Actor::addEffect` and a MobEffectInstance json parser.)
 
 ## Special cases
 
@@ -419,6 +463,17 @@ Expect `Finished signature scanning: N/N items successful` and an **empty** diff
 (a CRLF warning is harmless). An empty diff means a pure pattern scan resolves
 every entry to the exact PDB offset. Re-run it once more after adding the
 provenance comments, to confirm the commented toml still parses and resolves.
+
+`N/N successful` is not the whole verdict - **two WARNING lines are hard
+failures** and neither stops the run:
+
+- `Ambiguous pattern for <name>: … resolving to N distinct addresses` - the entry
+  is unresolved; tighten it or anchor it on a call site.
+- `Offset 0x… is not divisible by 8` - the tell of a leftover `rip_relative = true`
+  on a pattern that is now a **direct prologue**. The dumper RIP-decodes the
+  prologue bytes and emits an absurd RVA (`?fromTag@ItemInstance@@…` decoded
+  `41 56 56 57` as a rel32 into `0x591207E6`, ~1.5 GB past the 219 MB image). Fix
+  by deleting the `rip_relative`/`rip_offset` lines, not by re-cutting.
 
 Report a summary: **kept** (already unique) vs **regenerated direct** vs
 **regenerated rip** vs **rip→direct form changes** (list them) vs **manual**.

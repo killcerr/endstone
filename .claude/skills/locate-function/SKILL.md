@@ -287,6 +287,17 @@ VanillaStates init's intrusive-list prepend; `Enchant::mEnchants` via
 EDUCATION_METADATA_FILE` via the inline `"education.json"` build.) Any rip ref to
 a given global computes the same address, so a first-match ref is fine.
 
+**The initializer locates the CLUSTER, not the global.** It writes the one you
+want plus a run of neighbouring named statics, all through the same
+`mov [rip+d], reg` shape, so the store you land on is a coin flip. For an **array**
+global, finish the hunt on the read side: find the inlined bounds-checked load
+`cmp <id>, <N-1>; ja; lea <reg>, [base]; mov <reg>, [<reg>+<id>*8]`, whose
+semantic index proves base-ness. Tell base from neighbour by xref shape - the base
+has hundreds of indexed loads, a named static has a handful of
+`cmp reg, [rip+d]` compares and `mov qword [rip+d], 0` teardown stores.
+(`MobEffect::mMobEffects`, anchored on the `"potion.moveSpeed"` store, was actually
+`MobEffect::MOVEMENT_SPEED` - 0x190 below the array.)
+
 ## Confirm the target — DECOMPILE it (ALWAYS)
 
 **Confirmation means decompiling the candidate and matching its BEHAVIOUR to the
@@ -312,6 +323,19 @@ refresh; do not substitute any of them for decompiling:**
   (`tryGetStateFromLegacyData` resolved into the campfire cluster and was correct).
 - **A unique byte pattern.** Uniqueness proves the bytes are rare, not that they are
   the intended function.
+
+**Linux BDS: there is no named DB on either side.** The 1.26.x `.i64`s are fully
+stripped, so `func_profile(filter:"_ZN5Actor*")` returns nothing and "confirm vs
+the old named DB" has no names to lean on. Locate the baseline counterpart by
+running the config's own pattern against the baseline DB (`find_bytes`), then
+decompile both and diff the bodies - they come out near line-for-line. What
+carries identity across the bump: the EnTT component-lookup masks
+(`0xE6A1B550`, `0x72DDE456`, `0x4F6BA419`), the `0x3FFFF`/`0x7FF` entity-id field
+masks, and the `/mnt/vss/_work/1/s/...` assert paths. Expect vtable *offsets* to
+shift (Level virtuals went +16: 2528→2544, 1552→1568, 2616→2632) while others
+hold, and expect constant folding to replace a static read with a literal.
+(A full-DWARF debug `.i64` from a much older release is still worth opening purely
+as a naming oracle for helpers.)
 
 So the rule is: locate → **decompile the candidate** → confirm the behaviour matches
 the old named DB → only then trust it. When refreshing across a bump, decompile
