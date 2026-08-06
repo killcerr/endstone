@@ -66,8 +66,16 @@ rip_offset = 1
 name = "MobEffect::mMobEffects"
 relative = false
 extra = 0
-# MobEffect::getById indexes the global registry: `lea rcx, [rip+mMobEffects]; mov rax, [rcx+rax*8]`
-pattern = "48 8D 0D ? ? ? ? 48 8B 04 C1 48 85 C0 74 0A 0F B6 80 F0 00 00 00 88 45 D7 48 8D 55 B0 48 89 F1"
+# 1. find bytes "83 F8 26 0F 93 C2" = `cmp <id>, 26h; setnb` (unique; 26h = NUM_EFFECTS = 38) - the id
+#    bounds check Actor::addEffect makes before reading the registry
+# 2. the `lea <r>, [rip+mMobEffects]; mov <r>, [<r>+id*8]; test` right below it reads the array of
+#    std::unique_ptr<MobEffect>; that rip-relative lea is mMobEffects
+# 3. never anchor on the initializer stores - the neighbouring MobEffect statics are written with the same
+#    `mov [rip+d], reg` shape and a pattern silently lands on one of them; always cut the indexed load
+# 4. confirm vs the old named DB (addEffect reads the global again a few blocks below to call
+#    MobEffect::applyEffects; the json parser and the tradeable-component tick do the same indexed load)
+# rip-relative load in Actor::addEffect
+pattern = "4C 8D 05 ? ? ? ? 4D 8B 24 D0 4D 85 E4"
 rip_relative = true
 rip_offset = 3
 

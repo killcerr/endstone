@@ -37,11 +37,16 @@ rip_offset = 11
 name = "MobEffect::mMobEffects"
 relative = false
 extra = 0
-# the MobEffect registry init stores each effect into mMobEffects[id]; the id-0 slot store is the array base:
-# `mov cs:mMobEffects, r14` right after loading "potion.moveSpeed"
-pattern = "4C 89 35 ? ? ? ? F6 44 24 08 01 74 13 48 8B 74 24 08 48 8B 7C 24 18 48 83 E6 FE E8 C1 2F"
+# 1. MobEffect::getById is always inlined as `cmp <id>, 25h` (NUM_EFFECTS-1) / `ja` / `lea <reg>, mMobEffects` /
+#    `mov <reg>, [<reg>+<id>*8]` / `test`; the lea target is the array base
+# 2. reach one such site from Actor::addEffect (see that entry), which reads mMobEffects[instance.getId()],
+#    or from any of the base's many data xrefs
+# 3. confirm vs the old named DB: the base has hundreds of xrefs, while the named MobEffect* statics the
+#    registry init writes beside it have only a handful - do NOT anchor on an init store
+# rip-relative load in an inlined MobEffect::getById, anchored on the NUM_EFFECTS bound check (unique)
+pattern = "48 83 FA 25 77 ? 48 8D 05 ? ? ? ? 48 8B 04 D0 48 85 C0"
 rip_relative = true
-rip_offset = 3
+rip_offset = 9
 
 [[signatures]]
 name = "_ZN5Actor10teleportToERK4Vec3biib"
