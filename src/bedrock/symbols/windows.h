@@ -58,7 +58,7 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 61> symbol
     // Item
     {"?readUserData@Item@@UEBAXAEAVItemStackBase@@AEAVIDataInput@@AEAVReadOnlyBinaryStream@@@Z", 38712960},
     // ItemInstance
-    {"?fromTag@ItemInstance@@SA?AV1@AEBVCompoundTag@@@Z", 1494353894},
+    {"?fromTag@ItemInstance@@SA?AV1@AEBVCompoundTag@@@Z", 29077920},
     // ItemRegistry
     {"?lookupByName@ItemRegistry@@AEBA?AV?$WeakPtr@VItem@@@@AEAHV?$basic_string_view@DU?$char_traits@D@std@@@std@@@Z", 22160768},
     // ItemStackBase

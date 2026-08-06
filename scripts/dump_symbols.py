@@ -326,6 +326,39 @@ class Signature:
     rip_offset: int = 0
 
 
+# Opcodes that carry a ModRM byte and can therefore address rip-relatively.
+_MODRM_OPS = frozenset(
+    {0x8D, 0x8B, 0x89, 0x8A, 0x88, 0x63, 0x39, 0x3B, 0x85, 0x01, 0x03, 0x29, 0x2B,
+     0x31, 0x33, 0x09, 0x0B, 0x21, 0x23, 0xC7, 0xFF, 0x83, 0x81}
+)
+
+
+def check_rip_form(mem, pos: int, rip_offset: int) -> str | None:
+    """Name the rip-relative instruction whose displacement sits at `pos + rip_offset`.
+
+    Returns None when the bytes are not a rip-relative form at all -- the tell of a
+    `rip_relative = true` left behind on what is now a direct prologue pattern. The
+    dumper would otherwise decode prologue bytes as a rel32 and emit a plausible but
+    wildly wrong address, which fails at runtime instead of at build time.
+    """
+    d = pos + rip_offset
+    if d < 3 or d + 4 > len(mem):
+        return None
+    prev = mem[d - 1]
+    if prev in (0xE8, 0xE9):
+        return "call/jmp rel32"
+    if mem[d - 2] == 0x0F and 0x80 <= prev <= 0x8F:
+        return "Jcc rel32"
+    if mem[d - 2] == 0xFF and prev in (0x15, 0x25):
+        return "call/jmp [rip]"
+    if (prev & 0xC7) == 0x05:
+        if mem[d - 2] in _MODRM_OPS:
+            return f"rip-relative modrm (op 0x{mem[d - 2]:02x})"
+        if mem[d - 3] == 0x0F:
+            return "rip-relative 0F-escape"
+    return None
+
+
 def find_signature(section: lief.Section, sig: Signature) -> int:
     """Resolve a single signature to an offset within the binary."""
     logger.debug(f"Begin scan {sig.name}")
@@ -368,6 +401,19 @@ def find_signature(section: lief.Section, sig: Signature) -> int:
         return addr
 
     logger.debug(f"Pattern found at: 0x{matches[0]:x} (+ base = 0x{(matches[0] + base_addr):x})")
+
+    # Refuse to RIP-decode bytes that are not a rip-relative instruction; a wrong
+    # offset here resolves silently and only fails once the server jumps to it.
+    if sig.rip_relative and not sig.offsets:
+        form = check_rip_form(mem, matches[0], sig.rip_offset)
+        if form is None:
+            raise NameError(
+                f"rip_relative is set for {sig.name} but the bytes at rip_offset "
+                f"{sig.rip_offset} are not a rip-relative instruction "
+                f"({bytes(mem[matches[0]:matches[0] + sig.rip_offset])[-4:].hex(' ')} | disp). "
+                f"Drop rip_relative/rip_offset if this is a direct prologue pattern."
+            )
+        logger.debug(f"rip_relative form: {form}")
 
     # A pattern matching several places resolves to whichever comes first in the section, which is only
     # right by luck - say so rather than picking one silently.

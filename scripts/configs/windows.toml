@@ -388,9 +388,8 @@ extra = 0
 # 2. landmark: MerchantRecipe::load reads the "buyA"/"buyB" child tags and calls this on each to build the
 #    trade ItemInstances - so the `call` right after a buyA/buyB tag lookup is the target
 # 3. confirm the callee vs the old named DB (static, takes a CompoundTag, returns an ItemInstance)
+# function prologue
 pattern = "55 41 56 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 48 C7 45 ? ? ? ? ? 48 89 D6 49 89 CE 48 8D 3D"
-rip_relative = true
-rip_offset = 1
 
 [[signatures]]
 name = "?lookupByName@ItemRegistry@@AEBA?AV?$WeakPtr@VItem@@@@AEAHV?$basic_string_view@DU?$char_traits@D@std@@@std@@@Z"
