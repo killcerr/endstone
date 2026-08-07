@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.8] - 2026-08-07
+
 ### Fixed
 
 - Fixed a crash on Windows when reading the item charged into a crossbow, for example through its item meta. The server called into an invalid address instead of the item's loader. Introduced in 0.11.7 along with BDS 1.26.40 support.
@@ -1126,7 +1128,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic plugin loader for C++ and Python plugins.
 - Basic command system that allows plugins to register custom commands.
 
-[Unreleased]: https://github.com/EndstoneMC/endstone/compare/v0.11.7...HEAD
+[Unreleased]: https://github.com/EndstoneMC/endstone/compare/v0.11.8...HEAD
+[0.11.8]: https://github.com/EndstoneMC/endstone/compare/v0.11.7...v0.11.8
 [0.11.7]: https://github.com/EndstoneMC/endstone/compare/v0.11.6...v0.11.7
 [0.11.6]: https://github.com/EndstoneMC/endstone/compare/v0.11.5...v0.11.6
 [0.11.5]: https://github.com/EndstoneMC/endstone/compare/v0.11.4...v0.11.5
