@@ -631,7 +631,7 @@ class PlayerGameModeChangeEvent(PlayerEvent, Cancellable):
 
 class PlayerInteractEvent(PlayerEvent, Cancellable):
     """
-    Represents an event that is called when a player right-clicks a block.
+    Represents an event that is called when a player interacts with an object or air.
     """
     class Action(enum.Enum):
         LEFT_CLICK_BLOCK = 0

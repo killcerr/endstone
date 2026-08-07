@@ -749,6 +749,21 @@ bool EndstonePlayer::handlePacket(Packet &packet)
     }
     case MinecraftPacketIds::PlayerAuthInputPacket: {
         auto &pk = static_cast<PlayerAuthInputPacket &>(packet);
+        if (pk.getInput(PlayerAuthInputPacket::InputData::MissedSwing)) {
+            PlayerInteractEvent e{
+                *this,
+                PlayerInteractEvent::Action::LeftClickAir,
+                getInventory().getItemInMainHand(),
+                nullptr,
+                BlockFace::South,
+                std::nullopt,
+            };
+            getServer().getPluginManager().callEvent(e);
+            if (e.isCancelled()) {
+                pk.setInput(PlayerAuthInputPacket::InputData::MissedSwing, false);
+            }
+        }
+
         auto &actions = pk.payload.player_block_actions.actions_;
         for (auto it = actions.begin(); it != actions.end();) {
             const auto &action = *it;

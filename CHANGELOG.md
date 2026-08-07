@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `PlayerInteractEvent` is now fired with the `LEFT_CLICK_AIR` action when a player swings at nothing, that is, at neither a block nor an actor. The action had been part of the API since the event was introduced, but was never fired. Cancelling the event suppresses the swing, including its attack sound (#316).
+
 ### Fixed
 
 - Fixed the server list entry losing its last two fields whenever a plugin listened for `ServerListPingEvent`, or the ping was otherwise answered by Endstone. The reply was rebuilt from a fixed list of fields, so anything the server had added beyond it, currently whether the world is an editor world and whether it is hardcore, was dropped. Any field Endstone does not itself expose is now passed through untouched.
