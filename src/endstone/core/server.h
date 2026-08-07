@@ -142,6 +142,7 @@ private:
     friend class EndstonePlayer;
     void enablePlugin(Plugin &plugin);
     void loadResourcePacks();
+    void fixServerAnnouncement();
 
     ServerInstance *server_instance_{nullptr};
     Logger &logger_;
