@@ -178,6 +178,24 @@ void EndstoneServer::init(ServerInstance &server_instance)
     enablePlugins(PluginLoadOrder::Startup);
 }
 
+// #blameMojang - MCPE-240610: BDS skips the server advertisement when the level's LANBroadcast flag is off,
+// leaving RakNet's offline ping response empty. Clients refuse to start the handshake without a valid pong.
+void EndstoneServer::fixServerAnnouncement()
+{
+    const auto handler = getServer().getMinecraft()->getServerNetworkHandler();
+    if (!handler || !handler->server_name_.empty()) {
+        return;
+    }
+
+    auto server_name = getServer().server_name_;
+    if (server_name.empty()) {
+        server_name = "Endstone Server";
+    }
+
+    handler->server_name_ = server_name;
+    handler->updateServerAnnouncement();
+}
+
 void EndstoneServer::setLevel(::Level &level)
 {
     if (level_) {
@@ -246,6 +264,7 @@ void EndstoneServer::setLevel(::Level &level)
                               },
                               Bedrock::PubSub::ConnectPosition::AtBack, nullptr);
 
+    fixServerAnnouncement();
     enablePlugins(PluginLoadOrder::PostWorld);
     ServerLoadEvent event{ServerLoadEvent::LoadType::Startup};
     getPluginManager().callEvent(event);

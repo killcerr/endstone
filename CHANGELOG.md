@@ -51,7 +51,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed type annotations for `Plugin` and `event_handler`.
+- Fixed the server list entry losing its last two fields whenever a plugin listened for `ServerListPingEvent`, or the ping was otherwise answered by Endstone. The reply was rebuilt from a fixed list of fields, so anything the server had added beyond it, currently whether the world is an editor world and whether it is hardcore, was dropped. Any field Endstone does not itself expose is now passed through untouched.
+
+## [0.11.8] - 2026-08-07
+
+### Fixed
+
 - Fixed a crash on Windows when reading the item charged into a crossbow, for example through its item meta. The server called into an invalid address instead of the item's loader. Introduced in 0.11.7 along with BDS 1.26.40 support.
+
+- Fixed clients timing out on the connection screen when the world's `LANBroadcast` flag is off. BDS then never publishes the server advertisement, so it answers the client's ping with an empty response, and recent clients refuse to start the connection handshake without a valid one. The advertisement is now restored on startup, using the `server-name` from `server.properties`. Note that a server in this state also starts using the LAN discovery ports (19132/19133) again, as it would have with the flag on. Servers hidden with `enable-lan-visibility=false` are advertised again as well (#423, #465).
 
 ## [0.11.7] - 2026-08-05
 
@@ -1166,7 +1174,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic plugin loader for C++ and Python plugins.
 - Basic command system that allows plugins to register custom commands.
 
-[Unreleased]: https://github.com/EndstoneMC/endstone/compare/v0.11.7...HEAD
+[Unreleased]: https://github.com/EndstoneMC/endstone/compare/v0.11.8...HEAD
+[0.11.8]: https://github.com/EndstoneMC/endstone/compare/v0.11.7...v0.11.8
 [0.11.7]: https://github.com/EndstoneMC/endstone/compare/v0.11.6...v0.11.7
 [0.11.6]: https://github.com/EndstoneMC/endstone/compare/v0.11.5...v0.11.6
 [0.11.5]: https://github.com/EndstoneMC/endstone/compare/v0.11.4...v0.11.5
