@@ -17,19 +17,10 @@
 #include <vector>
 
 #include "bedrock/bedrock.h"
-#include "bedrock/world/item/crafting/recipe_ingredient.h"
+#include "bedrock/world/containers/container_enum.h"
 
-class RecipeUnlockingRequirement {
-public:
-    enum class UnlockingContext : int {
-        None = 0,
-        AlwaysUnlocked = 0x1,
-        PlayerInWater = 0x2,
-        PlayerHasManyItems = 0x3,
-    };
-
-private:
-    UnlockingContext context_;                   // +0
-    std::vector<RecipeIngredient> ingredients_;  // +8
+struct LegacySetSlot {
+    ContainerEnumName container_enum;  // +0
+    std::vector<unsigned char> slots;  // +8
 };
-BEDROCK_STATIC_ASSERT_SIZE(RecipeUnlockingRequirement, 32, 32);
+BEDROCK_STATIC_ASSERT_SIZE(LegacySetSlot, 32, 32);

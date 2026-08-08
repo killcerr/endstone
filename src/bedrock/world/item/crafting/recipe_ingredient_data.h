@@ -14,22 +14,16 @@
 
 #pragma once
 
-#include <vector>
+#include <cstdint>
 
 #include "bedrock/bedrock.h"
-#include "bedrock/world/item/crafting/recipe_ingredient.h"
+#include "bedrock/world/item/item_descriptor.h"
 
-class RecipeUnlockingRequirement {
-public:
-    enum class UnlockingContext : int {
-        None = 0,
-        AlwaysUnlocked = 0x1,
-        PlayerInWater = 0x2,
-        PlayerHasManyItems = 0x3,
-    };
-
-private:
-    UnlockingContext context_;                   // +0
-    std::vector<RecipeIngredient> ingredients_;  // +8
+// The cereal serialized form of RecipeIngredient - it carries its own aux value and stack size
+// instead of the uint16_t count that ItemDescriptorCount holds.
+struct RecipeIngredientData {
+    ItemDescriptor descriptor;  // +0
+    std::int32_t aux_value;     // +16
+    std::int32_t stack_size;    // +20
 };
-BEDROCK_STATIC_ASSERT_SIZE(RecipeUnlockingRequirement, 32, 32);
+BEDROCK_STATIC_ASSERT_SIZE(RecipeIngredientData, 24, 24);

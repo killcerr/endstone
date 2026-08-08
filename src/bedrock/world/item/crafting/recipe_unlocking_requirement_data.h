@@ -14,22 +14,16 @@
 
 #pragma once
 
+#include <optional>
 #include <vector>
 
 #include "bedrock/bedrock.h"
-#include "bedrock/world/item/crafting/recipe_ingredient.h"
+#include "bedrock/world/item/crafting/recipe_ingredient_data.h"
+#include "bedrock/world/item/crafting/recipe_unlocking_requirement.h"
 
-class RecipeUnlockingRequirement {
-public:
-    enum class UnlockingContext : int {
-        None = 0,
-        AlwaysUnlocked = 0x1,
-        PlayerInWater = 0x2,
-        PlayerHasManyItems = 0x3,
-    };
-
-private:
-    UnlockingContext context_;                   // +0
-    std::vector<RecipeIngredient> ingredients_;  // +8
+// The cereal serialized form of RecipeUnlockingRequirement.
+struct RecipeUnlockingRequirementData {
+    RecipeUnlockingRequirement::UnlockingContext context;          // +0
+    std::optional<std::vector<RecipeIngredientData>> ingredients;  // +8
 };
-BEDROCK_STATIC_ASSERT_SIZE(RecipeUnlockingRequirement, 32, 32);
+BEDROCK_STATIC_ASSERT_SIZE(RecipeUnlockingRequirementData, 40, 40);
