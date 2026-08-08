@@ -37,7 +37,7 @@ void patchPacket(const StartGamePacket &packet)
     const auto &server = endstone::core::EndstoneServer::getInstance();
     if (const auto *level = server.getEndstoneLevel(); level && !level->getHandle().isClientSideGenerationEnabled()) {
         auto &pk = const_cast<StartGamePacket &>(packet);
-        pk.settings.setRandomSeed(0);
+        pk.payload.settings.setRandomSeed(0);
     }
 }
 
@@ -45,8 +45,8 @@ void patchPacket(const ResourcePacksInfoPacket &packet)
 {
     const auto &server = endstone::core::EndstoneServer::getInstance();
     auto &pk = const_cast<ResourcePacksInfoPacket &>(packet);
-    for (auto &pack_info : pk.data.resource_packs) {
-        if (const auto *key = server.getContentKey(pack_info.m_pack_id_version)) {
+    for (auto &pack_info : pk.payload.resource_packs) {
+        if (const auto *key = server.getContentKey(pack_info.pack_id_version)) {
             pack_info.content_key = *key;
         }
     }
@@ -54,12 +54,12 @@ void patchPacket(const ResourcePacksInfoPacket &packet)
 
 void patchPacket(const ResourcePackStackPacket &packet)
 {
-    if (packet.texture_pack_required) {
+    if (packet.payload.texture_pack_required) {
         const auto &server = endstone::core::EndstoneServer::getInstance();
         if (server.getAllowClientPacks()) {
             auto &pk = const_cast<ResourcePackStackPacket &>(packet);
             // false, otherwise the client will remove its own non-server-supplied resource packs.
-            pk.texture_pack_required = false;
+            pk.payload.texture_pack_required = false;
         }
     }
 }
@@ -202,7 +202,9 @@ void BatchedNetworkPeer::sendPacket(const std::string &data, Reliability reliabi
     if (e.getPayload().data() != payload.data()) {
         BinaryStream out;
         header.write(out);
-        out.writeRawBytes(e.getPayload());
+        const auto new_payload = e.getPayload();
+        const auto *bytes = reinterpret_cast<const unsigned char *>(new_payload.data());
+        out.writeRawBytes({bytes, bytes + new_payload.size()}, nullptr, nullptr);
         ENDSTONE_HOOK_CALL_ORIGINAL(&BatchedNetworkPeer::sendPacket, this, out.getBuffer(), reliability, compressible);
     }
     else {

@@ -110,20 +110,20 @@ bool ReadOnlyBinaryStream::hasOverflowed() const
     return has_overflowed_;
 }
 
-BinaryStream::BinaryStream() : ReadOnlyBinaryStream("", false), buffer_(&owned_buffer_)
+BinaryStream::BinaryStream() : ReadOnlyBinaryStream("", false), buffer_(owned_buffer_)
 {
     view_ = owned_buffer_;
 }
 
 const std::string &BinaryStream::getBuffer() const
 {
-    return *buffer_;
+    return buffer_;
 }
 
 void BinaryStream::reset()
 {
-    buffer_->clear();
-    view_ = *buffer_;
+    buffer_.clear();
+    view_ = buffer_;
     setReadPointer(0);
 }
 
@@ -310,20 +310,21 @@ void BinaryStream::_writeArray(std::function<void(BinaryStream &)> &&size_writer
     writer(*this);
 }
 
-void BinaryStream::writeRawBytes(std::string_view span)
+void BinaryStream::writeRawBytes(buffer_span<unsigned char> bytes, char const *doc_field_name,
+                                 char const *doc_field_notes)
 {
-    write(span.data(), span.size());
+    write(bytes.data(), bytes.byte_size());
 }
 
-void BinaryStream::writeStream(BinaryStream &stream)
+void BinaryStream::writeStream(BinaryStream &stream, char const *doc_field_name, char const *doc_field_notes)
 {
-    buffer_->append(stream.getView().substr(stream.getReadPointer(), stream.getUnreadLength()));
+    buffer_.append(stream.getView().substr(stream.getReadPointer(), stream.getUnreadLength()));
 }
 
 void BinaryStream::write(const void *data, std::size_t size)
 {
     if (size > 0) {
-        buffer_->append(static_cast<const char *>(data), size);
+        buffer_.append(static_cast<const char *>(data), size);
     }
-    view_ = *buffer_;
+    view_ = buffer_;
 }
