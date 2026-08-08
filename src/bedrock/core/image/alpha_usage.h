@@ -12,10 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "bedrock/core/file/path.h"
+#pragma once
 
-namespace Core {
+#include <cstdint>
 
-Path const Path::EMPTY{};
-
-}  // namespace Core
+namespace mce {
+enum class AlphaUsage : std::uint8_t {
+    Unknown = 0,
+    Data = 1,
+    Transparent = 2,
+};
+}  // namespace mce

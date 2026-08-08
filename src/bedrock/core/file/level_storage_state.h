@@ -12,10 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "bedrock/core/file/path.h"
+#pragma once
 
 namespace Core {
-
-Path const Path::EMPTY{};
-
+enum class LevelStorageState : int {
+    Open = 0,
+    Corrupted = 1,
+    NotFound = 2,
+    IOError = 3,
+    NotSupported = 4,
+    InvalidArguments = 5,
+    Unknown = 6,
+};
 }  // namespace Core

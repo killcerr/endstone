@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "bedrock/core/file/path.h"
+#pragma once
+
+#include <cstdint>
 
 namespace Core {
-
-Path const Path::EMPTY{};
-
+using FileSize = std::uint64_t;
 }  // namespace Core
