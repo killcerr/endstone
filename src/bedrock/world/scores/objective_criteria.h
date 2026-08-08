@@ -30,7 +30,7 @@ public:
     [[nodiscard]] ObjectiveRenderType getRenderType() const { return render_type_; }
 
 private:
-    std::string name_;
-    bool is_read_only_;
-    ObjectiveRenderType render_type_;
+    const std::string name_;
+    const bool is_read_only_;
+    const ObjectiveRenderType render_type_;
 };
