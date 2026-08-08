@@ -1,7 +1,9 @@
 import inspect
 import os
 import shutil
+import typing
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import lazy_loader as lazy
 import tomlkit
@@ -11,6 +13,10 @@ from endstone._python.plugin import Plugin as _Plugin
 from endstone._python.plugin import PluginDescription
 from endstone.event import Event
 
+if TYPE_CHECKING:
+    from endstone._python.permissions import PermissionDefault
+    from endstone._python.plugin import PluginLoadOrder
+
 
 class Plugin(_Plugin):
     # Metadata
@@ -19,7 +25,7 @@ class Plugin(_Plugin):
 
     # Optional metadata
     description: str | None = None
-    load: str | None = None
+    load: "PluginLoadOrder | str | None" = None
     authors: list[str] | None = None
     contributors: list[str] | None = None
     website: str | None = None
@@ -32,11 +38,11 @@ class Plugin(_Plugin):
     load_before: list[str] | None = None
 
     # Command
-    commands: dict | None = None
+    commands: dict[str, typing.Any] | None = None
 
     # Permissions
-    default_permission: str | None = None
-    permissions: dict | None = None
+    default_permission: "PermissionDefault | bool | str | None" = None
+    permissions: dict[str, typing.Any] | None = None
 
     def __init__(self):
         _Plugin.__init__(self)
@@ -92,7 +98,7 @@ class Plugin(_Plugin):
             self.server.plugin_manager.register_event(event_name, func, priority, self, ignore_cancelled)
 
     @property
-    def config(self) -> dict:
+    def config(self) -> dict[str, typing.Any]:
         """
         Returns the plugin's configuration loaded from config.toml.
 
@@ -108,7 +114,7 @@ class Plugin(_Plugin):
 
         return self._config
 
-    def reload_config(self) -> dict:
+    def reload_config(self) -> dict[str, typing.Any]:
         """
         Returns the plugin's configuration loaded from config.toml.
 

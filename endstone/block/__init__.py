@@ -3,6 +3,6 @@ import lazy_loader as lazy
 __getattr__, __dir__, __all__ = lazy.attach(
     "endstone._python",
     submod_attrs={
-        "block": ["Block", "BlockData", "BlockFace", "BlockState", "BlockType"],
+        "block": ["Biome", "Block", "BlockData", "BlockFace", "BlockState", "BlockType", "Container"],
     },
 )

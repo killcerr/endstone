@@ -9,6 +9,7 @@ from endstone.attribute import Attribute, AttributeInstance
 from endstone.command import CommandSender
 from endstone.inventory import ItemStack
 from endstone.level import Dimension, Level, Location
+from endstone.potion import Effect, EffectType
 from endstone.util import Vector
 
 __all__ = [
@@ -27,55 +28,55 @@ class Actor(CommandSender):
         """
         The type of the actor.
         """
-        ...
+
     @property
     def runtime_id(self) -> int:
         """
         The runtime id for this actor.
         """
-        ...
+
     @property
     def location(self) -> Location:
         """
         A new copy of `Location` containing the position of this actor.
         """
-        ...
+
     @property
     def velocity(self) -> Vector:
         """
         The current traveling velocity of this actor.
         """
-        ...
+
     @property
     def is_on_ground(self) -> bool:
         """
         `True` if the actor is supported by a block, i.e. on ground.
         """
-        ...
+
     @property
     def is_in_water(self) -> bool:
         """
         `True` if the actor is in water.
         """
-        ...
+
     @property
     def is_in_lava(self) -> bool:
         """
         `True` if the actor is in lava.
         """
-        ...
+
     @property
     def level(self) -> Level:
         """
         The current `Level` this actor resides in.
         """
-        ...
+
     @property
     def dimension(self) -> Dimension:
         """
         The current `Dimension` this actor resides in.
         """
-        ...
+
     def set_rotation(self, yaw: float, pitch: float) -> None:
         """
         Sets the actor's rotation.
@@ -86,7 +87,7 @@ class Actor(CommandSender):
             yaw: Rotation around the up axis (Y axis).
             pitch: Rotation around the right axis (X axis).
         """
-        ...
+
     @typing.overload
     def teleport(self, location: Location) -> bool:
         """
@@ -98,7 +99,7 @@ class Actor(CommandSender):
         Returns:
             `True` if the teleport was successful.
         """
-        ...
+
     @typing.overload
     def teleport(self, target: Actor) -> bool:
         """
@@ -110,38 +111,38 @@ class Actor(CommandSender):
         Returns:
             `True` if the teleport was successful.
         """
-        ...
+
     @property
     def id(self) -> int:
         """
         A unique id for this actor.
         """
-        ...
+
     def remove(self) -> None:
         """
         Remove this actor from the level.
 
         If you are trying to remove a `Player`, use `Player.kick` instead.
         """
-        ...
+
     @property
     def is_valid(self) -> bool:
         """
         `False` if the entity has died, been despawned for some other reason, or has not been added to the level.
         """
-        ...
+
     @property
     def is_dead(self) -> bool:
         """
         `True` if this actor has been marked for removal.
         """
-        ...
+
     @property
     def scoreboard_tags(self) -> list[str]:
         """
         A list of scoreboard tags for this actor.
         """
-        ...
+
     def add_scoreboard_tag(self, tag: str) -> bool:
         """
         Adds a tag to this actor.
@@ -152,7 +153,7 @@ class Actor(CommandSender):
         Returns:
             `True` if the tag was successfully added, `False` if the tag already exists.
         """
-        ...
+
     def remove_scoreboard_tag(self, tag: str) -> bool:
         """
         Removes a given tag from this actor.
@@ -163,13 +164,13 @@ class Actor(CommandSender):
         Returns:
             `True` if the tag was successfully removed, `False` if the tag does not exist.
         """
-        ...
+
     @property
     def is_name_tag_visible(self) -> bool:
         """
         Whether the actor's name tag is currently visible.
         """
-        ...
+
     @is_name_tag_visible.setter
     def is_name_tag_visible(self, arg1: bool) -> None: ...
     @property
@@ -177,7 +178,7 @@ class Actor(CommandSender):
         """
         Whether the actor's name tag is always visible.
         """
-        ...
+
     @is_name_tag_always_visible.setter
     def is_name_tag_always_visible(self, arg1: bool) -> None: ...
     @property
@@ -185,7 +186,7 @@ class Actor(CommandSender):
         """
         The current name tag of the actor.
         """
-        ...
+
     @name_tag.setter
     def name_tag(self, arg1: str) -> None: ...
     @property
@@ -193,7 +194,7 @@ class Actor(CommandSender):
         """
         The current score tag of the actor.
         """
-        ...
+
     @score_tag.setter
     def score_tag(self, arg1: str) -> None: ...
 
@@ -206,13 +207,13 @@ class Mob(Actor):
         """
         `True` if this actor is gliding, such as using an Elytra.
         """
-        ...
+
     @property
     def health(self) -> int:
         """
         The entity's health from 0 to its max possible value, where 0 is dead.
         """
-        ...
+
     @health.setter
     def health(self, arg1: int) -> None: ...
     @property
@@ -224,25 +225,50 @@ class Mob(Actor):
         with a health bar (e.g. `Player`, `EnderDragon`, `Wither`, etc.) will have their bar scaled
         accordingly.
         """
-        ...
+
     @max_health.setter
     def max_health(self, arg1: int) -> None: ...
     def has_attribute(self, attribute: Identifier[Attribute] | str) -> bool:
         """
         Checks whether the given attribute is present on the object.
         """
-        ...
+
     def get_attribute(self, attribute: Identifier[Attribute] | str) -> AttributeInstance:
         """
         Gets the specified attribute instance from the object. This instance will be backed directly to the object and any changes will be visible at once.
         """
-        ...
+
     @property
     def attributes(self) -> list[AttributeInstance]:
         """
         Gets all attribute instances from the object. This instance will be backed directly to the object and any changes will be visible at once.
         """
-        ...
+
+    def add_effect(self, effect: Effect) -> None:
+        """
+        Adds the given potion effect to this entity. Only one effect of any given type may be active at any one time; an existing effect of the same type will be overwritten.
+        """
+
+    def remove_effect(self, type: Identifier[EffectType] | str) -> None:
+        """
+        Removes any effects of the given type that are present on this entity.
+        """
+
+    def has_effect(self, type: Identifier[EffectType] | str) -> bool:
+        """
+        Returns whether the entity already has an existing effect of the given type applied to it.
+        """
+
+    def get_effect(self, type: Identifier[EffectType] | str) -> Effect | None:
+        """
+        Returns the active potion effect of the specified type, or None if the effect is not present.
+        """
+
+    @property
+    def active_effects(self) -> list[Effect]:
+        """
+        Returns all currently active potion effects on this entity.
+        """
 
 class ActorType:
     """
@@ -389,21 +415,19 @@ class ActorType:
         """
         The identifier of this actor type.
         """
-        ...
+
     @property
     def translation_key(self) -> str:
         """
         The translation key, suitable for use in a translation component.
         """
-        ...
+
     @staticmethod
     def get(name: Identifier[ActorType] | str) -> ActorType:
         """
         Attempts to get the `ActorType` with the given name.
         """
-        ...
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
+
     def __hash__(self) -> int: ...
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, other: object) -> bool: ...
@@ -417,7 +441,7 @@ class Item(Actor):
         """
         The item stack associated with this item drop.
         """
-        ...
+
     @item_stack.setter
     def item_stack(self, arg1: ItemStack) -> None: ...
     @property
@@ -425,7 +449,7 @@ class Item(Actor):
         """
         The delay before this `Item` is available to be picked up by players.
         """
-        ...
+
     @pickup_delay.setter
     def pickup_delay(self, arg1: int) -> None: ...
     @property
@@ -433,7 +457,7 @@ class Item(Actor):
         """
         Whether this `Item` lives forever.
         """
-        ...
+
     @is_unlimited_lifetime.setter
     def is_unlimited_lifetime(self, arg1: bool) -> None: ...
     @property
@@ -441,6 +465,6 @@ class Item(Actor):
         """
         The thrower of this item (the entity which dropped the item), as a unique id.
         """
-        ...
+
     @thrower.setter
     def thrower(self, arg1: int | None) -> None: ...

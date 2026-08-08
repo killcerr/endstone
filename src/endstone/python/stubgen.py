@@ -2,7 +2,7 @@
 # /// script
 # requires-python = ">=3.10"
 # dependencies = [
-#     "griffe",
+#     "griffe>=2.1,<3",
 # ]
 # ///
 
@@ -17,6 +17,7 @@ introspection with griffe.
 
 import argparse
 import ast
+import inspect
 import io
 import re
 import sys
@@ -24,7 +25,6 @@ import textwrap
 from dataclasses import dataclass
 from pathlib import Path
 from re import Pattern
-from typing import List, Optional
 
 import griffe
 from griffe import (
@@ -92,6 +92,20 @@ _PYBIND_SIG_RE = re.compile(
 # An enum-member default in a pybind11 signature: "<annotation> = <Enum.MEMBER: N>".
 _ENUM_DEFAULT_RE = re.compile(r"(?P<ann>[\w.]+)(?P<eq> = )<(?P<enum>\w+(?:\.\w+)+): -?\d+>")
 
+# An in-place operator and the binary one Python falls back to when it returns
+# NotImplemented, which pybind11's narrower overload does.
+_IN_PLACE_OPS = {
+    "__iadd__": "__add__",
+    "__isub__": "__sub__",
+    "__imul__": "__mul__",
+    "__itruediv__": "__truediv__",
+}
+
+# Dunders object already supplies.
+_REDUNDANT_DUNDERS = {"__repr__", "__str__"}
+
+_LITERAL_TYPES = (bool, int, float, str, bytes)
+
 
 def _elevate_enum_default(m: "re.Match[str]") -> str:
     # Rebind a bare enum default to its parameter's fully-qualified type, so
@@ -104,7 +118,7 @@ def _elevate_enum_default(m: "re.Match[str]") -> str:
     return f"{ann}{m.group('eq')}{enum}"
 
 
-def _clean_sig_args(name: Optional[str], args: str) -> str:
+def _clean_sig_args(name: str | None, args: str) -> str:
     args = _ENUM_DEFAULT_RE.sub(_elevate_enum_default, args)
     args = _ENUM_RE.sub(r"\g<enum>", args)
     if name is None:
@@ -112,13 +126,74 @@ def _clean_sig_args(name: Optional[str], args: str) -> str:
     return re.sub(r"^self:\s*[\w.]+", "self", args)
 
 
-def _valid_sig(sig: str) -> bool:
+def _is_optional(ann: ast.expr) -> bool:
+    if isinstance(ann, ast.Constant):
+        return ann.value is None
+    if isinstance(ann, ast.BinOp) and isinstance(ann.op, ast.BitOr):
+        return _is_optional(ann.left) or _is_optional(ann.right)
+    if isinstance(ann, ast.Subscript):
+        name = ast.unparse(ann.value).rpartition(".")[2]
+        if name == "Optional":
+            return True
+        if name == "Union" and isinstance(ann.slice, ast.Tuple):
+            return any(_is_optional(e) for e in ann.slice.elts)
+    return False
+
+
+def _make_sig(name: str | None, args: str, ret: str) -> str:
+    """Build "def (args) -> ret" from a pybind11 signature line, splicing in what it
+    leaves out: a type for an untyped parameter, and the ``| None`` PEP 484 requires
+    beside a ``None`` default."""
+    sig = f"def ({_clean_sig_args(name, args)}) -> {ret.strip()}"
+    src = f"def _{sig[4:]}: ..."
     # pybind11 docstrings can carry non-Python types (e.g. C++ "endstone::Foo").
     try:
-        ast.parse(f"def _{sig[4:]}: ...")
-        return True
+        node = ast.parse(src).body[0]
     except SyntaxError:
-        return False
+        raise ValueError(f"unparseable signature {sig[4:]!r}") from None
+    a = node.args
+    positional = a.posonlyargs + a.args
+    defaults = dict(zip(positional[len(positional) - len(a.defaults) :], a.defaults))
+    defaults.update({p: d for p, d in zip(a.kwonlyargs, a.kw_defaults) if d is not None})
+    edits: list[tuple[int, str]] = []
+    for arg in positional + a.kwonlyargs + [a.vararg, a.kwarg]:
+        if arg is None:
+            continue
+        default = defaults.get(arg)
+        if arg.annotation is None:
+            if arg.arg != "self":
+                edits.append((arg.end_col_offset, ": typing.Any"))
+        elif isinstance(default, ast.Constant) and default.value is None and not _is_optional(arg.annotation):
+            edits.append((arg.annotation.end_col_offset, " | None"))
+    for col, text in sorted(edits, reverse=True):
+        src = src[:col] + text + src[col:]
+    return "def " + src[5:-5]
+
+
+def _self_return(sig: str) -> str:
+    return sig[: sig.rindex(") -> ") + 5] + "typing.Self"
+
+
+def _is_enum_member(owner) -> bool:
+    return (
+        owner is not None
+        and owner.parent is not None
+        and owner.parent.kind == Kind.CLASS
+        and any("enum." in str(b) for b in owner.parent.bases)
+    )
+
+
+def _literal_type(value: str) -> str | None:
+    """Name a rendered literal's type, so a bare value carries an annotation."""
+    try:
+        literal = ast.literal_eval(value)
+    except (SyntaxError, ValueError):
+        return None
+    return type(literal).__name__ if isinstance(literal, _LITERAL_TYPES) else None
+
+
+def is_private(name: str) -> bool:
+    return len(name) > 2 and ((name[0] == "_" and name[1] != "_") or (name[-1] == "_" and name[-2] != "_"))
 
 
 def _local_class_names(mod: Module) -> set:
@@ -135,7 +210,7 @@ def _local_class_names(mod: Module) -> set:
     return names
 
 
-def _extract_signatures(docstring) -> Optional[List[tuple]]:
+def _extract_signatures(docstring) -> list[tuple] | None:
     """Parse pybind11 signature(s) from a docstring, mirroring nanobind's __nb_signature__.
 
     Returns a list of (sig, doc) where sig is "def (args) -> ret"; pybind11
@@ -148,16 +223,14 @@ def _extract_signatures(docstring) -> Optional[List[tuple]]:
     if head is None:
         return None
     if len(lines) >= 2 and lines[1].strip() == "Overloaded function.":
-        entries: List[tuple] = []
+        entries: list[tuple] = []
         doc_start = 2
         for i in range(2, len(lines)):
             m = _PYBIND_SIG_RE.match(lines[i])
             if m and m.group("ret") and m.group("num") == str(len(entries) + 1):
                 if entries:
                     entries[-1] = (entries[-1][0], "\n".join(lines[doc_start:i]).strip() or None)
-                sig = f"def ({_clean_sig_args(m.group('name'), m.group('args'))}) -> {m.group('ret').strip()}"
-                if not _valid_sig(sig):
-                    raise ValueError(f"unparseable signature {sig[4:]!r}")
+                sig = _make_sig(m.group("name"), m.group("args"), m.group("ret"))
                 entries.append((sig, None))
                 doc_start = i + 1
         if not entries:
@@ -166,9 +239,7 @@ def _extract_signatures(docstring) -> Optional[List[tuple]]:
         return entries
     if head.group("ret") is None:
         return None
-    sig = f"def ({_clean_sig_args(head.group('name'), head.group('args'))}) -> {head.group('ret').strip()}"
-    if not _valid_sig(sig):
-        raise ValueError(f"unparseable signature {sig[4:]!r}")
+    sig = _make_sig(head.group("name"), head.group("args"), head.group("ret"))
     return [(sig, "\n".join(lines[1:]).strip() or None)]
 
 
@@ -177,7 +248,7 @@ class Pybind11Support(Extension):
 
     def __init__(self) -> None:
         super().__init__()
-        self.errors: List[str] = []
+        self.errors: list[str] = []
 
     def on_module_instance(self, *, node, mod: Module, agent, **kwargs) -> None:
         """Force griffe to inspect pybind11 submodules that share the parent's binary."""
@@ -200,6 +271,27 @@ class Pybind11Support(Extension):
             if k in obj.members:
                 ordered[k] = obj.members.pop(k)
         obj.members.update(ordered)
+
+    def on_class_members(self, *, node, cls: Class, agent, **kwargs) -> None:
+        """Retype the operators pybind11 types by their C++ operand."""
+        if not isinstance(node, ObjectNode) or not isinstance(agent, Inspector):
+            return
+        # The data model requires these to take any object, and not to overload.
+        for name in ("__eq__", "__ne__"):
+            func = cls.members.get(name)
+            if isinstance(func, Function):
+                func._pybind11_signature_ = [("def (self, other: object) -> bool", None)]
+                func.docstring = None
+        # An in-place operator takes what the binary one it falls back to takes,
+        # and returns the object it was called on.
+        for iop, op in _IN_PLACE_OPS.items():
+            ifunc = cls.members.get(iop)
+            if not isinstance(ifunc, Function):
+                continue
+            func = cls.members.get(op)
+            sigs = getattr(func, "_pybind11_signature_", None) or getattr(ifunc, "_pybind11_signature_", None)
+            if sigs:
+                ifunc._pybind11_signature_ = [(_self_return(s), None) for s, _ in sigs]
 
     def on_attribute_instance(self, *, node, attr: Attribute, agent, **kwargs) -> None:
         """Strip inherited docstrings and attach property setters/deleters."""
@@ -270,26 +362,26 @@ def load(module_name: str) -> Module:
 @dataclass
 class ReplacePattern:
     query: Pattern[str]
-    lines: List[str]
+    lines: list[str]
     matches: int
 
 
-def load_pattern_file(fname: str) -> List[ReplacePattern]:
+def load_pattern_file(fname: str) -> list[ReplacePattern]:
     """Load a pattern file; see nanobind's stubgen docs for the syntax."""
-    with open(fname, "r", encoding="utf-8") as f:
+    with open(fname, encoding="utf-8") as f:
         f_lines = f.readlines()
 
-    patterns: List[ReplacePattern] = []
+    patterns: list[ReplacePattern] = []
 
-    def add_pattern(query: str, lines: List[str]) -> None:
-        while lines and (lines[-1].isspace() or len(lines[-1]) == 0):
-            lines.pop()
-        lines.append("")
-        if all((p.isspace() or len(p) == 0 for p in lines)):
+    def add_pattern(query: str, lines: list[str]) -> None:
+        # The body is emitted verbatim, trailing blank line included: one that
+        # replaces a class or a function needs that separator, one that replaces
+        # a value does not, and only the author knows which.
+        if all(p.isspace() or len(p) == 0 for p in lines):
             lines = []
         patterns.append(ReplacePattern(re.compile(query[:-1]), lines, 0))
 
-    lines: List[str] = []
+    lines: list[str] = []
     query, dedent = None, 0
     for i, line in enumerate(f_lines):
         line = line.rstrip()
@@ -342,7 +434,9 @@ class StubGen:
         include_docstrings: bool = True,
         include_private: bool = False,
         include_values: bool = True,
-        patterns: Optional[List[ReplacePattern]] = None,
+        patterns: list[ReplacePattern] | None = None,
+        rename: tuple[str, str] | None = None,
+        aliases: dict[str, str] | None = None,
         quiet: bool = True,
     ) -> None:
         self.top = top
@@ -351,6 +445,8 @@ class StubGen:
         self.include_private = include_private
         self.include_values = include_values
         self.patterns = patterns or []
+        self.rename = rename
+        self.aliases = aliases or {}
         self.quiet = quiet
 
         self.depth = 0
@@ -363,11 +459,16 @@ class StubGen:
 
         # Imports discovered while rendering the body.
         # ``import <module>`` entries (module -> optional alias):
-        self._import_modules: dict[str, Optional[str]] = {}
+        self._import_modules: dict[str, str | None] = {}
         # ``from <module> import <name>`` entries (module -> {name: bound name}):
         self._import_from: dict[str, dict[str, str]] = {}
+        # Names already bound by an import, so two modules cannot claim the same one.
+        self._bound: dict[str, str] = {}
 
         self._local_names = _local_class_names(mod)
+
+        # Names declared via the pattern file's \export directive.
+        self._extra_exports: list[str] = []
 
     # ---- output primitives ----
 
@@ -385,8 +486,10 @@ class StubGen:
         self._output.write(replacement)
 
     def format_docstr(self, docstr: str, depth: int) -> str:
-        # Always the expanded block form (ruff stub style).
-        docstr = textwrap.dedent(docstr).strip()
+        # Always the expanded block form (ruff stub style). cleandoc, not dedent:
+        # an overload's text arrives with its first line already flush and the
+        # rest still indented, which dedent leaves alone.
+        docstr = inspect.cleandoc(docstr)
         raw = ""
         if "''" in docstr or "\\" in docstr:
             docstr = docstr.replace("''", "\\'\\'")
@@ -398,7 +501,7 @@ class StubGen:
 
     # ---- imports / name resolution ----
 
-    def import_object(self, module: str, name: Optional[str] = None, as_name: Optional[str] = None) -> str:
+    def import_object(self, module: str, name: str | None = None, as_name: str | None = None) -> str:
         """Register an import, avoiding collisions with local names (mirrors nanobind).
 
         With ``name`` None the whole module is imported; otherwise ``name`` is
@@ -413,9 +516,10 @@ class StubGen:
             return binds[name]
         bound = as_name if as_name else name
         if not as_name:
-            while bound in self.mod.members:
+            while bound in self.mod.members or self._bound.get(bound, module) != module:
                 bound = "_" + bound
         binds[name] = bound
+        self._bound[bound] = module
         return bound
 
     def check_party(self, module: str) -> int:
@@ -443,6 +547,10 @@ class StubGen:
 
     def _process_name(self, m: "re.Match[str]") -> str:
         full = m.group(0)
+        # Resolved in turn, so the alias brings its own import and the name it
+        # replaces brings none.
+        if (alias := self.aliases.get(full)) is not None:
+            return self.simplify(alias) if alias != full else alias
         mod_name = m.group(1)[:-1]
         cls_name = m.group(2)
 
@@ -460,11 +568,10 @@ class StubGen:
                 if enclosing and qual.startswith(enclosing + "."):
                     qual = qual[len(enclosing) + 1 :]
                 return qual or full
-            self.import_object(mod_path)
-            return full
-
-        if mod_name in ("typing", "typing_extensions", "collections.abc"):
-            return self.import_object(mod_name, cls_name)
+            # In-package names read as short names; everything else stays qualified.
+            head, _, nested = qual.partition(".")
+            bound = self.import_object(mod_path, head)
+            return f"{bound}.{nested}" if nested else bound
 
         # A same-module class/enum referenced by short name (pybind11 drops the
         # package prefix, e.g. RenderType.INTEGER) is already in scope; keep bare.
@@ -476,6 +583,8 @@ class StubGen:
 
     def simplify(self, s: str) -> str:
         """Rewrite dotted names in a rendered type string and register imports."""
+        if self.rename is not None:
+            s = s.replace(self.rename[0], self.rename[1])
         return _ID_SEQ.sub(self._process_name, s)
 
     def type_str(self, annotation) -> str:
@@ -484,7 +593,8 @@ class StubGen:
         return self.simplify(str(annotation))
 
     def any_type(self) -> str:
-        return self.import_object("typing", "Any")
+        self.import_object("typing")
+        return "typing.Any"
 
     def _render_value(self, value, owner=None) -> str:
         # Rendered verbatim; simplify() must not touch a literal (a dotted
@@ -505,22 +615,19 @@ class StubGen:
             return self.simplify(qualified)
         # An opaque repr, or a value suppressed via --exclude-values -- but keep
         # enum members, which nanobind never abbreviates.
-        enum_member = (
-            owner is not None
-            and owner.parent is not None
-            and owner.parent.kind == Kind.CLASS
-            and any("enum." in str(b) for b in owner.parent.bases)
-        )
-        if (not self.include_values and not enum_member) or "<" in s or ">" in s or "\n" in s:
+        if (not self.include_values and not _is_enum_member(owner)) or "<" in s or ">" in s or "\n" in s:
             return "..."
+        try:
+            ast.parse(s, mode="eval")
+        except SyntaxError:
+            # A __str__ that is not a Python expression, e.g. an Identifier's
+            # "namespace:key"; the stub shows it as the string it prints as.
+            return repr(s)
         return s
 
     # ---- dispatch ----
 
-    def _is_private(self, name: str) -> bool:
-        return len(name) > 2 and ((name[0] == "_" and name[1] != "_") or (name[-1] == "_" and name[-2] != "_"))
-
-    def apply_pattern(self, query: str, obj) -> bool:
+    def apply_pattern(self, query: str, obj) -> ReplacePattern | None:
         """Apply the first pattern-file entry whose query matches (mirrors nanobind)."""
         match = None
         pattern = None
@@ -529,7 +636,7 @@ class StubGen:
             if match:
                 break
         if not match or not pattern:
-            return False
+            return None
         for line in pattern.lines:
             ls = line.strip()
             if ls == "\\doc":
@@ -570,6 +677,11 @@ class StubGen:
                         raise RuntimeError(f"Could not parse import declaration {mod}")
                     self.import_object(modname, None, as_name=as_name)
                 continue
+            elif ls.startswith("\\export "):
+                self._extra_exports.extend(n.strip() for n in ls[7:].split(","))
+                continue
+            if "\\value" in line and obj is not None:
+                line = line.replace("\\value", self._render_value(obj.value, obj))
             groups = match.groups()
             for i in reversed(range(len(groups))):
                 line = line.replace(f"\\{i + 1}", groups[i])
@@ -577,16 +689,20 @@ class StubGen:
                 line = line.replace(f"\\{k}", v)
             self.write_ln(line)
         pattern.matches += 1
-        return True
+        return pattern
 
-    def put(self, obj) -> None:
+    def put(self, obj) -> bool:
+        """Emit ``obj``; returns whether anything was written."""
         if isinstance(obj, Alias):
-            return
+            return False
         name = obj.name
         if name in SKIP_LIST:
-            return
-        if self._is_private(name) and not self.include_private:
-            return
+            return False
+        if is_private(name) and not self.include_private:
+            return False
+        # Drop an undocumented __repr__/__str__; object's says the same.
+        if name in _REDUNDANT_DUNDERS and getattr(obj, "_pybind11_signature_", None) == [("def (self) -> str", None)]:
+            return False
         # Drop pybind11's default __init__ (carries object.__init__'s docstring).
         if (
             obj.kind == Kind.FUNCTION
@@ -594,13 +710,14 @@ class StubGen:
             and obj.docstring is not None
             and obj.docstring.value == object.__init__.__doc__
         ):
-            return
+            return False
 
         old_prefix = self.prefix
         self.prefix = self.prefix + (("." + name) if name else "")
+        before = self._output.tell()
         try:
             if self.apply_pattern(self.prefix, obj):
-                return
+                return self._output.tell() > before
             kind = obj.kind
             if kind == Kind.CLASS:
                 self.put_type(obj)
@@ -614,6 +731,7 @@ class StubGen:
             # Submodules are emitted as separate files by the driver.
         finally:
             self.prefix = old_prefix
+        return self._output.tell() > before
 
     # ---- class ----
 
@@ -661,8 +779,8 @@ class StubGen:
         for i, s in enumerate(sigs):
             if s[1] is not None and last_idx[s[1]] != i:
                 s = (s[0], None)
-            overload = self.import_object("typing", "overload")
-            self.write_ln(f"@{overload}")
+            self.import_object("typing")
+            self.write_ln("@typing.overload")
             self.put_py_overload(func, s)
 
     def put_py_overload(self, func: Function, sig: tuple) -> None:
@@ -706,12 +824,17 @@ class StubGen:
 
     def _signature_str(self, func: Function) -> str:
         params = list(func.parameters)
-        inner = self._params_str(params) if params else "*args, **kwargs"
-        ret = self.type_str(func.returns) if func.returns is not None else self.any_type()
+        any_type = self.any_type()
+        inner = self._params_str(params) if params else f"*args: {any_type}, **kwargs: {any_type}"
+        if func.returns is not None:
+            ret = self.type_str(func.returns)
+        else:
+            # An unannotated __init__ returns None, as every type checker assumes.
+            ret = "None" if func.name == "__init__" else self.any_type()
         return f"({inner}) -> {ret}"
 
     def _params_str(self, params) -> str:
-        parts: List[str] = []
+        parts: list[str] = []
         prev = None
         for p in params:
             if prev == ParameterKind.positional_only and p.kind != ParameterKind.positional_only:
@@ -726,6 +849,8 @@ class StubGen:
             s += p.name
             if p.annotation is not None:
                 s += ": " + self.type_str(p.annotation)
+            elif p.name != "self":
+                s += ": " + self.any_type()
             if p.default is not None:
                 s += (" = " if p.annotation is not None else "=") + self._render_value(p.default)
             parts.append(s)
@@ -764,29 +889,38 @@ class StubGen:
 
     def put_value(self, attr: Attribute) -> None:
         line = attr.name
+        value = self._render_value(attr.value, attr) if attr.value is not None else "..."
         if attr.annotation is not None:
             line += ": " + self.type_str(attr.annotation)
-        if attr.value is not None:
-            line += " = " + self._render_value(attr.value, attr)
-        else:
-            line += " = ..."
-        self.write_ln(line)
+        elif not _is_enum_member(attr) and (ann := _literal_type(value)):
+            # An enum member is exempt; any other bare value needs one.
+            line += ": " + ann
+        self.write_ln(line + " = " + value)
+        # Values pack together (an enum body reads better dense); only a
+        # documented one gets a separating blank line.
         if attr.docstring and self.include_docstrings and attr.docstring.value:
             self.put_docstr(attr.docstring.value)
-        self.write("\n")
+            self.write("\n")
 
     # ---- assembly ----
 
     def render(self) -> None:
+        emitted: list[str] = []
         self.apply_pattern(self.prefix + ".__prefix__", None)
         for member in self.mod.members.values():
             if isinstance(member, Alias) or member.kind == Kind.MODULE:
                 continue
-            self.put(member)
+            if self.put(member):
+                emitted.append(member.name)
         self.apply_pattern(self.prefix + ".__suffix__", None)
+        # A pybind11 module has no __all__, so griffe leaves exports unset;
+        # derive it from what was actually emitted (pattern-dropped members
+        # therefore drop out of __all__ too).
+        if self.mod.exports is None:
+            self.mod.exports = sorted(set(emitted) | set(self.mod.modules) | set(self._extra_exports))
 
     def _imports_block(self) -> str:
-        groups: List[List[str]] = [[], [], []]
+        groups: list[list[str]] = [[], [], []]
         for module, alias in self._import_modules.items():
             stmt = f"import {module} as {alias}" if alias else f"import {module}"
             groups[self.check_party(module)].append(stmt)
@@ -805,12 +939,14 @@ class StubGen:
         return "\n\n".join(chunks)
 
     def _submodule_block(self) -> str:
+        # Plain names, not the redundant "x as x" re-export form: __all__ already
+        # marks them exported, and isort splits aliased imports one per statement.
         subs = [name for name in self.mod.modules]
         if not subs:
             return ""
         if len(subs) == 1:
-            return f"from . import {subs[0]} as {subs[0]}"
-        lines = ",\n".join(f"    {s} as {s}" for s in subs)
+            return f"from . import {subs[0]}"
+        lines = ",\n".join(f"    {s}" for s in subs)
         return "from . import (\n" + lines + "\n)"
 
     def get(self) -> str:
@@ -858,7 +994,7 @@ def _target_file(mod: Module, top: Module, out_dir: Path) -> Path:
     return out_dir.joinpath(*segs[:-1]) / (segs[-1] + ".pyi")
 
 
-def render_module(top: Module, mod: Module, opt: argparse.Namespace, patterns: List[ReplacePattern]) -> str:
+def render_module(top: Module, mod: Module, opt: argparse.Namespace, patterns: list[ReplacePattern]) -> str:
     sg = StubGen(
         top,
         mod,
@@ -872,7 +1008,7 @@ def render_module(top: Module, mod: Module, opt: argparse.Namespace, patterns: L
     return sg.get()
 
 
-def parse_options(args: List[str]) -> argparse.Namespace:
+def parse_options(args: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="python -m endstone.python.stubgen",
         description="Generate stubs for pybind11 extensions (griffe-backed).",
@@ -956,7 +1092,7 @@ def parse_options(args: List[str]) -> argparse.Namespace:
     return opt
 
 
-def main(args: Optional[List[str]] = None) -> None:
+def main(args: list[str] | None = None) -> None:
     opt = parse_options(sys.argv[1:] if args is None else args)
 
     for path in opt.imports:

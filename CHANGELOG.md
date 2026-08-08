@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a `Biome` type and `Block.biome` for reading the biome at a block. Biomes can be looked up by name with `Biome.get("minecraft:plains")` and enumerated via `server.get_registry(Biome)`.
 - Added an effect API: `Mob.add_effect()`, `Mob.remove_effect()`, `Mob.has_effect()`, `Mob.get_effect()`, and `Mob.active_effects` apply, remove, and query a living entity's status effects (speed, regeneration, poison, etc.). Effects are described by the new `Effect` type, carrying an effect type, duration in ticks, amplifier, and ambient/particles/icon display flags.
 - Added a chunk loading API: `Dimension.load_chunk()`, `Dimension.unload_chunk()`, and `Dimension.is_chunk_loaded()`. `load_chunk()` loads a chunk and keeps it resident for as long as your plugin needs it, and `unload_chunk()` releases it again so it can unload once nothing else (a nearby player, the spawn area, etc.) is keeping it loaded.
+- `PlayerInteractEvent` is now fired with the `LEFT_CLICK_AIR` action when a player swings at nothing, that is, at neither a block nor an actor. The action had been part of the API since the event was introduced, but was never fired. Cancelling the event suppresses the swing, including its attack sound (#316).
 
 ### Changed
 
@@ -51,6 +52,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed type annotations for `Plugin` and `event_handler`.
+- Fixed the type stubs so a type checker no longer reports errors on them. `__eq__`/`__ne__` now take `object` as the data model requires, in-place operators such as `Vector.__iadd__` accept everything their binary counterpart does and return `Self`, an optional callback like `ActionForm(on_click=...)` is typed `Callable[...] | None` rather than relying on an implicit `Optional`, a skin image is a `numpy.typing.NDArray`, and `Plugin.config` is a `dict[str, Any]`.
+- Fixed the NBT bindings hiding what their containers hold: `ByteArrayTag(iterable)` and `IntArrayTag(iterable)` take an `Iterable[int]`, `ListTag(iterable)` an `Iterable[Tag]`, `CompoundTag(mapping)` a `dict[str, Tag]`, and `to_list()`/`to_dict()` return `list[Any]`/`dict[str, Any]`.
+- `Plugin.default_permission` now accepts a string or a bool (`"operator"`, `"not op"`, `True`) as well as a `PermissionDefault`, matching the `default` of an individual entry in `Plugin.permissions` and the string form already accepted by `Plugin.load`. Previously only `PermissionDefault` worked, and anything else raised `TypeError`.
+- Fixed `from endstone import ItemRegistry` (and `EnchantmentRegistry`, `ActorTypeRegistry`) raising `AttributeError`. These names were re-exported but never existed; the registry class is `Registry`, obtained through `Server.get_registry()`.
 - Fixed the server list entry losing its last two fields whenever a plugin listened for `ServerListPingEvent`, or the ping was otherwise answered by Endstone. The reply was rebuilt from a fixed list of fields, so anything the server had added beyond it, currently whether the world is an editor world and whether it is hardcore, was dropped. Any field Endstone does not itself expose is now passed through untouched.
 
 ## [0.11.8] - 2026-08-07

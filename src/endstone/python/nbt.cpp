@@ -12,10 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <pybind11/typing.h>
+
 #include "endstone_python.h"
 #include "literal.h"
 
 namespace py = pybind11;
+
+namespace endstone::python {
+// A value of any Python type; pybind11 has no py::typing::Any.
+struct PyAny : py::object {
+    using py::object::object;
+};
+}  // namespace endstone::python
+
+namespace pybind11::detail {
+template <>
+struct handle_type_name<endstone::python::PyAny> {
+    static constexpr auto name = const_name("typing.Any");
+};
+}  // namespace pybind11::detail
 
 namespace endstone::python {
 static py::object tag_to_python(const nbt::Tag &tag)
@@ -148,7 +164,7 @@ static void bind_array_tag(py::module_ &m, const char *name, Args &&...args)
     // --- Constructors ---
     cls.def(py::init<>())
         // From any iterable: ArrayTag([1,2,3])
-        .def(py::init([](const py::iterable &it) {
+        .def(py::init([](const py::typing::Iterable<value_type> &it) {
                  storage_type v;
                  for (py::handle h : it) {
                      v.push_back(py::cast<value_type>(h));
@@ -185,7 +201,7 @@ static void bind_array_tag(py::module_ &m, const char *name, Args &&...args)
 )doc")
         .def(
             "extend",
-            [](T &self, const py::iterable &it) {
+            [](T &self, const py::typing::Iterable<value_type> &it) {
                 for (py::handle h : it) {
                     self.push_back(py::cast<value_type>(h));
                 }
@@ -254,7 +270,7 @@ static void bind_list_tag(py::module &m)
 {
     auto cls = py::class_<ListTag, nbt::TagBase>(m, "ListTag", "An NBT list tag of homogeneously-typed tags.")
                    .def(py::init<>())
-                   .def(py::init([](py::iterable iter) {
+                   .def(py::init([](py::typing::Iterable<nbt::Tag> iter) {
                             ListTag lt;
                             for (py::handle h : iter) {
                                 auto v = py::cast<nbt::Tag>(h);
@@ -311,7 +327,7 @@ static void bind_list_tag(py::module &m)
 )doc")
                    .def(
                        "extend",
-                       [](ListTag &self, py::iterable it) {
+                       [](ListTag &self, py::typing::Iterable<nbt::Tag> it) {
                            for (py::handle h : it) {
                                self.emplace_back(py::cast<nbt::Tag>(h));
                            }
@@ -341,7 +357,7 @@ static void bind_list_tag(py::module &m)
 )doc")
                    .def("to_list",
                         [](const ListTag &self) {
-                            py::list lst;
+                            py::typing::List<PyAny> lst;
                             for (const auto &elem : self) {
                                 lst.append(tag_to_python(elem));
                             }
@@ -360,7 +376,7 @@ static void bind_compound_tag(py::module &m)
     auto cls =
         py::class_<CompoundTag, nbt::TagBase>(m, "CompoundTag", "A named NBT compound tag mapping string keys to tags.")
             .def(py::init<>())
-            .def(py::init([](py::dict d) {
+            .def(py::init([](py::typing::Dict<py::str, nbt::Tag> d) {
                      CompoundTag c;
                      for (auto item : d) {
                          auto key = py::cast<std::string>(item.first);
@@ -455,7 +471,7 @@ static void bind_compound_tag(py::module &m)
             .def(py::self != py::self)
             .def("to_dict",
                  [](const CompoundTag &self) {
-                     py::dict d;
+                     py::typing::Dict<py::str, PyAny> d;
                      for (const auto &[k, v] : self) {
                          d[py::str(k)] = tag_to_python(v);
                      }

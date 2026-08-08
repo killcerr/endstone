@@ -2,7 +2,7 @@
 Classes relating to the NBT data format.
 """
 
-import collections
+import collections.abc
 import typing
 
 __all__ = [
@@ -39,11 +39,9 @@ class ByteTag(Tag):
         """
         The underlying value of this tag.
         """
-        ...
+
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, other: object) -> bool: ...
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
     def __int__(self) -> int: ...
     def dump(
         self, name: str | None = None, byte_order: typing.Literal["little", "big"] = "little", network: bool = False
@@ -59,7 +57,6 @@ class ByteTag(Tag):
         Returns:
             bytes: The binary NBT data.
         """
-        ...
 
 class ShortTag(Tag):
     """
@@ -74,11 +71,9 @@ class ShortTag(Tag):
         """
         The underlying value of this tag.
         """
-        ...
+
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, other: object) -> bool: ...
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
     def __int__(self) -> int: ...
     def dump(
         self, name: str | None = None, byte_order: typing.Literal["little", "big"] = "little", network: bool = False
@@ -94,7 +89,6 @@ class ShortTag(Tag):
         Returns:
             bytes: The binary NBT data.
         """
-        ...
 
 class IntTag(Tag):
     """
@@ -109,11 +103,9 @@ class IntTag(Tag):
         """
         The underlying value of this tag.
         """
-        ...
+
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, other: object) -> bool: ...
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
     def __int__(self) -> int: ...
     def dump(
         self, name: str | None = None, byte_order: typing.Literal["little", "big"] = "little", network: bool = False
@@ -129,7 +121,6 @@ class IntTag(Tag):
         Returns:
             bytes: The binary NBT data.
         """
-        ...
 
 class LongTag(Tag):
     """
@@ -144,11 +135,9 @@ class LongTag(Tag):
         """
         The underlying value of this tag.
         """
-        ...
+
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, other: object) -> bool: ...
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
     def __int__(self) -> int: ...
     def dump(
         self, name: str | None = None, byte_order: typing.Literal["little", "big"] = "little", network: bool = False
@@ -164,7 +153,6 @@ class LongTag(Tag):
         Returns:
             bytes: The binary NBT data.
         """
-        ...
 
 class FloatTag(Tag):
     """
@@ -179,11 +167,9 @@ class FloatTag(Tag):
         """
         The underlying value of this tag.
         """
-        ...
+
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, other: object) -> bool: ...
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
     def __float__(self) -> float: ...
     def dump(
         self, name: str | None = None, byte_order: typing.Literal["little", "big"] = "little", network: bool = False
@@ -199,7 +185,6 @@ class FloatTag(Tag):
         Returns:
             bytes: The binary NBT data.
         """
-        ...
 
 class DoubleTag(Tag):
     """
@@ -214,11 +199,9 @@ class DoubleTag(Tag):
         """
         The underlying value of this tag.
         """
-        ...
+
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, other: object) -> bool: ...
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
     def __float__(self) -> float: ...
     def dump(
         self, name: str | None = None, byte_order: typing.Literal["little", "big"] = "little", network: bool = False
@@ -234,7 +217,6 @@ class DoubleTag(Tag):
         Returns:
             bytes: The binary NBT data.
         """
-        ...
 
 class ByteArrayTag(Tag):
     """
@@ -243,24 +225,24 @@ class ByteArrayTag(Tag):
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
-    def __init__(self, iterable: collections.abc.Iterable) -> None: ...
+    def __init__(self, iterable: collections.abc.Iterable[int]) -> None: ...
     @typing.overload
     def __init__(self, buffer: collections.abc.Buffer) -> None: ...
-    def __buffer__(self, flags) -> None:
+    def __buffer__(self, flags: typing.Any, /) -> typing.Any:
         """
         Return a buffer object that exposes the underlying memory of the object.
         """
-        ...
-    def __release_buffer__(self, buffer) -> None:
+
+    def __release_buffer__(self, buffer: typing.Any, /) -> typing.Any:
         """
         Release the buffer object that exposes the underlying memory of the object.
         """
-        ...
+
     def clear(self) -> None:
         """
         Removes all values from this tag.
         """
-        ...
+
     def append(self, value: int) -> None:
         """
         Appends a value to the end of this tag.
@@ -268,15 +250,15 @@ class ByteArrayTag(Tag):
         Args:
             value: The value to append.
         """
-        ...
-    def extend(self, iterable: collections.abc.Iterable) -> None:
+
+    def extend(self, iterable: collections.abc.Iterable[int]) -> None:
         """
         Appends all values from an iterable to the end of this tag.
 
         Args:
             iterable: An iterable of values to append.
         """
-        ...
+
     def __len__(self) -> int: ...
     def __bool__(self) -> bool: ...
     def __getitem__(self, arg0: int) -> int: ...
@@ -284,8 +266,6 @@ class ByteArrayTag(Tag):
     def __iter__(self) -> collections.abc.Iterator[int]: ...
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, other: object) -> bool: ...
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
     def __bytes__(self) -> bytes: ...
     def dump(
         self, name: str | None = None, byte_order: typing.Literal["little", "big"] = "little", network: bool = False
@@ -301,7 +281,6 @@ class ByteArrayTag(Tag):
         Returns:
             bytes: The binary NBT data.
         """
-        ...
 
 class StringTag(Tag):
     """
@@ -316,11 +295,9 @@ class StringTag(Tag):
         """
         The underlying value of this tag.
         """
-        ...
+
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, other: object) -> bool: ...
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
     def dump(
         self, name: str | None = None, byte_order: typing.Literal["little", "big"] = "little", network: bool = False
     ) -> bytes:
@@ -335,7 +312,6 @@ class StringTag(Tag):
         Returns:
             bytes: The binary NBT data.
         """
-        ...
 
 class IntArrayTag(Tag):
     """
@@ -344,12 +320,12 @@ class IntArrayTag(Tag):
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
-    def __init__(self, iterable: collections.abc.Iterable) -> None: ...
+    def __init__(self, iterable: collections.abc.Iterable[int]) -> None: ...
     def clear(self) -> None:
         """
         Removes all values from this tag.
         """
-        ...
+
     def append(self, value: int) -> None:
         """
         Appends a value to the end of this tag.
@@ -357,15 +333,15 @@ class IntArrayTag(Tag):
         Args:
             value: The value to append.
         """
-        ...
-    def extend(self, iterable: collections.abc.Iterable) -> None:
+
+    def extend(self, iterable: collections.abc.Iterable[int]) -> None:
         """
         Appends all values from an iterable to the end of this tag.
 
         Args:
             iterable: An iterable of values to append.
         """
-        ...
+
     def __len__(self) -> int: ...
     def __bool__(self) -> bool: ...
     def __getitem__(self, arg0: int) -> int: ...
@@ -373,8 +349,6 @@ class IntArrayTag(Tag):
     def __iter__(self) -> collections.abc.Iterator[int]: ...
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, other: object) -> bool: ...
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
     def dump(
         self, name: str | None = None, byte_order: typing.Literal["little", "big"] = "little", network: bool = False
     ) -> bytes:
@@ -389,7 +363,6 @@ class IntArrayTag(Tag):
         Returns:
             bytes: The binary NBT data.
         """
-        ...
 
 class ListTag(Tag):
     """
@@ -398,11 +371,9 @@ class ListTag(Tag):
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
-    def __init__(self, iterable: collections.abc.Iterable) -> None: ...
+    def __init__(self, iterable: collections.abc.Iterable[Tag]) -> None: ...
     def __len__(self) -> int: ...
     def __bool__(self) -> bool: ...
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
     def __getitem__(self, arg0: int) -> Tag: ...
     def __setitem__(self, arg0: int, arg1: Tag) -> None: ...
     def __delitem__(self, arg0: int) -> None: ...
@@ -411,7 +382,7 @@ class ListTag(Tag):
         """
         Removes all tags from this list.
         """
-        ...
+
     def append(self, tag: Tag) -> None:
         """
         Appends a tag to the end of this list.
@@ -419,15 +390,15 @@ class ListTag(Tag):
         Args:
             tag: The tag to append. It must have the same type as the existing elements.
         """
-        ...
-    def extend(self, iterable: collections.abc.Iterable) -> None:
+
+    def extend(self, iterable: collections.abc.Iterable[Tag]) -> None:
         """
         Appends all tags from an iterable to the end of this list.
 
         Args:
             iterable: An iterable of tags to append. Each tag must have the same type as the existing elements.
         """
-        ...
+
     def pop(self, index: int = -1) -> Tag:
         """
         Removes and returns the tag at the given index.
@@ -438,22 +409,22 @@ class ListTag(Tag):
         Returns:
             The removed tag.
         """
-        ...
-    def to_list(self) -> list:
+
+    def to_list(self) -> list[typing.Any]:
         """
         Converts this list to a plain Python list of native values.
         """
-        ...
+
     def size(self) -> int:
         """
         The number of tags in this list.
         """
-        ...
+
     def empty(self) -> bool:
         """
         Returns `True` if this list contains no tags.
         """
-        ...
+
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, other: object) -> bool: ...
     def dump(
@@ -470,7 +441,6 @@ class ListTag(Tag):
         Returns:
             bytes: The binary NBT data.
         """
-        ...
 
 class CompoundTag(Tag):
     """
@@ -479,7 +449,7 @@ class CompoundTag(Tag):
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
-    def __init__(self, mapping: dict) -> None: ...
+    def __init__(self, mapping: dict[str, Tag]) -> None: ...
     def __len__(self) -> int: ...
     def __bool__(self) -> bool: ...
     def __contains__(self, key: str) -> bool: ...
@@ -496,12 +466,12 @@ class CompoundTag(Tag):
         Returns:
             The tag associated with the key, or the newly inserted default.
         """
-        ...
+
     def clear(self) -> None:
         """
         Removes all entries from this compound tag.
         """
-        ...
+
     @typing.overload
     def pop(self, key: str) -> Tag:
         """
@@ -516,9 +486,9 @@ class CompoundTag(Tag):
         Raises:
             KeyError: If the key is not present.
         """
-        ...
+
     @typing.overload
-    def pop(self, key: str, default: object = None) -> object:
+    def pop(self, key: str, default: object | None = None) -> object:
         """
         Removes the entry with the given key and returns its tag, or a default if the key is not present.
 
@@ -529,32 +499,30 @@ class CompoundTag(Tag):
         Returns:
             The tag that was associated with the key, or the default if the key is not present.
         """
-        ...
+
     def __iter__(self) -> collections.abc.Iterator[str]: ...
     def keys(self) -> collections.abc.Iterator[str]:
         """
         Returns an iterator over the keys in this compound tag.
         """
-        ...
+
     def values(self) -> collections.abc.Iterator[Tag]:
         """
         Returns an iterator over the tags in this compound tag.
         """
-        ...
+
     def items(self) -> collections.abc.Iterator[tuple[str, Tag]]:
         """
         Returns an iterator over the (key, tag) pairs in this compound tag.
         """
-        ...
+
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, other: object) -> bool: ...
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, typing.Any]:
         """
         Converts this compound tag to a plain Python dict of native values.
         """
-        ...
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
+
     def dump(
         self, name: str | None = None, byte_order: typing.Literal["little", "big"] = "little", network: bool = False
     ) -> bytes:
@@ -569,7 +537,6 @@ class CompoundTag(Tag):
         Returns:
             bytes: The binary NBT data.
         """
-        ...
 
 def load(data: bytes, byte_order: typing.Literal["little", "big"] = "little", network: bool = False) -> tuple[Tag, str]:
     """
@@ -583,4 +550,3 @@ def load(data: bytes, byte_order: typing.Literal["little", "big"] = "little", ne
     Returns:
         tuple[Tag, str]: A tuple of (tag, name) where name is the root tag name.
     """
-    ...

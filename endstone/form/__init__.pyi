@@ -1,4 +1,4 @@
-import collections
+import collections.abc
 
 from endstone import Player
 from endstone.lang import Translatable
@@ -30,7 +30,7 @@ class Dropdown:
         """
         The label of the dropdown.
         """
-        ...
+
     @label.setter
     def label(self, arg1: str | Translatable) -> Dropdown: ...
     @property
@@ -38,7 +38,7 @@ class Dropdown:
         """
         The options of the dropdown.
         """
-        ...
+
     @options.setter
     def options(self, arg1: list[str]) -> Dropdown: ...
     @property
@@ -46,14 +46,13 @@ class Dropdown:
         """
         The optional default index of the dropdown.
         """
-        ...
+
     @default_index.setter
     def default_index(self, arg1: int | None) -> Dropdown: ...
     def add_option(self, option: str) -> Dropdown:
         """
         Adds a new option to the dropdown.
         """
-        ...
 
 class Label:
     """
@@ -65,7 +64,7 @@ class Label:
         """
         The text of the label.
         """
-        ...
+
     @text.setter
     def text(self, arg1: str | Translatable) -> Label: ...
 
@@ -86,7 +85,7 @@ class Slider:
         """
         The label of the slider.
         """
-        ...
+
     @label.setter
     def label(self, arg1: str | Translatable) -> Slider: ...
     @property
@@ -94,7 +93,7 @@ class Slider:
         """
         The minimum value of the slider.
         """
-        ...
+
     @min.setter
     def min(self, arg1: float) -> Slider: ...
     @property
@@ -102,7 +101,7 @@ class Slider:
         """
         The maximum value of the slider.
         """
-        ...
+
     @max.setter
     def max(self, arg1: float) -> Slider: ...
     @property
@@ -110,7 +109,7 @@ class Slider:
         """
         The step size of the slider.
         """
-        ...
+
     @step.setter
     def step(self, arg1: float) -> Slider: ...
     @property
@@ -118,7 +117,7 @@ class Slider:
         """
         The optional default value of the slider.
         """
-        ...
+
     @default_value.setter
     def default_value(self, arg1: float | None) -> Slider: ...
 
@@ -134,7 +133,7 @@ class StepSlider:
         """
         The label of the step slider.
         """
-        ...
+
     @label.setter
     def label(self, arg1: str | Translatable) -> Dropdown: ...
     @property
@@ -142,7 +141,7 @@ class StepSlider:
         """
         The options of the step slider.
         """
-        ...
+
     @options.setter
     def options(self, arg1: list[str]) -> Dropdown: ...
     @property
@@ -150,14 +149,13 @@ class StepSlider:
         """
         The optional default index of the step slider.
         """
-        ...
+
     @default_index.setter
     def default_index(self, arg1: int | None) -> Dropdown: ...
     def add_option(self, option: str) -> Dropdown:
         """
         Adds a new option to the step slider.
         """
-        ...
 
 class TextInput:
     """
@@ -171,7 +169,7 @@ class TextInput:
         """
         The label of the text input field.
         """
-        ...
+
     @label.setter
     def label(self, arg1: str | Translatable) -> TextInput: ...
     @property
@@ -179,7 +177,7 @@ class TextInput:
         """
         The placeholder of the text input field.
         """
-        ...
+
     @placeholder.setter
     def placeholder(self, arg1: str | Translatable) -> TextInput: ...
     @property
@@ -187,7 +185,7 @@ class TextInput:
         """
         The optional default text of the text input field.
         """
-        ...
+
     @default_value.setter
     def default_value(self, arg1: str | None) -> TextInput: ...
 
@@ -201,7 +199,7 @@ class Toggle:
         """
         The label of the toggle.
         """
-        ...
+
     @label.setter
     def label(self, arg1: str | Translatable) -> Toggle: ...
     @property
@@ -209,7 +207,7 @@ class Toggle:
         """
         The default value of the toggle.
         """
-        ...
+
     @default_value.setter
     def default_value(self, arg1: bool) -> Toggle: ...
 
@@ -229,7 +227,7 @@ class Header:
         """
         The label of the header.
         """
-        ...
+
     @label.setter
     def label(self, arg1: str | Translatable) -> Header: ...
 
@@ -248,7 +246,7 @@ class Button:
         """
         The text of the button.
         """
-        ...
+
     @text.setter
     def text(self, arg1: str | Translatable) -> Button: ...
     @property
@@ -256,7 +254,7 @@ class Button:
         """
         The path or URL to the icon file.
         """
-        ...
+
     @icon.setter
     def icon(self, arg1: str) -> Button: ...
     @property
@@ -264,7 +262,7 @@ class Button:
         """
         The on click callback of the button.
         """
-        ...
+
     @on_click.setter
     def on_click(self, arg1: collections.abc.Callable[[Player], None]) -> Button: ...
 
@@ -286,7 +284,7 @@ class MessageForm:
         """
         The title of the form.
         """
-        ...
+
     @title.setter
     def title(self, arg1: str | Translatable) -> MessageForm: ...
     @property
@@ -294,7 +292,7 @@ class MessageForm:
         """
         The on submit callback of the form.
         """
-        ...
+
     @on_submit.setter
     def on_submit(self, arg1: collections.abc.Callable[[Player, int], None]) -> MessageForm: ...
     @property
@@ -302,7 +300,7 @@ class MessageForm:
         """
         The on close callback of the form.
         """
-        ...
+
     @on_close.setter
     def on_close(self, arg1: collections.abc.Callable[[Player], None]) -> MessageForm: ...
     @property
@@ -310,7 +308,7 @@ class MessageForm:
         """
         The content of the form.
         """
-        ...
+
     @content.setter
     def content(self, arg1: str | Translatable) -> MessageForm: ...
     @property
@@ -318,7 +316,7 @@ class MessageForm:
         """
         The text of button1.
         """
-        ...
+
     @button1.setter
     def button1(self, arg1: str | Translatable) -> MessageForm: ...
     @property
@@ -326,7 +324,7 @@ class MessageForm:
         """
         The text of button2.
         """
-        ...
+
     @button2.setter
     def button2(self, arg1: str | Translatable) -> MessageForm: ...
 
@@ -347,7 +345,7 @@ class ActionForm:
         """
         The title of the form.
         """
-        ...
+
     @title.setter
     def title(self, arg1: str | Translatable) -> ActionForm: ...
     @property
@@ -355,7 +353,7 @@ class ActionForm:
         """
         The on submit callback of the form.
         """
-        ...
+
     @on_submit.setter
     def on_submit(self, arg1: collections.abc.Callable[[Player, int], None]) -> ActionForm: ...
     @property
@@ -363,7 +361,7 @@ class ActionForm:
         """
         The on close callback of the form.
         """
-        ...
+
     @on_close.setter
     def on_close(self, arg1: collections.abc.Callable[[Player], None]) -> ActionForm: ...
     @property
@@ -371,7 +369,7 @@ class ActionForm:
         """
         The content of the form.
         """
-        ...
+
     @content.setter
     def content(self, arg1: str | Translatable) -> ActionForm: ...
     def add_button(
@@ -391,7 +389,7 @@ class ActionForm:
         Returns:
             A reference to the current form.
         """
-        ...
+
     def add_label(self, text: str | Translatable) -> ActionForm:
         """
         Adds a label to the form.
@@ -402,7 +400,7 @@ class ActionForm:
         Returns:
             A reference to the current form.
         """
-        ...
+
     def add_header(self, text: str | Translatable) -> ActionForm:
         """
         Adds a header to the form.
@@ -413,7 +411,7 @@ class ActionForm:
         Returns:
             A reference to the current form.
         """
-        ...
+
     def add_divider(self) -> ActionForm:
         """
         Adds a divider to the form.
@@ -421,13 +419,13 @@ class ActionForm:
         Returns:
             A reference to the current form.
         """
-        ...
+
     @property
     def controls(self) -> list[Button | Divider | Header | Label]:
         """
         The controls of the action form.
         """
-        ...
+
     @controls.setter
     def controls(self, arg1: list[Button | Divider | Header | Label]) -> ActionForm: ...
 
@@ -450,13 +448,13 @@ class ModalForm:
         """
         Adds a control to the form.
         """
-        ...
+
     @property
     def title(self) -> str | Translatable:
         """
         The title of the form.
         """
-        ...
+
     @title.setter
     def title(self, arg1: str | Translatable) -> ModalForm: ...
     @property
@@ -464,7 +462,7 @@ class ModalForm:
         """
         The on submit callback of the form.
         """
-        ...
+
     @on_submit.setter
     def on_submit(self, arg1: collections.abc.Callable[[Player, str], None]) -> ModalForm: ...
     @property
@@ -472,7 +470,7 @@ class ModalForm:
         """
         The on close callback of the form.
         """
-        ...
+
     @on_close.setter
     def on_close(self, arg1: collections.abc.Callable[[Player], None]) -> ModalForm: ...
     @property
@@ -480,7 +478,7 @@ class ModalForm:
         """
         The controls of the modal form.
         """
-        ...
+
     @controls.setter
     def controls(
         self, arg1: list[Dropdown | Label | Slider | StepSlider | TextInput | Toggle | Divider | Header]
@@ -490,7 +488,7 @@ class ModalForm:
         """
         The path or URL to the icon file.
         """
-        ...
+
     @icon.setter
     def icon(self, arg1: str | None) -> ModalForm: ...
     @property
@@ -498,6 +496,6 @@ class ModalForm:
         """
         The submit button text of the form.
         """
-        ...
+
     @submit_button.setter
     def submit_button(self, arg1: str | Translatable | None) -> ModalForm: ...

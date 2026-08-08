@@ -9,6 +9,7 @@ from endstone.util import Vector
 __all__ = [
     "Chunk",
     "Dimension",
+    "DimensionCreator",
     "Level",
     "Location",
 ]
@@ -22,19 +23,19 @@ class Level:
         """
         The unique name of this level.
         """
-        ...
+
     @property
     def actors(self) -> list[Actor]:
         """
         A list of all actors currently residing in this level.
         """
-        ...
+
     @property
     def time(self) -> int:
         """
         The relative in-game time of this level.
         """
-        ...
+
     @time.setter
     def time(self, arg1: int) -> None: ...
     @property
@@ -42,7 +43,7 @@ class Level:
         """
         A list of all dimensions within this level.
         """
-        ...
+
     def get_dimension(self, id: Identifier[Dimension] | str) -> Dimension:
         """
         Gets the dimension with the given id.
@@ -53,13 +54,27 @@ class Level:
         Returns:
             The `Dimension` with the given id, or `None` if none exists.
         """
-        ...
+
+    def create_dimension(self, creator: DimensionCreator) -> Dimension:
+        """
+        Creates a new custom dimension within this level.
+
+        Custom dimensions are empty (void) dimensions identified by a namespaced id, e.g. `myplugin:void_realm`;
+        populate them with blocks, structures or actors afterward. Custom dimensions persist across server restarts.
+        If a dimension with the requested name already exists, that existing dimension is returned instead.
+
+        Args:
+            creator: The options to use when creating the dimension. An identifier or plain string is also accepted as the name.
+
+        Returns:
+            The newly created (or existing) `Dimension`, or `None` if it could not be created.
+        """
+
     @property
     def seed(self) -> int:
         """
         The Seed for this level.
         """
-        ...
 
 class Dimension:
     """
@@ -74,19 +89,25 @@ class Dimension:
         """
         The identifier of this dimension.
         """
-        ...
+
     @property
     def translation_key(self) -> str:
         """
         The translation key, suitable for use in a translation component.
         """
-        ...
+
     @property
     def level(self) -> Level:
         """
         The level to which this dimension belongs.
         """
-        ...
+
+    @property
+    def is_valid(self) -> bool:
+        """
+        Whether this dimension is still valid (loaded).
+        """
+
     @typing.overload
     def get_block_at(self, location: Location) -> Block:
         """
@@ -98,7 +119,7 @@ class Dimension:
         Returns:
             `Block` at the given coordinates.
         """
-        ...
+
     @typing.overload
     def get_block_at(self, x: int, y: int, z: int) -> Block:
         """
@@ -112,7 +133,7 @@ class Dimension:
         Returns:
             `Block` at the given coordinates.
         """
-        ...
+
     def get_highest_block_y_at(self, x: int, z: int) -> int:
         """
         Gets the highest non-empty (impassable) coordinate at the given coordinates.
@@ -124,7 +145,7 @@ class Dimension:
         Returns:
             Y-coordinate of the highest non-empty block.
         """
-        ...
+
     @typing.overload
     def get_highest_block_at(self, location: Location) -> Block:
         """
@@ -136,7 +157,7 @@ class Dimension:
         Returns:
             Highest non-empty block.
         """
-        ...
+
     @typing.overload
     def get_highest_block_at(self, x: int, z: int) -> Block:
         """
@@ -149,13 +170,13 @@ class Dimension:
         Returns:
             Highest non-empty block.
         """
-        ...
+
     @property
     def loaded_chunks(self) -> list[Chunk]:
         """
         A list of all loaded `Chunk`s.
         """
-        ...
+
     def is_chunk_loaded(self, x: int, z: int) -> bool:
         """
         Checks if the `Chunk` at the given coordinates is loaded.
@@ -167,7 +188,7 @@ class Dimension:
         Returns:
             ``True`` if the chunk is loaded, otherwise ``False``.
         """
-        ...
+
     def load_chunk(self, x: int, z: int) -> bool:
         """
         Requests the `Chunk` at the given coordinates to be loaded, and keeps it loaded until unloaded again.
@@ -184,7 +205,7 @@ class Dimension:
         Returns:
             ``True`` if the ticket was registered (or already present), otherwise ``False``.
         """
-        ...
+
     def unload_chunk(self, x: int, z: int) -> bool:
         """
         Releases the plugin-owned ticket that ``load_chunk`` placed on the `Chunk` at the given coordinates.
@@ -199,7 +220,7 @@ class Dimension:
         Returns:
             ``True`` once the ticket has been released.
         """
-        ...
+
     def drop_item(self, location: Location, item: ItemStack) -> Item:
         """
         Drops an item at the specified `Location`.
@@ -211,7 +232,7 @@ class Dimension:
         Returns:
             `Item` entity created as a result of this method.
         """
-        ...
+
     def spawn_actor(self, location: Location, type: Identifier[ActorType] | str) -> Actor:
         """
         Creates an actor at the given `Location`.
@@ -223,41 +244,40 @@ class Dimension:
         Returns:
             Resulting `Actor` of this method.
         """
-        ...
+
     @property
     def actors(self) -> list[Actor]:
         """
         A list of all actors currently residing in this dimension.
         """
-        ...
 
 class Location:
     """
     Represents a 3-dimensional location in a dimension within a level.
     """
     def __init__(
-        self, dimension: Dimension, x: float, y: float, z: float, pitch: float = 0.0, yaw: float = 0.0
+        self, dimension: Dimension | None, x: float, y: float, z: float, pitch: float = 0.0, yaw: float = 0.0
     ) -> None: ...
     @property
-    def dimension(self) -> Dimension:
+    def dimension(self) -> Dimension | None:
         """
-        The `Dimension` that contains this position.
+        The `Dimension` that contains this position, or `None` if it is not set.
         """
-        ...
+
     @dimension.setter
-    def dimension(self, arg1: Dimension) -> None: ...
+    def dimension(self, arg1: Dimension | None) -> None: ...
     @property
     def block(self) -> Block:
         """
         The block at the represented location.
         """
-        ...
+
     @property
     def pitch(self) -> float:
         """
         The pitch of this location, measured in degrees.
         """
-        ...
+
     @pitch.setter
     def pitch(self, arg1: float) -> None: ...
     @property
@@ -265,7 +285,7 @@ class Location:
         """
         The yaw of this location, measured in degrees.
         """
-        ...
+
     @yaw.setter
     def yaw(self, arg1: float) -> None: ...
     @property
@@ -273,7 +293,7 @@ class Location:
         """
         The x-coordinate of this location.
         """
-        ...
+
     @x.setter
     def x(self, arg1: float) -> None: ...
     @property
@@ -281,7 +301,7 @@ class Location:
         """
         The y-coordinate of this location.
         """
-        ...
+
     @y.setter
     def y(self, arg1: float) -> None: ...
     @property
@@ -289,7 +309,7 @@ class Location:
         """
         The z-coordinate of this location.
         """
-        ...
+
     @z.setter
     def z(self, arg1: float) -> None: ...
     @property
@@ -297,25 +317,25 @@ class Location:
         """
         The floored value of the X component, indicating the block that this location is contained with.
         """
-        ...
+
     @property
     def block_y(self) -> int:
         """
         The floored value of the Y component, indicating the block that this location is contained with.
         """
-        ...
+
     @property
     def block_z(self) -> int:
         """
         The floored value of the Z component, indicating the block that this location is contained with.
         """
-        ...
+
     @property
     def direction(self) -> Vector:
         """
         A unit-vector pointing in the direction that this `Location` is facing.
         """
-        ...
+
     @direction.setter
     def direction(self, arg1: Vector) -> Location: ...
     @property
@@ -325,7 +345,7 @@ class Location:
 
         Not world-aware and orientation independent.
         """
-        ...
+
     @property
     def length_squared(self) -> float:
         """
@@ -333,7 +353,7 @@ class Location:
 
         Not world-aware and orientation independent.
         """
-        ...
+
     def distance(self, other: Location) -> float:
         """
         Get the distance between this location and another.
@@ -344,7 +364,7 @@ class Location:
         Returns:
             The distance.
         """
-        ...
+
     def distance_squared(self, other: Location) -> float:
         """
         Get the squared distance between this location and another.
@@ -355,25 +375,23 @@ class Location:
         Returns:
             The distance.
         """
-        ...
+
     @typing.overload
-    def __iadd__(self, arg0: Location) -> Location: ...
+    def __iadd__(self, arg0: Location) -> typing.Self: ...
     @typing.overload
-    def __iadd__(self, arg0: Vector) -> Location: ...
+    def __iadd__(self, arg0: Vector) -> typing.Self: ...
     @typing.overload
-    def __isub__(self, arg0: Location) -> Location: ...
+    def __isub__(self, arg0: Location) -> typing.Self: ...
     @typing.overload
-    def __isub__(self, arg0: Vector) -> Location: ...
-    def __imul__(self, arg0: float) -> Location: ...
+    def __isub__(self, arg0: Vector) -> typing.Self: ...
+    def __imul__(self, arg0: float) -> typing.Self: ...
     def zero(self) -> Location:
         """
         Zero this location's components. Not world-aware.
         """
-        ...
+
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, other: object) -> bool: ...
-    def __repr__(self) -> str: ...
-    def __str__(self) -> str: ...
     @staticmethod
     def normalize_yaw(yaw: float) -> float:
         """
@@ -385,7 +403,7 @@ class Location:
         Returns:
             The normalized yaw in degrees.
         """
-        ...
+
     @staticmethod
     def normalize_pitch(pitch: float) -> float:
         """
@@ -397,7 +415,6 @@ class Location:
         Returns:
             The normalized pitch in degrees.
         """
-        ...
 
 class Chunk:
     """
@@ -408,24 +425,39 @@ class Chunk:
         """
         X-coordinate of this chunk.
         """
-        ...
+
     @property
     def z(self) -> int:
         """
         Z-coordinate of this chunk.
         """
-        ...
+
     @property
     def level(self) -> Level:
         """
         The level containing this chunk.
         """
-        ...
+
     @property
     def dimension(self) -> Dimension:
         """
         The dimension containing this chunk.
         """
-        ...
-    def __repr__(self) -> str: ...
-    def __str__(self) -> str: ...
+
+class DimensionCreator:
+    """
+    Represents the options that may be used to create a custom dimension.
+    """
+    def __init__(self, id: Identifier[Dimension] | str) -> None:
+        """
+        Creates an instance of a DimensionCreator for the given dimension id.
+
+        Args:
+            id: The identifier of the dimension to create, e.g. `myplugin:void_realm`.
+        """
+
+    @property
+    def id(self) -> Identifier[Dimension]:
+        """
+        The identifier of the dimension that is being created.
+        """

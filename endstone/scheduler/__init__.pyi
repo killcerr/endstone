@@ -2,7 +2,7 @@
 Classes relating to letting plugins run code at specific time intervals.
 """
 
-import collections
+import collections.abc
 
 from endstone.plugin import Plugin
 
@@ -20,30 +20,29 @@ class Task:
         """
         The task id number.
         """
-        ...
+
     @property
     def owner(self) -> Plugin:
         """
         The `Plugin` that owns this task.
         """
-        ...
+
     @property
     def is_sync(self) -> bool:
         """
         `True` if the task is run by the server thread.
         """
-        ...
+
     @property
     def is_cancelled(self) -> bool:
         """
         `True` if this task has been cancelled.
         """
-        ...
+
     def cancel(self) -> None:
         """
         Attempts to cancel this task.
         """
-        ...
 
 class Scheduler:
     """
@@ -65,7 +64,7 @@ class Scheduler:
         Returns:
             A `Task` that contains the id number (`None` if task is empty).
         """
-        ...
+
     def cancel_task(self, id: int) -> None:
         """
         Removes task from scheduler.
@@ -73,7 +72,7 @@ class Scheduler:
         Args:
             id: Id number of task to be removed.
         """
-        ...
+
     def cancel_tasks(self, plugin: Plugin) -> None:
         """
         Removes all tasks associated with a particular plugin from the scheduler.
@@ -81,7 +80,7 @@ class Scheduler:
         Args:
             plugin: Owner of tasks to be removed.
         """
-        ...
+
     def is_running(self, id: int) -> bool:
         """
         Check if the task is currently running.
@@ -92,7 +91,7 @@ class Scheduler:
         Returns:
             `True` if the task is currently running.
         """
-        ...
+
     def is_queued(self, id: int) -> bool:
         """
         Check if the task is queued to be run later.
@@ -103,11 +102,10 @@ class Scheduler:
         Returns:
             `True` if the task is queued to be run.
         """
-        ...
+
     def get_pending_tasks(self) -> list[Task]:
         """
         Returns a list of all pending tasks.
 
         The ordering of the tasks is NOT related to their order of execution.
         """
-        ...

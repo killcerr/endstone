@@ -126,6 +126,7 @@ public:
     Bedrock::Result<void> _read(ReadOnlyBinaryStream &stream) override { throw std::logic_error("Not implemented"); }
 
     [[nodiscard]] bool getInput(InputData input) const { return payload.input_data.test(input); }
+    void setInput(InputData input, bool value) { payload.input_data.set(input, value); }
 
     PlayerAuthInputPacketPayload payload;                                 // +48
     SerializationMode serialization_mode{SerializationMode::CerealOnly};  // +224

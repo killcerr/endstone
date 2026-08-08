@@ -2,7 +2,8 @@
 Classes relating to handling specialized non-chat player input.
 """
 
-import collections
+import collections.abc
+import typing
 
 from endstone import Server
 from endstone.block import Block
@@ -29,7 +30,7 @@ class CommandSender(Permissible):
         Args:
             message: Message to be displayed.
         """
-        ...
+
     def send_error_message(self, message: str | Translatable) -> None:
         """
         Sends this sender a error message.
@@ -37,19 +38,18 @@ class CommandSender(Permissible):
         Args:
             message: Error message to be displayed.
         """
-        ...
+
     @property
     def server(self) -> Server:
         """
         The server instance that this command is running on.
         """
-        ...
+
     @property
     def name(self) -> str:
         """
         The name of this command sender.
         """
-        ...
 
 class BlockCommandSender(CommandSender):
     """
@@ -60,7 +60,6 @@ class BlockCommandSender(CommandSender):
         """
         The block this command sender belongs to.
         """
-        ...
 
 class CommandSenderWrapper(CommandSender):
     """
@@ -89,8 +88,8 @@ class Command:
         usages: list[str] | None = None,
         aliases: list[str] | None = None,
         permissions: list[str] | None = None,
-        *args,
-        **kwargs,
+        *args: typing.Any,
+        **kwargs: typing.Any,
     ) -> None: ...
     def execute(self, sender: CommandSender, args: list[str]) -> bool:
         """
@@ -103,7 +102,7 @@ class Command:
         Returns:
             `True` if the execution was successful, `False` otherwise.
         """
-        ...
+
     def test_permission(self, target: CommandSender) -> bool:
         """
         Tests the given `CommandSender` to see if they can perform this command.
@@ -116,7 +115,7 @@ class Command:
         Returns:
             `True` if they can use it, `False` otherwise.
         """
-        ...
+
     def test_permission_silently(self, target: CommandSender) -> bool:
         """
         Tests the given `CommandSender` to see if they can perform this command.
@@ -129,13 +128,13 @@ class Command:
         Returns:
             `True` if they can use it, `False` otherwise.
         """
-        ...
+
     @property
     def name(self) -> str:
         """
         The name of this command.
         """
-        ...
+
     @name.setter
     def name(self, arg1: str) -> None: ...
     @property
@@ -143,7 +142,7 @@ class Command:
         """
         A brief description of this command.
         """
-        ...
+
     @description.setter
     def description(self, arg1: str) -> None: ...
     @property
@@ -151,7 +150,7 @@ class Command:
         """
         A list of aliases of this command.
         """
-        ...
+
     @aliases.setter
     def aliases(self, arg1: list[str]) -> None: ...
     @property
@@ -159,7 +158,7 @@ class Command:
         """
         A list of usages of this command.
         """
-        ...
+
     @usages.setter
     def usages(self, arg1: list[str]) -> None: ...
     @property
@@ -167,7 +166,7 @@ class Command:
         """
         The permissions required by users to be able to perform this command.
         """
-        ...
+
     @permissions.setter
     def permissions(self, arg1: list[str]) -> None: ...
     @property
@@ -175,7 +174,6 @@ class Command:
         """
         The current registered state of this command.
         """
-        ...
 
 class CommandExecutor:
     """
@@ -194,4 +192,3 @@ class CommandExecutor:
         Returns:
             `True` if the execution is successful, `False` otherwise.
         """
-        ...

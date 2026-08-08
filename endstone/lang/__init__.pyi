@@ -15,13 +15,12 @@ class Translatable:
         """
         The text to be translated.
         """
-        ...
+
     @property
     def params(self) -> list[str]:
         """
         The translation parameters.
         """
-        ...
 
 class Language:
     """
@@ -40,7 +39,7 @@ class Language:
         Returns:
             The translated text in the specified locale, with parameters applied.
         """
-        ...
+
     @typing.overload
     def translate(self, translatable: Translatable, locale: str | None = None) -> str:
         """
@@ -53,10 +52,9 @@ class Language:
         Returns:
             The translated text in the specified locale.
         """
-        ...
+
     @property
     def locale(self) -> str:
         """
         The current locale.
         """
-        ...

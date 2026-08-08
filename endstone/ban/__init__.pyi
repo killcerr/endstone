@@ -22,7 +22,7 @@ class BanEntry:
         """
         The date this ban entry was created.
         """
-        ...
+
     @created.setter
     def created(self, arg1: datetime.datetime) -> None: ...
     @property
@@ -30,7 +30,7 @@ class BanEntry:
         """
         The source of this ban.
         """
-        ...
+
     @source.setter
     def source(self, arg1: str) -> None: ...
     @property
@@ -38,7 +38,7 @@ class BanEntry:
         """
         The date this ban expires on, or `None` for no defined end date.
         """
-        ...
+
     @expiration.setter
     def expiration(self, arg1: datetime.datetime | None) -> None: ...
     @property
@@ -46,7 +46,7 @@ class BanEntry:
         """
         The reason for this ban.
         """
-        ...
+
     @reason.setter
     def reason(self, arg1: str) -> None: ...
 
@@ -60,7 +60,6 @@ class IpBanEntry(BanEntry):
         """
         The banned IP address.
         """
-        ...
 
 class IpBanList:
     """
@@ -76,7 +75,7 @@ class IpBanList:
         Returns:
             The corresponding entry, or `None` if none found.
         """
-        ...
+
     def add_ban(
         self,
         address: str,
@@ -96,7 +95,7 @@ class IpBanList:
         Returns:
             The entry for the newly created ban, or the entry for the (updated) previous ban.
         """
-        ...
+
     def is_banned(self, address: str) -> bool:
         """
         Checks if a `BanEntry` exists for the target, indicating an active ban status.
@@ -107,7 +106,7 @@ class IpBanList:
         Returns:
             `True` if a `BanEntry` exists for the target, indicating an active ban status, `False` otherwise.
         """
-        ...
+
     def remove_ban(self, address: str) -> None:
         """
         Removes the specified IP address from this list, therefore indicating a "not banned" status.
@@ -115,13 +114,12 @@ class IpBanList:
         Args:
             address: The IP address to remove from this list.
         """
-        ...
+
     @property
     def entries(self) -> list[IpBanEntry]:
         """
         A vector containing pointers to every entry tracked by this list.
         """
-        ...
 
 class PlayerBanEntry(BanEntry):
     """
@@ -133,19 +131,18 @@ class PlayerBanEntry(BanEntry):
         """
         The banned player's name.
         """
-        ...
+
     @property
     def unique_id(self) -> uuid.UUID | None:
         """
         The banned player's unique id, or `None` if not available.
         """
-        ...
+
     @property
     def xuid(self) -> str | None:
         """
         The banned player's xbox user id (xuid), or `None` if not available.
         """
-        ...
 
 class PlayerBanList:
     """
@@ -163,7 +160,7 @@ class PlayerBanList:
         Returns:
             The corresponding entry, or `None` if none found.
         """
-        ...
+
     def add_ban(
         self,
         name: str,
@@ -187,7 +184,7 @@ class PlayerBanList:
         Returns:
             The entry for the newly created ban, or the entry for the (updated) previous ban.
         """
-        ...
+
     def is_banned(self, name: str, uuid: uuid.UUID | None = None, xuid: str | None = None) -> bool:
         """
         Checks if a `BanEntry` exists for the target, indicating an active ban status.
@@ -200,7 +197,7 @@ class PlayerBanList:
         Returns:
             `True` if a `BanEntry` exists for the target, indicating an active ban status, `False` otherwise.
         """
-        ...
+
     def remove_ban(self, name: str, uuid: uuid.UUID | None = None, xuid: str | None = None) -> None:
         """
         Removes the specified player from this list, therefore indicating a "not banned" status.
@@ -210,10 +207,9 @@ class PlayerBanList:
             uuid: The unique id of the player, `None` if not used.
             xuid: The xbox user id (xuid) of the player, `None` if not used.
         """
-        ...
+
     @property
     def entries(self) -> list[PlayerBanEntry]:
         """
         A vector containing pointers to every entry tracked by this list.
         """
-        ...

@@ -17,7 +17,7 @@ class DamageSource:
         """
         The damage type.
         """
-        ...
+
     @property
     def actor(self) -> Actor | None:
         """
@@ -27,7 +27,7 @@ class DamageSource:
         ultimately attributed if the receiver is killed. If, for example, the receiver was damaged by a projectile, the
         shooter/thrower would be returned.
         """
-        ...
+
     @property
     def damaging_actor(self) -> Actor | None:
         """
@@ -36,7 +36,7 @@ class DamageSource:
         Not to be confused with `actor`, the returned actor is the actor that actually inflicted the
         damage. If, for example, the receiver was damaged by a projectile, the projectile would be returned.
         """
-        ...
+
     @property
     def is_indirect(self) -> bool:
         """
@@ -45,5 +45,3 @@ class DamageSource:
         Damage is considered indirect if `actor` is not equal to `damaging_actor`. This will be the case, for
         example, if a skeleton shot an arrow or a player threw a potion.
         """
-        ...
-    def __str__(self) -> str: ...

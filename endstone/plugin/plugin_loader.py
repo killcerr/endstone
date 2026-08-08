@@ -64,17 +64,21 @@ def _build_commands(commands: dict[str, Any]) -> list[Command]:
     return results
 
 
+def _to_permission_default(value: Any) -> PermissionDefault:
+    if isinstance(value, bool):
+        return PermissionDefault.TRUE if value else PermissionDefault.FALSE
+    if isinstance(value, str):
+        return PermissionDefault.__members__[value.strip().replace(" ", "_").upper()]
+    if not isinstance(value, PermissionDefault):
+        raise TypeError(f"Invalid value for default permission: {value}")
+    return value
+
+
 def _build_permissions(permissions: dict[str, Any]) -> list[Permission]:
     results = []
     for name, permission in permissions.items():
         if "default" in permission:
-            value = permission["default"]
-            if isinstance(value, bool):
-                permission["default"] = PermissionDefault.TRUE if value else PermissionDefault.FALSE
-            elif isinstance(value, str):
-                permission["default"] = PermissionDefault.__members__[value.strip().replace(" ", "_").upper()]
-            elif not isinstance(value, PermissionDefault):
-                raise TypeError(f"Invalid value for default permission: {value}")
+            permission["default"] = _to_permission_default(permission["default"])
 
         permission = Permission(name, **permission)
         results.append(permission)
@@ -229,6 +233,10 @@ class PythonPluginLoader(PluginLoader):
         authors = cls_attr.pop("authors", author_email.split(",") if isinstance(author_email, str) else author_email)
         website = cls_attr.pop("website", "; ".join(plugin_metadata.get("project_url", [])))
 
+        default_permission = cls_attr.pop("default_permission", None)
+        if default_permission is not None:
+            default_permission = _to_permission_default(default_permission)
+
         commands = cls_attr.pop("commands", {})
         commands = _build_commands(commands)
 
@@ -244,6 +252,7 @@ class PythonPluginLoader(PluginLoader):
             website=website,
             commands=commands,
             permissions=permissions,
+            default_permission=default_permission,
             **cls_attr,
         )
 

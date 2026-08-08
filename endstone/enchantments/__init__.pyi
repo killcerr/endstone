@@ -60,25 +60,25 @@ class Enchantment:
         """
         The identifier of this enchantment.
         """
-        ...
+
     @property
     def translation_key(self) -> str:
         """
         The translation key, suitable for use in a translation component.
         """
-        ...
+
     @property
     def max_level(self) -> int:
         """
         The maximum level that this `Enchantment` may become.
         """
-        ...
+
     @property
     def start_level(self) -> int:
         """
         The level that this `Enchantment` should start at (also known as minimum level).
         """
-        ...
+
     def conflicts_with(self, other: Enchantment) -> bool:
         """
         Check if this enchantment conflicts with another enchantment.
@@ -89,7 +89,7 @@ class Enchantment:
         Returns:
             `True` if there is a conflict.
         """
-        ...
+
     def can_enchant_item(self, item: ItemStack) -> bool:
         """
         Checks if this `Enchantment` may be applied to the given `ItemStack`.
@@ -102,7 +102,7 @@ class Enchantment:
         Returns:
             `True` if the enchantment may be applied, `False` otherwise.
         """
-        ...
+
     @staticmethod
     def get(name: Identifier[Enchantment] | str) -> Enchantment:
         """
@@ -114,8 +114,7 @@ class Enchantment:
         Returns:
             The `Enchantment`, or `None` if not found.
         """
-        ...
-    def __str__(self) -> str: ...
+
     def __hash__(self) -> int: ...
     def __eq__(self, other: object) -> bool: ...
     def __ne__(self, other: object) -> bool: ...
