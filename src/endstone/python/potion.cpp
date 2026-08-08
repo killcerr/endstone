@@ -19,6 +19,9 @@ namespace py = pybind11;
 namespace endstone::python {
 void init_potion(py::module_ &m)
 {
+    // Declared before Effect, whose signatures name Identifier<EffectType>.
+    py::class_<EffectType> effect_type(m, "EffectType", "All effect types.");
+
     py::class_<Effect>(m, "Effect", "Represents an effect that can be added to a `Mob`.")
         .def(py::init<EffectId, std::optional<int>, int, bool, bool, bool>(), py::arg("type"), py::arg("duration"),
              py::arg("amplifier"), py::arg("ambient") = false, py::arg("particles") = true, py::arg("icon") = true,
@@ -42,7 +45,7 @@ void init_potion(py::module_ &m)
         .def_property_readonly("particles", &Effect::hasParticles, "Whether this effect has particles.")
         .def_property_readonly("icon", &Effect::hasIcon, "Whether this effect has an icon.");
 
-    py::class_<EffectType>(m, "EffectType", "All effect types.")
+    effect_type
         .def_property_readonly_static(
             "SPEED", [](const py::object &) { return EffectType::Speed; }, "Increases movement speed.")
         .def_property_readonly_static(
