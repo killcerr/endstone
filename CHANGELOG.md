@@ -10,8 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `PlayerInteractEvent` is now fired with the `LEFT_CLICK_AIR` action when a player swings at nothing, that is, at neither a block nor an actor. The action had been part of the API since the event was introduced, but was never fired. Cancelling the event suppresses the swing, including its attack sound (#316).
+- `endstone.block.BlockType` is now importable from Python. The class was bound but never re-exported, so it could only be reached through `endstone._python`.
+
+### Changed
+
+- **BREAKING**: The concrete registry classes are no longer importable from `endstone` (Python). `EnchantmentRegistry` is gone, and the broken `ItemRegistry` name with it; obtain a registry through `Server.get_registry()` and annotate it as `Registry[T]`.
 
 ### Fixed
+
+- Fixed `from endstone import ItemRegistry` raising `AttributeError` (Python). The name was re-exported but never existed, as the class bound by the server is `ItemTypeRegistry`.
 
 - Fixed the server list entry losing its last two fields whenever a plugin listened for `ServerListPingEvent`, or the ping was otherwise answered by Endstone. The reply was rebuilt from a fixed list of fields, so anything the server had added beyond it, currently whether the world is an editor world and whether it is hardcore, was dropped. Any field Endstone does not itself expose is now passed through untouched.
 
