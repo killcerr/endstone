@@ -18,6 +18,7 @@
 #include <string>
 
 #include "bedrock/network/packet.h"
+#include "bedrock/network/packet/serialize/serialized_packet.h"
 #include "bedrock/server/config/gathering/gatherings_configuration_join_info.h"
 
 struct TransferPacketInfo {

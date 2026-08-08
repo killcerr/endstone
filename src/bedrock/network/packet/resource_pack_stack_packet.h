@@ -18,6 +18,7 @@
 
 #include "bedrock/core/resource/resource_helper.h"
 #include "bedrock/network/packet.h"
+#include "bedrock/resources/base_game_version.h"
 
 struct ResourcePackStackPacketPayload {
     std::vector<PackInstanceId> texture_pack_ids_and_versions;

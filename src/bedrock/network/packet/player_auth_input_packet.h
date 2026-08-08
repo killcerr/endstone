@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <bitset>
+
 #include "bedrock/core/math/vec2.h"
 #include "bedrock/core/math/vec3.h"
 #include "bedrock/entity/components/player_block_actions.h"
