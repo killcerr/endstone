@@ -19,13 +19,12 @@
 
 #include "bedrock/bedrock.h"
 
-// TODO(fixme): check the name - the cereal scope name is read from the binary, but its identity with
-// this element could not be proven; only the layout is confirmed.
-struct NetworkItemInstanceDescriptorData {
-    int id;                       // +0
-    std::int16_t stack_size;      // +4
-    int aux_value;                // +8
-    int block_runtime_id;         // +12
+// The serialized form of NetworkItemInstanceDescriptor carried by CraftingDataPacket.
+struct CraftingDataNetworkItem {
+    int id;                        // +0
+    std::uint16_t stack_size;      // +4
+    std::uint32_t aux_value;       // +8
+    int block_runtime_id;          // +12
     std::string user_data_buffer;  // +16, an already-serialized NBT blob
 };
-BEDROCK_STATIC_ASSERT_SIZE(NetworkItemInstanceDescriptorData, 48, 40);
+BEDROCK_STATIC_ASSERT_SIZE(CraftingDataNetworkItem, 48, 40);
