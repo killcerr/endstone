@@ -767,6 +767,20 @@ bool EndstonePlayer::handlePacket(Packet &packet)
             PlayerSneakEvent e(*this, false);
             getServer().getPluginManager().callEvent(e);
         }
+        if (pk.getInput(PlayerAuthInputPacket::InputData::MissedSwing)) {
+            PlayerInteractEvent e{
+                *this,
+                PlayerInteractEvent::Action::LeftClickAir,
+                getInventory().getItemInMainHand(),
+                nullptr,
+                BlockFace::South,
+                std::nullopt,
+            };
+            getServer().getPluginManager().callEvent(e);
+            if (e.isCancelled()) {
+                pk.setInput(PlayerAuthInputPacket::InputData::MissedSwing, false);
+            }
+        }
 
         auto &actions = pk.payload.player_block_actions.actions_;
         for (auto it = actions.begin(); it != actions.end();) {
