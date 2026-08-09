@@ -93,8 +93,8 @@ public:
     void setFlySpeed(float value) const override;
     [[nodiscard]] float getWalkSpeed() const override;
     void setWalkSpeed(float value) const override;
-    [[nodiscard]] Scoreboard &getScoreboard() const override;
-    void setScoreboard(Scoreboard &scoreboard) override;
+    [[nodiscard]] NotNull<Scoreboard> getScoreboard() const override;
+    void setScoreboard(NotNull<Scoreboard> scoreboard) override;
     void sendActionBar(std::string message) const override;
     void sendPopup(std::string message) const override;
     void sendTip(std::string message) const override;

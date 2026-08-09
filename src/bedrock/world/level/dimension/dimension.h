@@ -33,6 +33,7 @@
 #include "bedrock/world/level/saveddata/saved_data.h"
 #include "bedrock/world/level/weather.h"
 #include "bedrock/world/redstone/circuit/circuit_system.h"
+#include "endstone/util/pointers.h"  // Endstone
 
 class Level;
 
@@ -99,7 +100,7 @@ public:
     [[nodiscard]] const std::string &getName() const;
     [[nodiscard]] const std::string &getTypeId() const;
     WeakRef<Dimension> getWeakRef();
-    [[nodiscard]] endstone::Dimension &getEndstoneDimension() const;  // Endstone
+    [[nodiscard]] endstone::NotNull<endstone::Dimension> getEndstoneDimension() const;  // Endstone
 
 private:
     std::vector<ActorChunkTransferEntry> actor_chunk_transfer_queue_;  // +104

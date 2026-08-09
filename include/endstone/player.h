@@ -281,14 +281,14 @@ public:
      *
      * @return The current scoreboard seen by this player
      */
-    [[nodiscard]] virtual Scoreboard &getScoreboard() const = 0;
+    [[nodiscard]] virtual NotNull<Scoreboard> getScoreboard() const = 0;
 
     /**
      * Sets the player's visible Scoreboard.
      *
      * @param scoreboard New Scoreboard for the player
      */
-    void virtual setScoreboard(Scoreboard &scoreboard) = 0;
+    void virtual setScoreboard(NotNull<Scoreboard> scoreboard) = 0;
 
     /**
      * Sends this player an action bar message.

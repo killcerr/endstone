@@ -33,7 +33,7 @@ class PermissionAttachment;
 /**
  * Represents an object that may become a server operator and can be assigned permissions.
  */
-class Permissible : public Object, public std::enable_shared_from_this<Permissible> {
+class Permissible : public Object {
 public:
     /**
      * Gets the permission level of this object.

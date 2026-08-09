@@ -404,14 +404,14 @@ void EndstonePlayer::setWalkSpeed(float value) const
     mutable_attr->setDefaultValue(getWalkSpeed(), static_cast<int>(AttributeOperands::OPERAND_CURRENT));
 }
 
-Scoreboard &EndstonePlayer::getScoreboard() const
+NotNull<Scoreboard> EndstonePlayer::getScoreboard() const
 {
     return server_.getPlayerBoard(*this);
 }
 
-void EndstonePlayer::setScoreboard(Scoreboard &scoreboard)
+void EndstonePlayer::setScoreboard(NotNull<Scoreboard> scoreboard)
 {
-    server_.setPlayerBoard(*this, scoreboard);
+    server_.setPlayerBoard(*this, std::move(scoreboard));
 }
 
 void EndstonePlayer::sendActionBar(std::string message) const

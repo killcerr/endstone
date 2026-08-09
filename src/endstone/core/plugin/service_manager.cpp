@@ -19,13 +19,13 @@
 
 namespace endstone::core {
 
-void EndstoneServiceManager::registerService(std::string name, std::shared_ptr<Service> provider, const Plugin &plugin,
+void EndstoneServiceManager::registerService(std::string name, NotNull<Service> provider, const Plugin &plugin,
                                              ServicePriority priority)
 {
     std::lock_guard lock(mutex_);
     auto &registered = providers_[name];
 
-    RegisteredServiceProvider new_provider(name, provider, priority, const_cast<Plugin &>(plugin));
+    RegisteredServiceProvider new_provider(name, std::move(provider), priority, const_cast<Plugin &>(plugin));
     const auto position = std::ranges::lower_bound(registered, new_provider, std::greater{});
     registered.insert(position, std::move(new_provider));
 }
@@ -60,7 +60,7 @@ void EndstoneServiceManager::unregister(std::string name, const Service &provide
 
         // Remove entries matching the given provider
         std::erase_if(services, [&provider](const RegisteredServiceProvider &registered) {
-            return registered.getProvider().get() == &provider;
+            return &*registered.getProvider() == &provider;
         });
 
         // Remove the entire list if it's empty
@@ -78,7 +78,7 @@ void EndstoneServiceManager::unregister(const Service &provider)
 
         // Remove entries matching the given provider
         std::erase_if(services, [&provider](const RegisteredServiceProvider &registered) {
-            return registered.getProvider().get() == &provider;
+            return &*registered.getProvider() == &provider;
         });
 
         // Remove the entire list if it's empty
@@ -91,7 +91,7 @@ void EndstoneServiceManager::unregister(const Service &provider)
     }
 }
 
-std::shared_ptr<Service> EndstoneServiceManager::get(std::string name) const
+Nullable<Service> EndstoneServiceManager::get(std::string name) const
 {
     std::lock_guard lock(mutex_);
     if (const auto it = providers_.find(name); it != providers_.end() && !it->second.empty()) {

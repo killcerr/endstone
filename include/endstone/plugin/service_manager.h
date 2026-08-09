@@ -20,6 +20,7 @@
 
 #include "endstone/plugin/service.h"
 #include "endstone/plugin/service_priority.h"
+#include "endstone/util/pointers.h"
 
 namespace endstone {
 
@@ -43,7 +44,7 @@ public:
      * @param plugin plugin associated with the service
      * @param priority priority of the provider
      */
-    virtual void registerService(std::string name, std::shared_ptr<Service> provider, const Plugin &plugin,
+    virtual void registerService(std::string name, NotNull<Service> provider, const Plugin &plugin,
                                  ServicePriority priority) = 0;
 
     /**
@@ -69,13 +70,13 @@ public:
     virtual void unregister(const Service &provider) = 0;
 
     /**
-     * Queries for a provider. This may return an empty shared_ptr if no provider has been registered for the service.
+     * Queries for a provider. This may return null if no provider has been registered for the service.
      * The highest priority provider is returned.
      *
      * @param name The service name
-     * @return The highest priority provider, or an empty shared_ptr if none is registered.
+     * @return The highest priority provider, or null if none is registered.
      */
-    virtual std::shared_ptr<Service> get(std::string name) const = 0;
+    virtual Nullable<Service> get(std::string name) const = 0;
 
     /**
      * Queries for a provider and casts it to the requested service type.
@@ -84,12 +85,12 @@ public:
      *
      * @tparam T The service type to cast the provider to
      * @param name The service name
-     * @return The highest priority provider cast to T, or an empty shared_ptr if none is registered.
+     * @return The highest priority provider cast to T, or null if none is registered.
      */
     template <typename T>
-    std::shared_ptr<T> load(std::string name) const
+    Nullable<T> load(std::string name) const
     {
-        return std::static_pointer_cast<T>(get(std::move(name)));
+        return std::static_pointer_cast<T>(get(std::move(name)).get());
     }
 };
 }  // namespace endstone

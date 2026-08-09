@@ -727,7 +727,7 @@ class ServiceManager:
             provider: The service provider implementation.
         """
 
-    def load(self, name: str) -> Service:
+    def load(self, name: str) -> Service | None:
         """
         Queries for a provider.
 

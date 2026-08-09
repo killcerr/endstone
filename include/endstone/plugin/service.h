@@ -14,12 +14,11 @@
 
 #pragma once
 
-#include <memory>
 namespace endstone {
 /**
  * Services represent a list of methods.
  */
-class Service : public std::enable_shared_from_this<Service> {
+class Service {
 public:
     virtual ~Service() = default;
 };

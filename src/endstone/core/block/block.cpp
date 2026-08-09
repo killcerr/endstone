@@ -88,7 +88,7 @@ std::unique_ptr<Block> EndstoneBlock::getRelative(BlockFace face, int distance)
 
 NotNull<Dimension> EndstoneBlock::getDimension() const
 {
-    return block_source_.getDimension().getEndstoneDimension().shared_from_this();
+    return block_source_.getDimension().getEndstoneDimension();
 }
 
 const Biome &EndstoneBlock::getBiome() const

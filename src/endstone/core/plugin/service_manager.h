@@ -27,9 +27,9 @@ namespace endstone::core {
  */
 class RegisteredServiceProvider {
 public:
-    RegisteredServiceProvider(const std::string &name, const std::shared_ptr<Service> &provider,
-                              ServicePriority priority, Plugin &plugin)
-        : name_(name), plugin_(plugin), provider_(provider), priority_(priority)
+    RegisteredServiceProvider(const std::string &name, NotNull<Service> provider, ServicePriority priority,
+                              Plugin &plugin)
+        : name_(name), plugin_(plugin), provider_(std::move(provider)), priority_(priority)
     {
     }
 
@@ -37,7 +37,7 @@ public:
 
     [[nodiscard]] Plugin &getPlugin() const { return plugin_; }
 
-    [[nodiscard]] std::shared_ptr<Service> getProvider() const { return provider_; }
+    [[nodiscard]] NotNull<Service> getProvider() const { return provider_; }
 
     [[nodiscard]] ServicePriority getPriority() const { return priority_; }
 
@@ -59,18 +59,18 @@ public:
 private:
     std::string name_;
     std::reference_wrapper<Plugin> plugin_;
-    std::shared_ptr<Service> provider_;
+    NotNull<Service> provider_;
     ServicePriority priority_;
 };
 
 class EndstoneServiceManager : public ServiceManager {
 public:
-    void registerService(std::string name, std::shared_ptr<Service> provider, const Plugin &plugin,
+    void registerService(std::string name, NotNull<Service> provider, const Plugin &plugin,
                          ServicePriority priority) override;
     void unregisterAll(const Plugin &plugin) override;
     void unregister(std::string name, const Service &provider) override;
     void unregister(const Service &provider) override;
-    std::shared_ptr<Service> get(std::string name) const override;
+    Nullable<Service> get(std::string name) const override;
 
 private:
     std::unordered_map<std::string, std::vector<RegisteredServiceProvider>> providers_;

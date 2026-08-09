@@ -172,8 +172,8 @@ std::vector<Actor *> EndstoneDimension::getActors() const
 }
 }  // namespace endstone::core
 
-endstone::Dimension &Dimension::getEndstoneDimension() const
+endstone::NotNull<endstone::Dimension> Dimension::getEndstoneDimension() const
 {
     const auto &server = endstone::core::EndstoneServer::getInstance();
-    return *server.getEndstoneLevel()->getDimension(getDimensionId());
+    return server.getEndstoneLevel()->getDimension(getDimensionId()).get();
 }

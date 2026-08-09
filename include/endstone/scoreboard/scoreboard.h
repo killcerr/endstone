@@ -29,7 +29,7 @@ namespace endstone {
 /**
  * Represents a scoreboard.
  */
-class Scoreboard : public std::enable_shared_from_this<Scoreboard> {
+class Scoreboard {
 public:
     virtual ~Scoreboard() = default;
 

@@ -119,8 +119,8 @@ public:
     [[nodiscard]] MapView *getMap(std::int64_t id) const override;
     [[nodiscard]] MapView &createMap(const Dimension &dimension) const override;
 
-    [[nodiscard]] EndstoneScoreboard &getPlayerBoard(const EndstonePlayer &player) const;
-    void setPlayerBoard(EndstonePlayer &player, Scoreboard &scoreboard);
+    [[nodiscard]] NotNull<EndstoneScoreboard> getPlayerBoard(const EndstonePlayer &player) const;
+    void setPlayerBoard(EndstonePlayer &player, NotNull<Scoreboard> scoreboard);
     void removePlayerBoard(EndstonePlayer &player);
 
     void tick(std::uint64_t current_tick, const std::function<void()> &tick_function);

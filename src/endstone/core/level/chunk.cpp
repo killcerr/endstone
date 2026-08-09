@@ -42,7 +42,7 @@ Level &EndstoneChunk::getLevel() const
 
 NotNull<Dimension> EndstoneChunk::getDimension() const
 {
-    return dimension_.getEndstoneDimension().shared_from_this();
+    return dimension_.getEndstoneDimension();
 }
 
 }  // namespace endstone::core

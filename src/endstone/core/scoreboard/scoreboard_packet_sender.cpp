@@ -54,7 +54,7 @@ void ScoreboardPacketSender::sendToClient(const UserEntityIdentifierComponent *u
         return;
     }
 
-    if (&player->getScoreboard() != &scoreboard_) {
+    if (&*player->getScoreboard() != &scoreboard_) {
         return;
     }
 
@@ -67,7 +67,7 @@ void ScoreboardPacketSender::sendToClient(const NetworkIdentifier &network_ident
     for (const auto &p : server_.getOnlinePlayers()) {
         auto *player = static_cast<EndstonePlayer *>(p);
 
-        if (&player->getScoreboard() != &scoreboard_) {
+        if (&*player->getScoreboard() != &scoreboard_) {
             continue;
         }
 
@@ -92,7 +92,7 @@ void ScoreboardPacketSender::sendBroadcast(const ::Packet &packet)
     for (const auto &p : server_.getOnlinePlayers()) {
         auto *player = static_cast<EndstonePlayer *>(p);
 
-        if (&player->getScoreboard() != &scoreboard_) {
+        if (&*player->getScoreboard() != &scoreboard_) {
             continue;
         }
 

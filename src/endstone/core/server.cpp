@@ -791,37 +791,36 @@ MapView &EndstoneServer::createMap(const Dimension &dimension) const
     return map.getMapView();
 }
 
-EndstoneScoreboard &EndstoneServer::getPlayerBoard(const EndstonePlayer &player) const
+NotNull<EndstoneScoreboard> EndstoneServer::getPlayerBoard(const EndstonePlayer &player) const
 {
     auto it = player_boards_.find(player.getUniqueId());
     if (it == player_boards_.end()) {
-        return *scoreboard_;
+        return scoreboard_;
     }
-    return *it->second;
+    return it->second;
 }
 
-void EndstoneServer::setPlayerBoard(EndstonePlayer &player, Scoreboard &scoreboard)
+void EndstoneServer::setPlayerBoard(EndstonePlayer &player, NotNull<Scoreboard> scoreboard)
 {
-    auto &old_board = getPlayerBoard(player).getHandle();
-    auto &new_board = static_cast<EndstoneScoreboard &>(scoreboard).getHandle();
+    auto &old_board = getPlayerBoard(player)->getHandle();
+    auto &new_board = static_cast<EndstoneScoreboard &>(*scoreboard).getHandle();
 
     if (&old_board == &new_board) {
         return;
     }
 
     // remove player from the old board
-    getPlayerBoard(player).resetScores(&player);
+    getPlayerBoard(player)->resetScores(&player);
 
     // add player to the new board
     new_board.onPlayerJoined(player.getHandle());
 
     // update tracking records
-    if (&scoreboard == scoreboard_.get()) {
+    if (&*scoreboard == scoreboard_.get()) {
         player_boards_.erase(player.getUniqueId());
     }
     else {
-        player_boards_[player.getUniqueId()] =
-            std::static_pointer_cast<EndstoneScoreboard>(scoreboard.shared_from_this());
+        player_boards_[player.getUniqueId()] = std::static_pointer_cast<EndstoneScoreboard>(scoreboard.get());
     }
 }
 

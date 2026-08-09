@@ -32,13 +32,13 @@ template <typename Interface = BlockState>
 class EndstoneBlockStateBase : public Interface {
 public:
     explicit EndstoneBlockStateBase(const EndstoneBlock &block)
-        : EndstoneBlockStateBase(*block.getDimension(), block.getPosition(), block.getMinecraftBlock())
+        : EndstoneBlockStateBase(block.getDimension(), block.getPosition(), block.getMinecraftBlock())
     {
     }
 
-    explicit EndstoneBlockStateBase(Dimension &dimension, BlockPos block_pos, const ::Block &block)
-        : dimension_(static_cast<EndstoneDimension &>(dimension)),
-          block_source_(dimension_.getHandle().getBlockSourceFromMainChunkSource()), block_pos_(block_pos),
+    explicit EndstoneBlockStateBase(NotNull<Dimension> dimension, BlockPos block_pos, const ::Block &block)
+        : dimension_(std::static_pointer_cast<EndstoneDimension>(dimension.get())),
+          block_source_(dimension_->getHandle().getBlockSourceFromMainChunkSource()), block_pos_(block_pos),
           block_(const_cast<::Block *>(&block))
     {
     }
@@ -86,7 +86,7 @@ public:
 
     [[nodiscard]] NotNull<Dimension> getDimension() const override
     {
-        return dimension_.shared_from_this();
+        return dimension_;
     }
 
     [[nodiscard]] int getX() const override
@@ -130,7 +130,7 @@ public:
     }
 
 protected:
-    EndstoneDimension &dimension_;
+    NotNull<EndstoneDimension> dimension_;
     BlockSource &block_source_;
     BlockPos block_pos_;
     ::Block *block_;

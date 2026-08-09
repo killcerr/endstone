@@ -86,10 +86,10 @@ pytest tests/endstone/python
 - Enabled rules: I (isort), F (pyflakes)
 
 ### Comments (all languages)
-- Keep comments terse and human. Default to no comment; when one is warranted, one short line.
-- No multi-line explanations, rationale, design-decision narration, or parenthetical asides.
-- Do not leave "LLM notes" — comments that explain why a change was made, reference the development process, or restate what the code plainly does.
-- Match the comment density and verbosity of the surrounding or original code (e.g. a port stays as terse as its upstream).
+- **This project has a no-comments policy for LLMs.** Do not add a comment unless the user explicitly asks for one. Write code that reads without commentary; if a comment feels necessary, rename or restructure instead.
+- This applies to new code and to code you touch. Leave existing comments alone unless the change makes them wrong.
+- Never leave "LLM notes" — comments that explain why a change was made, reference the development process, or restate what the code plainly does.
+- When explicitly asked for a comment: one short line, terse and human. No multi-line explanations, rationale, design-decision narration, or parenthetical asides. Match the density of the surrounding or original code (e.g. a port stays as terse as its upstream).
 
 ## Architecture
 

@@ -34,7 +34,7 @@ using DimensionId = Identifier<Dimension>;
 /**
  * Represents a dimension within a Level.
  */
-class Dimension : public std::enable_shared_from_this<Dimension> {
+class Dimension {
 public:
     static constexpr auto Overworld = DimensionId::minecraft("overworld");
     static constexpr auto Nether = DimensionId::minecraft("nether");
