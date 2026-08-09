@@ -72,8 +72,7 @@ PYBIND11_MODULE(_python, m)  // NOLINT(*-use-anonymous-namespace)
             "key", [](const PyIdentifier &self) { return self.key_; }, "The key component of this identifier.")
         .def("__str__", &PyIdentifier::str)
         .def("__repr__", &PyIdentifier::str)
-        .def("__hash__",
-             [](const PyIdentifier &self) { return py::hash(py::str(self.str())); })
+        .def("__hash__", [](const PyIdentifier &self) { return py::hash(py::str(self.str())); })
         .def("__eq__",
              [](const PyIdentifier &self, const py::object &other) {
                  if (py::isinstance<PyIdentifier>(other)) {
@@ -231,83 +230,49 @@ PYBIND11_MODULE(_python, m)  // NOLINT(*-use-anonymous-namespace)
 void init_color_format(py::module_ &m)
 {
     py::class_<ColorFormat>(m, "ColorFormat", "All supported color and format codes.")
-        .def_property_readonly_static(
-            "BLACK", [](const py::object &) { return ColorFormat::Black; }, "Black (§0).")
-        .def_property_readonly_static(
-            "DARK_BLUE", [](const py::object &) { return ColorFormat::DarkBlue; }, "Dark blue (§1).")
-        .def_property_readonly_static(
-            "DARK_GREEN", [](const py::object &) { return ColorFormat::DarkGreen; }, "Dark green (§2).")
-        .def_property_readonly_static(
-            "DARK_AQUA", [](const py::object &) { return ColorFormat::DarkAqua; }, "Dark aqua (§3).")
-        .def_property_readonly_static(
-            "DARK_RED", [](const py::object &) { return ColorFormat::DarkRed; }, "Dark red (§4).")
-        .def_property_readonly_static(
-            "DARK_PURPLE", [](const py::object &) { return ColorFormat::DarkPurple; }, "Dark purple (§5).")
-        .def_property_readonly_static(
-            "GOLD", [](const py::object &) { return ColorFormat::Gold; }, "Gold (§6).")
-        .def_property_readonly_static(
-            "GRAY", [](const py::object &) { return ColorFormat::Gray; }, "Gray (§7).")
-        .def_property_readonly_static(
-            "DARK_GRAY", [](const py::object &) { return ColorFormat::DarkGray; }, "Dark gray (§8).")
-        .def_property_readonly_static(
-            "BLUE", [](const py::object &) { return ColorFormat::Blue; }, "Blue (§9).")
-        .def_property_readonly_static(
-            "GREEN", [](const py::object &) { return ColorFormat::Green; }, "Green (§a).")
-        .def_property_readonly_static(
-            "AQUA", [](const py::object &) { return ColorFormat::Aqua; }, "Aqua (§b).")
-        .def_property_readonly_static(
-            "RED", [](const py::object &) { return ColorFormat::Red; }, "Red (§c).")
-        .def_property_readonly_static(
-            "LIGHT_PURPLE", [](const py::object &) { return ColorFormat::LightPurple; }, "Light purple (§d).")
-        .def_property_readonly_static(
-            "YELLOW", [](const py::object &) { return ColorFormat::Yellow; }, "Yellow (§e).")
-        .def_property_readonly_static(
-            "WHITE", [](const py::object &) { return ColorFormat::White; }, "White (§f).")
-        .def_property_readonly_static(
-            "MINECOIN_GOLD", [](const py::object &) { return ColorFormat::MinecoinGold; }, "Minecoin gold (§g).")
-        .def_property_readonly_static(
-            "MATERIAL_QUARTZ", [](const py::object &) { return ColorFormat::MaterialQuartz; },
-            "Quartz material color (§h).")
-        .def_property_readonly_static(
-            "MATERIAL_IRON", [](const py::object &) { return ColorFormat::MaterialIron; },
-            "Iron material color (§i).")
-        .def_property_readonly_static(
-            "MATERIAL_NETHERITE", [](const py::object &) { return ColorFormat::MaterialNetherite; },
-            "Netherite material color (§j).")
-        .def_property_readonly_static(
-            "MATERIAL_REDSTONE", [](const py::object &) { return ColorFormat::MaterialRedstone; },
-            "Redstone material color (§m).")
-        .def_property_readonly_static(
-            "MATERIAL_COPPER", [](const py::object &) { return ColorFormat::MaterialCopper; },
-            "Copper material color (§n).")
-        .def_property_readonly_static(
-            "MATERIAL_GOLD", [](const py::object &) { return ColorFormat::MaterialGold; },
-            "Gold material color (§p).")
-        .def_property_readonly_static(
-            "MATERIAL_EMERALD", [](const py::object &) { return ColorFormat::MaterialEmerald; },
-            "Emerald material color (§q).")
-        .def_property_readonly_static(
-            "MATERIAL_DIAMOND", [](const py::object &) { return ColorFormat::MaterialDiamond; },
-            "Diamond material color (§s).")
-        .def_property_readonly_static(
-            "MATERIAL_LAPIS", [](const py::object &) { return ColorFormat::MaterialLapis; },
-            "Lapis material color (§t).")
-        .def_property_readonly_static(
-            "MATERIAL_AMETHYST", [](const py::object &) { return ColorFormat::MaterialAmethyst; },
-            "Amethyst material color (§u).")
-        .def_property_readonly_static(
-            "MATERIAL_RESIN", [](const py::object &) { return ColorFormat::MaterialResin; },
-            "Resin material color (§v).")
-        .def_property_readonly_static(
-            "OBFUSCATED", [](const py::object &) { return ColorFormat::Obfuscated; },
-            "Makes the text obfuscated, randomly cycling through characters (§k).")
-        .def_property_readonly_static(
-            "BOLD", [](const py::object &) { return ColorFormat::Bold; }, "Makes the text bold (§l).")
-        .def_property_readonly_static(
-            "ITALIC", [](const py::object &) { return ColorFormat::Italic; }, "Makes the text italic (§o).")
-        .def_property_readonly_static(
-            "RESET", [](const py::object &) { return ColorFormat::Reset; },
-            "Resets all colors and formatting codes (§r).");
+        .def_property_readonly_static("BLACK", constant(ColorFormat::Black), "Black (§0).")
+        .def_property_readonly_static("DARK_BLUE", constant(ColorFormat::DarkBlue), "Dark blue (§1).")
+        .def_property_readonly_static("DARK_GREEN", constant(ColorFormat::DarkGreen), "Dark green (§2).")
+        .def_property_readonly_static("DARK_AQUA", constant(ColorFormat::DarkAqua), "Dark aqua (§3).")
+        .def_property_readonly_static("DARK_RED", constant(ColorFormat::DarkRed), "Dark red (§4).")
+        .def_property_readonly_static("DARK_PURPLE", constant(ColorFormat::DarkPurple), "Dark purple (§5).")
+        .def_property_readonly_static("GOLD", constant(ColorFormat::Gold), "Gold (§6).")
+        .def_property_readonly_static("GRAY", constant(ColorFormat::Gray), "Gray (§7).")
+        .def_property_readonly_static("DARK_GRAY", constant(ColorFormat::DarkGray), "Dark gray (§8).")
+        .def_property_readonly_static("BLUE", constant(ColorFormat::Blue), "Blue (§9).")
+        .def_property_readonly_static("GREEN", constant(ColorFormat::Green), "Green (§a).")
+        .def_property_readonly_static("AQUA", constant(ColorFormat::Aqua), "Aqua (§b).")
+        .def_property_readonly_static("RED", constant(ColorFormat::Red), "Red (§c).")
+        .def_property_readonly_static("LIGHT_PURPLE", constant(ColorFormat::LightPurple), "Light purple (§d).")
+        .def_property_readonly_static("YELLOW", constant(ColorFormat::Yellow), "Yellow (§e).")
+        .def_property_readonly_static("WHITE", constant(ColorFormat::White), "White (§f).")
+        .def_property_readonly_static("MINECOIN_GOLD", constant(ColorFormat::MinecoinGold), "Minecoin gold (§g).")
+        .def_property_readonly_static("MATERIAL_QUARTZ", constant(ColorFormat::MaterialQuartz),
+                                      "Quartz material color (§h).")
+        .def_property_readonly_static("MATERIAL_IRON", constant(ColorFormat::MaterialIron), "Iron material color (§i).")
+        .def_property_readonly_static("MATERIAL_NETHERITE", constant(ColorFormat::MaterialNetherite),
+                                      "Netherite material color (§j).")
+        .def_property_readonly_static("MATERIAL_REDSTONE", constant(ColorFormat::MaterialRedstone),
+                                      "Redstone material color (§m).")
+        .def_property_readonly_static("MATERIAL_COPPER", constant(ColorFormat::MaterialCopper),
+                                      "Copper material color (§n).")
+        .def_property_readonly_static("MATERIAL_GOLD", constant(ColorFormat::MaterialGold), "Gold material color (§p).")
+        .def_property_readonly_static("MATERIAL_EMERALD", constant(ColorFormat::MaterialEmerald),
+                                      "Emerald material color (§q).")
+        .def_property_readonly_static("MATERIAL_DIAMOND", constant(ColorFormat::MaterialDiamond),
+                                      "Diamond material color (§s).")
+        .def_property_readonly_static("MATERIAL_LAPIS", constant(ColorFormat::MaterialLapis),
+                                      "Lapis material color (§t).")
+        .def_property_readonly_static("MATERIAL_AMETHYST", constant(ColorFormat::MaterialAmethyst),
+                                      "Amethyst material color (§u).")
+        .def_property_readonly_static("MATERIAL_RESIN", constant(ColorFormat::MaterialResin),
+                                      "Resin material color (§v).")
+        .def_property_readonly_static("OBFUSCATED", constant(ColorFormat::Obfuscated),
+                                      "Makes the text obfuscated, randomly cycling through characters (§k).")
+        .def_property_readonly_static("BOLD", constant(ColorFormat::Bold), "Makes the text bold (§l).")
+        .def_property_readonly_static("ITALIC", constant(ColorFormat::Italic), "Makes the text italic (§o).")
+        .def_property_readonly_static("RESET", constant(ColorFormat::Reset),
+                                      "Resets all colors and formatting codes (§r).");
 }
 
 void init_game_mode(py::module_ &m)
@@ -335,7 +300,8 @@ void init_logger(py::module &m)
         .export_values()
         .finalize();
 
-    logger.def("set_level", &Logger::setLevel, py::arg("level"), R"doc(
+    logger
+        .def("set_level", &Logger::setLevel, py::arg("level"), R"doc(
     Set the logging level for this `Logger` instance.
 
     Args:
@@ -470,8 +436,7 @@ void init_server(py::classh<Server> &server)
 )doc")
         .def_property_readonly("level", &Server::getLevel, py::return_value_policy::reference_internal,
                                "The server level.")
-        .def_property_readonly("online_players", &Server::getOnlinePlayers,
-                               "A list of all currently online players.")
+        .def_property_readonly("online_players", &Server::getOnlinePlayers, "A list of all currently online players.")
         .def_property("max_players", &Server::getMaxPlayers, &Server::setMaxPlayers,
                       "The maximum amount of players which can login to this server.")
         .def("get_player", py::overload_cast<std::string>(&Server::getPlayer, py::const_), py::arg("name").noconvert(),
@@ -494,8 +459,7 @@ void init_server(py::classh<Server> &server)
     Returns:
         A player object if one was found, `None` otherwise.
 )doc")
-        .def_property_readonly("online_mode", &Server::getOnlineMode,
-                               "Whether the Server is in online mode or not.")
+        .def_property_readonly("online_mode", &Server::getOnlineMode, "Whether the Server is in online mode or not.")
         .def_property_readonly("port", &Server::getPort, "The game port that the server runs on.")
         .def_property_readonly("port_v6", &Server::getPortV6, "The game port (IPv6) that the server runs on.")
         .def("shutdown", &Server::shutdown, "Shutdowns the server, stopping everything.")
@@ -521,8 +485,7 @@ void init_server(py::classh<Server> &server)
         message: The message.
 )doc")
         .def_property_readonly("item_factory", &Server::getItemFactory,
-                               "The instance of the item factory (for `ItemMeta`).",
-                               py::return_value_policy::reference)
+                               "The instance of the item factory (for `ItemMeta`).", py::return_value_policy::reference)
         .def_property_readonly("scoreboard", &Server::getScoreboard, R"doc(
     The primary `Scoreboard` controlled by the server.
 
@@ -542,10 +505,8 @@ void init_server(py::classh<Server> &server)
                                "The current milliseconds per tick (MSPT).")
         .def_property_readonly("average_mspt", &Server::getAverageMillisecondsPerTick,
                                "The average milliseconds per tick (MSPT).")
-        .def_property_readonly("current_tps", &Server::getCurrentTicksPerSecond,
-                               "The current ticks per second (TPS).")
-        .def_property_readonly("average_tps", &Server::getAverageTicksPerSecond,
-                               "The average ticks per second (TPS).")
+        .def_property_readonly("current_tps", &Server::getCurrentTicksPerSecond, "The current ticks per second (TPS).")
+        .def_property_readonly("average_tps", &Server::getAverageTicksPerSecond, "The average ticks per second (TPS).")
         .def_property_readonly("current_tick_usage", &Server::getCurrentTickUsage,
                                "The current tick usage of the server.")
         .def_property_readonly("average_tick_usage", &Server::getAverageTickUsage,
@@ -652,8 +613,7 @@ void init_player(py::module_ &m, py_class<Player> &player)
     Returns:
         `True` if the command was successful, `False` otherwise.
 )doc")
-        .def_property("is_sneaking", &Player::isSneaking, &Player::setSneaking,
-                      "Whether the player is in sneak mode.")
+        .def_property("is_sneaking", &Player::isSneaking, &Player::setSneaking, "Whether the player is in sneak mode.")
         .def_property("is_sprinting", &Player::isSprinting, &Player::setSprinting,
                       "Whether the player is sprinting or not.")
         .def("play_sound", &Player::playSound, py::arg("location"), py::arg("sound"), py::arg("volume") = 1.0,
@@ -715,8 +675,7 @@ void init_player(py::module_ &m, py_class<Player> &player)
 
     This is a percentage value. 0.0 is "no progress" and 1.0 is "next level".
 )doc")
-        .def_property("exp_level", &Player::getExpLevel, &Player::setExpLevel,
-                      "The player's current experience level.")
+        .def_property("exp_level", &Player::getExpLevel, &Player::setExpLevel, "The player's current experience level.")
         .def_property_readonly("total_exp", &Player::getTotalExp, R"doc(
     The player's total experience points.
 
@@ -754,8 +713,7 @@ void init_player(py::module_ &m, py_class<Player> &player)
 )doc")
         .def("spawn_particle",
              py::overload_cast<std::string, Location, std::optional<std::string>>(&Player::spawnParticle, py::const_),
-             py::arg("name"), py::arg("location").noconvert(),
-             py::arg("molang_variables_json") = std::nullopt, R"doc(
+             py::arg("name"), py::arg("location").noconvert(), py::arg("molang_variables_json") = std::nullopt, R"doc(
     Spawns the particle at the target location.
 
     Args:
@@ -766,8 +724,8 @@ void init_player(py::module_ &m, py_class<Player> &player)
         .def("spawn_particle",
              py::overload_cast<std::string, float, float, float, std::optional<std::string>>(&Player::spawnParticle,
                                                                                              py::const_),
-             py::arg("name"), py::arg("x"), py::arg("y"), py::arg("z"),
-             py::arg("molang_variables_json") = std::nullopt, R"doc(
+             py::arg("name"), py::arg("x"), py::arg("y"), py::arg("z"), py::arg("molang_variables_json") = std::nullopt,
+             R"doc(
     Spawns the particle at the target location.
 
     Args:

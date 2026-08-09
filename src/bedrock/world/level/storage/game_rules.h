@@ -162,6 +162,7 @@ public:
     // Endstone ends
 
 private:
+    // Endstone: returns shared_ptr where BDS returns unique_ptr, as the packet comes from the createPacket factory.
     std::shared_ptr<GameRulesChangedPacket> _setGameRule(GameRule *game_rule, GameRule::Value value,
                                                          GameRule::Type type, bool return_packet, bool *value_validated,
                                                          bool *value_changed, GameRule::ValidationError *error_output);

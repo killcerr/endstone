@@ -67,19 +67,12 @@ std::shared_ptr<GameRulesChangedPacket> GameRules::setGameRule(GameRuleId rule, 
                                                                bool *value_changed,
                                                                GameRule::ValidationError *error_output)
 {
-    if (rule < 0 || rule >= game_rules_.size()) {
-        if (value_validated != nullptr) {
-            *value_validated = false;
-        }
-        if (value_changed != nullptr) {
-            *value_changed = false;
-        }
-        return nullptr;
+    GameRule *game_rule = nullptr;
+    if (rule >= 0 && rule < game_rules_.size()) {
+        game_rule = &game_rules_[rule];
     }
-
-    auto &game_rule = game_rules_[rule];
-    return _setGameRule(&game_rule, value, game_rule.type_, return_packet, value_validated, value_changed,
-                        error_output);
+    return _setGameRule(game_rule, value, game_rule != nullptr ? game_rule->type_ : GameRule::Type::Invalid,
+                        return_packet, value_validated, value_changed, error_output);
 }
 
 std::shared_ptr<GameRulesChangedPacket> GameRules::_setGameRule(GameRule *game_rule, GameRule::Value value,
@@ -131,7 +124,7 @@ std::shared_ptr<GameRulesChangedPacket> GameRules::_setGameRule(GameRule *game_r
         return nullptr;
     }
 
-    const auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::GameRulesChanged);
+    const auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::GameRulesChanged);  // Endstone: factory
     const auto pk = std::static_pointer_cast<GameRulesChangedPacket>(packet);
     pk->payload.rule_data.rules.push_back(*game_rule);
     return pk;
