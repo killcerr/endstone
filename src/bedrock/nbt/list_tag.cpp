@@ -24,6 +24,7 @@
 #include "bedrock/nbt/float_tag.h"
 #include "bedrock/nbt/int64_tag.h"
 #include "bedrock/nbt/int_tag.h"
+#include "bedrock/nbt/nbt_io.h"
 #include "bedrock/nbt/short_tag.h"
 #include "bedrock/nbt/string_tag.h"
 #include "bedrock/nbt/tag.h"
@@ -38,14 +39,24 @@ void ListTag::deleteChildren()
 
 void ListTag::write(IDataOutput &output) const
 {
+    write(output, 0);
+}
+
+void ListTag::write(IDataOutput &output, int depth) const
+{
     output.writeByte(static_cast<std::uint8_t>(type_));
     output.writeInt(static_cast<std::int32_t>(list_.size()));
     for (const auto &data : list_) {
-        data->write(output);
+        NbtIo::writeTagPayload(*data, output, depth + 1);
     }
 }
 
 Bedrock::Result<void> ListTag::load(IDataInput &input)
+{
+    return load(input, 0);
+}
+
+Bedrock::Result<void> ListTag::load(IDataInput &input, int depth)
 {
     auto byte_result = input.readByteResult();
     if (!byte_result.ignoreError()) {
@@ -75,7 +86,7 @@ Bedrock::Result<void> ListTag::load(IDataInput &input)
             return BEDROCK_RETHROW(tag_result);
         }
         auto tag = std::move(tag_result.discardError().value());
-        tag->load(input);
+        NbtIo::loadTagPayload(*tag, input, depth + 1);
         list_.push_back(std::move(tag));
     }
     return {};
@@ -199,9 +210,9 @@ std::uint8_t ListTag::getByte(int index) const
     return 0;
 }
 
-std::size_t ListTag::size() const
+int ListTag::size() const
 {
-    return list_.size();
+    return static_cast<int>(list_.size());
 }
 
 std::unique_ptr<ListTag> ListTag::copyList() const
@@ -243,7 +254,7 @@ void ListTag::popBack()
     list_.pop_back();
 }
 
-void ListTag::forEachCompoundTag(std::function<void(const CompoundTag &)> func) const
+void ListTag::forEachCompoundTag(brstd::function_ref<void(const CompoundTag &)> func) const
 {
     for (const auto &tag : list_) {
         if (tag->getId() == Type::Compound) {

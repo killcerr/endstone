@@ -49,10 +49,12 @@ NetworkConnection *NetworkSystem::_getConnectionFromId(const NetworkIdentifier &
     return nullptr;
 }
 
-void NetworkSystem::setCloseConnection(const NetworkIdentifier &id)
+void NetworkSystem::setCloseConnection(const NetworkIdentifier &id,
+                                       Connection::DisconnectFailReason close_connection_reason)
 {
     if (auto *connection = _getConnectionFromId(id)) {
         connection->should_close_connection_ = true;
+        connection->should_close_connection_reason_ = close_connection_reason;
         connection->closed_time = std::chrono::steady_clock::now();
     }
 }

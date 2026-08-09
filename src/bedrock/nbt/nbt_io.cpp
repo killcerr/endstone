@@ -15,8 +15,24 @@
 #include "bedrock/nbt/nbt_io.h"
 
 #include "bedrock/nbt/compound_tag.h"
+#include "bedrock/nbt/list_tag.h"
 
-Bedrock::Result<std::unique_ptr<Tag>> NbtIo::readNamedTag(IDataInput &dis, std::string &name)
+Bedrock::Result<void> NbtIo::loadTagPayload(Tag &tag, IDataInput &dis, int depth)
+{
+    if (depth > MAX_NESTING_DEPTH) {
+        return BEDROCK_NEW_ERROR(std::errc::value_too_large);
+    }
+    switch (tag.getId()) {
+    case Tag::Type::Compound:
+        return static_cast<CompoundTag &>(tag).load(dis, depth);
+    case Tag::Type::List:
+        return static_cast<ListTag &>(tag).load(dis, depth);
+    default:
+        return tag.load(dis);
+    }
+}
+
+Bedrock::Result<std::unique_ptr<Tag>> NbtIo::readNamedTag(IDataInput &dis, std::string &name, int depth)
 {
     auto type_result = dis.readByteResult();
     if (!type_result.ignoreError()) {
@@ -39,8 +55,9 @@ Bedrock::Result<std::unique_ptr<Tag>> NbtIo::readNamedTag(IDataInput &dis, std::
         return BEDROCK_RETHROW(tag_result);
     }
 
-    tag_result.discardError().value()->load(dis);
-    return std::move(tag_result.discardError().value());
+    auto tag = std::move(tag_result.discardError().value());
+    loadTagPayload(*tag, dis, depth);
+    return std::move(tag);
 }
 
 Bedrock::Result<std::unique_ptr<CompoundTag>> NbtIo::readNamedCompoundTag(IDataInput &dis, std::string &name)
@@ -62,17 +79,40 @@ Bedrock::Result<std::unique_ptr<CompoundTag>> NbtIo::readNamedCompoundTag(IDataI
     name = name_result.discardError().value();
 
     auto tag = std::make_unique<CompoundTag>();
-    tag->load(dis);
+    tag->load(dis, 0);
     return std::move(tag);
 }
 
 void NbtIo::writeNamedTag(const std::string &name, const Tag &tag, IDataOutput &output)
 {
+    writeNamedTag(name, tag, output, 0);
+}
+
+void NbtIo::writeTagPayload(const Tag &tag, IDataOutput &output, int depth)
+{
+    if (depth > MAX_NESTING_DEPTH) {
+        return;
+    }
+    switch (tag.getId()) {
+    case Tag::Type::Compound:
+        static_cast<const CompoundTag &>(tag).write(output, depth);
+        break;
+    case Tag::Type::List:
+        static_cast<const ListTag &>(tag).write(output, depth);
+        break;
+    default:
+        tag.write(output);
+        break;
+    }
+}
+
+void NbtIo::writeNamedTag(const std::string &name, const Tag &tag, IDataOutput &output, int depth)
+{
     auto type = tag.getId();
     output.writeByte(static_cast<std::uint8_t>(type));
     if (type != Tag::Type::End) {
         output.writeString(name);
-        tag.write(output);
+        writeTagPayload(tag, output, depth);
     }
 }
 

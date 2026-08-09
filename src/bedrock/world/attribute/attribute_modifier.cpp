@@ -14,16 +14,16 @@
 
 #include "bedrock/world/attribute/attribute_modifier.h"
 
-AttributeModifier::AttributeModifier(mce::UUID id, const std::string &name, float amount, int operation, int operands,
+AttributeModifier::AttributeModifier(mce::UUID id, const std::string &name, float amount, int operation, int operand,
                                      bool serialize)
     : id_(id), name_(name), amount_(amount), operation_(static_cast<AttributeModifierOperation>(operation)),
-      operands_(static_cast<AttributeOperands>(operands)), serialize_(serialize)
+      operand_(static_cast<AttributeOperands>(operand)), serialize_(serialize)
 {
 }
 
 AttributeModifier::AttributeModifier(mce::UUID id, const std::string &name, float amount,
-                                     AttributeModifierOperation operation, AttributeOperands operands, bool serialize)
-    : id_(id), name_(name), amount_(amount), operation_(operation), operands_(operands), serialize_(serialize)
+                                     AttributeModifierOperation operation, AttributeOperands operand, bool serialize)
+    : id_(id), name_(name), amount_(amount), operation_(operation), operand_(operand), serialize_(serialize)
 {
 }
 
@@ -53,7 +53,7 @@ AttributeModifierOperation AttributeModifier::getOperation() const
 
 AttributeOperands AttributeModifier::getOperand() const
 {
-    return operands_;
+    return operand_;
 }
 
 float AttributeModifier::getAmount() const
@@ -73,7 +73,7 @@ void AttributeModifier::setSerialize(bool serialize)
 
 bool AttributeModifier::operator==(const AttributeModifier &rhs) const
 {
-    return id_ == rhs.id_ && name_ == rhs.name_ && operation_ == rhs.operation_ && operands_ == rhs.operands_;
+    return id_ == rhs.id_ && name_ == rhs.name_ && operation_ == rhs.operation_ && operand_ == rhs.operand_;
 }
 
 bool AttributeModifier::operator!=(const AttributeModifier &rhs) const

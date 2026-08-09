@@ -48,7 +48,7 @@ public:
 private:
     float amount_;
     AttributeModifierOperation operation_;
-    AttributeOperands operands_;
+    AttributeOperands operand_;
     std::string name_;
     mce::UUID id_;
     bool serialize_;

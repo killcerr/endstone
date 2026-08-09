@@ -154,6 +154,16 @@ iteratively; never batch many unverified ABI edits.**
   used across many headers goes in `src/bedrock/forward.h` (alphabetical); for a
   heavy include chain, forward-declare and use the type incomplete (fine for
   pointers, references, and container value types).
+- **Every header must be self-contained.** A sweep that adds one `#include` to
+  an events/shard header can re-order the whole chain and expose headers that
+  were silently borrowing a transitive include - the symptom is `no template
+  named 'X'` plus a cascade of `static_assert` size failures in a file the sweep
+  never touched. Include what you use, in the file that uses it. Verify with a
+  one-line TU (`#include "<the header>"`) compiled `/Zs` (`-fsyntax-only`) using
+  flags lifted from the **build log**, not from the repo-root
+  `compile_commands.json`, which goes stale and can miss defines (`-DNOMINMAX`,
+  `-DWIN32_LEAN_AND_MEAN`). Sweep the whole sibling directory at once - latent
+  cases cluster.
 - **Structural refactors** - when BDS introduces a base class, mirror it (add
   the base header, re-parent, move shared members down). When BDS removes a
   class, `git rm` once `grep` confirms nothing references it. Follow BDS
@@ -1365,6 +1375,31 @@ only a tiny `.dynsym`), so every Linux entry is pattern-resolved too.
   only some files of a stage (e.g. some `network/packet/*` but not all) and left
   `.cpp` files referencing the pre-refactor shape. Build early; the first compile
   pass surfaces these gaps.
+
+### Adding a pure virtual makes every embedder abstract
+
+- A pure virtual added to a base class propagates: `field type '...' is an
+  abstract class` at every by-value member, far from the edit. A pure virtual
+  *destructor* never does this - the implicitly-declared derived destructor
+  overrides it. Any other pure virtual needs an explicit override somewhere down
+  the chain.
+- Declare the override where the headers put it, not where it is convenient. The
+  DWARF dump for a class defined inside a `.cpp` lands in
+  `bedrock-headers/src/.../<Name>.cpp`, not the matching `.h` - grep both.
+- A declared-but-undefined virtual is a link error only if the vtable is emitted,
+  which for these class templates needs a constructor or destructor to be
+  odr-used. Two ways to check before paying for a build:
+  - `llvm-nm` the object files a previous build already left in the build tree
+    and grep for the mangled type name. No symbol in any `.obj` means nothing
+    forces emission.
+  - Write a probe `.cpp` that constructs the type, compile it with `-c`, and
+    `llvm-nm -u` it. This proves the check is sensitive, and it lists the other
+    declaration-only symbols the same vtable already needs. If those already
+    exist in a tree that links, the new declaration adds no risk.
+- To compile a single TU without touching the build tree, lift the flags from a
+  `FAILED:` line in the build log (**not** the repo-root `compile_commands.json`,
+  which can be stale) and use clang-cl `/Zs`; add `-ferror-limit=0` so unrelated
+  breakage does not hide your error.
 
 ## Record findings here
 

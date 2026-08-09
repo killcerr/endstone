@@ -14,6 +14,9 @@
 
 #pragma once
 
+#include <cstddef>
+#include <vector>
+
 template <typename T>
 class buffer_span {
 public:

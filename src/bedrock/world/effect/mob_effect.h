@@ -27,6 +27,7 @@ class BaseAttributeMap;
 
 using MobEffectId = unsigned int;
 
+
 class MobEffect {
 public:
     static constexpr std::size_t NUM_EFFECTS = 38;

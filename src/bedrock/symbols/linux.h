@@ -49,7 +49,7 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 63> symbol
     // CommandUtils
     {"_ZN12CommandUtils12getActorNameERK5Actor", 159687440},
     // CraftingDataPacket
-    {"_ZN18CraftingDataPacket18prepareFromRecipesERK7Recipesb", 134707376},
+    {"_ZN25CraftingDataPacketPayload11fromRecipesERK7Recipesb", 134707376},
     // DedicatedServer
     {"_ZN15DedicatedServer5startERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEERKN7Bedrock19ActivationArgumentsE", 71542176},
     // Explosion

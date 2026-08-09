@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace SharedTypes::Legacy {
 enum class DealsDamage : std::uint8_t {
     Yes = 0,
