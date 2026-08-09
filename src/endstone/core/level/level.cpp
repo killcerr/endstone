@@ -14,15 +14,20 @@
 
 #include "endstone/core/level/level.h"
 
+#include <cstdlib>
 #include <ranges>
 #include <stdexcept>
 
 #include "bedrock/entity/gamerefs_entity/gamerefs_entity.h"
+#include "bedrock/network/packet_sender.h"
 #include "bedrock/world/level/dimension/dimension.h"
 #include "bedrock/world/level/dimension/vanilla_dimensions.h"
 #include "bedrock/world/level/dimension_manager.h"
 #include "bedrock/world/level/level.h"
+#include "bedrock/world/level/storage/game_rule_utils.h"
+#include "bedrock/world/level/storage/game_rules.h"
 #include "endstone/core/actor/actor.h"
+#include "endstone/core/game_rule.h"
 #include "endstone/core/level/dimension.h"
 #include "endstone/level/dimension.h"
 
@@ -123,6 +128,53 @@ Nullable<Dimension> EndstoneLevel::createDimension(const DimensionCreator & /*cr
 std::int64_t EndstoneLevel::getSeed() const
 {
     return level_.getLevelSeed64();
+}
+
+bool EndstoneLevel::_hasGameRule(Identifier<GameRule> rule) const
+{
+    return server_.getRegistry<GameRule>().get(rule) != nullptr;
+}
+
+GameRuleValue EndstoneLevel::_getGameRule(Identifier<GameRule> rule) const
+{
+    const auto *entry = server_.getRegistry<GameRule>().get(rule);
+    if (entry == nullptr) {
+        throw std::out_of_range("Game rule is not available.");
+    }
+
+    const auto *game_rule = &static_cast<const EndstoneGameRule *>(entry)->getHandle();
+    const auto &value = game_rule->getValue();
+    switch (game_rule->getType()) {
+    case ::GameRule::Type::Bool:
+        return std::get<bool>(value);
+    case ::GameRule::Type::Int:
+        return std::get<int>(value);
+    case ::GameRule::Type::Float:
+        return std::get<float>(value);
+    case ::GameRule::Type::Invalid:
+        std::abort();
+    }
+}
+
+bool EndstoneLevel::_setGameRule(Identifier<GameRule> rule, GameRuleValue value)
+{
+    const auto *entry = server_.getRegistry<GameRule>().get(rule);
+    if (entry == nullptr) {
+        return false;
+    }
+
+    auto &game_rules = level_.getGameRules();
+    const auto *game_rule = &static_cast<const EndstoneGameRule *>(entry)->getHandle();
+    const ::GameRuleId id{static_cast<int>(game_rule - game_rules.getRules().data())};
+
+    const auto native_value = std::visit([](auto &&v) -> std::variant<int, float, bool> { return v; }, value);
+    try {
+        GameRuleUtils::setGameRule(level_, id, native_value, nullptr, false);
+    }
+    catch (const std::bad_variant_access &) {
+        return false;
+    }
+    return true;
 }
 
 EndstoneServer &EndstoneLevel::getServer() const

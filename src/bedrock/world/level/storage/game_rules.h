@@ -16,15 +16,22 @@
 
 #include <functional>
 #include <map>
+#include <memory>
 #include <optional>
+#include <string>
 #include <variant>
+#include <vector>
 
+#include "bedrock/bedrock.h"
 #include "bedrock/core/string/string_hash.h"
+#include "bedrock/core/utility/enable_non_owner_references.h"
 #include "bedrock/core/utility/pub_sub/publisher.h"
+#include "bedrock/network/packet/cerealize/schema/dynamic/dynamic_value.h"
 #include "bedrock/resources/base_game_version.h"
 #include "bedrock/util/new_type.h"
 
 class CompoundTag;
+class GameRulesChangedPacket;
 
 class GameRule {
 public:
@@ -35,20 +42,30 @@ public:
         Float = 3,
     };
 
-    using Value = std::variant<std::monostate, bool, int, float>;
+    using Value = std::variant<cereal::NullType, bool, int, float>;
+
+    class ValidationError;
 
     using TagDataNotFoundCallback = std::function<void(GameRule &, const BaseGameVersion &, const CompoundTag &)>;
-    using ValidateValueCallback = std::function<bool(const Value &, class ValidationError *)>;
+    using ValidateValueCallback = std::function<bool(const Value &, ValidationError *)>;
     using CommandValueRedirectCallback = std::function<Value(const Value &)>;
 
     GameRule();
+    [[nodiscard]] Type getType() const { return type_; }
+    [[nodiscard]] const Value &getValue() const { return value_; }
+    [[nodiscard]] const std::string &getName() const { return name_; }
     [[nodiscard]] bool getBool() const
     {
         const auto *value = std::get_if<bool>(&value_);
         return value != nullptr && *value;
     }
+    [[nodiscard]] bool compareValue(const Value &value) const;
 
 private:
+    friend class GameRules;
+
+    bool _set(const Value &value, bool *validated, ValidationError *error_output);
+
     bool should_save_;
     Type type_;
     Value value_;
@@ -56,7 +73,7 @@ private:
     bool allow_use_in_command_;
     bool allow_use_in_scripting_;
     bool is_default_set_;
-    bool requires_cheat_;
+    bool requires_cheats_;
     bool can_be_modified_by_player_;
     TagDataNotFoundCallback tag_not_found_callback_;
     ValidateValueCallback validate_value_callback_;
@@ -74,10 +91,10 @@ struct GameRuleId : NewType<int> {
 };
 
 class GameRules : public Bedrock::EnableNonOwnerReferences {
+public:
     using GameRuleMap = std::vector<GameRule>;
     using WorldPolicyMap = std::map<HashedString, GameRule>;
 
-public:
     [[nodiscard]] bool getBool(GameRuleId id, bool default_value) const
     {
         if (id >= 0 && id < game_rules_.size()) {
@@ -85,6 +102,9 @@ public:
         }
         return default_value;
     }
+
+    [[nodiscard]] const GameRuleMap &getRules() const { return game_rules_; }
+    [[nodiscard]] const GameRule *getRule(GameRuleId rule) const;
 
     enum GameRulesIndex : int {  // NOLINTBEGIN
         INVALID_GAME_RULE = -1,
@@ -127,17 +147,38 @@ public:
         PLAYER_SLEEPING_PERCENTAGE = 36,
         PROJECTILES_CAN_BREAK_BLOCKS = 37,
         TNT_EXPLOSION_DROP_DECAY = 38,
-        VANILLA_GAME_RULE_COUNT = 39,
-        GLOBAL_MUTE = 39,
+        VANILLA_GAME_RULE_COUNT,
+        GLOBAL_MUTE = VANILLA_GAME_RULE_COUNT,
         ALLOW_DESTRUCTIVE_OBJECTS = 40,
         ALLOW_MOBS = 41,
         CODE_BUILDER = 42,
         EDU_CLOUD_SAVE = 43,
-        EDU_GAME_RULE_COUNT = 44,
-        GAME_RULE_COUNT = 44,
+        EDU_GAME_RULE_COUNT,
+        GAME_RULE_COUNT = EDU_GAME_RULE_COUNT,
     };  // NOLINTEND
 
+    // Endstone: these return shared_ptr where BDS returns unique_ptr, as the packet comes from the createPacket
+    // factory.
+    std::shared_ptr<GameRulesChangedPacket> setRule(GameRuleId rule, bool value, bool return_packet,
+                                                    bool *value_validated, bool *value_changed,
+                                                    GameRule::ValidationError *error_output);
+    std::shared_ptr<GameRulesChangedPacket> setRule(GameRuleId rule, int value, bool return_packet,
+                                                    bool *value_validated, bool *value_changed,
+                                                    GameRule::ValidationError *error_output);
+    std::shared_ptr<GameRulesChangedPacket> setRule(GameRuleId rule, float value, bool return_packet,
+                                                    bool *value_validated, bool *value_changed,
+                                                    GameRule::ValidationError *error_output);
+
 private:
+    GameRule *_getRule(GameRuleId rule_type);
+    std::shared_ptr<GameRulesChangedPacket> _setRule(GameRuleId rule_type, GameRule::Value value, GameRule::Type type,
+                                                     bool return_packet, bool *value_validated, bool *value_changed,
+                                                     GameRule::ValidationError *error_output);
+    std::shared_ptr<GameRulesChangedPacket> _setGameRule(GameRule *game_rule, GameRule::Value value,
+                                                         GameRule::Type type, bool return_packet, bool *value_validated,
+                                                         bool *value_changed, GameRule::ValidationError *error_output);
+    std::shared_ptr<GameRulesChangedPacket> _createPacket(const GameRule &rule);
+
     GameRuleMap game_rules_;
     WorldPolicyMap world_policies_;
     Bedrock::PubSub::Publisher<void(const GameRules &, const GameRuleId &), Bedrock::PubSub::ThreadModel::MultiThreaded>

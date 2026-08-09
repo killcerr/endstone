@@ -1,6 +1,6 @@
 import typing
 
-from endstone import Identifier
+from endstone import GameRule, Identifier
 from endstone.actor import Actor, ActorType, Item
 from endstone.block import Block
 from endstone.inventory import ItemStack
@@ -13,6 +13,8 @@ __all__ = [
     "Level",
     "Location",
 ]
+
+_T = typing.TypeVar("_T")
 
 class Level:
     """
@@ -74,6 +76,49 @@ class Level:
     def seed(self) -> int:
         """
         The Seed for this level.
+        """
+
+    def has_game_rule(self, rule: Identifier[GameRule] | str) -> bool:
+        """
+        Checks if a game rule exists.
+
+        Args:
+            rule: The Minecraft game rule to check.
+
+        Returns:
+            `True` if the game rule exists.
+        """
+
+    @typing.overload
+    def get_game_rule(self, rule: Identifier[GameRule[_T]]) -> _T: ...
+    @typing.overload
+    def get_game_rule(self, rule: str) -> bool | int | float:
+        """
+        Gets the value of a game rule.
+
+        Args:
+            rule: The Minecraft game rule to get.
+
+        Returns:
+            The current game rule value.
+
+        Raises:
+            IndexError: If the game rule does not exist.
+        """
+
+    @typing.overload
+    def set_game_rule(self, rule: Identifier[GameRule[_T]], value: _T) -> None: ...
+    @typing.overload
+    def set_game_rule(self, rule: str, value: bool | float) -> None:
+        """
+        Sets the value of a game rule.
+
+        Args:
+            rule: The Minecraft game rule to set.
+            value: The new value, which must match the type of the game rule.
+
+        Raises:
+            ValueError: If the game rule does not exist or the value has the wrong type.
         """
 
 class Dimension:

@@ -691,6 +691,17 @@ class StubGen:
         pattern.matches += 1
         return pattern
 
+    def pattern_text(self, query: str) -> str | None:
+        """Apply a pattern for its text rather than emitting it; imports still register."""
+        saved_output, saved_depth = self._output, self.depth
+        self._output, self.depth = io.StringIO(), 0
+        try:
+            matched = self.apply_pattern(query, None)
+            text = self._output.getvalue().strip()
+        finally:
+            self._output, self.depth = saved_output, saved_depth
+        return text if matched else None
+
     def put(self, obj) -> bool:
         """Emit ``obj``; returns whether anything was written."""
         if isinstance(obj, Alias):
@@ -740,6 +751,8 @@ class StubGen:
         bases = [
             self.simplify(str(b)) for b in cls.bases if str(b) not in {"object", "pybind11_builtins.pybind11_object"}
         ]
+        if (override := self.pattern_text(self.prefix + ".__bases__")) is not None:
+            bases = [override]
         header = "class " + cls.name
         if bases:
             header += "(" + ", ".join(bases) + ")"

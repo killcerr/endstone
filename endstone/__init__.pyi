@@ -50,6 +50,7 @@ from ._version import __version__
 __all__ = [
     "ColorFormat",
     "GameMode",
+    "GameRule",
     "Identifier",
     "Logger",
     "OfflinePlayer",
@@ -862,6 +863,80 @@ class GameMode(enum.Enum):
     CREATIVE = 1
     ADVENTURE = 2
     SPECTATOR = 3
+
+class GameRule(typing.Generic[_T]):
+    """
+    Represents a game rule.
+    """
+    @property
+    def id(self) -> Identifier[GameRule[_T]]:
+        """
+        The identifier of this game rule.
+        """
+
+    @property
+    def translation_key(self) -> str:
+        """
+        The translation key, suitable for use in a translation component.
+        """
+
+    @typing.overload
+    @staticmethod
+    def get(name: Identifier[GameRule[_T]]) -> GameRule[_T] | None: ...
+    @typing.overload
+    @staticmethod
+    def get(name: str) -> GameRule[typing.Any] | None:
+        """
+        Attempts to get the `GameRule` with the given name.
+
+        Args:
+            name: The identifier of the game rule (e.g. `minecraft:dofiretick`).
+
+        Returns:
+            The `GameRule`, or `None` if no game rule with that name exists.
+        """
+
+    def __hash__(self) -> int: ...
+
+    COMMAND_BLOCK_OUTPUT: Identifier[GameRule[bool]] = "minecraft:commandblockoutput"
+    COMMAND_BLOCKS_ENABLED: Identifier[GameRule[bool]] = "minecraft:commandblocksenabled"
+    DO_DAY_LIGHT_CYCLE: Identifier[GameRule[bool]] = "minecraft:dodaylightcycle"
+    DO_ENTITY_DROPS: Identifier[GameRule[bool]] = "minecraft:doentitydrops"
+    DO_FIRE_TICK: Identifier[GameRule[bool]] = "minecraft:dofiretick"
+    DO_IMMEDIATE_RESPAWN: Identifier[GameRule[bool]] = "minecraft:doimmediaterespawn"
+    DO_INSOMNIA: Identifier[GameRule[bool]] = "minecraft:doinsomnia"
+    DO_LIMITED_CRAFTING: Identifier[GameRule[bool]] = "minecraft:dolimitedcrafting"
+    DO_MOB_LOOT: Identifier[GameRule[bool]] = "minecraft:domobloot"
+    DO_MOB_SPAWNING: Identifier[GameRule[bool]] = "minecraft:domobspawning"
+    DO_TILE_DROPS: Identifier[GameRule[bool]] = "minecraft:dotiledrops"
+    DO_WEATHER_CYCLE: Identifier[GameRule[bool]] = "minecraft:doweathercycle"
+    DROWNING_DAMAGE: Identifier[GameRule[bool]] = "minecraft:drowningdamage"
+    FALL_DAMAGE: Identifier[GameRule[bool]] = "minecraft:falldamage"
+    FIRE_DAMAGE: Identifier[GameRule[bool]] = "minecraft:firedamage"
+    FREEZE_DAMAGE: Identifier[GameRule[bool]] = "minecraft:freezedamage"
+    FUNCTION_COMMAND_LIMIT: Identifier[GameRule[int]] = "minecraft:functioncommandlimit"
+    KEEP_INVENTORY: Identifier[GameRule[bool]] = "minecraft:keepinventory"
+    LOCATOR_BAR: Identifier[GameRule[bool]] = "minecraft:locatorbar"
+    MAX_COMMAND_CHAIN_LENGTH: Identifier[GameRule[int]] = "minecraft:maxcommandchainlength"
+    MOB_GRIEFING: Identifier[GameRule[bool]] = "minecraft:mobgriefing"
+    NATURAL_REGENERATION: Identifier[GameRule[bool]] = "minecraft:naturalregeneration"
+    PLAYERS_SLEEPING_PERCENTAGE: Identifier[GameRule[int]] = "minecraft:playerssleepingpercentage"
+    PLAYER_WAYPOINTS: Identifier[GameRule[int]] = "minecraft:playerwaypoints"
+    PROJECTILES_CAN_BREAK_BLOCKS: Identifier[GameRule[bool]] = "minecraft:projectilescanbreakblocks"
+    PVP: Identifier[GameRule[bool]] = "minecraft:pvp"
+    RANDOM_TICK_SPEED: Identifier[GameRule[int]] = "minecraft:randomtickspeed"
+    RECIPES_UNLOCK: Identifier[GameRule[bool]] = "minecraft:recipesunlock"
+    RESPAWN_BLOCKS_EXPLODE: Identifier[GameRule[bool]] = "minecraft:respawnblocksexplode"
+    SEND_COMMAND_FEEDBACK: Identifier[GameRule[bool]] = "minecraft:sendcommandfeedback"
+    SHOW_BORDER_EFFECT: Identifier[GameRule[bool]] = "minecraft:showbordereffect"
+    SHOW_COORDINATES: Identifier[GameRule[bool]] = "minecraft:showcoordinates"
+    SHOW_DAYS_PLAYED: Identifier[GameRule[bool]] = "minecraft:showdaysplayed"
+    SHOW_DEATH_MESSAGES: Identifier[GameRule[bool]] = "minecraft:showdeathmessages"
+    SHOW_RECIPE_MESSAGES: Identifier[GameRule[bool]] = "minecraft:showrecipemessages"
+    SHOW_TAGS: Identifier[GameRule[bool]] = "minecraft:showtags"
+    SPAWN_RADIUS: Identifier[GameRule[int]] = "minecraft:spawnradius"
+    TNT_EXPLODES: Identifier[GameRule[bool]] = "minecraft:tntexplodes"
+    TNT_EXPLOSION_DROP_DECAY: Identifier[GameRule[bool]] = "minecraft:tntexplosiondropdecay"
 
 class Logger:
     """

@@ -16,6 +16,7 @@ pybind11_add_module(_python MODULE
         endstone_python.cpp
         event.cpp
         form.cpp
+        game_rule.cpp
         inventory.cpp
         lang.cpp
         level.cpp

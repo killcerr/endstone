@@ -107,6 +107,8 @@ add_library(bedrock STATIC
         world/level/block_source.cpp
         world/level/explosion.cpp
         world/level/level.cpp
+        world/level/storage/game_rule_utils.cpp
+        world/level/storage/game_rules.cpp
         world/level/weather.cpp
         world/level/biome/registry/biome_registry.cpp
         world/level/block/bed_block.cpp

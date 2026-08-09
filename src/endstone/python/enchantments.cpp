@@ -24,126 +24,76 @@ void init_enchantments(py::module_ &m)
 {
     py::class_<Enchantment, std::shared_ptr<Enchantment>>(
         m, "Enchantment", "Represents an enchantment that may be added to armor, weapons, tools or other items.")
+        .def_property_readonly_static("PROTECTION", id(Enchantment::Protection),
+                                      "Provides protection against environmental damage.")
+        .def_property_readonly_static("FIRE_PROTECTION", id(Enchantment::FireProtection),
+                                      "Provides protection against fire damage.")
+        .def_property_readonly_static("FEATHER_FALLING", id(Enchantment::FeatherFalling),
+                                      "Provides protection against fall damage.")
+        .def_property_readonly_static("BLAST_PROTECTION", id(Enchantment::BlastProtection),
+                                      "Provides protection against explosive damage.")
+        .def_property_readonly_static("PROJECTILE_PROTECTION", id(Enchantment::ProjectileProtection),
+                                      "Provides protection against projectile damage.")
+        .def_property_readonly_static("THORNS", id(Enchantment::Thorns), "Damages the attacker.")
+        .def_property_readonly_static("RESPIRATION", id(Enchantment::Respiration),
+                                      "Decreases the rate of air loss whilst underwater.")
+        .def_property_readonly_static("DEPTH_STRIDER", id(Enchantment::DepthStrider),
+                                      "Increases walking speed while in water.")
+        .def_property_readonly_static("AQUA_AFFINITY", id(Enchantment::AquaAffinity),
+                                      "Increases the speed at which a player may mine underwater.")
+        .def_property_readonly_static("SHARPNESS", id(Enchantment::Sharpness), "Increases damage against all targets.")
+        .def_property_readonly_static("SMITE", id(Enchantment::Smite), "Increases damage against undead targets.")
+        .def_property_readonly_static("BANE_OF_ARTHROPODS", id(Enchantment::BaneOfArthropods),
+                                      "Increases damage against arthropod targets.")
+        .def_property_readonly_static("KNOCKBACK", id(Enchantment::Knockback),
+                                      "All damage to other targets will knock them back when hit.")
+        .def_property_readonly_static("FIRE_ASPECT", id(Enchantment::FireAspect),
+                                      "When attacking a target, has a chance to set them on fire.")
+        .def_property_readonly_static("LOOTING", id(Enchantment::Looting),
+                                      "Provides a chance of gaining extra loot when killing monsters.")
+        .def_property_readonly_static("EFFICIENCY", id(Enchantment::Efficiency),
+                                      "Increases the rate at which you mine/dig.")
         .def_property_readonly_static(
-            "PROTECTION", [](const py::object &) { return Enchantment::Protection; },
-            "Provides protection against environmental damage.")
-        .def_property_readonly_static(
-            "FIRE_PROTECTION", [](const py::object &) { return Enchantment::FireProtection; },
-            "Provides protection against fire damage.")
-        .def_property_readonly_static(
-            "FEATHER_FALLING", [](const py::object &) { return Enchantment::FeatherFalling; },
-            "Provides protection against fall damage.")
-        .def_property_readonly_static(
-            "BLAST_PROTECTION", [](const py::object &) { return Enchantment::BlastProtection; },
-            "Provides protection against explosive damage.")
-        .def_property_readonly_static(
-            "PROJECTILE_PROTECTION", [](const py::object &) { return Enchantment::ProjectileProtection; },
-            "Provides protection against projectile damage.")
-        .def_property_readonly_static(
-            "THORNS", [](const py::object &) { return Enchantment::Thorns; }, "Damages the attacker.")
-        .def_property_readonly_static(
-            "RESPIRATION", [](const py::object &) { return Enchantment::Respiration; },
-            "Decreases the rate of air loss whilst underwater.")
-        .def_property_readonly_static(
-            "DEPTH_STRIDER", [](const py::object &) { return Enchantment::DepthStrider; },
-            "Increases walking speed while in water.")
-        .def_property_readonly_static(
-            "AQUA_AFFINITY", [](const py::object &) { return Enchantment::AquaAffinity; },
-            "Increases the speed at which a player may mine underwater.")
-        .def_property_readonly_static(
-            "SHARPNESS", [](const py::object &) { return Enchantment::Sharpness; },
-            "Increases damage against all targets.")
-        .def_property_readonly_static(
-            "SMITE", [](const py::object &) { return Enchantment::Smite; },
-            "Increases damage against undead targets.")
-        .def_property_readonly_static(
-            "BANE_OF_ARTHROPODS", [](const py::object &) { return Enchantment::BaneOfArthropods; },
-            "Increases damage against arthropod targets.")
-        .def_property_readonly_static(
-            "KNOCKBACK", [](const py::object &) { return Enchantment::Knockback; },
-            "All damage to other targets will knock them back when hit.")
-        .def_property_readonly_static(
-            "FIRE_ASPECT", [](const py::object &) { return Enchantment::FireAspect; },
-            "When attacking a target, has a chance to set them on fire.")
-        .def_property_readonly_static(
-            "LOOTING", [](const py::object &) { return Enchantment::Looting; },
-            "Provides a chance of gaining extra loot when killing monsters.")
-        .def_property_readonly_static(
-            "EFFICIENCY", [](const py::object &) { return Enchantment::Efficiency; },
-            "Increases the rate at which you mine/dig.")
-        .def_property_readonly_static(
-            "SILK_TOUCH", [](const py::object &) { return Enchantment::SilkTouch; },
+            "SILK_TOUCH", id(Enchantment::SilkTouch),
             "Allows blocks to drop themselves instead of fragments (for example, stone instead of cobblestone).")
+        .def_property_readonly_static("UNBREAKING", id(Enchantment::Unbreaking),
+                                      "Decreases the rate at which a tool looses durability.")
+        .def_property_readonly_static("POWER", id(Enchantment::Power),
+                                      "Provides extra damage when shooting arrows from bows.")
+        .def_property_readonly_static("PUNCH", id(Enchantment::Punch),
+                                      "Provides a knockback when an entity is hit by an arrow from a bow.")
+        .def_property_readonly_static("FLAME", id(Enchantment::Flame),
+                                      "Sets entities on fire when hit by arrows shot from a bow.")
+        .def_property_readonly_static("INFINITY", id(Enchantment::Infinity),
+                                      "Provides infinite arrows when shooting a bow.")
+        .def_property_readonly_static("LUCK_OF_THE_SEA", id(Enchantment::LuckOfTheSea),
+                                      "Decreases odds of catching worthless junk.")
+        .def_property_readonly_static("LURE", id(Enchantment::Lure), "Increases rate of fish biting your hook.")
+        .def_property_readonly_static("FROST_WALKER", id(Enchantment::FrostWalker),
+                                      "Freezes any still water adjacent to ice / frost which player is walking on.")
+        .def_property_readonly_static("MENDING", id(Enchantment::Mending),
+                                      "Allows mending the item using experience orbs.")
+        .def_property_readonly_static("CURSE_OF_BINDING", id(Enchantment::CurseOfBinding), "Item cannot be removed.")
+        .def_property_readonly_static("CURSE_OF_VANISHING", id(Enchantment::CurseOfVanishing),
+                                      "Item disappears instead of dropping.")
+        .def_property_readonly_static("IMPALING", id(Enchantment::Impaling),
+                                      "Deals more damage to mobs that live in the ocean.")
+        .def_property_readonly_static("RIPTIDE", id(Enchantment::Riptide),
+                                      "When it is rainy, launches the player in the direction their trident is thrown.")
+        .def_property_readonly_static("LOYALTY", id(Enchantment::Loyalty),
+                                      "Causes a thrown trident to return to the player who threw it.")
+        .def_property_readonly_static("CHANNELING", id(Enchantment::Channeling),
+                                      "Strikes lightning when a mob is hit with a trident if conditions are stormy.")
+        .def_property_readonly_static("MULTISHOT", id(Enchantment::Multishot), "Shoot multiple arrows from crossbows.")
+        .def_property_readonly_static("PIERCING", id(Enchantment::Piercing), "Crossbow projectiles pierce entities.")
+        .def_property_readonly_static("QUICK_CHARGE", id(Enchantment::QuickCharge), "Charges crossbows quickly.")
+        .def_property_readonly_static("SOUL_SPEED", id(Enchantment::SoulSpeed), "Walk quicker on soul blocks.")
+        .def_property_readonly_static("SWIFT_SNEAK", id(Enchantment::SwiftSneak), "Walk quicker while sneaking.")
+        .def_property_readonly_static("WIND_BURST", id(Enchantment::WindBurst), "Emits wind burst upon hitting enemy.")
+        .def_property_readonly_static("DENSITY", id(Enchantment::Density), "Increases fall damage of maces.")
+        .def_property_readonly_static("BREACH", id(Enchantment::Breach), "Reduces armor effectiveness against maces.")
         .def_property_readonly_static(
-            "UNBREAKING", [](const py::object &) { return Enchantment::Unbreaking; },
-            "Decreases the rate at which a tool looses durability.")
-        .def_property_readonly_static(
-            "POWER", [](const py::object &) { return Enchantment::Power; },
-            "Provides extra damage when shooting arrows from bows.")
-        .def_property_readonly_static(
-            "PUNCH", [](const py::object &) { return Enchantment::Punch; },
-            "Provides a knockback when an entity is hit by an arrow from a bow.")
-        .def_property_readonly_static(
-            "FLAME", [](const py::object &) { return Enchantment::Flame; },
-            "Sets entities on fire when hit by arrows shot from a bow.")
-        .def_property_readonly_static(
-            "INFINITY", [](const py::object &) { return Enchantment::Infinity; },
-            "Provides infinite arrows when shooting a bow.")
-        .def_property_readonly_static(
-            "LUCK_OF_THE_SEA", [](const py::object &) { return Enchantment::LuckOfTheSea; },
-            "Decreases odds of catching worthless junk.")
-        .def_property_readonly_static(
-            "LURE", [](const py::object &) { return Enchantment::Lure; },
-            "Increases rate of fish biting your hook.")
-        .def_property_readonly_static(
-            "FROST_WALKER", [](const py::object &) { return Enchantment::FrostWalker; },
-            "Freezes any still water adjacent to ice / frost which player is walking on.")
-        .def_property_readonly_static(
-            "MENDING", [](const py::object &) { return Enchantment::Mending; },
-            "Allows mending the item using experience orbs.")
-        .def_property_readonly_static(
-            "CURSE_OF_BINDING", [](const py::object &) { return Enchantment::CurseOfBinding; },
-            "Item cannot be removed.")
-        .def_property_readonly_static(
-            "CURSE_OF_VANISHING", [](const py::object &) { return Enchantment::CurseOfVanishing; },
-            "Item disappears instead of dropping.")
-        .def_property_readonly_static(
-            "IMPALING", [](const py::object &) { return Enchantment::Impaling; },
-            "Deals more damage to mobs that live in the ocean.")
-        .def_property_readonly_static(
-            "RIPTIDE", [](const py::object &) { return Enchantment::Riptide; },
-            "When it is rainy, launches the player in the direction their trident is thrown.")
-        .def_property_readonly_static(
-            "LOYALTY", [](const py::object &) { return Enchantment::Loyalty; },
-            "Causes a thrown trident to return to the player who threw it.")
-        .def_property_readonly_static(
-            "CHANNELING", [](const py::object &) { return Enchantment::Channeling; },
-            "Strikes lightning when a mob is hit with a trident if conditions are stormy.")
-        .def_property_readonly_static(
-            "MULTISHOT", [](const py::object &) { return Enchantment::Multishot; },
-            "Shoot multiple arrows from crossbows.")
-        .def_property_readonly_static(
-            "PIERCING", [](const py::object &) { return Enchantment::Piercing; },
-            "Crossbow projectiles pierce entities.")
-        .def_property_readonly_static(
-            "QUICK_CHARGE", [](const py::object &) { return Enchantment::QuickCharge; },
-            "Charges crossbows quickly.")
-        .def_property_readonly_static(
-            "SOUL_SPEED", [](const py::object &) { return Enchantment::SoulSpeed; },
-            "Walk quicker on soul blocks.")
-        .def_property_readonly_static(
-            "SWIFT_SNEAK", [](const py::object &) { return Enchantment::SwiftSneak; },
-            "Walk quicker while sneaking.")
-        .def_property_readonly_static(
-            "WIND_BURST", [](const py::object &) { return Enchantment::WindBurst; },
-            "Emits wind burst upon hitting enemy.")
-        .def_property_readonly_static(
-            "DENSITY", [](const py::object &) { return Enchantment::Density; }, "Increases fall damage of maces.")
-        .def_property_readonly_static(
-            "BREACH", [](const py::object &) { return Enchantment::Breach; },
-            "Reduces armor effectiveness against maces.")
-        .def_property_readonly_static(
-            "LUNGE", [](const py::object &) { return Enchantment::Lunge; },
+            "LUNGE", id(Enchantment::Lunge),
             "Applied to spears, causes jab attacks to propel the wielder forward horizontally.")
 
         .def_property_readonly("id", &Enchantment::getId, "The identifier of this enchantment.")
@@ -181,7 +131,8 @@ void init_enchantments(py::module_ &m)
 
     Returns:
         The `Enchantment`, or `None` if not found.
-)doc", py::return_value_policy::reference)
+)doc",
+                    py::return_value_policy::reference)
         .def("__str__", [](const Enchantment &self) { return std::string(self.getId()); })
         .def("__hash__", [](const Enchantment &self) { return py::hash(py::str(std::string(self.getId()))); })
         .def(py::self == py::self)

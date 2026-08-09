@@ -54,6 +54,7 @@
 #include "endstone/core/command/command_map.h"
 #include "endstone/core/command/console_command_sender.h"
 #include "endstone/core/enchantments/enchantment.h"
+#include "endstone/core/game_rule.h"
 #include "endstone/core/inventory/item_factory.h"
 #include "endstone/core/inventory/item_type.h"
 #include "endstone/core/level/chunk.h"
@@ -281,6 +282,7 @@ void EndstoneServer::initRegistries()
     registries_[typeid(Biome)] = EndstoneRegistry<Biome, ::Biome>::create();
     registries_[typeid(BlockType)] = EndstoneRegistry<BlockType, ::BlockType>::create();
     registries_[typeid(Enchantment)] = EndstoneRegistry<Enchantment, ::Enchant>::create();
+    registries_[typeid(GameRule)] = EndstoneRegistry<GameRule, ::GameRule>::create();
     registries_[typeid(ItemType)] = EndstoneRegistry<ItemType, ::Item>::create();
     BlockStateRegistry::get().unregisterBlockStates();
     ::BlockState::forEachState([](const auto &state) {

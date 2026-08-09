@@ -19,11 +19,13 @@
 #include <pybind11/native_enum.h>
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
 #include <pybind11/stl_bind.h>
 
 #include "endstone/endstone.hpp"
+#include "endstone/identifier.h"
 #include "poly.h"
 #include "type_caster.h"
 
@@ -74,6 +76,24 @@ struct py_class<CommandSenderWrapper> {
 
 template <typename T>
 using py_class = typename detail::py_class<T>::type;
+
+// def_property_readonly_static getters that ignore the class and yield a fixed value.
+template <typename T>
+auto constant(T value)
+{
+    return [value = std::move(value)](const py::object &) {
+        return value;
+    };
+}
+
+// The base is taken by value, so a derived id such as GameRuleId<T> slices to the type the caster binds.
+template <typename T>
+auto id(Identifier<T> value)
+{
+    return [value = std::move(value)](const py::object &) {
+        return value;
+    };
+}
 }  // namespace endstone::python
 
 template <typename... Ts>

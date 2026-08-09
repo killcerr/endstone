@@ -28,6 +28,7 @@
 #include "endstone/core/block/biome.h"
 #include "endstone/core/block/block_type.h"
 #include "endstone/core/enchantments/enchantment.h"
+#include "endstone/core/game_rule.h"
 #include "endstone/core/inventory/item_type.h"
 #include "endstone/core/server.h"
 
@@ -174,6 +175,38 @@ std::unique_ptr<Registry<Biome>> EndstoneRegistry<Biome, ::Biome>::create()
         auto entry = std::make_unique<EndstoneBiome>(biome);
         registry->cache_.emplace(std::string(entry->getId()), std::move(entry));
     });
+    return registry;
+}
+
+template <>
+std::vector<Identifier<GameRule>> EndstoneRegistry<GameRule, ::GameRule>::identifiers() const
+{
+    std::vector<Identifier<GameRule>> keys;
+    keys.reserve(cache_.size());
+    for (const auto &[key, _] : cache_) {
+        keys.emplace_back(key);
+    }
+    return keys;
+}
+
+template <>
+const ::GameRule *EndstoneRegistry<GameRule, ::GameRule>::getMinecraft(Identifier<GameRule> id) const
+{
+    // cache is pre-populated, getMinecraft should not be called
+    return nullptr;
+}
+
+template <>
+std::unique_ptr<Registry<GameRule>> EndstoneRegistry<GameRule, ::GameRule>::create()
+{
+    auto registry = std::make_unique<EndstoneRegistry>(
+        [](auto, const auto &handle) { return std::make_unique<EndstoneGameRule>(handle); });
+    const auto &server = EndstoneServer::getInstance();
+    const auto &level = server.getEndstoneLevel()->getHandle();
+    for (const auto &game_rule : level.getGameRules().getRules()) {
+        auto entry = std::make_unique<EndstoneGameRule>(game_rule);
+        registry->cache_.emplace(std::string(entry->getId()), std::move(entry));
+    }
     return registry;
 }
 

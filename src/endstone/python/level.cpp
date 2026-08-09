@@ -38,12 +38,10 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
         .def("__str__", [](const Chunk &self) { return std::format("{}", self); });
 
     dimension
-        .def_property_readonly_static("OVERWORLD", [](const py::object &) { return Dimension::Overworld; },
+        .def_property_readonly_static("OVERWORLD", id(Dimension::Overworld),
                                       "The identifier of the Overworld dimension.")
-        .def_property_readonly_static("NETHER", [](const py::object &) { return Dimension::Nether; },
-                                      "The identifier of the Nether dimension.")
-        .def_property_readonly_static("THE_END", [](const py::object &) { return Dimension::TheEnd; },
-                                      "The identifier of the End dimension.")
+        .def_property_readonly_static("NETHER", id(Dimension::Nether), "The identifier of the Nether dimension.")
+        .def_property_readonly_static("THE_END", id(Dimension::TheEnd), "The identifier of the End dimension.")
         .def_property_readonly("id", &Dimension::getId, "The identifier of this dimension.")
         .def_property_readonly("translation_key", &Dimension::getTranslationKey,
                                "The translation key, suitable for use in a translation component.")
@@ -207,7 +205,45 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
         The newly created (or existing) `Dimension`, or `None` if it could not be created.
 )doc",
              py::return_value_policy::reference)
-        .def_property_readonly("seed", &Level::getSeed, "The Seed for this level.");
+        .def_property_readonly("seed", &Level::getSeed, "The Seed for this level.")
+        .def("has_game_rule", &Level::_hasGameRule, py::arg("rule"), R"doc(
+    Checks if a game rule exists.
+
+    Args:
+        rule: The Minecraft game rule to check.
+
+    Returns:
+        `True` if the game rule exists.
+)doc")
+        .def("get_game_rule", &Level::_getGameRule, py::arg("rule"), R"doc(
+    Gets the value of a game rule.
+
+    Args:
+        rule: The Minecraft game rule to get.
+
+    Returns:
+        The current game rule value.
+
+    Raises:
+        IndexError: If the game rule does not exist.
+)doc")
+        .def(
+            "set_game_rule",
+            [](Level &self, Identifier<GameRule> rule, GameRuleValue value) {
+                if (!self._setGameRule(rule, std::move(value))) {
+                    throw py::value_error(std::format("Unable to set game rule {}.", rule));
+                }
+            },
+            py::arg("rule"), py::arg("value"), R"doc(
+    Sets the value of a game rule.
+
+    Args:
+        rule: The Minecraft game rule to set.
+        value: The new value, which must match the type of the game rule.
+
+    Raises:
+        ValueError: If the game rule does not exist or the value has the wrong type.
+)doc");
 
     location
         .def(py::init(&create_location), py::arg("dimension"), py::arg("x"), py::arg("y"), py::arg("z"),
