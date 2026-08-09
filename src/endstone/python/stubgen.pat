@@ -54,75 +54,30 @@
         \doc
 
 # GameRule is generic in the value type, which nothing carries at runtime -- a
-# constant is just its identifier there. Replacing the class means its constants
-# live here too, so this list must track include/endstone/game_rule.h.
-^endstone\.GameRule$:
-    class GameRule(typing.Generic[_T]):
-        """
-        Represents a game rule.
-        """
-        @property
-        def id(self) -> Identifier[GameRule]:
-            """
-            The identifier of this game rule.
-            """
-        @property
-        def translation_key(self) -> str:
-            """
-            The translation key, suitable for use in a translation component.
-            """
-        @staticmethod
-        def get(name: Identifier[GameRule] | str) -> GameRule | None:
-            """
-            Attempts to get the `GameRule` with the given name.
+# constant is just its identifier there. Only the base is injected, so the class
+# body still generates; the int-valued rules are listed because the value type
+# cannot be recovered from the constant, and everything else is a flag.
+^endstone\.GameRule\.__bases__$:
+    typing.Generic[_T]
 
-            Args:
-                name: The identifier of the game rule (e.g. `minecraft:dofiretick`).
+^endstone\.GameRule\.id$:
+    @property
+    def id(self) -> Identifier[GameRule[_T]]:
+        \doc
 
-            Returns:
-                The `GameRule`, or `None` if no game rule with that name exists.
-            """
-        def __hash__(self) -> int: ...
-        COMMAND_BLOCK_OUTPUT: typing.ClassVar[Identifier[GameRule[bool]]]
-        COMMAND_BLOCKS_ENABLED: typing.ClassVar[Identifier[GameRule[bool]]]
-        DO_DAY_LIGHT_CYCLE: typing.ClassVar[Identifier[GameRule[bool]]]
-        DO_ENTITY_DROPS: typing.ClassVar[Identifier[GameRule[bool]]]
-        DO_FIRE_TICK: typing.ClassVar[Identifier[GameRule[bool]]]
-        DO_IMMEDIATE_RESPAWN: typing.ClassVar[Identifier[GameRule[bool]]]
-        DO_INSOMNIA: typing.ClassVar[Identifier[GameRule[bool]]]
-        DO_LIMITED_CRAFTING: typing.ClassVar[Identifier[GameRule[bool]]]
-        DO_MOB_LOOT: typing.ClassVar[Identifier[GameRule[bool]]]
-        DO_MOB_SPAWNING: typing.ClassVar[Identifier[GameRule[bool]]]
-        DO_TILE_DROPS: typing.ClassVar[Identifier[GameRule[bool]]]
-        DO_WEATHER_CYCLE: typing.ClassVar[Identifier[GameRule[bool]]]
-        DROWNING_DAMAGE: typing.ClassVar[Identifier[GameRule[bool]]]
-        FALL_DAMAGE: typing.ClassVar[Identifier[GameRule[bool]]]
-        FIRE_DAMAGE: typing.ClassVar[Identifier[GameRule[bool]]]
-        FREEZE_DAMAGE: typing.ClassVar[Identifier[GameRule[bool]]]
-        FUNCTION_COMMAND_LIMIT: typing.ClassVar[Identifier[GameRule[int]]]
-        KEEP_INVENTORY: typing.ClassVar[Identifier[GameRule[bool]]]
-        LOCATOR_BAR: typing.ClassVar[Identifier[GameRule[bool]]]
-        MAX_COMMAND_CHAIN_LENGTH: typing.ClassVar[Identifier[GameRule[int]]]
-        MOB_GRIEFING: typing.ClassVar[Identifier[GameRule[bool]]]
-        NATURAL_REGENERATION: typing.ClassVar[Identifier[GameRule[bool]]]
-        PLAYERS_SLEEPING_PERCENTAGE: typing.ClassVar[Identifier[GameRule[int]]]
-        PLAYER_WAYPOINTS: typing.ClassVar[Identifier[GameRule[int]]]
-        PROJECTILES_CAN_BREAK_BLOCKS: typing.ClassVar[Identifier[GameRule[bool]]]
-        PVP: typing.ClassVar[Identifier[GameRule[bool]]]
-        RANDOM_TICK_SPEED: typing.ClassVar[Identifier[GameRule[int]]]
-        RECIPES_UNLOCK: typing.ClassVar[Identifier[GameRule[bool]]]
-        RESPAWN_BLOCKS_EXPLODE: typing.ClassVar[Identifier[GameRule[bool]]]
-        SEND_COMMAND_FEEDBACK: typing.ClassVar[Identifier[GameRule[bool]]]
-        SHOW_BORDER_EFFECT: typing.ClassVar[Identifier[GameRule[bool]]]
-        SHOW_COORDINATES: typing.ClassVar[Identifier[GameRule[bool]]]
-        SHOW_DAYS_PLAYED: typing.ClassVar[Identifier[GameRule[bool]]]
-        SHOW_DEATH_MESSAGES: typing.ClassVar[Identifier[GameRule[bool]]]
-        SHOW_RECIPE_MESSAGES: typing.ClassVar[Identifier[GameRule[bool]]]
-        SHOW_TAGS: typing.ClassVar[Identifier[GameRule[bool]]]
-        SPAWN_RADIUS: typing.ClassVar[Identifier[GameRule[int]]]
-        TNT_EXPLODES: typing.ClassVar[Identifier[GameRule[bool]]]
-        TNT_EXPLOSION_DROP_DECAY: typing.ClassVar[Identifier[GameRule[bool]]]
+^endstone\.GameRule\.get$:
+    @typing.overload
+    @staticmethod
+    def get(name: Identifier[GameRule[_T]]) -> GameRule[_T] | None: ...
+    @typing.overload
+    @staticmethod
+    def get(name: str) -> GameRule[typing.Any] | None:
+        \doc
 
+^endstone\.GameRule\.(?P<name>FUNCTION_COMMAND_LIMIT|MAX_COMMAND_CHAIN_LENGTH|PLAYERS_SLEEPING_PERCENTAGE|PLAYER_WAYPOINTS|RANDOM_TICK_SPEED|SPAWN_RADIUS)$:
+    \name: Identifier[GameRule[int]] = \value
+^endstone\.GameRule\.(?P<name>[A-Z][A-Z0-9_]*)$:
+    \name: Identifier[GameRule[bool]] = \value
 # Identifier class constants. The bindings expose them as plain values, so the
 # generic parameter is lost; the owners are listed because a query cannot tell
 # these apart from enum members, which are ALL_CAPS too. The annotation types the
