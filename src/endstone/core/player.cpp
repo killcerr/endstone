@@ -67,8 +67,8 @@
 #include "endstone/event/player/player_jump_event.h"
 #include "endstone/event/player/player_move_event.h"
 #include "endstone/event/player/player_skin_change_event.h"
-#include "endstone/event/player/player_sneak_event.h"
-#include "endstone/event/player/player_sprint_event.h"
+#include "endstone/event/player/player_toggle_sneak_event.h"
+#include "endstone/event/player/player_toggle_sprint_event.h"
 #include "endstone/form/action_form.h"
 #include "endstone/form/message_form.h"
 
@@ -752,19 +752,19 @@ bool EndstonePlayer::handlePacket(Packet &packet)
     case MinecraftPacketIds::PlayerAuthInputPacket: {
         auto &pk = static_cast<PlayerAuthInputPacket &>(packet);
         if (pk.getInput(PlayerAuthInputPacket::InputData::StartSprinting) && !getHandle().isSprinting()) {
-            PlayerSprintEvent e(*this, true);
+            PlayerToggleSprintEvent e(*this, true);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StopSprinting) && getHandle().isSprinting()) {
-            PlayerSprintEvent e(*this, false);
+            PlayerToggleSprintEvent e(*this, false);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StartSneaking) && !getHandle().isSneaking()) {
-            PlayerSneakEvent e(*this, true);
+            PlayerToggleSneakEvent e(*this, true);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StopSneaking) && getHandle().isSneaking()) {
-            PlayerSneakEvent e(*this, false);
+            PlayerToggleSneakEvent e(*this, false);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::MissedSwing)) {

@@ -76,9 +76,9 @@ __all__ = [
     "PlayerQuitEvent",
     "PlayerRespawnEvent",
     "PlayerSkinChangeEvent",
-    "PlayerSneakEvent",
-    "PlayerSprintEvent",
     "PlayerTeleportEvent",
+    "PlayerToggleSneakEvent",
+    "PlayerToggleSprintEvent",
     "PluginDisableEvent",
     "PluginEnableEvent",
     "ScriptMessageEvent",
@@ -765,24 +765,24 @@ class PlayerItemHeldEvent(PlayerEvent, Cancellable):
         The previous held slot index.
         """
 
-class PlayerSneakEvent(PlayerEvent):
+class PlayerToggleSneakEvent(PlayerEvent):
     """
-    Called when a player starts or stops sneaking.
+    Called when a player toggles their sneaking state.
     """
     @property
     def is_sneaking(self) -> bool:
         """
-        Whether the player is attempting to sneak.
+        Whether the player is now sneaking or not.
         """
 
-class PlayerSprintEvent(PlayerEvent):
+class PlayerToggleSprintEvent(PlayerEvent):
     """
-    Called when a player starts or stops sprinting.
+    Called when a player toggles their sprinting state.
     """
     @property
     def is_sprinting(self) -> bool:
         """
-        Whether the player is attempting to sprint.
+        Whether the player is now sprinting or not.
         """
 
 class PlayerJoinEvent(PlayerEvent):

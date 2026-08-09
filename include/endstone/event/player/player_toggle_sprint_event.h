@@ -19,18 +19,18 @@
 namespace endstone {
 
 /**
- * @brief Called when a player starts or stops sprinting.
+ * Called when a player toggles their sprinting state.
  */
-class PlayerSprintEvent final : public PlayerEvent {
+class PlayerToggleSprintEvent final : public PlayerEvent {
 public:
-    ENDSTONE_EVENT(PlayerSprintEvent)
+    ENDSTONE_EVENT(PlayerToggleSprintEvent)
 
-    explicit PlayerSprintEvent(Player &player, bool sprinting) : PlayerEvent(player), sprinting_(sprinting) {}
+    explicit PlayerToggleSprintEvent(Player &player, bool sprinting) : PlayerEvent(player), sprinting_(sprinting) {}
 
     /**
-     * @brief Gets whether the player is attempting to sprint.
+     * Returns whether the player is now sprinting or not.
      *
-     * @return true when starting to sprint, false when stopping
+     * @return the new sprinting state
      */
     [[nodiscard]] bool isSprinting() const { return sprinting_; }
 

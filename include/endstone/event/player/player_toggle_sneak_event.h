@@ -19,18 +19,18 @@
 namespace endstone {
 
 /**
- * @brief Called when a player starts or stops sneaking.
+ * Called when a player toggles their sneaking state.
  */
-class PlayerSneakEvent final : public PlayerEvent {
+class PlayerToggleSneakEvent final : public PlayerEvent {
 public:
-    ENDSTONE_EVENT(PlayerSneakEvent)
+    ENDSTONE_EVENT(PlayerToggleSneakEvent)
 
-    explicit PlayerSneakEvent(Player &player, bool sneaking) : PlayerEvent(player), sneaking_(sneaking) {}
+    explicit PlayerToggleSneakEvent(Player &player, bool sneaking) : PlayerEvent(player), sneaking_(sneaking) {}
 
     /**
-     * @brief Gets whether the player is attempting to sneak.
+     * Returns whether the player is now sneaking or not.
      *
-     * @return true when starting to sneak, false when stopping
+     * @return the new sneaking state
      */
     [[nodiscard]] bool isSneaking() const { return sneaking_; }
 
