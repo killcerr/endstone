@@ -20,6 +20,7 @@
 #include "endstone/boss/bar_color.h"
 #include "endstone/boss/bar_flag.h"
 #include "endstone/boss/bar_style.h"
+#include "endstone/util/pointers.h"
 
 namespace endstone {
 class Player;
@@ -130,7 +131,7 @@ public:
      * Returns all players viewing this boss bar.
      * @return a list of players
      */
-    [[nodiscard]] virtual std::vector<Player *> getPlayers() const = 0;
+    [[nodiscard]] virtual std::vector<NotNull<Player>> getPlayers() const = 0;
 };
 
 }  // namespace endstone

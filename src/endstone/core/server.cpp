@@ -511,11 +511,11 @@ EndstoneLevel *EndstoneServer::getEndstoneLevel() const
     return level_.get();
 }
 
-std::vector<Player *> EndstoneServer::getOnlinePlayers() const
+std::vector<NotNull<Player>> EndstoneServer::getOnlinePlayers() const
 {
-    std::vector<Player *> result;
+    std::vector<NotNull<Player>> result;
     level_->getHandle().forEachPlayer([&](const ::Player &player) {
-        result.emplace_back(&player.getEndstoneActor<EndstonePlayer>());
+        result.emplace_back(player.getEndstoneActorPtr<EndstonePlayer>());
         return true;
     });
     return result;
@@ -810,7 +810,7 @@ void EndstoneServer::setPlayerBoard(EndstonePlayer &player, NotNull<Scoreboard> 
     }
 
     // remove player from the old board
-    getPlayerBoard(player)->resetScores(&player);
+    getPlayerBoard(player)->resetScores(player.getSelf());
 
     // add player to the new board
     new_board.onPlayerJoined(player.getHandle());
@@ -839,7 +839,7 @@ void EndstoneServer::tick(std::uint64_t current_tick, const std::function<void()
     scheduler_->mainThreadHeartbeat(current_tick);
     tick_function();
     for (const auto &p : getOnlinePlayers()) {
-        auto *player = static_cast<EndstonePlayer *>(p);
+        auto *player = static_cast<EndstonePlayer *>(&*p);
         player->checkOpStatus();
     }
     // tick end

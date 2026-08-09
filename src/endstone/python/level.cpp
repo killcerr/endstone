@@ -164,7 +164,7 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
     Returns:
         Resulting `Actor` of this method.
 )doc")
-        .def_property_readonly("actors", &Dimension::getActors, py::return_value_policy::reference_internal,
+        .def_property_readonly("actors", &Dimension::getActors,
                                "A list of all actors currently residing in this dimension.");
 
     py::class_<DimensionCreator>(m, "DimensionCreator",
@@ -180,11 +180,9 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
     py::implicitly_convertible<DimensionId, DimensionCreator>();
 
     level.def_property_readonly("name", &Level::getName, "The unique name of this level.")
-        .def_property_readonly("actors", &Level::getActors, "A list of all actors currently residing in this level.",
-                               py::return_value_policy::reference_internal)
+        .def_property_readonly("actors", &Level::getActors, "A list of all actors currently residing in this level.")
         .def_property("time", &Level::getTime, &Level::setTime, "The relative in-game time of this level.")
-        .def_property_readonly("dimensions", &Level::getDimensions, "A list of all dimensions within this level.",
-                               py::return_value_policy::reference_internal)
+        .def_property_readonly("dimensions", &Level::getDimensions, "A list of all dimensions within this level.")
         .def("get_dimension", &Level::getDimension, py::arg("id"), R"doc(
     Gets the dimension with the given id.
 

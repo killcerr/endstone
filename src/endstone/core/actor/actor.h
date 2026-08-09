@@ -242,6 +242,11 @@ public:
         return *ptr;
     }
 
+    [[nodiscard]] NotNull<Interface> getSelf() const
+    {
+        return getHandle().template getEndstoneActorPtr<Interface>();
+    }
+
 protected:
     EndstoneServer &server_;
 

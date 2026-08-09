@@ -90,8 +90,7 @@ void init_boss(py::module_ &m)
         player: The player to remove.
 )doc")
         .def("remove_all", &BossBar::removeAll, "Removes all players from this boss bar.")
-        .def_property_readonly("players", &BossBar::getPlayers, "All players viewing this boss bar.",
-                               py::return_value_policy::reference_internal);
+        .def_property_readonly("players", &BossBar::getPlayers, "All players viewing this boss bar.");
 }
 
 }  // namespace endstone::python

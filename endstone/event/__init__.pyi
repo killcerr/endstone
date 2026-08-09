@@ -270,7 +270,7 @@ class ActorKnockbackEvent(MobEvent, Cancellable):
     Called when a living entity receives knockback.
     """
     @property
-    def source(self) -> Actor:
+    def source(self) -> Actor | None:
         """
         The source actor that has caused knockback to the defender, or `None` if the knockback is not caused by an actor.
         """
@@ -976,7 +976,7 @@ class PacketReceiveEvent(ServerEvent, Cancellable):
     @payload.setter
     def payload(self, arg1: bytes) -> None: ...
     @property
-    def player(self) -> Player:
+    def player(self) -> Player | None:
         """
         The `Player` who is involved in this event.
 
@@ -1016,7 +1016,7 @@ class PacketSendEvent(ServerEvent, Cancellable):
     @payload.setter
     def payload(self, arg1: bytes) -> None: ...
     @property
-    def player(self) -> Player:
+    def player(self) -> Player | None:
         """
         The `Player` who is involved in this event.
 

@@ -38,7 +38,7 @@ public:
     };
 
     ENDSTONE_EVENT(PlayerRespawnEvent);
-    PlayerRespawnEvent(Player &player, RespawnReason reason) : PlayerEvent(player), reason_(reason) {}
+    PlayerRespawnEvent(const NotNull<Player> &player, RespawnReason reason) : PlayerEvent(player), reason_(reason) {}
     ~PlayerRespawnEvent() override = default;
 
     /**

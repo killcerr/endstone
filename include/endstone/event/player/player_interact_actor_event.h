@@ -25,7 +25,7 @@ namespace endstone {
 class PlayerInteractActorEvent : public Cancellable<PlayerEvent> {
 public:
     ENDSTONE_EVENT(PlayerInteractActorEvent);
-    explicit PlayerInteractActorEvent(Player &player, Actor &actor) : Cancellable(player), actor_(actor) {}
+    explicit PlayerInteractActorEvent(const NotNull<Player> &player, const NotNull<Actor> &actor) : Cancellable(player), actor_(actor) {}
     ~PlayerInteractActorEvent() override = default;
 
     /**
@@ -33,10 +33,10 @@ public:
      *
      * @return actor right-clicked by player
      */
-    [[nodiscard]] Actor &getActor() const { return actor_; }
+    [[nodiscard]] const NotNull<Actor> &getActor() const { return actor_; }
 
 private:
-    Actor &actor_;
+    NotNull<Actor> actor_;
 };
 
 }  // namespace endstone

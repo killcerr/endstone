@@ -30,7 +30,7 @@ namespace endstone {
 class PlayerChatEvent final : public Cancellable<PlayerEvent> {
 public:
     ENDSTONE_EVENT(PlayerChatEvent);
-    explicit PlayerChatEvent(Player &player, std::string message, std::optional<std::vector<Player *>> recipients,
+    explicit PlayerChatEvent(const NotNull<Player> &player, std::string message, std::optional<std::vector<NotNull<Player>>> recipients,
                              std::string format = "<{0}> {1}")
         : Cancellable(player), message_(std::move(message)), format_(std::move(format)),
           recipients_(std::move(recipients))
@@ -56,7 +56,7 @@ public:
      *
      * @param player The player to display this message as.
      */
-    void setPlayer(Player &player) { player_ = player; }
+    void setPlayer(const NotNull<Player> &player) { player_ = player; }
 
     /**
      * Gets the format to use to display this chat message.
@@ -80,10 +80,10 @@ public:
      *
      * @return All Players who will see this chat message
      */
-    [[nodiscard]] std::vector<Player *> getRecipients() const
+    [[nodiscard]] std::vector<NotNull<Player>> getRecipients() const
     {
         if (!recipients_) {
-            recipients_ = player_.get().getServer().getOnlinePlayers();
+            recipients_ = player_->getServer().getOnlinePlayers();
         }
         return recipients_.value();
     }
@@ -91,7 +91,7 @@ public:
 private:
     std::string message_;
     std::string format_;
-    mutable std::optional<std::vector<Player *>> recipients_;
+    mutable std::optional<std::vector<NotNull<Player>>> recipients_;
 };
 
 }  // namespace endstone

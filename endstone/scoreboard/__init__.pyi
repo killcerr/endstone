@@ -126,7 +126,7 @@ class Scoreboard:
             A list of `Objectives` using the specified `Criteria`.
         """
 
-    def get_scores(self, entry: Player | Actor | str) -> list[Score]:
+    def get_scores(self, entry: str | Player | Actor) -> list[Score]:
         """
         Gets all scores for an entry on this `Scoreboard`.
 
@@ -137,7 +137,7 @@ class Scoreboard:
             A list of all scores tracked for the entry.
         """
 
-    def reset_scores(self, entry: Player | Actor | str) -> None:
+    def reset_scores(self, entry: str | Player | Actor) -> None:
         """
         Removes all scores for an entry on this `Scoreboard`.
 
@@ -146,7 +146,7 @@ class Scoreboard:
         """
 
     @property
-    def entries(self) -> list[Player | Actor | str]:
+    def entries(self) -> list[str | Player | Actor]:
         """
         A list of all entries tracked by this `Scoreboard`.
         """
@@ -239,7 +239,7 @@ class Objective:
         The manner in which this objective will be rendered.
         """
 
-    def get_score(self, entry: Player | Actor | str) -> Score:
+    def get_score(self, entry: str | Player | Actor) -> Score:
         """
         Gets an entry's `Score` for this objective.
 
@@ -297,7 +297,7 @@ class Score:
     Represents a score for an objective on a scoreboard.
     """
     @property
-    def entry(self) -> Player | Actor | str:
+    def entry(self) -> str | Player | Actor:
         """
         The entry being tracked by this `Score`.
         """

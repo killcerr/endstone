@@ -78,7 +78,7 @@ public:
     [[nodiscard]] Level &getLevel() const override;
     [[nodiscard]] EndstoneLevel *getEndstoneLevel() const;
 
-    [[nodiscard]] std::vector<Player *> getOnlinePlayers() const override;
+    [[nodiscard]] std::vector<NotNull<Player>> getOnlinePlayers() const override;
     [[nodiscard]] int getMaxPlayers() const override;
     void setMaxPlayers(int max_players) override;
     [[nodiscard]] Nullable<Player> getPlayer(UUID id) const override;

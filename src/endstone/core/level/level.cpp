@@ -56,9 +56,9 @@ std::string EndstoneLevel::getName() const
     return level_.getLevelId();
 }
 
-std::vector<Actor *> EndstoneLevel::getActors() const
+std::vector<NotNull<Actor>> EndstoneLevel::getActors() const
 {
-    std::vector<Actor *> result;
+    std::vector<NotNull<Actor>> result;
     for (const auto &entity : level_.getEntities()) {
         if (!entity.hasValue()) {
             continue;
@@ -70,7 +70,7 @@ std::vector<Actor *> EndstoneLevel::getActors() const
         if (&actor->getLevel() != &level_) {
             continue;
         }
-        result.push_back(&actor->getEndstoneActor());
+        result.push_back(actor->getEndstoneActorPtr());
     }
     return result;
 }

@@ -44,7 +44,7 @@ public:
      *
      * @return A List of all actors currently residing in this level
      */
-    [[nodiscard]] virtual std::vector<Actor *> getActors() const = 0;
+    [[nodiscard]] virtual std::vector<NotNull<Actor>> getActors() const = 0;
 
     /**
      * Gets the relative in-game time of this level.

@@ -29,7 +29,7 @@ class PlayerKickEvent : public Cancellable<PlayerEvent> {
 public:
     ENDSTONE_EVENT(PlayerKickEvent);
 
-    explicit PlayerKickEvent(Player &player, std::string reason) : Cancellable(player), reason_(std::move(reason)) {}
+    explicit PlayerKickEvent(const NotNull<Player> &player, std::string reason) : Cancellable(player), reason_(std::move(reason)) {}
 
     /**
      * Gets the reason why the player is getting kicked.

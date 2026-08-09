@@ -134,13 +134,13 @@ void EndstoneBossBar::removeAll()
     }
 }
 
-std::vector<Player *> EndstoneBossBar::getPlayers() const
+std::vector<NotNull<Player>> EndstoneBossBar::getPlayers() const
 {
-    std::vector<Player *> players;
+    std::vector<NotNull<Player>> players;
     const auto &server = EndstoneServer::getInstance();
     for (auto it = players_.begin(); it != players_.end();) {
         if (auto player = server.getPlayer(*it); player) {
-            players.emplace_back(&*player);
+            players.emplace_back(player.get());
             ++it;
         }
         else {

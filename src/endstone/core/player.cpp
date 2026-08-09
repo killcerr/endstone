@@ -672,7 +672,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
         if (from_slot == to_slot) {
             return true;
         }
-        PlayerItemHeldEvent e(*this, from_slot, to_slot);
+        PlayerItemHeldEvent e(getSelf(), from_slot, to_slot);
         getServer().getPluginManager().callEvent(e);
         if (e.isCancelled()) {
             this->inventory_->setHeldItemSlot(from_slot);
@@ -692,7 +692,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
                 bed = getDimension()->getBlockAt(getLocation());
             }
 
-            PlayerBedLeaveEvent e(*this, *bed);
+            PlayerBedLeaveEvent e(getSelf(), *bed);
             getServer().getPluginManager().callEvent(e);
         }
         return true;
@@ -705,7 +705,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
                 ColorFormat::Yellow + (pk.payload.skin.getIsPersona() ? "%multiplayer.player.changeToPersona"
                                                                       : "%multiplayer.player.changeToSkin"),
                 {getName()});
-            PlayerSkinChangeEvent e{*this, EndstoneSkin::fromMinecraft(pk.payload.skin), skin_change_message};
+            PlayerSkinChangeEvent e{getSelf(), EndstoneSkin::fromMinecraft(pk.payload.skin), skin_change_message};
             getServer().getPluginManager().callEvent(e);
             if (e.isCancelled()) {
                 auto new_packet = MinecraftPackets::createPacket(MinecraftPacketIds::PlayerSkin);
@@ -736,7 +736,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
         if (pk.isServerSide()) {
             return true;
         }
-        PlayerEmoteEvent e(*this, pk.payload.piece_id, pk.isEmoteChatMuted());
+        PlayerEmoteEvent e(getSelf(), pk.payload.piece_id, pk.isEmoteChatMuted());
         getServer().getPluginManager().callEvent(e);
         if (e.isCancelled()) {
             return false;
@@ -752,24 +752,24 @@ bool EndstonePlayer::handlePacket(Packet &packet)
     case MinecraftPacketIds::PlayerAuthInputPacket: {
         auto &pk = static_cast<PlayerAuthInputPacket &>(packet);
         if (pk.getInput(PlayerAuthInputPacket::InputData::StartSprinting) && !getHandle().isSprinting()) {
-            PlayerToggleSprintEvent e(*this, true);
+            PlayerToggleSprintEvent e(getSelf(), true);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StopSprinting) && getHandle().isSprinting()) {
-            PlayerToggleSprintEvent e(*this, false);
+            PlayerToggleSprintEvent e(getSelf(), false);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StartSneaking) && !getHandle().isSneaking()) {
-            PlayerToggleSneakEvent e(*this, true);
+            PlayerToggleSneakEvent e(getSelf(), true);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StopSneaking) && getHandle().isSneaking()) {
-            PlayerToggleSneakEvent e(*this, false);
+            PlayerToggleSneakEvent e(getSelf(), false);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::MissedSwing)) {
             PlayerInteractEvent e{
-                *this,
+                getSelf(),
                 PlayerInteractEvent::Action::LeftClickAir,
                 getInventory().getItemInMainHand(),
                 nullptr,
@@ -789,7 +789,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
                 const auto item = getInventory().getItemInMainHand();
                 const auto block = getDimension()->getBlockAt(action.pos.x, action.pos.y, action.pos.z);
                 PlayerInteractEvent e{
-                    *this,
+                    getSelf(),
                     PlayerInteractEvent::Action::LeftClickBlock,
                     item,
                     block.get(),
@@ -823,7 +823,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
                           input.rot.y};
 
         if (pk.getInput(PlayerAuthInputPacket::InputData::Jumping) && on_ground && delta.y > 0.0F) {
-            PlayerJumpEvent e{*this, from, to};
+            PlayerJumpEvent e{getSelf(), from, to};
             getServer().getPluginManager().callEvent(e);
             if (e.isCancelled()) {
                 actor.addOrRemoveComponent<InternalTeleportFlagComponent>(true);
@@ -834,7 +834,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
 
         // Prevent intensive event calls on tiny movement using the thresholds from Spigot
         if (delta.lengthSquared() > 1.0F / 256 || delta_angle.lengthSquared() > 10.0F) {
-            PlayerMoveEvent e{*this, from, to};
+            PlayerMoveEvent e{getSelf(), from, to};
             getServer().getPluginManager().callEvent(e);
             if (e.isCancelled()) {
                 if (delta_angle.lengthSquared() > 0.0F) {
@@ -884,7 +884,7 @@ void EndstonePlayer::onFormClose(std::uint32_t form_id, PlayerFormCloseReason /*
             std::visit(overloaded{[this](auto &&form) {
                            auto callback = form.getOnClose();
                            if (callback) {
-                               callback(this);
+                               callback(getSelf());
                            }
                        }},
                        form_variant);
@@ -910,20 +910,20 @@ void EndstonePlayer::onFormResponse(std::uint32_t form_id, const nlohmann::json 
             std::visit(overloaded{
                            [&](const MessageForm &form) {
                                if (const auto callback = form.getOnSubmit()) {
-                                   callback(this, json.get<bool>() ? 0 : 1);
+                                   callback(getSelf(), json.get<bool>() ? 0 : 1);
                                }
                            },
                            [&](const ActionForm &form) {
                                const int selection = json.get<int>();
                                if (const auto callback = form.getOnSubmit()) {
-                                   callback(this, selection);
+                                   callback(getSelf(), selection);
                                }
                                int index = 0;
                                for (const auto &controls = form.getControls(); const auto &control : controls) {
                                    if (std::holds_alternative<Button>(control)) {
                                        if (index == selection) {
                                            if (const auto on_click = std::get<Button>(control).getOnClick()) {
-                                               on_click(this);
+                                               on_click(getSelf());
                                            }
                                            break;
                                        }
@@ -933,7 +933,7 @@ void EndstonePlayer::onFormResponse(std::uint32_t form_id, const nlohmann::json 
                            },
                            [&](const ModalForm &form) {
                                if (auto callback = form.getOnSubmit()) {
-                                   callback(this, json.dump());
+                                   callback(getSelf(), json.dump());
                                }
                            },
                        },
@@ -954,7 +954,7 @@ void EndstonePlayer::doFirstSpawn()
 
     const auto &server = static_cast<EndstoneServer &>(getServer());
     Message join_message = Translatable(ColorFormat::Yellow + "%multiplayer.player.joined", {getName()});
-    PlayerJoinEvent e{*this, join_message};
+    PlayerJoinEvent e{getSelf(), join_message};
     server.getPluginManager().callEvent(e);
     join_message = e.getJoinMessage().value_or("");
     if (server.isServerTextEnabled(ServerTextEvent::PlayerConnection) &&

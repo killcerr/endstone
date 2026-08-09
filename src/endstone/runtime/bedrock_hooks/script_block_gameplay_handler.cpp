@@ -50,7 +50,7 @@ bool handleEvent(const BlockTryPlaceByPlayerEvent &event)
     }
 
     const auto &server = endstone::core::EndstoneServer::getInstance();
-    auto &endstone_player = player->getEndstoneActor<endstone::core::EndstonePlayer>();
+    auto endstone_player = player->getEndstoneActorPtr<endstone::core::EndstonePlayer>();
     auto &block_source = player->getDimension().getBlockSourceFromMainChunkSource();
     const auto block_face = static_cast<endstone::BlockFace>(event.face);
 
@@ -88,8 +88,8 @@ bool handleEvent(ExplosionStartedEvent &event)
     }
 
     if (source) {
-        auto &actor = source->getEndstoneActor<>();
-        endstone::ActorExplodeEvent e{actor, actor.getLocation(), std::move(block_list)};
+        auto actor = source->getEndstoneActorPtr<>();
+        endstone::ActorExplodeEvent e{actor, actor->getLocation(), std::move(block_list)};
         server.getPluginManager().callEvent(e);
         if (e.isCancelled()) {
             return false;
@@ -136,7 +136,7 @@ bool handleEvent(BlockTryDestroyByPlayerEvent &event)
         }
 
         endstone::BlockBreakEvent e{endstone::core::EndstoneBlock::at(block_source, event.pos),
-                                    player->getEndstoneActor<endstone::core::EndstonePlayer>()};
+                                    player->getEndstoneActorPtr<endstone::core::EndstonePlayer>()};
         server.getPluginManager().callEvent(e);
         if (e.isCancelled()) {
             return false;

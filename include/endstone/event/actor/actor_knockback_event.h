@@ -27,17 +27,17 @@ class ActorKnockbackEvent : public Cancellable<ActorEvent<Mob>> {
 public:
     ENDSTONE_EVENT(ActorKnockbackEvent);
 
-    explicit ActorKnockbackEvent(Mob &mob, Actor *source, Vector knockback)
-        : Cancellable(mob), mob_(mob), source_(source), knockback_(knockback)
+    explicit ActorKnockbackEvent(const NotNull<Mob> &mob, const Nullable<Actor> &source, Vector knockback)
+        : Cancellable(mob), source_(source), knockback_(knockback)
     {
     }
 
     /**
      * Get the source actor that has caused knockback to the defender, if exists.
      *
-     * @return actor that caused knockback, or `nullptr` if the knockback is not caused by an actor.
+     * @return actor that caused knockback, or null if the knockback is not caused by an actor.
      */
-    [[nodiscard]] Actor *getSource() const { return source_; }
+    [[nodiscard]] const Nullable<Actor> &getSource() const { return source_; }
 
     /**
      * Gets the knockback that will be applied to the entity.
@@ -57,8 +57,7 @@ public:
     void setKnockback(Vector knockback) { knockback_ = knockback; }
 
 private:
-    Mob &mob_;
-    Actor *source_;
+    Nullable<Actor> source_;
     Vector raw_knockback_;
     Vector knockback_;
 };

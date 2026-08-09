@@ -34,7 +34,7 @@ public:
 
     void onPlayerDeath(const endstone::PlayerDeathEvent &event)
     {
-        getLogger().info("onPlayerDeath is called for player {}", event.getPlayer().getName());
+        getLogger().info("onPlayerDeath is called for player {}", event.getPlayer()->getName());
     }
 };
 

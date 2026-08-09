@@ -233,7 +233,7 @@ class Dimension:
             `Item` entity created as a result of this method.
         """
 
-    def spawn_actor(self, location: Location, type: Identifier[ActorType] | str) -> Actor:
+    def spawn_actor(self, location: Location, type: Identifier[ActorType] | str) -> Actor | None:
         """
         Creates an actor at the given `Location`.
 

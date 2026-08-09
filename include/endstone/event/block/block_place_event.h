@@ -33,7 +33,7 @@ class BlockPlaceEvent : public Cancellable<BlockEvent> {
 public:
     ENDSTONE_EVENT(BlockPlaceEvent);
     explicit BlockPlaceEvent(std::unique_ptr<Block> placed_block, std::unique_ptr<BlockState> replaced_state,
-                             std::unique_ptr<Block> placed_against, Player &player)
+                             std::unique_ptr<Block> placed_against, const NotNull<Player> &player)
         : Cancellable(std::move(placed_block)), replaced_state_(std::move(replaced_state)),
           placed_against_(std::move(placed_against)), player_(player)
     {
@@ -45,7 +45,7 @@ public:
      *
      * @return The Player who placed the block involved in this event
      */
-    [[nodiscard]] Player &getPlayer() const { return player_; }
+    [[nodiscard]] const NotNull<Player> &getPlayer() const { return player_; }
 
     /**
      * Gets the block placed.
@@ -71,7 +71,7 @@ public:
 private:
     std::unique_ptr<BlockState> replaced_state_;
     std::unique_ptr<Block> placed_against_;
-    Player &player_;
+    NotNull<Player> player_;
 };
 
 }  // namespace endstone

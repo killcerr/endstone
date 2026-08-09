@@ -28,9 +28,10 @@ namespace endstone {
 class PlayerDeathEvent : public ActorDeathEvent {
 public:
     ENDSTONE_EVENT(PlayerDeathEvent);
-    explicit PlayerDeathEvent(Player &player, std::unique_ptr<DamageSource> damage_source,
+    explicit PlayerDeathEvent(const NotNull<Player> &player, std::unique_ptr<DamageSource> damage_source,
                               std::optional<Message> death_message)
-        : ActorDeathEvent(player, std::move(damage_source)), death_message_(std::move(death_message))
+        : ActorDeathEvent(player, std::move(damage_source)), player_(player),
+          death_message_(std::move(death_message))
     {
     }
 
@@ -39,7 +40,7 @@ public:
      *
      * @return Player which is involved in this event
      */
-    [[nodiscard]] Player &getPlayer() const { return static_cast<Player &>(getActor()); }
+    [[nodiscard]] const NotNull<Player> &getPlayer() const { return player_; }
 
     /**
      * Get the death message that will appear to everyone on the server.
@@ -56,6 +57,7 @@ public:
     void setDeathMessage(std::optional<Message> death_message) { death_message_ = std::move(death_message); }
 
 private:
+    NotNull<Player> player_;
     std::optional<Message> death_message_;
 
     // TODO(event): new exp, new level, new total exp, keep level, keep inventory

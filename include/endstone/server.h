@@ -165,7 +165,7 @@ public:
      *
      * @return a list of currently online players.
      */
-    [[nodiscard]] virtual std::vector<Player *> getOnlinePlayers() const = 0;
+    [[nodiscard]] virtual std::vector<NotNull<Player>> getOnlinePlayers() const = 0;
 
     /**
      * Get the maximum amount of players which can login to this server.

@@ -28,7 +28,7 @@ bool handleEvent(ItemUseEvent &event)
         const auto &server = endstone::core::EndstoneServer::getInstance();
         const auto item = ItemStack(event.item_instance);
         endstone::PlayerInteractEvent e{
-            player->getEndstoneActor<endstone::core::EndstonePlayer>(),
+            player->getEndstoneActorPtr<endstone::core::EndstonePlayer>(),
             endstone::PlayerInteractEvent::Action::RightClickAir,
             endstone::core::EndstoneItemStack::fromMinecraft(item),
             nullptr,

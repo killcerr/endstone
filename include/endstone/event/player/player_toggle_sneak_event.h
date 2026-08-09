@@ -25,7 +25,7 @@ class PlayerToggleSneakEvent final : public PlayerEvent {
 public:
     ENDSTONE_EVENT(PlayerToggleSneakEvent)
 
-    explicit PlayerToggleSneakEvent(Player &player, bool sneaking) : PlayerEvent(player), sneaking_(sneaking) {}
+    explicit PlayerToggleSneakEvent(const NotNull<Player> &player, bool sneaking) : PlayerEvent(player), sneaking_(sneaking) {}
 
     /**
      * Returns whether the player is now sneaking or not.

@@ -25,7 +25,7 @@ class PlayerToggleSprintEvent final : public PlayerEvent {
 public:
     ENDSTONE_EVENT(PlayerToggleSprintEvent)
 
-    explicit PlayerToggleSprintEvent(Player &player, bool sprinting) : PlayerEvent(player), sprinting_(sprinting) {}
+    explicit PlayerToggleSprintEvent(const NotNull<Player> &player, bool sprinting) : PlayerEvent(player), sprinting_(sprinting) {}
 
     /**
      * Returns whether the player is now sprinting or not.

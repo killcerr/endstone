@@ -51,7 +51,7 @@ public:
     void addPlayer(Player &player) override;
     void removePlayer(Player &player) override;
     void removeAll() override;
-    [[nodiscard]] std::vector<Player *> getPlayers() const override;
+    [[nodiscard]] std::vector<NotNull<Player>> getPlayers() const override;
 
 private:
     void send(BossEventUpdateType event_type, Player &player);

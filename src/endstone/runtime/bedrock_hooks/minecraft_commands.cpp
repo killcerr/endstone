@@ -31,7 +31,7 @@ MCRESULT MinecraftCommands::executeCommand(CommandContext &ctx, bool suppress_ou
     switch (ctx.getOrigin().getOriginType()) {
     case CommandOriginType::Player: {
         auto command_line = ctx.getCommand();
-        auto &player = ctx.getOrigin().getEntity()->getEndstoneActor<endstone::core::EndstonePlayer>();
+        auto player = ctx.getOrigin().getEntity()->getEndstoneActorPtr<endstone::core::EndstonePlayer>();
 
         endstone::PlayerCommandEvent e(player, command_line);
         server.getPluginManager().callEvent(e);
@@ -41,9 +41,9 @@ MCRESULT MinecraftCommands::executeCommand(CommandContext &ctx, bool suppress_ou
 
         command_line = e.getCommand();
         if (server.logCommands()) {
-            server.getLogger().info("{} issued server command: {}", player.getName(), command_line);
+            server.getLogger().info("{} issued server command: {}", player->getName(), command_line);
         }
-        if (server.dispatchCommand(player, command_line)) {
+        if (server.dispatchCommand(*player, command_line)) {
             return MCRESULT_Success;
         }
         return MCRESULT_CommandNotFound;

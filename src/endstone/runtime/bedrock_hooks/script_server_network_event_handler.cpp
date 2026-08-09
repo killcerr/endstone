@@ -47,19 +47,19 @@ GameplayHandlerResult<CoordinatorResult> handleEvent(ChatEvent &event,
 
     const auto &server = endstone::core::EndstoneServer::getInstance();
     // populate recipient list
-    std::optional<std::vector<endstone::Player *>> recipients = std::nullopt;
+    std::optional<std::vector<endstone::NotNull<endstone::Player>>> recipients = std::nullopt;
     if (event.targets.has_value()) {
-        auto r = std::vector<endstone::Player *>();
+        auto r = std::vector<endstone::NotNull<endstone::Player>>();
         for (const auto &weak_ref : event.targets.value()) {
             if (const auto *receipt = WeakEntityRef(weak_ref).tryUnwrap<::Player>(); receipt) {
-                r.emplace_back(&receipt->getEndstoneActor<endstone::core::EndstonePlayer>());
+                r.emplace_back(receipt->getEndstoneActorPtr<endstone::core::EndstonePlayer>());
             }
         }
         recipients = r;
     }
 
     // call endstone's chat event before the script api
-    endstone::PlayerChatEvent e{player->getEndstoneActor<endstone::core::EndstonePlayer>(), event.message, recipients};
+    endstone::PlayerChatEvent e{player->getEndstoneActorPtr<endstone::core::EndstonePlayer>(), event.message, recipients};
     auto original_format = e.getFormat();
 
     server.getPluginManager().callEvent(e);
@@ -70,7 +70,7 @@ GameplayHandlerResult<CoordinatorResult> handleEvent(ChatEvent &event,
     // check if the format is valid
     std::string message;
     try {
-        const auto name = e.getPlayer().getName();
+        const auto name = e.getPlayer()->getName();
         const auto content = e.getMessage();
         message = std::vformat(e.getFormat(), std::make_format_args(name, content));
     }
@@ -97,7 +97,7 @@ GameplayHandlerResult<CoordinatorResult> handleEvent(ChatEvent &event,
 
     // Message has been changed, send new text messages and cancel the original event to avoid double sending
     if (e.getMessage() != event.message) {
-        player = &static_cast<endstone::core::EndstonePlayer &>(e.getPlayer()).getHandle();
+        player = &static_cast<endstone::core::EndstonePlayer &>(*e.getPlayer()).getHandle();
         for (const auto &recipient : e.getRecipients()) {
             auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::Text);
             auto &pk = static_cast<TextPacket &>(*packet);
@@ -105,7 +105,7 @@ GameplayHandlerResult<CoordinatorResult> handleEvent(ChatEvent &event,
                 .xuid = player->getXuid(),
                 .platform_id = player->getPlatformOnlineId(),
                 .body = TextPacketPayload::AuthorAndMessage{TextPacketType::Chat, player->getName(), e.getMessage()}};
-            static_cast<endstone::core::EndstonePlayer *>(recipient)->getHandle().sendNetworkPacket(*packet);
+            static_cast<endstone::core::EndstonePlayer *>(&*recipient)->getHandle().sendNetworkPacket(*packet);
         }
         return CANCEL;
     }

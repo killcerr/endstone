@@ -175,14 +175,14 @@ public:
      * @param type The actor type to spawn
      * @return Resulting Actor of this method
      */
-    [[nodiscard]] virtual Actor *spawnActor(Location location, ActorTypeId type) = 0;
+    [[nodiscard]] virtual Nullable<Actor> spawnActor(Location location, ActorTypeId type) = 0;
 
     /**
      * Get a list of all actors in this dimension.
      *
      * @return A List of all actors currently residing in this dimension
      */
-    [[nodiscard]] virtual std::vector<Actor *> getActors() const = 0;
+    [[nodiscard]] virtual std::vector<NotNull<Actor>> getActors() const = 0;
 };
 
 inline Nullable<Dimension> Location::getDimension() const

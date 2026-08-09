@@ -133,7 +133,7 @@ Item &EndstoneDimension::dropItem(const Location location, const ItemStack &item
     return actor->getEndstoneActor<EndstoneItem>();
 }
 
-Actor *EndstoneDimension::spawnActor(Location location, ActorTypeId type)
+Nullable<Actor> EndstoneDimension::spawnActor(Location location, ActorTypeId type)
 {
     auto &actor_factory = level_.getHandle().getActorFactory();
     const auto id = ActorDefinitionIdentifier(std::string(type));
@@ -144,16 +144,13 @@ Actor *EndstoneDimension::spawnActor(Location location, ActorTypeId type)
     if (!actor) {
         return nullptr;
     }
-    return &actor->getEndstoneActor();
+    return actor->getEndstoneActorPtr();
 }
 
-std::vector<Actor *> EndstoneDimension::getActors() const
+std::vector<NotNull<Actor>> EndstoneDimension::getActors() const
 {
-    std::vector<Actor *> result;
+    std::vector<NotNull<Actor>> result;
     for (const auto &actor : level_.getActors()) {
-        if (!actor) {
-            continue;
-        }
         if (&*actor->getDimension() != this) {
             continue;
         }

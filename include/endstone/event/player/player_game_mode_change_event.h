@@ -26,7 +26,7 @@ namespace endstone {
 class PlayerGameModeChangeEvent : public Cancellable<PlayerEvent> {
 public:
     ENDSTONE_EVENT(PlayerGameModeChangeEvent);
-    explicit PlayerGameModeChangeEvent(Player &player, GameMode new_game_mode)
+    explicit PlayerGameModeChangeEvent(const NotNull<Player> &player, GameMode new_game_mode)
         : Cancellable(player), new_game_mode_(new_game_mode)
     {
     }

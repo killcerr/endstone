@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "endstone/message.h"
+#include "endstone/util/pointers.h"
 
 namespace endstone {
 
@@ -33,7 +34,7 @@ class Player;
 template <typename T>
 class Form {
 public:
-    using OnCloseCallback = std::function<void(Player *)>;
+    using OnCloseCallback = std::function<void(const NotNull<Player> &)>;
     explicit Form() = default;
 
     /**

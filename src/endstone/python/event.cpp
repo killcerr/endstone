@@ -51,10 +51,10 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 
     // Actor events
     py::class_<ActorEvent<Actor>, Event>(m, "ActorEvent", "Represents an `Actor`-related event.")
-        .def_property_readonly("actor", &ActorEvent<Actor>::getActor, py::return_value_policy::reference,
+        .def_property_readonly("actor", &ActorEvent<Actor>::getActor,
                                "The `Actor` which is involved in this event.");
     py::class_<ActorEvent<Mob>, Event>(m, "MobEvent", "Represents an `Mob`-related event.")
-        .def_property_readonly("actor", &ActorEvent<Mob>::getActor, py::return_value_policy::reference,
+        .def_property_readonly("actor", &ActorEvent<Mob>::getActor,
                                "The `Mob` which is involved in this event.");
     py::class_<ActorDamageEvent, ActorEvent<Mob>, ICancellable>(m, "ActorDamageEvent",
                                                                 "Called when an `Actor` is damaged.")
@@ -66,7 +66,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
         .def_property_readonly("damage_source", &ActorDeathEvent::getDamageSource, py::return_value_policy::reference,
                                "A `DamageSource` detailing the source of the damage for the death.");
     py::class_<PlayerDeathEvent, ActorDeathEvent>(m, "PlayerDeathEvent", "Called when a `Player` dies.")
-        .def_property_readonly("player", &PlayerDeathEvent::getPlayer, py::return_value_policy::reference,
+        .def_property_readonly("player", &PlayerDeathEvent::getPlayer,
                                "The `Player` which is involved in this event.")
         .def_property("death_message", &PlayerDeathEvent::getDeathMessage, &PlayerDeathEvent::setDeathMessage,
                       "The death message that will appear to everyone on the server.");
@@ -101,7 +101,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
             "The list of blocks that would have been removed or were removed from the explosion event.");
     py::class_<ActorKnockbackEvent, ActorEvent<Mob>, ICancellable>(m, "ActorKnockbackEvent",
                                                                    "Called when a living entity receives knockback.")
-        .def_property_readonly("source", &ActorKnockbackEvent::getSource, py::return_value_policy::reference,
+        .def_property_readonly("source", &ActorKnockbackEvent::getSource,
                                "The source actor that has caused knockback to the defender, or `None` if the "
                                "knockback is not caused by an actor.")
         .def_property("knockback", &ActorKnockbackEvent::getKnockback, &ActorKnockbackEvent::setKnockback, R"doc(
@@ -140,7 +140,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 
     If a `BlockBreakEvent` is cancelled, the block will not break and experience will not drop.
 )doc")
-        .def_property_readonly("player", &BlockBreakEvent::getPlayer, py::return_value_policy::reference,
+        .def_property_readonly("player", &BlockBreakEvent::getPlayer,
                                "The `Player` that is breaking the block involved in this event.");
     py::class_<BlockExplodeEvent, BlockEvent, ICancellable>(m, "BlockExplodeEvent", R"doc(
     Called when a block explodes (e.g. bed in the Nether, respawn anchor in the Overworld).
@@ -214,7 +214,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 
     If a `BlockPlaceEvent` is cancelled, the block will not be placed.
 )doc")
-        .def_property_readonly("player", &BlockPlaceEvent::getPlayer, py::return_value_policy::reference,
+        .def_property_readonly("player", &BlockPlaceEvent::getPlayer,
                                "The `Player` who placed the block involved in this event.")
         .def_property_readonly("block_placed", &BlockPlaceEvent::getBlockPlaced, py::return_value_policy::reference,
                                "The `Block` that was placed.")
@@ -246,7 +246,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 
     // Player events
     py::class_<PlayerEvent, Event>(m, "PlayerEvent", "Represents a player related event.")
-        .def_property_readonly("player", &PlayerEvent::getPlayer, py::return_value_policy::reference,
+        .def_property_readonly("player", &PlayerEvent::getPlayer,
                                "The `Player` who is involved in this event.");
     auto player_bed_enter_event = py::class_<PlayerBedEnterEvent, PlayerEvent, ICancellable>(
         m, "PlayerBedEnterEvent", "Called when a player is almost about to enter the bed.");
@@ -262,7 +262,6 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
         .def_property("message", &PlayerChatEvent::getMessage, &PlayerChatEvent::setMessage,
                       "The message that the player is attempting to send.")
         .def_property("player", &PlayerChatEvent::getPlayer, &PlayerChatEvent::setPlayer,
-                      py::return_value_policy::reference,
                       "The player that this message will be displayed as being sent by.")
         .def_property("format", &PlayerChatEvent::getFormat, &PlayerChatEvent::setFormat, R"doc(
     The format to use to display this chat message.
@@ -270,7 +269,6 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
     See the format string syntax at https://en.cppreference.com/w/cpp/utility/format/spec.html.
 )doc")
         .def_property_readonly("recipients", &PlayerChatEvent::getRecipients,
-                               py::return_value_policy::reference_internal,
                                "The set of `Player`s who will see this chat message.");
     py::class_<PlayerCommandEvent, PlayerEvent, ICancellable>(m, "PlayerCommandEvent",
                                                               "Called whenever a player runs a command.")
@@ -326,7 +324,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 )doc");
     py::class_<PlayerInteractActorEvent, PlayerEvent, ICancellable>(
         m, "PlayerInteractActorEvent", "Represents an event that is called when a player right-clicks an actor.")
-        .def_property_readonly("actor", &PlayerInteractActorEvent::getActor, py::return_value_policy::reference,
+        .def_property_readonly("actor", &PlayerInteractActorEvent::getActor,
                                "The actor that was right-clicked by the player.");
     py::class_<PlayerItemConsumeEvent, PlayerEvent, ICancellable>(m, "PlayerItemConsumeEvent", R"doc(
     Called when a player is finishing consuming an item (food, potion, milk bucket).
@@ -395,7 +393,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
         m, "PlayerPortalEvent", "Called when a player is about to teleport because it is in contact with a portal.");
     py::class_<PlayerPickupItemEvent, PlayerEvent, ICancellable>(
         m, "PlayerPickupItemEvent", "Called when a player picks an item up from the ground.")
-        .def_property_readonly("item", &PlayerPickupItemEvent::getItem, py::return_value_policy::reference,
+        .def_property_readonly("item", &PlayerPickupItemEvent::getItem,
                                "The Item picked up by the entity.");
 
     // Server events
@@ -420,7 +418,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
             "payload", [](const PacketReceiveEvent &self) { return py::bytes(self.getPayload()); },
             [](PacketReceiveEvent &self, const py::bytes &payload) { self.setPayload(payload); },
             "The raw packet data, excluding the header.")
-        .def_property_readonly("player", &PacketReceiveEvent::getPlayer, py::return_value_policy::reference, R"doc(
+        .def_property_readonly("player", &PacketReceiveEvent::getPlayer, R"doc(
     The `Player` who is involved in this event.
 
     This may return `None` if the packet is sent before the player completes the login process.
@@ -440,7 +438,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
             "payload", [](const PacketSendEvent &self) { return py::bytes(self.getPayload()); },
             [](PacketSendEvent &self, const py::bytes &payload) { self.setPayload(payload); },
             "The raw packet data, excluding the header.")
-        .def_property_readonly("player", &PacketSendEvent::getPlayer, py::return_value_policy::reference, R"doc(
+        .def_property_readonly("player", &PacketSendEvent::getPlayer, R"doc(
     The `Player` who is involved in this event.
 
     This may return `None` if the packet is sent before the player completes the login process.

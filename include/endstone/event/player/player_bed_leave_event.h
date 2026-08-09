@@ -27,7 +27,7 @@ class PlayerBedLeaveEvent final : public PlayerEvent {
 public:
     ENDSTONE_EVENT(PlayerBedLeaveEvent)
 
-    explicit PlayerBedLeaveEvent(Player &player, Block &bed) : PlayerEvent(player), bed_(bed) {}
+    explicit PlayerBedLeaveEvent(const NotNull<Player> &player, Block &bed) : PlayerEvent(player), bed_(bed) {}
     ~PlayerBedLeaveEvent() override = default;
 
     /**

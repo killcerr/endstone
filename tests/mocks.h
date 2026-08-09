@@ -36,7 +36,7 @@ public:
     MOCK_METHOD(endstone::MapView *, getMap, (std::int64_t), (const, override));
     MOCK_METHOD(endstone::MapView &, createMap, (const endstone::Dimension &), (const, override));
     MOCK_METHOD(endstone::Level &, getLevel, (), (const, override));
-    MOCK_METHOD(std::vector<endstone::Player *>, getOnlinePlayers, (), (const, override));
+    MOCK_METHOD((std::vector<endstone::NotNull<endstone::Player>>), getOnlinePlayers, (), (const, override));
     MOCK_METHOD(int, getMaxPlayers, (), (const, override));
     MOCK_METHOD(void, setMaxPlayers, (int), (override));
     MOCK_METHOD(endstone::Nullable<endstone::Player>, getPlayer, (endstone::UUID), (const, override));

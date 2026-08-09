@@ -33,7 +33,7 @@ public:
     ~EndstoneLevel() override = default;
 
     [[nodiscard]] std::string getName() const override;
-    [[nodiscard]] std::vector<Actor *> getActors() const override;
+    [[nodiscard]] std::vector<NotNull<Actor>> getActors() const override;
     [[nodiscard]] int getTime() const override;
     void setTime(int time) override;
     [[nodiscard]] std::vector<NotNull<Dimension>> getDimensions() const override;
