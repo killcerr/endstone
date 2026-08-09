@@ -37,8 +37,7 @@ void Actor::teleportTo(const Vec3 &pos, bool should_stop_riding, int cause, int 
     if (!isPlayer()) {
         auto &server = EndstoneServer::getInstance();
         auto &actor = getEndstoneActor();
-        endstone::Location to{
-            actor.getDimension().shared_from_this(), pos.x, pos.y, pos.z, getRotation().x, getRotation().y};
+        endstone::Location to{actor.getDimension(), pos.x, pos.y, pos.z, getRotation().x, getRotation().y};
         endstone::ActorTeleportEvent e{actor, actor.getLocation(), to};
         server.getPluginManager().callEvent(e);
 

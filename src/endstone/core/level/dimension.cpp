@@ -154,7 +154,7 @@ std::vector<Actor *> EndstoneDimension::getActors() const
         if (!actor) {
             continue;
         }
-        if (&actor->getDimension() != this) {
+        if (&*actor->getDimension() != this) {
             continue;
         }
         result.push_back(actor);

@@ -53,7 +53,7 @@ public:
      *
      * @return Parent Dimension
      */
-    [[nodiscard]] virtual Dimension &getDimension() const = 0;
+    [[nodiscard]] virtual NotNull<Dimension> getDimension() const = 0;
 };
 
 }  // namespace endstone

@@ -74,7 +74,7 @@ void EndstoneMapView::setCenterZ(const int z)
     }
 }
 
-Dimension *EndstoneMapView::getDimension() const
+Nullable<Dimension> EndstoneMapView::getDimension() const
 {
     const auto *level = EndstoneServer::getInstance().getEndstoneLevel();
     const auto dimension = level->getHandle().getDimension(map_.getDimensionId());

@@ -85,35 +85,35 @@ void EndstoneLevel::setTime(int time)
     level_.setTime(time);
 }
 
-std::vector<Dimension *> EndstoneLevel::getDimensions() const
+std::vector<NotNull<Dimension>> EndstoneLevel::getDimensions() const
 {
-    std::vector<Dimension *> dimensions;
+    std::vector<NotNull<Dimension>> dimensions;
     dimensions.reserve(dimensions_.size());
     for (const auto &val : dimensions_ | std::views::values) {
-        dimensions.push_back(val.get());
+        dimensions.emplace_back(val);
     }
     return dimensions;
 }
 
-Dimension *EndstoneLevel::getDimension(DimensionId id) const
+Nullable<Dimension> EndstoneLevel::getDimension(DimensionId id) const
 {
     for (const auto &dimension : dimensions_ | std::views::values) {
         if (dimension->getId() == id) {
-            return dimension.get();
+            return dimension;
         }
     }
     return nullptr;
 }
 
-Dimension *EndstoneLevel::getDimension(DimensionType type) const
+Nullable<Dimension> EndstoneLevel::getDimension(DimensionType type) const
 {
     if (const auto it = dimensions_.find(type.value); it != dimensions_.end()) {
-        return it->second.get();
+        return it->second;
     }
     return nullptr;
 }
 
-Dimension *EndstoneLevel::createDimension(const DimensionCreator & /*creator*/)
+Nullable<Dimension> EndstoneLevel::createDimension(const DimensionCreator & /*creator*/)
 {
     // Deferred: serverRegisterCustomDimension and getDimensionId are inlined in the shipped BDS build, so there is no
     // symbol to call. Revisit once a callable registration path is wired.

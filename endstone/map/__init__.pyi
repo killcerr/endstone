@@ -161,7 +161,7 @@ class MapView:
     @center_z.setter
     def center_z(self, arg1: int) -> None: ...
     @property
-    def dimension(self) -> Dimension:
+    def dimension(self) -> Dimension | None:
         """
         The dimension that this map is associated with.
         """

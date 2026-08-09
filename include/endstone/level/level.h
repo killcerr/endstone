@@ -65,16 +65,16 @@ public:
      *
      * @return a list of dimensions
      */
-    [[nodiscard]] virtual std::vector<Dimension *> getDimensions() const = 0;
+    [[nodiscard]] virtual std::vector<NotNull<Dimension>> getDimensions() const = 0;
 
     /**
      * Gets the dimension with the given id.
      *
      * @param id the id of the dimension to retrieve.
      *
-     * @return The Dimension with the given id, or nullptr if none exists
+     * @return The Dimension with the given id, or null if none exists
      */
-    [[nodiscard]] virtual Dimension *getDimension(DimensionId id) const = 0;
+    [[nodiscard]] virtual Nullable<Dimension> getDimension(DimensionId id) const = 0;
 
     /**
      * Creates a new custom dimension within this level.
@@ -86,9 +86,9 @@ public:
      * If a dimension with the requested name already exists, that existing dimension is returned instead.
      *
      * @param creator the options to use when creating the dimension
-     * @return the newly created (or existing) Dimension, or nullptr if it could not be created
+     * @return the newly created (or existing) Dimension, or null if it could not be created
      */
-    [[nodiscard]] virtual Dimension *createDimension(const DimensionCreator &creator) = 0;
+    [[nodiscard]] virtual Nullable<Dimension> createDimension(const DimensionCreator &creator) = 0;
 
     /**
      * Gets the Seed for this level.

@@ -42,7 +42,7 @@ public:
     [[nodiscard]] int getCenterZ() const override;
     void setCenterX(int x) override;
     void setCenterZ(int z) override;
-    [[nodiscard]] Dimension *getDimension() const override;
+    [[nodiscard]] Nullable<Dimension> getDimension() const override;
     void setDimension(const Dimension &dimension) override;
     [[nodiscard]] std::vector<std::shared_ptr<MapRenderer>> getRenderers() const override;
     void addRenderer(std::shared_ptr<MapRenderer> renderer) override;

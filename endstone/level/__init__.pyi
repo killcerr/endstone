@@ -44,7 +44,7 @@ class Level:
         A list of all dimensions within this level.
         """
 
-    def get_dimension(self, id: Identifier[Dimension] | str) -> Dimension:
+    def get_dimension(self, id: Identifier[Dimension] | str) -> Dimension | None:
         """
         Gets the dimension with the given id.
 
@@ -55,7 +55,7 @@ class Level:
             The `Dimension` with the given id, or `None` if none exists.
         """
 
-    def create_dimension(self, creator: DimensionCreator) -> Dimension:
+    def create_dimension(self, creator: DimensionCreator) -> Dimension | None:
         """
         Creates a new custom dimension within this level.
 

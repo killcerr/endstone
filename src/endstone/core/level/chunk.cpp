@@ -37,12 +37,12 @@ int EndstoneChunk::getZ() const
 
 Level &EndstoneChunk::getLevel() const
 {
-    return getDimension().getLevel();
+    return getDimension()->getLevel();
 }
 
-Dimension &EndstoneChunk::getDimension() const
+NotNull<Dimension> EndstoneChunk::getDimension() const
 {
-    return dimension_.getEndstoneDimension();
+    return dimension_.getEndstoneDimension().shared_from_this();
 }
 
 }  // namespace endstone::core

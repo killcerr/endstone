@@ -97,7 +97,7 @@ bool StatusCommand::execute(CommandSender &sender, const std::vector<std::string
     for (const auto &dimension : level.getDimensions()) {
         auto actor_count = 0;
         for (const auto &actor : actors) {
-            if (&actor->getDimension() == dimension) {
+            if (actor->getDimension() == dimension) {
                 actor_count++;
             }
         }

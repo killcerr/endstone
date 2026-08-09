@@ -132,7 +132,7 @@ public:
         auto [x, y, z] = getHandle().getPosition();
         y -= ActorOffset::getHeightOffset(getHandle().getEntity());
         const auto &[pitch, yaw] = getHandle().getRotation();
-        return {getDimension().shared_from_this(), x, y, z, pitch, yaw};
+        return {getDimension(), x, y, z, pitch, yaw};
     }
 
     [[nodiscard]] Vector getVelocity() const override
@@ -159,9 +159,9 @@ public:
 
     [[nodiscard]] Level &getLevel() const override { return server_.getLevel(); }
 
-    [[nodiscard]] Dimension &getDimension() const override
+    [[nodiscard]] NotNull<Dimension> getDimension() const override
     {
-        return *server_.getEndstoneLevel()->getDimension(getHandle().getDimension().getDimensionId());
+        return server_.getEndstoneLevel()->getDimension(getHandle().getDimension().getDimensionId()).get();
     }
 
     void setRotation(float yaw, float pitch) override { getHandle().setRotationWrapped({pitch, yaw}); }
@@ -175,7 +175,7 @@ public:
         setRotation(location.getYaw(), location.getPitch());
         Vec3 to_location{location.getX(), location.getY(), location.getZ()};
         const auto location_dimension = location.getDimension();
-        if (&location_dimension.value() != &getDimension()) {
+        if (&location_dimension.value() != &*getDimension()) {
             const auto to_dimension =
                 static_cast<EndstoneDimension &>(location_dimension.value()).getHandle().getDimensionId();
             getHandle().getLevel().entityChangeDimension(getHandle(), to_dimension, to_location);

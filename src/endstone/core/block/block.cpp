@@ -72,7 +72,7 @@ void EndstoneBlock::setData(const BlockData &data, bool apply_physics)
 
 std::unique_ptr<Block> EndstoneBlock::getRelative(int offset_x, int offset_y, int offset_z)
 {
-    return getDimension().getBlockAt(getX() + offset_x, getY() + offset_y, getZ() + offset_z);
+    return getDimension()->getBlockAt(getX() + offset_x, getY() + offset_y, getZ() + offset_z);
 }
 
 std::unique_ptr<Block> EndstoneBlock::getRelative(BlockFace face)
@@ -86,9 +86,9 @@ std::unique_ptr<Block> EndstoneBlock::getRelative(BlockFace face, int distance)
                        EndstoneBlockFace::getOffsetZ(face) * distance);
 }
 
-Dimension &EndstoneBlock::getDimension() const
+NotNull<Dimension> EndstoneBlock::getDimension() const
 {
-    return block_source_.getDimension().getEndstoneDimension();
+    return block_source_.getDimension().getEndstoneDimension().shared_from_this();
 }
 
 const Biome &EndstoneBlock::getBiome() const
@@ -114,7 +114,7 @@ int EndstoneBlock::getZ() const
 
 Location EndstoneBlock::getLocation() const
 {
-    return {getDimension().shared_from_this(), getX(), getY(), getZ()};
+    return {getDimension(), getX(), getY(), getZ()};
 }
 
 std::unique_ptr<BlockState> EndstoneBlock::captureState() const

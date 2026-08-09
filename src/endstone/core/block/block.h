@@ -32,7 +32,7 @@ public:
     std::unique_ptr<Block> getRelative(int offset_x, int offset_y, int offset_z) override;
     std::unique_ptr<Block> getRelative(BlockFace face) override;
     std::unique_ptr<Block> getRelative(BlockFace face, int distance) override;
-    [[nodiscard]] Dimension &getDimension() const override;
+    [[nodiscard]] NotNull<Dimension> getDimension() const override;
     [[nodiscard]] const Biome &getBiome() const override;
     [[nodiscard]] int getX() const override;
     [[nodiscard]] int getY() const override;

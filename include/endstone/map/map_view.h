@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "endstone/map/map_renderer.h"
+#include "endstone/util/pointers.h"
 
 namespace endstone {
 
@@ -103,9 +104,9 @@ public:
     /**
      * Get the dimension that this map is associated with.
      *
-     * @return Pointer to the Dimension this map is associated with, or nullptr.
+     * @return The Dimension this map is associated with, or null.
      */
-    [[nodiscard]] virtual Dimension *getDimension() const = 0;
+    [[nodiscard]] virtual Nullable<Dimension> getDimension() const = 0;
 
     /**
      * Set the dimension that this map is associated with.

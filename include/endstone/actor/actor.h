@@ -91,7 +91,7 @@ public:
      *
      * @return The current Dimension this actor resides in
      */
-    [[nodiscard]] virtual Dimension &getDimension() const = 0;
+    [[nodiscard]] virtual NotNull<Dimension> getDimension() const = 0;
 
     /**
      * Sets the actor's rotation.

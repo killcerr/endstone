@@ -24,8 +24,7 @@ public:
 
     static Location toEndstone(const Vec3 &vec3, const DimensionType id)
     {
-        auto *dimension = EndstoneServer::getInstance().getEndstoneLevel()->getDimension(id);
-        return Location(dimension ? dimension->shared_from_this() : nullptr, vec3.x, vec3.y, vec3.z);
+        return Location(EndstoneServer::getInstance().getEndstoneLevel()->getDimension(id), vec3.x, vec3.y, vec3.z);
     }
 };
 }  // namespace endstone::core

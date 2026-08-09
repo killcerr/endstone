@@ -77,7 +77,7 @@ public:
      *
      * @return the dimension containing the block represented by this block state
      */
-    [[nodiscard]] virtual Dimension &getDimension() const = 0;
+    [[nodiscard]] virtual NotNull<Dimension> getDimension() const = 0;
 
     /**
      * Gets the x-coordinate of this block state.

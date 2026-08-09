@@ -188,10 +188,10 @@ bool EndstonePlayer::teleport(const Location &location)
     setRotation(location.getYaw(), location.getPitch());
     Vec3 to_location{location.getX(), location.getY(), location.getZ()};
     const auto location_dimension = location.getDimension();
-    if (&location_dimension.value() != &getDimension()) {
+    if (&location_dimension.value() != &*getDimension()) {
         auto current_location = getLocation();
         Vec3 from_location{current_location.getX(), current_location.getY(), current_location.getZ()};
-        const auto from_dimension = static_cast<EndstoneDimension &>(getDimension()).getHandle().getDimensionId();
+        const auto from_dimension = static_cast<EndstoneDimension &>(*getDimension()).getHandle().getDimensionId();
         const auto to_dimension =
             static_cast<EndstoneDimension &>(location_dimension.value()).getHandle().getDimensionId();
         getHandle().getLevel().requestPlayerChangeDimension(
@@ -686,10 +686,10 @@ bool EndstonePlayer::handlePacket(Packet &packet)
             std::unique_ptr<Block> bed;
             if (getHandle().hasBedPosition()) {
                 const auto bed_position = getHandle().getBedPosition();
-                bed = getDimension().getBlockAt(bed_position.x, bed_position.y, bed_position.z);
+                bed = getDimension()->getBlockAt(bed_position.x, bed_position.y, bed_position.z);
             }
             else {
-                bed = getDimension().getBlockAt(getLocation());
+                bed = getDimension()->getBlockAt(getLocation());
             }
 
             PlayerBedLeaveEvent e(*this, *bed);
@@ -787,7 +787,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
             const auto &action = *it;
             if (action.player_action_type == PlayerActionType::StartDestroyBlock) {
                 const auto item = getInventory().getItemInMainHand();
-                const auto block = getDimension().getBlockAt(action.pos.x, action.pos.y, action.pos.z);
+                const auto block = getDimension()->getBlockAt(action.pos.x, action.pos.y, action.pos.z);
                 PlayerInteractEvent e{
                     *this,
                     PlayerInteractEvent::Action::LeftClickBlock,
@@ -815,7 +815,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
 
         const Location from = getLocation();
         const auto height_offset = ActorOffset::getHeightOffset(actor.getEntity());
-        const Location to{getDimension().shared_from_this(),
+        const Location to{getDimension(),
                           input.pos.x,
                           input.pos.y - height_offset,
                           input.pos.z,

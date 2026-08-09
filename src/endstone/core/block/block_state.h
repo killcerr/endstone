@@ -32,7 +32,7 @@ template <typename Interface = BlockState>
 class EndstoneBlockStateBase : public Interface {
 public:
     explicit EndstoneBlockStateBase(const EndstoneBlock &block)
-        : EndstoneBlockStateBase(block.getDimension(), block.getPosition(), block.getMinecraftBlock())
+        : EndstoneBlockStateBase(*block.getDimension(), block.getPosition(), block.getMinecraftBlock())
     {
     }
 
@@ -84,9 +84,9 @@ public:
         block_ = &static_cast<const EndstoneBlockData &>(data).getHandle();
     }
 
-    [[nodiscard]] Dimension &getDimension() const override
+    [[nodiscard]] NotNull<Dimension> getDimension() const override
     {
-        return dimension_;
+        return dimension_.shared_from_this();
     }
 
     [[nodiscard]] int getX() const override
@@ -106,7 +106,7 @@ public:
 
     [[nodiscard]] Location getLocation() const override
     {
-        return Location{getDimension().shared_from_this(), getX(), getY(), getZ()};
+        return Location{getDimension(), getX(), getY(), getZ()};
     }
 
     bool update() override

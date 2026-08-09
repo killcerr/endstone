@@ -25,7 +25,7 @@ public:
     [[nodiscard]] int getX() const override;
     [[nodiscard]] int getZ() const override;
     [[nodiscard]] Level &getLevel() const override;
-    [[nodiscard]] Dimension &getDimension() const override;
+    [[nodiscard]] NotNull<Dimension> getDimension() const override;
 
 private:
     ::Dimension &dimension_;

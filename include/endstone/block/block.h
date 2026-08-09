@@ -120,7 +120,7 @@ public:
      *
      * @return Dimension containing this block
      */
-    [[nodiscard]] virtual Dimension &getDimension() const = 0;
+    [[nodiscard]] virtual NotNull<Dimension> getDimension() const = 0;
 
     /**
      * Gets the biome that this block resides in.
