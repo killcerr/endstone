@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <cstdint>
+#include <utility>
 #include <vector>
 
 #include "bedrock/network/packet.h"
@@ -21,7 +23,13 @@
 
 class GameRulesChangedPacketData {
 public:
-    std::vector<GameRule> rules;
+    void addRule(const GameRule &rule) { rules_.push_back(rule); }
+    [[nodiscard]] const std::vector<GameRule> &getRules() const { return rules_; }
+    void setRules(std::vector<GameRule> rules) { rules_ = std::move(rules); }
+    void reserve(const std::uint32_t size) { rules_.reserve(size); }
+
+private:
+    std::vector<GameRule> rules_;
 };
 
 struct GameRulesChangedPacketPayload {

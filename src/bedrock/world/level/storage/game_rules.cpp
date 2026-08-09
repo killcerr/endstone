@@ -16,6 +16,29 @@
 
 #include "bedrock/network/packet/game_rules_changed_packet.h"
 
+const GameRule *GameRules::getRule(GameRuleId rule) const
+{
+    if (rule < 0 || rule >= game_rules_.size()) {
+        return nullptr;
+    }
+    return &game_rules_[rule];
+}
+
+bool GameRule::compareValue(const Value &value) const
+{
+    switch (type_) {
+    case Type::Bool:
+        return value.index() == value_.index() && std::get<bool>(value) == std::get<bool>(value_);
+    case Type::Int:
+        return value.index() == value_.index() && std::get<int>(value) == std::get<int>(value_);
+    case Type::Float:
+        return value.index() == value_.index() && std::get<float>(value) == std::get<float>(value_);
+    case Type::Invalid:
+    default:
+        return false;
+    }
+}
+
 bool GameRule::_set(const Value &value, bool *validated, ValidationError *error_output)
 {
     auto set_validated = [validated](bool value) {
@@ -29,29 +52,7 @@ bool GameRule::_set(const Value &value, bool *validated, ValidationError *error_
         return false;
     }
 
-    bool value_unchanged = false;
-    switch (type_) {
-    case Type::Bool:
-        if (value.index() == value_.index()) {
-            value_unchanged = std::get<bool>(value) == std::get<bool>(value_);
-        }
-        break;
-    case Type::Int:
-        if (value.index() == value_.index()) {
-            value_unchanged = std::get<int>(value) == std::get<int>(value_);
-        }
-        break;
-    case Type::Float:
-        if (value.index() == value_.index()) {
-            value_unchanged = std::get<float>(value) == std::get<float>(value_);
-        }
-        break;
-    case Type::Invalid:
-    default:
-        break;
-    }
-
-    if (value_unchanged) {
+    if (compareValue(value)) {
         set_validated(true);
         return false;
     }
@@ -62,17 +63,41 @@ bool GameRule::_set(const Value &value, bool *validated, ValidationError *error_
     return true;
 }
 
-std::shared_ptr<GameRulesChangedPacket> GameRules::setGameRule(GameRuleId rule, GameRule::Value value,
-                                                               bool return_packet, bool *value_validated,
-                                                               bool *value_changed,
-                                                               GameRule::ValidationError *error_output)
+std::shared_ptr<GameRulesChangedPacket> GameRules::setRule(GameRuleId rule, bool value, bool return_packet,
+                                                           bool *value_validated, bool *value_changed,
+                                                           GameRule::ValidationError *error_output)
 {
-    GameRule *game_rule = nullptr;
-    if (rule >= 0 && rule < game_rules_.size()) {
-        game_rule = &game_rules_[rule];
+    return _setRule(rule, value, GameRule::Type::Bool, return_packet, value_validated, value_changed, error_output);
+}
+
+std::shared_ptr<GameRulesChangedPacket> GameRules::setRule(GameRuleId rule, int value, bool return_packet,
+                                                           bool *value_validated, bool *value_changed,
+                                                           GameRule::ValidationError *error_output)
+{
+    return _setRule(rule, value, GameRule::Type::Int, return_packet, value_validated, value_changed, error_output);
+}
+
+std::shared_ptr<GameRulesChangedPacket> GameRules::setRule(GameRuleId rule, float value, bool return_packet,
+                                                           bool *value_validated, bool *value_changed,
+                                                           GameRule::ValidationError *error_output)
+{
+    return _setRule(rule, value, GameRule::Type::Float, return_packet, value_validated, value_changed, error_output);
+}
+
+GameRule *GameRules::_getRule(GameRuleId rule_type)
+{
+    if (rule_type < 0 || rule_type >= game_rules_.size()) {
+        return nullptr;
     }
-    return _setGameRule(game_rule, value, game_rule != nullptr ? game_rule->type_ : GameRule::Type::Invalid,
-                        return_packet, value_validated, value_changed, error_output);
+    return &game_rules_[rule_type];
+}
+
+std::shared_ptr<GameRulesChangedPacket> GameRules::_setRule(GameRuleId rule_type, GameRule::Value value,
+                                                            GameRule::Type type, bool return_packet,
+                                                            bool *value_validated, bool *value_changed,
+                                                            GameRule::ValidationError *error_output)
+{
+    return _setGameRule(_getRule(rule_type), value, type, return_packet, value_validated, value_changed, error_output);
 }
 
 std::shared_ptr<GameRulesChangedPacket> GameRules::_setGameRule(GameRule *game_rule, GameRule::Value value,
@@ -119,13 +144,19 @@ std::shared_ptr<GameRulesChangedPacket> GameRules::_setGameRule(GameRule *game_r
         return nullptr;
     }
 
-    // todo(gamerule): publish the game rule change.
+    // todo(gamerule): dispatch game_rule_change_publisher_ with the index of game_rule, found by a case-insensitive
+    // name search over game_rules_ and defaulting to -1.
     if (!return_packet) {
         return nullptr;
     }
 
+    return _createPacket(*game_rule);
+}
+
+std::shared_ptr<GameRulesChangedPacket> GameRules::_createPacket(const GameRule &rule)
+{
     const auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::GameRulesChanged);  // Endstone: factory
     const auto pk = std::static_pointer_cast<GameRulesChangedPacket>(packet);
-    pk->payload.rule_data.rules.push_back(*game_rule);
+    pk->payload.rule_data.addRule(rule);
     return pk;
 }

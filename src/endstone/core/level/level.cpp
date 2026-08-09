@@ -19,12 +19,12 @@
 #include <stdexcept>
 
 #include "bedrock/entity/gamerefs_entity/gamerefs_entity.h"
-#include "bedrock/network/packet/game_rules_changed_packet.h"
 #include "bedrock/network/packet_sender.h"
 #include "bedrock/world/level/dimension/dimension.h"
 #include "bedrock/world/level/dimension/vanilla_dimensions.h"
 #include "bedrock/world/level/dimension_manager.h"
 #include "bedrock/world/level/level.h"
+#include "bedrock/world/level/storage/game_rule_utils.h"
 #include "bedrock/world/level/storage/game_rules.h"
 #include "endstone/core/actor/actor.h"
 #include "endstone/core/game_rule.h"
@@ -167,38 +167,12 @@ bool EndstoneLevel::_setGameRule(Identifier<GameRule> rule, GameRuleValue value)
     const auto *game_rule = &static_cast<const EndstoneGameRule *>(entry)->getHandle();
     const ::GameRuleId id{static_cast<int>(game_rule - game_rules.getRules().data())};
 
-    ::GameRule::Value native_value;
-    switch (game_rule->getType()) {
-    case ::GameRule::Type::Bool:
-        if (!std::holds_alternative<bool>(value)) {
-            return false;
-        }
-        native_value = std::get<bool>(value);
-        break;
-    case ::GameRule::Type::Int:
-        if (!std::holds_alternative<int>(value)) {
-            return false;
-        }
-        native_value = std::get<int>(value);
-        break;
-    case ::GameRule::Type::Float:
-        if (!std::holds_alternative<float>(value)) {
-            return false;
-        }
-        native_value = std::get<float>(value);
-        break;
-    case ::GameRule::Type::Invalid:
-        return false;
+    const auto native_value = std::visit([](auto &&v) -> std::variant<int, float, bool> { return v; }, value);
+    try {
+        GameRuleUtils::setGameRule(level_, id, native_value, nullptr, false);
     }
-
-    bool validated = false;
-    bool changed = false;
-    const auto packet = game_rules.setGameRule(id, native_value, true, &validated, &changed, nullptr);
-    if (!validated) {
+    catch (const std::bad_variant_access &) {
         return false;
-    }
-    if (packet != nullptr) {
-        level_.getPacketSender()->sendBroadcast(*packet);
     }
     return true;
 }

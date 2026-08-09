@@ -59,6 +59,7 @@ public:
         const auto *value = std::get_if<bool>(&value_);
         return value != nullptr && *value;
     }
+    [[nodiscard]] bool compareValue(const Value &value) const;
 
 private:
     friend class GameRules;
@@ -103,6 +104,7 @@ public:
     }
 
     [[nodiscard]] const GameRuleMap &getRules() const { return game_rules_; }
+    [[nodiscard]] const GameRule *getRule(GameRuleId rule) const;
 
     enum GameRulesIndex : int {  // NOLINTBEGIN
         INVALID_GAME_RULE = -1,
@@ -155,17 +157,27 @@ public:
         GAME_RULE_COUNT = EDU_GAME_RULE_COUNT,
     };  // NOLINTEND
 
-    // Endstone begins
-    std::shared_ptr<GameRulesChangedPacket> setGameRule(GameRuleId rule, GameRule::Value value, bool return_packet,
-                                                        bool *value_validated, bool *value_changed,
-                                                        GameRule::ValidationError *error_output);
-    // Endstone ends
+    // Endstone: these return shared_ptr where BDS returns unique_ptr, as the packet comes from the createPacket
+    // factory.
+    std::shared_ptr<GameRulesChangedPacket> setRule(GameRuleId rule, bool value, bool return_packet,
+                                                    bool *value_validated, bool *value_changed,
+                                                    GameRule::ValidationError *error_output);
+    std::shared_ptr<GameRulesChangedPacket> setRule(GameRuleId rule, int value, bool return_packet,
+                                                    bool *value_validated, bool *value_changed,
+                                                    GameRule::ValidationError *error_output);
+    std::shared_ptr<GameRulesChangedPacket> setRule(GameRuleId rule, float value, bool return_packet,
+                                                    bool *value_validated, bool *value_changed,
+                                                    GameRule::ValidationError *error_output);
 
 private:
-    // Endstone: returns shared_ptr where BDS returns unique_ptr, as the packet comes from the createPacket factory.
+    GameRule *_getRule(GameRuleId rule_type);
+    std::shared_ptr<GameRulesChangedPacket> _setRule(GameRuleId rule_type, GameRule::Value value, GameRule::Type type,
+                                                     bool return_packet, bool *value_validated, bool *value_changed,
+                                                     GameRule::ValidationError *error_output);
     std::shared_ptr<GameRulesChangedPacket> _setGameRule(GameRule *game_rule, GameRule::Value value,
                                                          GameRule::Type type, bool return_packet, bool *value_validated,
                                                          bool *value_changed, GameRule::ValidationError *error_output);
+    std::shared_ptr<GameRulesChangedPacket> _createPacket(const GameRule &rule);
 
     GameRuleMap game_rules_;
     WorldPolicyMap world_policies_;
