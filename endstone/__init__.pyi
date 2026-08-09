@@ -50,6 +50,7 @@ from ._version import __version__
 __all__ = [
     "ColorFormat",
     "GameMode",
+    "GameRule",
     "Identifier",
     "Logger",
     "OfflinePlayer",
@@ -862,6 +863,72 @@ class GameMode(enum.Enum):
     CREATIVE = 1
     ADVENTURE = 2
     SPECTATOR = 3
+
+class GameRule(typing.Generic[_T]):
+    """
+    Represents a game rule.
+    """
+    @property
+    def id(self) -> Identifier[GameRule]:
+        """
+        The identifier of this game rule.
+        """
+    @property
+    def translation_key(self) -> str:
+        """
+        The translation key, suitable for use in a translation component.
+        """
+    @staticmethod
+    def get(name: Identifier[GameRule] | str) -> GameRule | None:
+        """
+        Attempts to get the `GameRule` with the given name.
+
+        Args:
+            name: The identifier of the game rule (e.g. `minecraft:dofiretick`).
+
+        Returns:
+            The `GameRule`, or `None` if no game rule with that name exists.
+        """
+    def __hash__(self) -> int: ...
+    COMMAND_BLOCK_OUTPUT: typing.ClassVar[Identifier[GameRule[bool]]]
+    COMMAND_BLOCKS_ENABLED: typing.ClassVar[Identifier[GameRule[bool]]]
+    DO_DAY_LIGHT_CYCLE: typing.ClassVar[Identifier[GameRule[bool]]]
+    DO_ENTITY_DROPS: typing.ClassVar[Identifier[GameRule[bool]]]
+    DO_FIRE_TICK: typing.ClassVar[Identifier[GameRule[bool]]]
+    DO_IMMEDIATE_RESPAWN: typing.ClassVar[Identifier[GameRule[bool]]]
+    DO_INSOMNIA: typing.ClassVar[Identifier[GameRule[bool]]]
+    DO_LIMITED_CRAFTING: typing.ClassVar[Identifier[GameRule[bool]]]
+    DO_MOB_LOOT: typing.ClassVar[Identifier[GameRule[bool]]]
+    DO_MOB_SPAWNING: typing.ClassVar[Identifier[GameRule[bool]]]
+    DO_TILE_DROPS: typing.ClassVar[Identifier[GameRule[bool]]]
+    DO_WEATHER_CYCLE: typing.ClassVar[Identifier[GameRule[bool]]]
+    DROWNING_DAMAGE: typing.ClassVar[Identifier[GameRule[bool]]]
+    FALL_DAMAGE: typing.ClassVar[Identifier[GameRule[bool]]]
+    FIRE_DAMAGE: typing.ClassVar[Identifier[GameRule[bool]]]
+    FREEZE_DAMAGE: typing.ClassVar[Identifier[GameRule[bool]]]
+    FUNCTION_COMMAND_LIMIT: typing.ClassVar[Identifier[GameRule[int]]]
+    KEEP_INVENTORY: typing.ClassVar[Identifier[GameRule[bool]]]
+    LOCATOR_BAR: typing.ClassVar[Identifier[GameRule[bool]]]
+    MAX_COMMAND_CHAIN_LENGTH: typing.ClassVar[Identifier[GameRule[int]]]
+    MOB_GRIEFING: typing.ClassVar[Identifier[GameRule[bool]]]
+    NATURAL_REGENERATION: typing.ClassVar[Identifier[GameRule[bool]]]
+    PLAYERS_SLEEPING_PERCENTAGE: typing.ClassVar[Identifier[GameRule[int]]]
+    PLAYER_WAYPOINTS: typing.ClassVar[Identifier[GameRule[int]]]
+    PROJECTILES_CAN_BREAK_BLOCKS: typing.ClassVar[Identifier[GameRule[bool]]]
+    PVP: typing.ClassVar[Identifier[GameRule[bool]]]
+    RANDOM_TICK_SPEED: typing.ClassVar[Identifier[GameRule[int]]]
+    RECIPES_UNLOCK: typing.ClassVar[Identifier[GameRule[bool]]]
+    RESPAWN_BLOCKS_EXPLODE: typing.ClassVar[Identifier[GameRule[bool]]]
+    SEND_COMMAND_FEEDBACK: typing.ClassVar[Identifier[GameRule[bool]]]
+    SHOW_BORDER_EFFECT: typing.ClassVar[Identifier[GameRule[bool]]]
+    SHOW_COORDINATES: typing.ClassVar[Identifier[GameRule[bool]]]
+    SHOW_DAYS_PLAYED: typing.ClassVar[Identifier[GameRule[bool]]]
+    SHOW_DEATH_MESSAGES: typing.ClassVar[Identifier[GameRule[bool]]]
+    SHOW_RECIPE_MESSAGES: typing.ClassVar[Identifier[GameRule[bool]]]
+    SHOW_TAGS: typing.ClassVar[Identifier[GameRule[bool]]]
+    SPAWN_RADIUS: typing.ClassVar[Identifier[GameRule[int]]]
+    TNT_EXPLODES: typing.ClassVar[Identifier[GameRule[bool]]]
+    TNT_EXPLOSION_DROP_DECAY: typing.ClassVar[Identifier[GameRule[bool]]]
 
 class Logger:
     """

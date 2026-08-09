@@ -17,6 +17,16 @@
 namespace py = pybind11;
 
 namespace endstone::python {
+namespace {
+// The value type is carried by the stubs alone; at runtime a constant is its identifier.
+auto constant(Identifier<GameRule> id)
+{
+    return [id](const py::object &) {
+        return id;
+    };
+}
+}  // namespace
+
 void init_game_rule(py::module_ &m)
 {
     py::class_<GameRule>(m, "GameRule", "Represents a game rule.")
@@ -36,60 +46,46 @@ void init_game_rule(py::module_ &m)
         .def("__str__", [](const GameRule &self) { return std::string(self.getId()); })
         .def("__repr__", [](const GameRule &self) { return std::format("GameRule({})", self.getId()); })
         .def("__hash__", [](const GameRule &self) { return py::hash(py::str(std::string(self.getId()))); })
-        .def_property_readonly_static("COMMAND_BLOCK_OUTPUT",
-                                      [](const py::object &) { return GameRule::CommandBlockOutput; })
-        .def_property_readonly_static("DO_DAY_LIGHT_CYCLE",
-                                      [](const py::object &) { return GameRule::DoDayLightCycle; })
-        .def_property_readonly_static("DO_ENTITY_DROPS", [](const py::object &) { return GameRule::DoEntityDrops; })
-        .def_property_readonly_static("DO_FIRE_TICK", [](const py::object &) { return GameRule::DoFireTick; })
-        .def_property_readonly_static("RECIPES_UNLOCK", [](const py::object &) { return GameRule::RecipesUnlock; })
-        .def_property_readonly_static("DO_LIMITED_CRAFTING",
-                                      [](const py::object &) { return GameRule::DoLimitedCrafting; })
-        .def_property_readonly_static("DO_MOB_LOOT", [](const py::object &) { return GameRule::DoMobLoot; })
-        .def_property_readonly_static("DO_MOB_SPAWNING", [](const py::object &) { return GameRule::DoMobSpawning; })
-        .def_property_readonly_static("DO_TILE_DROPS", [](const py::object &) { return GameRule::DoTileDrops; })
-        .def_property_readonly_static("DO_WEATHER_CYCLE", [](const py::object &) { return GameRule::DoWeatherCycle; })
-        .def_property_readonly_static("DROWNING_DAMAGE", [](const py::object &) { return GameRule::DrowningDamage; })
-        .def_property_readonly_static("FALL_DAMAGE", [](const py::object &) { return GameRule::FallDamage; })
-        .def_property_readonly_static("FIRE_DAMAGE", [](const py::object &) { return GameRule::FireDamage; })
-        .def_property_readonly_static("KEEP_INVENTORY", [](const py::object &) { return GameRule::KeepInventory; })
-        .def_property_readonly_static("LOCATOR_BAR", [](const py::object &) { return GameRule::LocatorBar; })
-        .def_property_readonly_static("MOB_GRIEFING", [](const py::object &) { return GameRule::MobGriefing; })
-        .def_property_readonly_static("PVP", [](const py::object &) { return GameRule::Pvp; })
-        .def_property_readonly_static("SHOW_COORDINATES", [](const py::object &) { return GameRule::ShowCoordinates; })
-        .def_property_readonly_static("PLAYER_WAYPOINTS", [](const py::object &) { return GameRule::PlayerWaypoints; })
-        .def_property_readonly_static("SHOW_DAYS_PLAYED", [](const py::object &) { return GameRule::ShowDaysPlayed; })
-        .def_property_readonly_static("NATURAL_REGENERATION",
-                                      [](const py::object &) { return GameRule::NaturalRegeneration; })
-        .def_property_readonly_static("TNT_EXPLODES", [](const py::object &) { return GameRule::TntExplodes; })
-        .def_property_readonly_static("SEND_COMMAND_FEEDBACK",
-                                      [](const py::object &) { return GameRule::SendCommandFeedback; })
-        .def_property_readonly_static("MAX_COMMAND_CHAIN_LENGTH",
-                                      [](const py::object &) { return GameRule::MaxCommandChainLength; })
-        .def_property_readonly_static("DO_INSOMNIA", [](const py::object &) { return GameRule::DoInsomnia; })
-        .def_property_readonly_static("COMMAND_BLOCKS_ENABLED",
-                                      [](const py::object &) { return GameRule::CommandBlocksEnabled; })
-        .def_property_readonly_static("RANDOM_TICK_SPEED", [](const py::object &) { return GameRule::RandomTickSpeed; })
-        .def_property_readonly_static("DO_IMMEDIATE_RESPAWN",
-                                      [](const py::object &) { return GameRule::DoImmediateRespawn; })
-        .def_property_readonly_static("SHOW_DEATH_MESSAGES",
-                                      [](const py::object &) { return GameRule::ShowDeathMessages; })
-        .def_property_readonly_static("FUNCTION_COMMAND_LIMIT",
-                                      [](const py::object &) { return GameRule::FunctionCommandLimit; })
-        .def_property_readonly_static("SPAWN_RADIUS", [](const py::object &) { return GameRule::SpawnRadius; })
-        .def_property_readonly_static("SHOW_TAGS", [](const py::object &) { return GameRule::ShowTags; })
-        .def_property_readonly_static("FREEZE_DAMAGE", [](const py::object &) { return GameRule::FreezeDamage; })
-        .def_property_readonly_static("RESPAWN_BLOCKS_EXPLODE",
-                                      [](const py::object &) { return GameRule::RespawnBlocksExplode; })
-        .def_property_readonly_static("SHOW_BORDER_EFFECT",
-                                      [](const py::object &) { return GameRule::ShowBorderEffect; })
-        .def_property_readonly_static("SHOW_RECIPE_MESSAGES",
-                                      [](const py::object &) { return GameRule::ShowRecipeMessages; })
-        .def_property_readonly_static("PLAYERS_SLEEPING_PERCENTAGE",
-                                      [](const py::object &) { return GameRule::PlayersSleepingPercentage; })
-        .def_property_readonly_static("PROJECTILES_CAN_BREAK_BLOCKS",
-                                      [](const py::object &) { return GameRule::ProjectilesCanBreakBlocks; })
-        .def_property_readonly_static("TNT_EXPLOSION_DROP_DECAY",
-                                      [](const py::object &) { return GameRule::TntExplosionDropDecay; });
+        .def_static(
+            "__class_getitem__", [](const py::object &) { return py::type::of<GameRule>(); }, py::arg("item"))
+        .def_property_readonly_static("COMMAND_BLOCK_OUTPUT", constant(GameRule::CommandBlockOutput))
+        .def_property_readonly_static("COMMAND_BLOCKS_ENABLED", constant(GameRule::CommandBlocksEnabled))
+        .def_property_readonly_static("DO_DAY_LIGHT_CYCLE", constant(GameRule::DoDayLightCycle))
+        .def_property_readonly_static("DO_ENTITY_DROPS", constant(GameRule::DoEntityDrops))
+        .def_property_readonly_static("DO_FIRE_TICK", constant(GameRule::DoFireTick))
+        .def_property_readonly_static("DO_IMMEDIATE_RESPAWN", constant(GameRule::DoImmediateRespawn))
+        .def_property_readonly_static("DO_INSOMNIA", constant(GameRule::DoInsomnia))
+        .def_property_readonly_static("DO_LIMITED_CRAFTING", constant(GameRule::DoLimitedCrafting))
+        .def_property_readonly_static("DO_MOB_LOOT", constant(GameRule::DoMobLoot))
+        .def_property_readonly_static("DO_MOB_SPAWNING", constant(GameRule::DoMobSpawning))
+        .def_property_readonly_static("DO_TILE_DROPS", constant(GameRule::DoTileDrops))
+        .def_property_readonly_static("DO_WEATHER_CYCLE", constant(GameRule::DoWeatherCycle))
+        .def_property_readonly_static("DROWNING_DAMAGE", constant(GameRule::DrowningDamage))
+        .def_property_readonly_static("FALL_DAMAGE", constant(GameRule::FallDamage))
+        .def_property_readonly_static("FIRE_DAMAGE", constant(GameRule::FireDamage))
+        .def_property_readonly_static("FREEZE_DAMAGE", constant(GameRule::FreezeDamage))
+        .def_property_readonly_static("FUNCTION_COMMAND_LIMIT", constant(GameRule::FunctionCommandLimit))
+        .def_property_readonly_static("KEEP_INVENTORY", constant(GameRule::KeepInventory))
+        .def_property_readonly_static("LOCATOR_BAR", constant(GameRule::LocatorBar))
+        .def_property_readonly_static("MAX_COMMAND_CHAIN_LENGTH", constant(GameRule::MaxCommandChainLength))
+        .def_property_readonly_static("MOB_GRIEFING", constant(GameRule::MobGriefing))
+        .def_property_readonly_static("NATURAL_REGENERATION", constant(GameRule::NaturalRegeneration))
+        .def_property_readonly_static("PLAYERS_SLEEPING_PERCENTAGE", constant(GameRule::PlayersSleepingPercentage))
+        .def_property_readonly_static("PLAYER_WAYPOINTS", constant(GameRule::PlayerWaypoints))
+        .def_property_readonly_static("PROJECTILES_CAN_BREAK_BLOCKS", constant(GameRule::ProjectilesCanBreakBlocks))
+        .def_property_readonly_static("PVP", constant(GameRule::Pvp))
+        .def_property_readonly_static("RANDOM_TICK_SPEED", constant(GameRule::RandomTickSpeed))
+        .def_property_readonly_static("RECIPES_UNLOCK", constant(GameRule::RecipesUnlock))
+        .def_property_readonly_static("RESPAWN_BLOCKS_EXPLODE", constant(GameRule::RespawnBlocksExplode))
+        .def_property_readonly_static("SEND_COMMAND_FEEDBACK", constant(GameRule::SendCommandFeedback))
+        .def_property_readonly_static("SHOW_BORDER_EFFECT", constant(GameRule::ShowBorderEffect))
+        .def_property_readonly_static("SHOW_COORDINATES", constant(GameRule::ShowCoordinates))
+        .def_property_readonly_static("SHOW_DAYS_PLAYED", constant(GameRule::ShowDaysPlayed))
+        .def_property_readonly_static("SHOW_DEATH_MESSAGES", constant(GameRule::ShowDeathMessages))
+        .def_property_readonly_static("SHOW_RECIPE_MESSAGES", constant(GameRule::ShowRecipeMessages))
+        .def_property_readonly_static("SHOW_TAGS", constant(GameRule::ShowTags))
+        .def_property_readonly_static("SPAWN_RADIUS", constant(GameRule::SpawnRadius))
+        .def_property_readonly_static("TNT_EXPLODES", constant(GameRule::TntExplodes))
+        .def_property_readonly_static("TNT_EXPLOSION_DROP_DECAY", constant(GameRule::TntExplosionDropDecay));
 }
 }  // namespace endstone::python

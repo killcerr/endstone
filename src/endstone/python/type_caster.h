@@ -311,30 +311,6 @@ private:
     std::string storage_;
 };
 
-template <typename T>
-class type_caster<endstone::GameRuleId<T>> {
-public:
-    explicit type_caster() : value("") {}
-
-    bool load(handle src, bool convert)
-    {
-        make_caster<std::string_view> str_caster;
-        if (!str_caster.load(src, convert)) {
-            return false;
-        }
-        value = static_cast<std::string_view &>(str_caster);
-        return true;
-    }
-
-    static handle cast(endstone::GameRuleId<T> src, return_value_policy policy, handle parent)
-    {
-        make_caster<std::string> str_caster;
-        return str_caster.cast(static_cast<std::string>(src), policy, parent);
-    }
-
-    PYBIND11_TYPE_CASTER(endstone::GameRuleId<T>, const_name(PYBIND11_STRING_NAME));
-};
-
 template <>
 class type_caster<endstone::nbt::Tag> {
 public:
