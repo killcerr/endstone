@@ -56,6 +56,7 @@ __all__ = [
     "OfflinePlayer",
     "Player",
     "Registry",
+    "Rotation",
     "Server",
     "Skin",
     "__minecraft_version__",
@@ -937,6 +938,20 @@ class GameRule(typing.Generic[_T]):
     SPAWN_RADIUS: Identifier[GameRule[int]] = "minecraft:spawnradius"
     TNT_EXPLODES: Identifier[GameRule[bool]] = "minecraft:tntexplodes"
     TNT_EXPLOSION_DROP_DECAY: Identifier[GameRule[bool]] = "minecraft:tntexplosiondropdecay"
+
+class Rotation(enum.Enum):
+    """
+    Represents a rotation based orientation, like that on a clock. It represents how something is viewed, as opposed to cardinal directions.
+    """
+
+    NONE = 0
+    CLOCKWISE_45 = 1
+    CLOCKWISE = 2
+    CLOCKWISE_135 = 3
+    FLIPPED = 4
+    FLIPPED_45 = 5
+    COUNTER_CLOCKWISE = 6
+    COUNTER_CLOCKWISE_45 = 7
 
 class Logger:
     """

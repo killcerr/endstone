@@ -11,7 +11,7 @@
 
 namespace endstone::runtime {
 
-static constexpr std::array<std::pair<std::string_view, std::size_t>, 63> symbols = {{
+static constexpr std::array<std::pair<std::string_view, std::size_t>, 64> symbols = {{
     {"BlockState::StateListNode::mHead", 211163888},
     {"Enchant::mEnchants", 211010840},
     {"MobEffect::mMobEffects", 211293808},
@@ -59,6 +59,8 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 63> symbol
     {"?executeWorldInteraction@InventoryTransaction@@SA?AW4InventoryTransactionError@@PEAXAEAVPlayer@@AEBVInventoryAction@@@Z", 39501792},
     // Item
     {"?readUserData@Item@@UEBAXAEAVItemStackBase@@AEAVIDataInput@@AEAVReadOnlyBinaryStream@@@Z", 38712960},
+    // ItemFrameBlockActor
+    {"?setItem@ItemFrameBlockActor@@QEAAXAEAVBlockSource@@AEBVItemInstance@@PEAVActor@@@Z", 99437424},
     // ItemInstance
     {"?fromTag@ItemInstance@@SA?AV1@AEBVCompoundTag@@@Z", 29077920},
     // ItemRegistry

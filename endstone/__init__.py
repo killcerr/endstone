@@ -12,6 +12,7 @@ __getattr__, __dir__, __all__ = lazy.attach(
             "OfflinePlayer",
             "Player",
             "Registry",
+            "Rotation",
             "Server",
             "Skin",
             "__minecraft_version__",

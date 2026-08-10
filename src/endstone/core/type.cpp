@@ -25,6 +25,7 @@
 #include "endstone/actor/mob.h"
 #include "endstone/block/block_state.h"
 #include "endstone/block/container.h"
+#include "endstone/block/item_frame.h"
 #include "endstone/command/block_command_sender.h"
 #include "endstone/command/command_sender.h"
 #include "endstone/command/console_command_sender.h"
@@ -72,6 +73,7 @@ void registerTypes()
     // BlockState hierarchy
     registerType<BlockState>();
     registerType<Container>().base<BlockState>();
+    registerType<ItemFrame>().base<BlockState>();
 }
 
 bool isTypeInstanceOf(const std::type_info &from, const std::type_info &target)

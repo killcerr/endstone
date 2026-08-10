@@ -5,8 +5,8 @@ Classes relating to the blocks in a world, including special states.
 import enum
 import typing
 
-from endstone import Identifier
-from endstone.inventory import Inventory
+from endstone import Identifier, Rotation
+from endstone.inventory import Inventory, ItemStack
 from endstone.level import Dimension, Location
 
 __all__ = [
@@ -17,6 +17,7 @@ __all__ = [
     "BlockState",
     "BlockType",
     "Container",
+    "ItemFrame",
 ]
 
 class Block:
@@ -338,3 +339,39 @@ class Container(BlockState):
         If the block was changed to a different type in the meantime, the returned inventory might no
         longer be valid.
         """
+
+class ItemFrame(BlockState):
+    """
+    Represents a captured state of an item frame.
+    """
+    @property
+    def item(self) -> ItemStack | None:
+        """
+        The item in this frame.
+
+        Reading this returns a defensive copy of the item, or `None` if the frame is empty. Assign
+        `None` to empty the frame.
+
+        Assigning resets the rotation of the frame, as placing an item in a frame does in-game.
+        """
+
+    @item.setter
+    def item(self, arg1: ItemStack | None) -> None: ...
+    @property
+    def item_drop_chance(self) -> float:
+        """
+        The chance of the item being dropped upon this frame's destruction.
+
+        A drop chance of 0.0 will never drop, a drop chance of 1.0 will always drop.
+        """
+
+    @item_drop_chance.setter
+    def item_drop_chance(self, arg1: float) -> None: ...
+    @property
+    def rotation(self) -> Rotation:
+        """
+        The rotation of the frame's item.
+        """
+
+    @rotation.setter
+    def rotation(self, arg1: Rotation) -> None: ...

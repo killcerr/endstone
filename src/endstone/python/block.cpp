@@ -146,6 +146,25 @@ void init_block(py::module_ &m, py::classh<Block> &block)
     longer be valid.
 )doc");
 
+    py::classh<ItemFrame, BlockState>(m, "ItemFrame", R"doc(
+    Represents a captured state of an item frame.
+)doc")
+        .def_property("item", &ItemFrame::getItem, &ItemFrame::setItem, R"doc(
+    The item in this frame.
+
+    Reading this returns a defensive copy of the item, or `None` if the frame is empty. Assign
+    `None` to empty the frame.
+
+    Assigning resets the rotation of the frame, as placing an item in a frame does in-game.
+)doc")
+        .def_property("item_drop_chance", &ItemFrame::getItemDropChance, &ItemFrame::setItemDropChance, R"doc(
+    The chance of the item being dropped upon this frame's destruction.
+
+    A drop chance of 0.0 will never drop, a drop chance of 1.0 will always drop.
+)doc")
+        .def_property("rotation", &ItemFrame::getRotation, &ItemFrame::setRotation,
+                      "The rotation of the frame's item.");
+
     block.def_property_readonly("type", &Block::getType, py::return_value_policy::reference,
                                 "The type of the block.")
         .def("set_type", py::overload_cast<BlockTypeId, bool>(&Block::setType), py::arg("type"),

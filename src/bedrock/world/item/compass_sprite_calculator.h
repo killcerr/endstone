@@ -14,6 +14,13 @@
 
 #pragma once
 
+#include <cstdint>
+
+#include "bedrock/world/level/block_pos.h"
+
+class Actor;
+class BlockSource;
+
 class CompassSpriteCalculator {
 public:
     using PointToTargetFunction = BlockPos (*)(const BlockSource *, Actor *);
@@ -27,5 +34,6 @@ private:
     int frame_;
     float rot_;
     float rot_a_;
+    std::int32_t last_updated_at_;
 };
 static_assert(sizeof(CompassSpriteCalculator) == 32);

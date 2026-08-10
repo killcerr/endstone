@@ -50,6 +50,7 @@ void init_player(py::module_ &, py_class<Player> &player);
 void init_plugin(py::module_ &);
 void init_potion(py::module_ &);
 void init_registry(py::module_ &);
+void init_rotation(py::module_ &);
 void init_scheduler(py::module_ &);
 void init_scoreboard(py::module_ &);
 void init_server(py::classh<Server> &server);
@@ -199,6 +200,7 @@ PYBIND11_MODULE(_python, m)  // NOLINT(*-use-anonymous-namespace)
     init_damage(m_damage);
     init_game_mode(m);
     init_game_rule(m);
+    init_rotation(m);
     init_logger(m);
     init_lang(m_lang);
     init_form(m_form);
@@ -283,6 +285,22 @@ void init_game_mode(py::module_ &m)
         .value("CREATIVE", GameMode::Creative)
         .value("ADVENTURE", GameMode::Adventure)
         .value("SPECTATOR", GameMode::Spectator)
+        .finalize();
+}
+
+void init_rotation(py::module_ &m)
+{
+    py::native_enum<Rotation>(m, "Rotation", "enum.Enum",
+                              "Represents a rotation based orientation, like that on a clock. It represents how "
+                              "something is viewed, as opposed to cardinal directions.")
+        .value("NONE", Rotation::None)
+        .value("CLOCKWISE_45", Rotation::Clockwise45)
+        .value("CLOCKWISE", Rotation::Clockwise)
+        .value("CLOCKWISE_135", Rotation::Clockwise135)
+        .value("FLIPPED", Rotation::Flipped)
+        .value("FLIPPED_45", Rotation::Flipped45)
+        .value("COUNTER_CLOCKWISE", Rotation::CounterClockwise)
+        .value("COUNTER_CLOCKWISE_45", Rotation::CounterClockwise45)
         .finalize();
 }
 

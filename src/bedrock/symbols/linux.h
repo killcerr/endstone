@@ -11,7 +11,7 @@
 
 namespace endstone::runtime {
 
-static constexpr std::array<std::pair<std::string_view, std::size_t>, 63> symbols = {{
+static constexpr std::array<std::pair<std::string_view, std::size_t>, 64> symbols = {{
     {"BlockState::StateListNode::mHead", 245336464},
     {"Enchant::mEnchants", 245162480},
     {"MobEffect::mMobEffects", 245142824},
@@ -60,6 +60,8 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 63> symbol
     {"_ZN20InventoryTransaction23executeWorldInteractionEPvR6PlayerRK15InventoryAction", 197679904},
     // Item
     {"_ZNK4Item12readUserDataER13ItemStackBaseR10IDataInputR20ReadOnlyBinaryStream", 197040448},
+    // ItemFrameBlockActor
+    {"_ZN19ItemFrameBlockActor7setItemER11BlockSourceRK12ItemInstanceP5Actor", 207524656},
     // ItemInstance
     {"_ZN12ItemInstance7fromTagERK11CompoundTag", 196702384},
     // ItemRegistry

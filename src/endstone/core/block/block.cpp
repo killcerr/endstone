@@ -22,6 +22,7 @@
 #include "endstone/core/block/block_face.h"
 #include "endstone/core/block/block_state.h"
 #include "endstone/core/block/container.h"
+#include "endstone/core/block/item_frame.h"
 #include "endstone/core/server.h"
 
 using endstone::core::EndstoneServer;
@@ -120,9 +121,16 @@ Location EndstoneBlock::getLocation() const
 std::unique_ptr<BlockState> EndstoneBlock::captureState() const
 {
     if (auto *block_entity = block_source_.getBlockEntity(block_pos_)) {
-        // TODO(block-state): once we add type-specific block states (Sign, Furnace, CreatureSpawner, ...),
-        // dispatch on BlockActor::getType() via a BlockActorType -> factory registry (cf. CraftBukkit's
-        // CraftBlockStates), keeping this generic getContainer() check as the fallback for container blocks.
+        // TODO(block-state): once we add more type-specific block states (Sign, Furnace, CreatureSpawner, ...),
+        // replace this switch with a BlockActorType -> factory registry (cf. CraftBukkit's CraftBlockStates),
+        // keeping the generic getContainer() check as the fallback for container blocks.
+        switch (block_entity->getType()) {
+        case BlockActorType::ItemFrame:
+        case BlockActorType::GlowItemFrame:
+            return std::make_unique<EndstoneItemFrame>(*this, static_cast<ItemFrameBlockActor &>(*block_entity));
+        default:
+            break;
+        }
         if (auto *container = static_cast<VanillaBlockActor *>(block_entity)->getContainer()) {
             return std::make_unique<EndstoneContainer>(*this, *container);
         }
