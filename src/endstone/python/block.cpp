@@ -146,6 +146,68 @@ void init_block(py::module_ &m, py::classh<Block> &block)
     longer be valid.
 )doc");
 
+    py::classh<Campfire, BlockState>(m, "Campfire", "Represents a captured state of a campfire.")
+        .def_property_readonly("size", &Campfire::getSize, "The number of items this campfire can cook at once.")
+        .def("get_item", &Campfire::getItem, py::arg("index"), R"doc(
+    Gets the item currently cooking in the given slot.
+
+    Args:
+        index: The slot, between 0 and `size` - 1.
+
+    Returns:
+        The item, or `None` if the slot is empty.
+)doc")
+        .def("set_item", &Campfire::setItem, py::arg("index"), py::arg("item"), R"doc(
+    Sets the item currently cooking in the given slot.
+
+    Args:
+        index: The slot, between 0 and `size` - 1.
+        item: The item, or `None` to empty the slot.
+)doc")
+        .def("get_cook_time", &Campfire::getCookTime, py::arg("index"), R"doc(
+    Gets how long the item in the given slot has been cooking for, in ticks.
+
+    Args:
+        index: The slot, between 0 and `size` - 1.
+
+    Returns:
+        The cook time, in ticks.
+)doc")
+        .def("set_cook_time", &Campfire::setCookTime, py::arg("index"), py::arg("cook_time"), R"doc(
+    Sets how long the item in the given slot has been cooking for.
+
+    Args:
+        index: The slot, between 0 and `size` - 1.
+        cook_time: The cook time, in ticks.
+)doc");
+
+    py::classh<CreatureSpawner, BlockState>(m, "CreatureSpawner", "Represents a captured state of a creature spawner.")
+        .def_property("spawned_type", &CreatureSpawner::getSpawnedType, &CreatureSpawner::setSpawnedType,
+                      py::return_value_policy::reference, "The type of actor this spawner will spawn.")
+        .def_property("delay", &CreatureSpawner::getDelay, &CreatureSpawner::setDelay,
+                      "The delay until the spawner spawns the next batch of actors, in ticks.")
+        .def_property("min_spawn_delay", &CreatureSpawner::getMinSpawnDelay, &CreatureSpawner::setMinSpawnDelay,
+                      "The minimum delay the spawner will wait between spawns, in ticks.")
+        .def_property("max_spawn_delay", &CreatureSpawner::getMaxSpawnDelay, &CreatureSpawner::setMaxSpawnDelay,
+                      "The maximum delay the spawner will wait between spawns, in ticks.")
+        .def_property("spawn_count", &CreatureSpawner::getSpawnCount, &CreatureSpawner::setSpawnCount,
+                      "How many actors the spawner attempts to spawn at a time.")
+        .def_property("max_nearby_entities", &CreatureSpawner::getMaxNearbyEntities,
+                      &CreatureSpawner::setMaxNearbyEntities,
+                      "The maximum number of similar actors allowed nearby before the spawner stops spawning.")
+        .def_property("required_player_range", &CreatureSpawner::getRequiredPlayerRange,
+                      &CreatureSpawner::setRequiredPlayerRange,
+                      "How far away a player must be for the spawner to be active, in blocks.")
+        .def_property("spawn_range", &CreatureSpawner::getSpawnRange, &CreatureSpawner::setSpawnRange,
+                      "The radius around the spawner in which actors are spawned, in blocks.");
+
+    py::classh<Lectern, Container>(m, "Lectern", "Represents a captured state of a lectern.")
+        .def_property("page", &Lectern::getPage, &Lectern::setPage, R"doc(
+    The page currently displayed on the lectern.
+
+    The page is 0-indexed, and is clamped to the number of pages in the book the lectern holds.
+)doc");
+
     py::classh<Furnace, Container>(m, "Furnace", R"doc(
     Represents a captured state of a furnace.
 )doc")

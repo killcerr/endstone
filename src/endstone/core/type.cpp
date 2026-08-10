@@ -24,9 +24,12 @@
 #include "endstone/actor/item.h"
 #include "endstone/actor/mob.h"
 #include "endstone/block/block_state.h"
+#include "endstone/block/campfire.h"
 #include "endstone/block/container.h"
+#include "endstone/block/creature_spawner.h"
 #include "endstone/block/furnace.h"
 #include "endstone/block/item_frame.h"
+#include "endstone/block/lectern.h"
 #include "endstone/block/sign.h"
 #include "endstone/command/block_command_sender.h"
 #include "endstone/command/command_sender.h"
@@ -76,6 +79,9 @@ void registerTypes()
     registerType<BlockState>();
     registerType<Container>().base<BlockState>();
     registerType<Furnace>().base<Container>();
+    registerType<Lectern>().base<Container>();
+    registerType<Campfire>().base<BlockState>();
+    registerType<CreatureSpawner>().base<BlockState>();
     registerType<ItemFrame>().base<BlockState>();
     registerType<Sign>().base<BlockState>();
 }

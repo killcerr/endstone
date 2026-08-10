@@ -21,9 +21,12 @@
 #include "endstone/core/block/block_data.h"
 #include "endstone/core/block/block_face.h"
 #include "endstone/core/block/block_state.h"
+#include "endstone/core/block/campfire.h"
 #include "endstone/core/block/container.h"
+#include "endstone/core/block/creature_spawner.h"
 #include "endstone/core/block/furnace.h"
 #include "endstone/core/block/item_frame.h"
+#include "endstone/core/block/lectern.h"
 #include "endstone/core/block/sign.h"
 #include "endstone/core/server.h"
 
@@ -133,6 +136,13 @@ std::unique_ptr<BlockState> EndstoneBlock::captureState() const
         case BlockActorType::Sign:
         case BlockActorType::HangingSign:
             return std::make_unique<EndstoneSign>(*this, static_cast<SignBlockActor &>(*block_entity));
+        case BlockActorType::MobSpawner:
+            return std::make_unique<EndstoneCreatureSpawner>(*this,
+                                                             static_cast<MobSpawnerBlockActor &>(*block_entity));
+        case BlockActorType::Campfire:
+            return std::make_unique<EndstoneCampfire>(*this, static_cast<CampfireBlockActor &>(*block_entity));
+        case BlockActorType::Lectern:
+            return std::make_unique<EndstoneLectern>(*this, static_cast<LecternBlockActor &>(*block_entity));
         case BlockActorType::Furnace:
         case BlockActorType::BlastFurnace:
         case BlockActorType::Smoker:

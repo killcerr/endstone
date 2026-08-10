@@ -6,6 +6,7 @@ import enum
 import typing
 
 from endstone import Identifier, Rotation
+from endstone.actor import ActorType
 from endstone.inventory import Inventory, ItemStack
 from endstone.level import Dimension, Location
 
@@ -16,9 +17,12 @@ __all__ = [
     "BlockFace",
     "BlockState",
     "BlockType",
+    "Campfire",
     "Container",
+    "CreatureSpawner",
     "Furnace",
     "ItemFrame",
+    "Lectern",
     "Sign",
     "SignSide",
 ]
@@ -342,6 +346,140 @@ class Container(BlockState):
         If the block was changed to a different type in the meantime, the returned inventory might no
         longer be valid.
         """
+
+class Campfire(BlockState):
+    """
+    Represents a captured state of a campfire.
+    """
+    @property
+    def size(self) -> int:
+        """
+        The number of items this campfire can cook at once.
+        """
+
+    def get_item(self, index: int) -> ItemStack | None:
+        """
+        Gets the item currently cooking in the given slot.
+
+        Args:
+            index: The slot, between 0 and `size` - 1.
+
+        Returns:
+            The item, or `None` if the slot is empty.
+        """
+
+    def set_item(self, index: int, item: ItemStack | None) -> None:
+        """
+        Sets the item currently cooking in the given slot.
+
+        Args:
+            index: The slot, between 0 and `size` - 1.
+            item: The item, or `None` to empty the slot.
+        """
+
+    def get_cook_time(self, index: int) -> int:
+        """
+        Gets how long the item in the given slot has been cooking for, in ticks.
+
+        Args:
+            index: The slot, between 0 and `size` - 1.
+
+        Returns:
+            The cook time, in ticks.
+        """
+
+    def set_cook_time(self, index: int, cook_time: int) -> None:
+        """
+        Sets how long the item in the given slot has been cooking for.
+
+        Args:
+            index: The slot, between 0 and `size` - 1.
+            cook_time: The cook time, in ticks.
+        """
+
+class CreatureSpawner(BlockState):
+    """
+    Represents a captured state of a creature spawner.
+    """
+    @property
+    def spawned_type(self) -> ActorType:
+        """
+        The type of actor this spawner will spawn.
+        """
+
+    @spawned_type.setter
+    def spawned_type(self, arg1: Identifier[ActorType] | str) -> None: ...
+    @property
+    def delay(self) -> int:
+        """
+        The delay until the spawner spawns the next batch of actors, in ticks.
+        """
+
+    @delay.setter
+    def delay(self, arg1: int) -> None: ...
+    @property
+    def min_spawn_delay(self) -> int:
+        """
+        The minimum delay the spawner will wait between spawns, in ticks.
+        """
+
+    @min_spawn_delay.setter
+    def min_spawn_delay(self, arg1: int) -> None: ...
+    @property
+    def max_spawn_delay(self) -> int:
+        """
+        The maximum delay the spawner will wait between spawns, in ticks.
+        """
+
+    @max_spawn_delay.setter
+    def max_spawn_delay(self, arg1: int) -> None: ...
+    @property
+    def spawn_count(self) -> int:
+        """
+        How many actors the spawner attempts to spawn at a time.
+        """
+
+    @spawn_count.setter
+    def spawn_count(self, arg1: int) -> None: ...
+    @property
+    def max_nearby_entities(self) -> int:
+        """
+        The maximum number of similar actors allowed nearby before the spawner stops spawning.
+        """
+
+    @max_nearby_entities.setter
+    def max_nearby_entities(self, arg1: int) -> None: ...
+    @property
+    def required_player_range(self) -> int:
+        """
+        How far away a player must be for the spawner to be active, in blocks.
+        """
+
+    @required_player_range.setter
+    def required_player_range(self, arg1: int) -> None: ...
+    @property
+    def spawn_range(self) -> int:
+        """
+        The radius around the spawner in which actors are spawned, in blocks.
+        """
+
+    @spawn_range.setter
+    def spawn_range(self, arg1: int) -> None: ...
+
+class Lectern(Container):
+    """
+    Represents a captured state of a lectern.
+    """
+    @property
+    def page(self) -> int:
+        """
+        The page currently displayed on the lectern.
+
+        The page is 0-indexed, and is clamped to the number of pages in the book the lectern holds.
+        """
+
+    @page.setter
+    def page(self, arg1: int) -> None: ...
 
 class Furnace(Container):
     """

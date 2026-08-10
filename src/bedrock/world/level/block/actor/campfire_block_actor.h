@@ -22,6 +22,12 @@ public:
     static constexpr int MAX_COOKING_ITEMS = 4;
     CampfireBlockActor(const BlockPos &);
 
+    // Endstone
+    [[nodiscard]] const ItemInstance &getCookingItem(int slot) const { return cooking_item_[slot]; }
+    void setCookingItem(int slot, const ItemInstance &item) { cooking_item_[slot] = item; }
+    [[nodiscard]] int getCookingTime(int slot) const { return cooking_time_[slot]; }
+    void setCookingTime(int slot, int cooking_time) { cooking_time_[slot] = cooking_time; }
+
 private:
     ENDSTONE_HOOK void _finishCooking(::BlockSource &region, int slot);
 
@@ -30,3 +36,4 @@ private:
     bool was_lit_;
     int next_smoke_particle_tick_;
 };
+BEDROCK_STATIC_ASSERT_SIZE(CampfireBlockActor, 768, 744);
