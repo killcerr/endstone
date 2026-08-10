@@ -11,7 +11,7 @@
 
 namespace endstone::runtime {
 
-static constexpr std::array<std::pair<std::string_view, std::size_t>, 65> symbols = {{
+static constexpr std::array<std::pair<std::string_view, std::size_t>, 61> symbols = {{
     {"BlockState::StateListNode::mHead", 211163888},
     {"Enchant::mEnchants", 211010840},
     {"MobEffect::mMobEffects", 211293808},
@@ -83,19 +83,14 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 65> symbol
     {"?createPacket@MinecraftPackets@@SA?AV?$shared_ptr@VPacket@@@std@@W4MinecraftPacketIds@@@Z", 12530432},
     // Mob
     {"?knockback@Mob@@UEAAXPEAVActor@@MMMAEBUKnockbackParameters@@@Z", 37732912},
-    // NetworkSystem
-    {"?send@NetworkSystem@@QEAAXAEBVNetworkIdentifier@@AEBVPacket@@W4SubClientId@@@Z", 12576928},
     // PistonBlockActor
     {"?tick@PistonBlockActor@@UEAAXAEAVBlockSource@@@Z", 99503952},
     // Player
     {"?completeUsingItem@Player@@QEAAXXZ", 2206272},
     {"?drop@Player@@UEAA_NAEBVItemStack@@_N@Z", 2302400},
     {"?startSleepInBed@Player@@UEAA?AW4BedSleepingResult@@AEBVBlockPos@@_NM@Z", 2182176},
-    {"?stopSleepInBed@Player@@UEAAX_N0@Z", 2187632},
     {"?take@Player@@QEAA_NAEAVActor@@HH@Z", 2251552},
     {"?teleportTo@Player@@UEAAXAEBVVec3@@_NHH1@Z", 2176288},
-    // RakNet::RNS2_Windows_Linux_360
-    {"?Send_Windows_Linux_360NoVDP@RNS2_Windows_Linux_360@RakNet@@KAHHPEAURNS2_SendParameters@2@PEBDI@Z", 54736064},
     // RakPeerHelper
     {"?peerStartup@RakPeerHelper@@QEAA?AW4StartupResult@RakNet@@PEAVRakPeerInterface@3@AEBUConnectionDefinition@@W4PeerPurpose@1@@Z", 12695360},
     // RepositoryFactory
@@ -115,8 +110,6 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 65> symbol
     {"?changeDimension@ServerPlayer@@UEAAXUDimensionType@@@Z", 6905168},
     // ServerScoreboard
     {"??0ServerScoreboard@@QEAA@VCommandSoftEnumRegistry@@PEAVLevelStorage@@V?$not_null@V?$NonOwnerPointer@VGameplayUserManager@@@Bedrock@@@gsl@@@Z", 1277104},
-    // SignBlockActor
-    {"?setMessageForServerScripingOnly@SignBlockActor@@QEAAXW4SignTextSide@@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@1@Z", 73517984},
     // WeatherManager
     {"?updateWeather@WeatherManager@@QEAAXMHMH@Z", 19341888},
     // YAAEAVI18n

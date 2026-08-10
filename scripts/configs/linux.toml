@@ -512,17 +512,6 @@ extra = 0
 pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 49 89 D7 0F 29 54 24 ? 0F 29 4C 24"
 
 [[signatures]]
-name = "_ZN13NetworkSystem4sendERK17NetworkIdentifierRK6Packet11SubClientId"
-relative = false
-extra = 0
-# 1. find bytes "48 65 61 64 65 72 20 44 61 74 61 00" = "Header Data\0" (a writeString label; referenced here
-#    AND in NetworkSystem::sendToMultiple)
-# 2. tell them apart: sendToMultiple loops over an id vector (back-edge); this one (send) is straight-line for
-#    a single id
-# 3. confirm by diffing both vs the old named DB
-pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 89 CD 48 89 D3 49 89 F6 49 89 FF 48 8D 7C 24 ?"
-
-[[signatures]]
 name = "_ZN16PistonBlockActor4tickER11BlockSource"
 relative = false
 extra = 0
@@ -544,17 +533,6 @@ extra = 0
 # 2. its lone data xref (a validateVec3Position label arg) is a `lea` inside this function
 # 3. walk up to the prologue
 pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 45 89 CC 45 89 C6 89 CD 41 89 D5"
-
-[[signatures]]
-name = "_ZN6Player14stopSleepInBedEbb"
-relative = false
-extra = 0
-# 1. find bytes "33 20 73 74 6F 70 53 6C 65 65 70 20 62 65 64 20 70 6F 73 00" = "3 stopSleep bed pos\0" (unique)
-# 2. its lone data xref (a validateVec3Position label arg) is a `lea` inside this function
-# 3. walk up to the prologue
-pattern = "0F B6 D3 4C 89 F7 E8 ? ? ? ?"
-rip_relative = true
-rip_offset = 7
 
 [[signatures]]
 name = "_ZN6Player15startSleepInBedERK8BlockPosbf"
@@ -598,15 +576,6 @@ extra = 0
 pattern = "E8 ? ? ? ? 84 C0 74 ? ? ? ? 48 89 DF 5B 41 5C"
 rip_relative = true
 rip_offset = 1
-
-[[signatures]]
-name = "_ZN6RakNet22RNS2_Windows_Linux_36027Send_Windows_Linux_360NoVDPEiPNS_19RNS2_SendParametersEPKcj"
-relative = false
-extra = 0
-# 1. search the ASCII bytes of "sendto failed with code %s (%i) for char %i and length %i for %s." + a 00 (unique)
-# 2. its lone data xref is a `lea` inside this function
-# 3. walk up to the prologue
-pattern = "55 41 57 41 56 41 55 41 54 53 48 83 EC ? 48 89 F3 8B AF"
 
 [[signatures]]
 name = "_ZN13RakPeerHelper11peerStartupEPN6RakNet16RakPeerInterfaceERK20ConnectionDefinitionNS_11PeerPurposeE"
@@ -731,23 +700,6 @@ extra = 0
 # 3. confirm vs the old named DB (args: CommandSoftEnumRegistry, LevelStorage*, not_null<NonOwnerPointer<...>>);
 #    sole caller is ServerLevel::_initializeScoreboard
 pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? ? ? 48 89 8C 24 ? ? ? ? 49 89 D6 48 89 FB"
-
-[[signatures]]
-name = "_ZN14SignBlockActor31setMessageForServerScripingOnlyE12SignTextSideNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES7_"
-relative = false
-extra = 0
-# NOTE: "Scriping" is Mojang's typo, not ours - the mangled name has to keep it.
-# 1. find bytes "53 69 67 6E 54 65 78 74 43 6F 6C 6F 72 00" = "SignTextColor\0" and
-#    "54 65 78 74 4F 77 6E 65 72 00" = "TextOwner\0" (both unique, one data xref each, both into
-#    SignBlockActor::load) - load pins the class: mTextFront/mTextBack are the two unique_ptrs the sign
-#    accessors index as `[this + (side != 0) * 8 + 0xd0]`, and mProperties is the `or [this+44h], 1`
-# 2. two setMessageForServerScripingOnly overloads sit adjacent in that cluster, both ending with
-#    `mov byte ptr [text+0F8h], 1` (cached message dirty), the mLastEditXuid assign at text+120h and the
-#    setChanged. the one wanted takes a std::string: it MOVES the 3-word string into Text::mMessage
-#    (offset 0) and then empties the TextObjectRoot child vector at text+38h; the TextObjectRoot overload
-#    is the mirror image, moving into the vector and leaving mMessage alone
-# 3. confirm vs the old named DB (member, takes SignTextSide + two by-value std::strings)
-pattern = "41 57 41 56 41 55 41 54 53 48 83 EC 10 49 89 CE 48 89 FB 31 C0 85 F6 0F 95 C0 4C 8B BC C7 ? ? ? ? 0F 10 0A 4C 8B 62 10 0F 57 C0 0F 11 02"
 
 [[signatures]]
 name = "_ZN14WeatherManager13updateWeatherEfifi"

@@ -595,19 +595,6 @@ extra = 0
 pattern = "55 41 57 41 56 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 44 0F 29 8D ? ? ? ? 44 0F 29 85 ? ? ? ? 0F 29 BD ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 0F 28 F3"
 
 [[signatures]]
-name = "?send@NetworkSystem@@QEAAXAEBVNetworkIdentifier@@AEBVPacket@@W4SubClientId@@@Z"
-relative = false
-extra = 0
-# 1. find bytes "48 65 61 64 65 72 20 44 61 74 61 00" = "Header Data\0" (a BinaryStream::writeString label;
-#    referenced here AND in NetworkSystem::sendToMultiple)
-# 2. tell them apart (name-independent): sendToMultiple loops over an id vector (back-edge); this one
-#    (send) is straight-line for a single id
-# 3. confirm by diffing both vs the old named DB
-pattern = "48 8B 4E ? 48 83 C1 ? 48 83 C4 ? 5B 5D 5F 5E E9 ? ? ? ?"
-rip_relative = true
-rip_offset = 17
-
-[[signatures]]
 name = "?tick@PistonBlockActor@@UEAAXAEAVBlockSource@@@Z"
 relative = false
 extra = 0
@@ -668,17 +655,6 @@ extra = 0
 pattern = "55 41 57 41 56 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 44 0F 29 9D ? ? ? ? 44 0F 29 95 ? ? ? ? 44 0F 29 8D ? ? ? ? 44 0F 29 45"
 
 [[signatures]]
-name = "?stopSleepInBed@Player@@UEAAX_N0@Z"
-relative = false
-extra = 0
-# 1. find bytes "33 20 73 74 6F 70 53 6C 65 65 70 20 62 65 64 20 70 6F 73 00" = "3 stopSleep bed pos\0" (unique)
-# 2. its lone data xref (a validateVec3Position label arg) is a `lea` inside this function
-# 3. walk up to the prologue
-pattern = "FF 15 ? ? ? ? 48 89 F9 89 F2 41 89 D8 E8 ? ? ? ?"
-rip_relative = true
-rip_offset = 15
-
-[[signatures]]
 name = "?take@Player@@QEAA_NAEAVActor@@HH@Z"
 relative = false
 extra = 0
@@ -703,16 +679,6 @@ extra = 0
 # 2. its lone data xref (a validateVec3Position label arg) is a `lea` inside this function
 # 3. walk up to the prologue
 pattern = "55 41 57 41 56 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 44 0F 29 9D ? ? ? ? 44 0F 29 95 ? ? ? ? 44 0F 29 8D ? ? ? ? 66 44 0F 7F 85 ? ? 00 00"
-
-[[signatures]]
-name = "?Send_Windows_Linux_360NoVDP@RNS2_Windows_Linux_360@RakNet@@KAHHPEAURNS2_SendParameters@2@PEBDI@Z"
-relative = false
-extra = 0
-# 1. search the ASCII bytes of "sendto failed with code %s (%i) for char %i and length %i for %s.\n"
-#    + a 00 terminator (unique)
-# 2. its lone data xref is a `lea` inside this function
-# 3. walk up to the prologue
-pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 83 EC ? 48 8D 6C 24 ? 48 C7 45 ? FE FF FF FF 48 89 D6 48 89 CB 48 8B 89 ? ? ? ? 48 85 C9 74"
 
 [[signatures]]
 name = "?peerStartup@RakPeerHelper@@QEAA?AW4StartupResult@RakNet@@PEAVRakPeerInterface@3@AEBUConnectionDefinition@@W4PeerPurpose@1@@Z"
@@ -854,23 +820,6 @@ extra = 0
 #    read ("DisplayObjectives" / "LastUniqueID" / "dummy" default criteria)
 # 3. confirm vs the old named DB (ctor args: CommandSoftEnumRegistry, LevelStorage*, not_null<NonOwnerPointer<GameplayUserManager>>); caller_count 1 = ServerLevel::_initializeScoreboard. Size ballooned 0x3d4 -> 0x3032 from the inlining
 pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 0F 29 BD ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 4C 89 4D ? 4C 89 C6 48 89 CF E8"
-
-[[signatures]]
-name = "?setMessageForServerScripingOnly@SignBlockActor@@QEAAXW4SignTextSide@@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@1@Z"
-relative = false
-extra = 0
-# NOTE: "Scriping" is Mojang's typo, not ours - the mangled name has to keep it.
-# 1. find bytes "53 69 67 6E 54 65 78 74 43 6F 6C 6F 72 00" = "SignTextColor\0" and
-#    "54 65 78 74 4F 77 6E 65 72 00" = "TextOwner\0" (both unique); their data xrefs land in
-#    SignBlockActor::load, which pins the class: mTextFront/mTextBack are the two unique_ptrs the sign
-#    getters index as `[this + (side != 0) * 8 + 0xe8]`, and mProperties is the `or [this+44h], 1` they end on
-# 2. there are two setMessageForServerScripingOnly overloads in that cluster; the one wanted takes a
-#    std::string, so it MOVES the string into Text::mMessage (offset 0) and clears the TextObjectRoot's
-#    child vector - the TextObjectRoot overload does the opposite (moves into the vector, leaves mMessage).
-#    Both then set the cached-message dirty flag, assign mLastEditXuid and setChanged
-# 3. confirm vs the old named DB (member, takes SignTextSide + two by-value std::strings, returns void);
-#    cross-check that the sibling overload sits directly next to it
-pattern = "55 41 56 56 57 53 48 83 EC 70 48 8D 6C 24 70 48 C7 45 ? FE FF FF FF 4C 89 4D ? 48 89 CE 31 C0 85 D2 0F 95 C0 48 8B BC C1 ? ? ? ? 41 0F 10 00"
 
 [[signatures]]
 name = "?updateWeather@WeatherManager@@QEAAXMHMH@Z"

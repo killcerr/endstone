@@ -14,7 +14,7 @@
 
 #include "bedrock/world/level/block/actor/sign_block_actor.h"
 
-#include "bedrock/symbol.h"
+#include <utility>
 
 const std::string &SignBlockActor::Text::getMessage() const
 {
@@ -25,7 +25,17 @@ const std::string &SignBlockActor::Text::getMessage() const
     return text_object_string_;
 }
 
+void SignBlockActor::Text::setMessage(std::string message)
+{
+    message_ = std::move(message);
+    text_object_message_.clear();
+    cached_message_.dirty = true;
+}
+
 void SignBlockActor::setMessageForServerScripingOnly(SignTextSide side, std::string message, std::string owner_id)
 {
-    BEDROCK_CALL(&SignBlockActor::setMessageForServerScripingOnly, this, side, std::move(message), std::move(owner_id));
+    auto &text = _getText(side);
+    text.setMessage(std::move(message));
+    text.setEditedBy(owner_id);
+    setChanged();
 }

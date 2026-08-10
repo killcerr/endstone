@@ -57,6 +57,8 @@ public:
         static constexpr std::size_t MAX_TEXT_LENGTH = 512;
 
         [[nodiscard]] const std::string &getMessage() const;
+        void setMessage(std::string message);
+        void setEditedBy(const std::string &player_xuid) { last_edit_xuid_ = player_xuid; }
         [[nodiscard]] const mce::Color &getColor() const { return sign_text_color_; }
         void setColor(const mce::Color &color) { sign_text_color_ = color; }
         [[nodiscard]] bool isGlowing() const { return glowing_; }

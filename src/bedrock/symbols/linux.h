@@ -11,7 +11,7 @@
 
 namespace endstone::runtime {
 
-static constexpr std::array<std::pair<std::string_view, std::size_t>, 65> symbols = {{
+static constexpr std::array<std::pair<std::string_view, std::size_t>, 61> symbols = {{
     {"BlockState::StateListNode::mHead", 245336464},
     {"Enchant::mEnchants", 245162480},
     {"MobEffect::mMobEffects", 245142824},
@@ -84,19 +84,14 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 65> symbol
     {"_ZN16MinecraftPackets12createPacketE18MinecraftPacketIds", 140088240},
     // Mob
     {"_ZN3Mob9knockbackEP5ActorfffRK19KnockbackParameters", 191262256},
-    // NetworkSystem
-    {"_ZN13NetworkSystem4sendERK17NetworkIdentifierRK6Packet11SubClientId", 140083776},
     // PistonBlockActor
     {"_ZN16PistonBlockActor4tickER11BlockSource", 207100672},
     // Player
     {"_ZN6Player10teleportToERK4Vec3biib", 188049776},
-    {"_ZN6Player14stopSleepInBedEbb", 188060864},
     {"_ZN6Player15startSleepInBedERK8BlockPosbf", 188056592},
     {"_ZN6Player17completeUsingItemEv", 188080240},
     {"_ZN6Player4dropERK9ItemStackb", 188192432},
     {"_ZN6Player4takeER5Actorii", 188139696},
-    // RakNet::RNS2_Windows_Linux_360
-    {"_ZN6RakNet22RNS2_Windows_Linux_36027Send_Windows_Linux_360NoVDPEiPNS_19RNS2_SendParametersEPKcj", 214689920},
     // RakPeerHelper
     {"_ZN13RakPeerHelper11peerStartupEPN6RakNet16RakPeerInterfaceERK20ConnectionDefinitionNS_11PeerPurposeE", 140218816},
     // RepositoryFactory
@@ -116,8 +111,6 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 65> symbol
     {"_ZN12ServerPlayer15changeDimensionE13DimensionType", 160278224},
     // ServerScoreboard
     {"_ZN16ServerScoreboardC2E23CommandSoftEnumRegistryP12LevelStorageN3gsl8not_nullIN7Bedrock15NonOwnerPointerI19GameplayUserManagerEEEE", 208972080},
-    // SignBlockActor
-    {"_ZN14SignBlockActor31setMessageForServerScripingOnlyE12SignTextSideNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES7_", 207187904},
     // WeatherManager
     {"_ZN14WeatherManager13updateWeatherEfifi", 201312544},
 }};
