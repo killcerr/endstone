@@ -43,4 +43,4 @@ public:
     OpenSignPacketPayload payload;
     SerializationMode serialization_mode;
 };
-BEDROCK_STATIC_ASSERT_SIZE(OpenSignPacket, 72, 72);
+BEDROCK_STATIC_ASSERT_SIZE(OpenSignPacket, 72, 64);
