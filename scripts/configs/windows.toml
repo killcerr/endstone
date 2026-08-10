@@ -856,6 +856,23 @@ extra = 0
 pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 0F 29 BD ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? ? ? ? ? 4C 89 4D ? 4C 89 C6 48 89 CF E8"
 
 [[signatures]]
+name = "?setMessageForServerScripingOnly@SignBlockActor@@QEAAXW4SignTextSide@@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@1@Z"
+relative = false
+extra = 0
+# NOTE: "Scriping" is Mojang's typo, not ours - the mangled name has to keep it.
+# 1. find bytes "53 69 67 6E 54 65 78 74 43 6F 6C 6F 72 00" = "SignTextColor\0" and
+#    "54 65 78 74 4F 77 6E 65 72 00" = "TextOwner\0" (both unique); their data xrefs land in
+#    SignBlockActor::load, which pins the class: mTextFront/mTextBack are the two unique_ptrs the sign
+#    getters index as `[this + (side != 0) * 8 + 0xe8]`, and mProperties is the `or [this+44h], 1` they end on
+# 2. there are two setMessageForServerScripingOnly overloads in that cluster; the one wanted takes a
+#    std::string, so it MOVES the string into Text::mMessage (offset 0) and clears the TextObjectRoot's
+#    child vector - the TextObjectRoot overload does the opposite (moves into the vector, leaves mMessage).
+#    Both then set the cached-message dirty flag, assign mLastEditXuid and setChanged
+# 3. confirm vs the old named DB (member, takes SignTextSide + two by-value std::strings, returns void);
+#    cross-check that the sibling overload sits directly next to it
+pattern = "55 41 56 56 57 53 48 83 EC 70 48 8D 6C 24 70 48 C7 45 ? FE FF FF FF 4C 89 4D ? 48 89 CE 31 C0 85 D2 0F 95 C0 48 8B BC C1 ? ? ? ? 41 0F 10 00"
+
+[[signatures]]
 name = "?updateWeather@WeatherManager@@QEAAXMHMH@Z"
 relative = false
 extra = 0

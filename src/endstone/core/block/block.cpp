@@ -23,6 +23,7 @@
 #include "endstone/core/block/block_state.h"
 #include "endstone/core/block/container.h"
 #include "endstone/core/block/item_frame.h"
+#include "endstone/core/block/sign.h"
 #include "endstone/core/server.h"
 
 using endstone::core::EndstoneServer;
@@ -128,6 +129,9 @@ std::unique_ptr<BlockState> EndstoneBlock::captureState() const
         case BlockActorType::ItemFrame:
         case BlockActorType::GlowItemFrame:
             return std::make_unique<EndstoneItemFrame>(*this, static_cast<ItemFrameBlockActor &>(*block_entity));
+        case BlockActorType::Sign:
+        case BlockActorType::HangingSign:
+            return std::make_unique<EndstoneSign>(*this, static_cast<SignBlockActor &>(*block_entity));
         default:
             break;
         }

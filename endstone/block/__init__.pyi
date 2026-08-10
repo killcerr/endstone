@@ -18,6 +18,8 @@ __all__ = [
     "BlockType",
     "Container",
     "ItemFrame",
+    "Sign",
+    "SignSide",
 ]
 
 class Block:
@@ -375,3 +377,91 @@ class ItemFrame(BlockState):
 
     @rotation.setter
     def rotation(self, arg1: Rotation) -> None: ...
+
+class SignSide:
+    """
+    Represents a side of a sign.
+    """
+    @property
+    def lines(self) -> list[str]:
+        """
+        All the lines of text currently on this side of the sign.
+        """
+
+    def get_line(self, index: int) -> str:
+        """
+        Gets the line of text at the specified index on this side of the sign.
+
+        For example, `get_line(0)` will return the first line of text.
+
+        Args:
+            index: The index of the line to get, between 0 and 3.
+
+        Returns:
+            The text of the line, empty if the line is blank.
+        """
+
+    def set_line(self, index: int, line: str) -> None:
+        """
+        Sets the line of text at the specified index on this side of the sign.
+
+        For example, `set_line(0, "Line One")` will set the first line to "Line One".
+
+        Args:
+            index: The index of the line to set, between 0 and 3.
+            line: The new text to set.
+        """
+
+    @property
+    def glowing_text(self) -> bool:
+        """
+        Whether this side of the sign has glowing text.
+        """
+
+    @glowing_text.setter
+    def glowing_text(self, arg1: bool) -> None: ...
+    @property
+    def color(self) -> tuple[int, ...]:
+        """
+        The color of this side of the sign.
+
+        Bedrock stores the text color of a sign as a color rather than as one of the dyes, so this is a
+        `Color` where Bukkit has a `DyeColor`.
+        """
+
+    @color.setter
+    def color(self, arg1: tuple[int, ...]) -> None: ...
+
+class Sign(BlockState):
+    """
+    Represents a captured state of a sign.
+    """
+    class Side(enum.Enum):
+        """
+        Represents a side of a sign.
+        """
+
+        FRONT = 0
+        BACK = 1
+
+    def get_side(self, side: Side) -> SignSide:
+        """
+        Gets the side of this sign.
+
+        Args:
+            side: The side of the sign.
+
+        Returns:
+            The given side of the sign.
+        """
+
+    @property
+    def waxed(self) -> bool:
+        """
+        Whether this sign is waxed.
+
+        A waxed sign cannot be edited by players.
+        """
+
+    @waxed.setter
+    def waxed(self, arg1: bool) -> None: ...

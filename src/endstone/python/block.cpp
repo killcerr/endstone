@@ -165,6 +165,60 @@ void init_block(py::module_ &m, py::classh<Block> &block)
         .def_property("rotation", &ItemFrame::getRotation, &ItemFrame::setRotation,
                       "The rotation of the frame's item.");
 
+    py::classh<SignSide>(m, "SignSide", "Represents a side of a sign.")
+        .def_property_readonly("lines", &SignSide::getLines,
+                               "All the lines of text currently on this side of the sign.")
+        .def("get_line", &SignSide::getLine, py::arg("index"), R"doc(
+    Gets the line of text at the specified index on this side of the sign.
+
+    For example, `get_line(0)` will return the first line of text.
+
+    Args:
+        index: The index of the line to get, between 0 and 3.
+
+    Returns:
+        The text of the line, empty if the line is blank.
+)doc")
+        .def("set_line", &SignSide::setLine, py::arg("index"), py::arg("line"), R"doc(
+    Sets the line of text at the specified index on this side of the sign.
+
+    For example, `set_line(0, "Line One")` will set the first line to "Line One".
+
+    Args:
+        index: The index of the line to set, between 0 and 3.
+        line: The new text to set.
+)doc")
+        .def_property("glowing_text", &SignSide::isGlowingText, &SignSide::setGlowingText,
+                      "Whether this side of the sign has glowing text.")
+        .def_property("color", &SignSide::getColor, &SignSide::setColor, R"doc(
+    The color of this side of the sign.
+
+    Bedrock stores the text color of a sign as a color rather than as one of the dyes, so this is a
+    `Color` where Bukkit has a `DyeColor`.
+)doc");
+
+    auto sign = py::classh<Sign, BlockState>(m, "Sign", "Represents a captured state of a sign.");
+
+    py::native_enum<Sign::Side>(sign, "Side", "enum.Enum", "Represents a side of a sign.")
+        .value("FRONT", Sign::Side::Front)
+        .value("BACK", Sign::Side::Back)
+        .finalize();
+
+    sign.def("get_side", &Sign::getSide, py::arg("side"), py::return_value_policy::reference_internal, R"doc(
+    Gets the side of this sign.
+
+    Args:
+        side: The side of the sign.
+
+    Returns:
+        The given side of the sign.
+)doc")
+        .def_property("waxed", &Sign::isWaxed, &Sign::setWaxed, R"doc(
+    Whether this sign is waxed.
+
+    A waxed sign cannot be edited by players.
+)doc");
+
     block.def_property_readonly("type", &Block::getType, py::return_value_policy::reference,
                                 "The type of the block.")
         .def("set_type", py::overload_cast<BlockTypeId, bool>(&Block::setType), py::arg("type"),

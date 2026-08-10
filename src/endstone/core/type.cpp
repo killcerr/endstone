@@ -26,6 +26,7 @@
 #include "endstone/block/block_state.h"
 #include "endstone/block/container.h"
 #include "endstone/block/item_frame.h"
+#include "endstone/block/sign.h"
 #include "endstone/command/block_command_sender.h"
 #include "endstone/command/command_sender.h"
 #include "endstone/command/console_command_sender.h"
@@ -74,6 +75,7 @@ void registerTypes()
     registerType<BlockState>();
     registerType<Container>().base<BlockState>();
     registerType<ItemFrame>().base<BlockState>();
+    registerType<Sign>().base<BlockState>();
 }
 
 bool isTypeInstanceOf(const std::type_info &from, const std::type_info &target)
