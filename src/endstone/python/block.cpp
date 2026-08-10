@@ -146,6 +146,21 @@ void init_block(py::module_ &m, py::classh<Block> &block)
     longer be valid.
 )doc");
 
+    py::classh<Furnace, Container>(m, "Furnace", R"doc(
+    Represents a captured state of a furnace.
+)doc")
+        .def_property("burn_time", &Furnace::getBurnTime, &Furnace::setBurnTime, R"doc(
+    The burn time.
+
+    This is the number of ticks the current fuel keeps the furnace lit for. A burn time greater
+    than 0 will cause this block to be lit, whilst a time less than 0 will extinguish it.
+)doc")
+        .def_property("cook_time", &Furnace::getCookTime, &Furnace::setCookTime, R"doc(
+    The cook time.
+
+    This is the amount of time the item has been cooking for.
+)doc");
+
     py::classh<ItemFrame, BlockState>(m, "ItemFrame", R"doc(
     Represents a captured state of an item frame.
 )doc")

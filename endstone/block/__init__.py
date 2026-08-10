@@ -11,6 +11,7 @@ __getattr__, __dir__, __all__ = lazy.attach(
             "BlockState",
             "BlockType",
             "Container",
+            "Furnace",
             "ItemFrame",
             "Sign",
             "SignSide",

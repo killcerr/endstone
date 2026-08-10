@@ -44,6 +44,7 @@ add_library(endstone_core
         block/block_face.cpp
         block/block_snapshot.cpp
         block/block_type.cpp
+        block/furnace.cpp
         block/item_frame.cpp
         block/sign.cpp
         boss/boss_bar.cpp

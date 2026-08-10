@@ -25,6 +25,7 @@
 #include "endstone/actor/mob.h"
 #include "endstone/block/block_state.h"
 #include "endstone/block/container.h"
+#include "endstone/block/furnace.h"
 #include "endstone/block/item_frame.h"
 #include "endstone/block/sign.h"
 #include "endstone/command/block_command_sender.h"
@@ -74,6 +75,7 @@ void registerTypes()
     // BlockState hierarchy
     registerType<BlockState>();
     registerType<Container>().base<BlockState>();
+    registerType<Furnace>().base<Container>();
     registerType<ItemFrame>().base<BlockState>();
     registerType<Sign>().base<BlockState>();
 }

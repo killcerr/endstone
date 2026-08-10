@@ -17,6 +17,7 @@ __all__ = [
     "BlockState",
     "BlockType",
     "Container",
+    "Furnace",
     "ItemFrame",
     "Sign",
     "SignSide",
@@ -341,6 +342,32 @@ class Container(BlockState):
         If the block was changed to a different type in the meantime, the returned inventory might no
         longer be valid.
         """
+
+class Furnace(Container):
+    """
+    Represents a captured state of a furnace.
+    """
+    @property
+    def burn_time(self) -> int:
+        """
+        The burn time.
+
+        This is the number of ticks the current fuel keeps the furnace lit for. A burn time greater
+        than 0 will cause this block to be lit, whilst a time less than 0 will extinguish it.
+        """
+
+    @burn_time.setter
+    def burn_time(self, arg1: int) -> None: ...
+    @property
+    def cook_time(self) -> int:
+        """
+        The cook time.
+
+        This is the amount of time the item has been cooking for.
+        """
+
+    @cook_time.setter
+    def cook_time(self, arg1: int) -> None: ...
 
 class ItemFrame(BlockState):
     """

@@ -15,6 +15,7 @@
 #pragma once
 
 #include <memory>
+#include <type_traits>
 
 #include "endstone/block/container.h"
 #include "endstone/core/block/block_state.h"
@@ -22,10 +23,12 @@
 
 namespace endstone::core {
 
-class EndstoneContainer : public EndstoneBlockStateBase<Container> {
+template <typename Interface = Container>
+    requires std::is_base_of_v<Container, Interface>
+class EndstoneContainerBase : public EndstoneBlockStateBase<Interface> {
 public:
-    EndstoneContainer(const EndstoneBlock &block, ::Container &container)
-        : EndstoneBlockStateBase<Container>(block), inventory_(std::make_unique<EndstoneInventory>(container))
+    EndstoneContainerBase(const EndstoneBlock &block, ::Container &container)
+        : EndstoneBlockStateBase<Interface>(block), inventory_(std::make_unique<EndstoneInventory>(container))
     {
     }
 
@@ -37,5 +40,7 @@ public:
 private:
     std::unique_ptr<EndstoneInventory> inventory_;
 };
+
+using EndstoneContainer = EndstoneContainerBase<Container>;
 
 }  // namespace endstone::core
