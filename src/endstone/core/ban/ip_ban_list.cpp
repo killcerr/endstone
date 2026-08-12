@@ -15,8 +15,8 @@
 #include "endstone/core/ban/ip_ban_list.h"
 
 namespace endstone::core {
-bool IpBanEntryMatcher::operator()(const IpBanEntry &entry, const std::string &address) const
+bool IpBanEntryMatcher::operator()(const NotNull<IpBanEntry> &entry, const std::string &address) const
 {
-    return entry.getAddress() == address;
+    return entry->getAddress() == address;
 }
 }  // namespace endstone::core

@@ -30,22 +30,32 @@
 
 namespace endstone::core {
 
-EndstoneScoreboard::EndstoneScoreboard(::Scoreboard &board) : board_(board)
-{
-    init();
-}
+EndstoneScoreboard::EndstoneScoreboard(::Scoreboard &board) : board_(board) {}
 
 EndstoneScoreboard::EndstoneScoreboard(std::unique_ptr<::Scoreboard> board) : board_(*board)
 {
     holder_ = std::move(board);
-    init();
+}
+
+NotNull<EndstoneScoreboard> EndstoneScoreboard::create(::Scoreboard &board)
+{
+    auto result = std::make_shared<EndstoneScoreboard>(board);
+    result->init();
+    return result;
+}
+
+NotNull<EndstoneScoreboard> EndstoneScoreboard::create(std::unique_ptr<::Scoreboard> board)
+{
+    auto result = std::make_shared<EndstoneScoreboard>(std::move(board));
+    result->init();
+    return result;
 }
 
 void EndstoneScoreboard::init()
 {
     auto &server = EndstoneServer::getInstance();
     const auto *level = server.getEndstoneLevel();
-    packet_sender_ = std::make_unique<ScoreboardPacketSender>(server, *this, *level->getHandle().getPacketSender());
+    packet_sender_ = std::make_unique<ScoreboardPacketSender>(server, getSelf(), *level->getHandle().getPacketSender());
     board_.setPacketSender(packet_sender_.get());
 }
 
@@ -67,13 +77,13 @@ std::unique_ptr<Objective> EndstoneScoreboard::addObjective(std::string name, Cr
     Preconditions::checkState(cr != nullptr, "Criteria does not exist.");
     auto *objective = board_.addObjective(name, display_name, *cr);
     Preconditions::checkState(objective != nullptr, "Objective {} already exists.", name);
-    return std::make_unique<EndstoneObjective>(*this, *objective);
+    return std::make_unique<EndstoneObjective>(getSelf(), *objective);
 }
 
 std::unique_ptr<Objective> EndstoneScoreboard::getObjective(std::string name) const
 {
     if (auto *objective = board_.getObjective(name); objective) {
-        return std::make_unique<EndstoneObjective>(const_cast<EndstoneScoreboard &>(*this), *objective);
+        return std::make_unique<EndstoneObjective>(getSelf(), *objective);
     }
     return nullptr;
 }
@@ -84,16 +94,14 @@ std::unique_ptr<Objective> EndstoneScoreboard::getObjective(DisplaySlot slot) co
     if (!display_objective) {
         return nullptr;
     }
-    return std::make_unique<EndstoneObjective>(const_cast<EndstoneScoreboard &>(*this),
-                                               const_cast<::Objective &>(display_objective->getObjective()));
+    return std::make_unique<EndstoneObjective>(getSelf(), const_cast<::Objective &>(display_objective->getObjective()));
 }
 
 std::vector<std::unique_ptr<Objective>> EndstoneScoreboard::getObjectives() const
 {
     std::vector<std::unique_ptr<Objective>> result;
-    board_.forEachObjective([&](auto &objective) {
-        result.push_back(std::make_unique<EndstoneObjective>(const_cast<EndstoneScoreboard &>(*this), objective));
-    });
+    board_.forEachObjective(
+        [&](auto &objective) { result.push_back(std::make_unique<EndstoneObjective>(getSelf(), objective)); });
     return result;
 }
 
@@ -102,7 +110,7 @@ std::vector<std::unique_ptr<Objective>> EndstoneScoreboard::getObjectivesByCrite
     std::vector<std::unique_ptr<Objective>> result;
     board_.forEachObjective([&](auto &objective) {
         if (objective.getCriteria().getName() == getCriteriaName(criteria)) {
-            result.push_back(std::make_unique<EndstoneObjective>(const_cast<EndstoneScoreboard &>(*this), objective));
+            result.push_back(std::make_unique<EndstoneObjective>(getSelf(), objective));
         }
     });
     return result;
@@ -112,7 +120,7 @@ std::vector<std::unique_ptr<Score>> EndstoneScoreboard::getScores(ScoreEntry ent
 {
     std::vector<std::unique_ptr<Score>> result;
     board_.forEachObjective([&](auto &objective) {
-        auto obj = std::make_unique<EndstoneObjective>(const_cast<EndstoneScoreboard &>(*this), objective);
+        auto obj = std::make_unique<EndstoneObjective>(getSelf(), objective);
         result.push_back(std::make_unique<EndstoneScore>(std::move(obj), entry));
     });
     return result;
@@ -135,7 +143,7 @@ std::vector<ScoreEntry> EndstoneScoreboard::getEntries() const
         case IdentityDefinition::Type::Player: {
             auto players = server.getOnlinePlayers();
             for (const auto &player : players) {
-                if (static_cast<EndstonePlayer *>(&*player)->getHandle().getOrCreateUniqueID() ==
+                if (player.cast<EndstonePlayer>()->getHandle().getOrCreateUniqueID() ==
                     id_ref.getPlayerId().actor_unique_id) {
                     result.emplace_back(player);
                 }
@@ -203,12 +211,10 @@ DisplaySlot EndstoneScoreboard::fromMinecraftSlot(std::string slot)
 const ::ScoreboardId &EndstoneScoreboard::getScoreboardId(ScoreEntry entry) const
 {
     return std::visit(overloaded{[&](const NotNull<Player> &player) -> const ::ScoreboardId & {
-                                     return board_.getScoreboardId(
-                                         static_cast<EndstonePlayer *>(&*player)->getHandle());
+                                     return board_.getScoreboardId(player.cast<EndstonePlayer>()->getHandle());
                                  },
                                  [&](const NotNull<Actor> &actor) -> const ::ScoreboardId & {
-                                     return board_.getScoreboardId(
-                                         static_cast<EndstoneActor *>(&*actor)->getHandle());
+                                     return board_.getScoreboardId(actor.cast<EndstoneActor>()->getHandle());
                                  },
                                  [&](const std::string &fake) -> const ::ScoreboardId & {
                                      return board_.getScoreboardId(fake);
@@ -224,12 +230,10 @@ const ::ScoreboardId &EndstoneScoreboard::getOrCreateScoreboardId(ScoreEntry ent
     }
 
     return std::visit(overloaded{[&](const NotNull<Player> &player) -> const ::ScoreboardId & {
-                                     return board_.createScoreboardId(
-                                         static_cast<EndstonePlayer *>(&*player)->getHandle());
+                                     return board_.createScoreboardId(player.cast<EndstonePlayer>()->getHandle());
                                  },
                                  [&](const NotNull<Actor> &actor) -> const ::ScoreboardId & {
-                                     return board_.createScoreboardId(
-                                         static_cast<EndstoneActor *>(&*actor)->getHandle());
+                                     return board_.createScoreboardId(actor.cast<EndstoneActor>()->getHandle());
                                  },
                                  [&](const std::string &fake) -> const ::ScoreboardId & {
                                      return board_.createScoreboardId(fake);
@@ -240,6 +244,11 @@ const ::ScoreboardId &EndstoneScoreboard::getOrCreateScoreboardId(ScoreEntry ent
 ::Scoreboard &EndstoneScoreboard::getHandle() const
 {
     return board_;
+}
+
+NotNull<EndstoneScoreboard> EndstoneScoreboard::getSelf() const
+{
+    return const_cast<EndstoneScoreboard *>(this)->shared_from_this();
 }
 
 }  // namespace endstone::core

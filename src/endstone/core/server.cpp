@@ -203,7 +203,7 @@ void EndstoneServer::setLevel(::Level &level)
         throw std::runtime_error("Level already initialized.");
     }
     level_ = std::make_unique<EndstoneLevel>(level);
-    scoreboard_ = std::make_unique<EndstoneScoreboard>(level.getScoreboard());
+    scoreboard_ = EndstoneScoreboard::create(level.getScoreboard());
     command_map_ = std::make_unique<EndstoneCommandMap>(*this);
     metrics_ = std::make_unique<EndstoneMetrics>(*this);  // start metrics
     loadResourcePacks();
@@ -413,6 +413,11 @@ PluginManager &EndstoneServer::getPluginManager() const
     return *plugin_manager_;
 }
 
+EndstonePluginManager &EndstoneServer::getEndstonePluginManager() const
+{
+    return *plugin_manager_;
+}
+
 Nullable<PluginCommand> EndstoneServer::getPluginCommand(std::string name) const
 {
     if (auto command = command_map_->getCommand(name); command && command->is<PluginCommand>()) {
@@ -421,17 +426,12 @@ Nullable<PluginCommand> EndstoneServer::getPluginCommand(std::string name) const
     return nullptr;
 }
 
-ConsoleCommandSender &EndstoneServer::getCommandSender() const
-{
-    return *command_sender_;
-}
-
-std::shared_ptr<ConsoleCommandSender> EndstoneServer::getCommandSenderPtr() const
+NotNull<ConsoleCommandSender> EndstoneServer::getCommandSender() const
 {
     return command_sender_;
 }
 
-bool EndstoneServer::dispatchCommand(CommandSender &sender, std::string command_line) const
+bool EndstoneServer::dispatchCommand(const NotNull<CommandSender> &sender, std::string command_line) const
 {
     return command_map_->dispatch(sender, std::move(command_line));
 }
@@ -517,7 +517,7 @@ std::vector<NotNull<Player>> EndstoneServer::getOnlinePlayers() const
 {
     std::vector<NotNull<Player>> result;
     level_->getHandle().forEachPlayer([&](const ::Player &player) {
-        result.emplace_back(player.getEndstoneActorPtr<EndstonePlayer>());
+        result.emplace_back(player.getEndstoneActor<EndstonePlayer>());
         return true;
     });
     return result;
@@ -537,7 +537,7 @@ void EndstoneServer::setMaxPlayers(int max_players)
 Nullable<Player> EndstoneServer::getPlayer(UUID id) const
 {
     if (auto *player = level_->getHandle().getPlayer(EndstoneUUID::toMinecraft(id))) {
-        return player->getEndstoneActorPtr<EndstonePlayer>();
+        return player->getEndstoneActor<EndstonePlayer>();
     }
     return nullptr;
 }
@@ -546,7 +546,7 @@ Nullable<Player> EndstoneServer::getPlayer(std::string name) const
 {
     Nullable<Player> result;
     level_->getHandle().forEachPlayer([&](const ::Player &player) {
-        auto endstone_player = player.getEndstoneActorPtr<EndstonePlayer>();
+        auto endstone_player = player.getEndstoneActor<EndstonePlayer>();
         if (boost::iequals(endstone_player->getName(), name)) {
             result = std::move(endstone_player);
             return false;  // found a match; stop iterating
@@ -674,13 +674,12 @@ Nullable<Scoreboard> EndstoneServer::getScoreboard() const
     return scoreboard_;
 }
 
-std::shared_ptr<Scoreboard> EndstoneServer::createScoreboard()
+NotNull<Scoreboard> EndstoneServer::createScoreboard()
 {
     auto registry = CommandSoftEnumRegistry();
     auto board = std::make_unique<ServerScoreboard>(registry, nullptr, level_->getHandle().getGameplayUserManager());
     board->setPacketSender(level_->getHandle().getPacketSender());
-    auto result = std::make_shared<EndstoneScoreboard>(std::move(board));
-    return result;
+    return EndstoneScoreboard::create(std::move(board));
 }
 
 float EndstoneServer::getCurrentMillisecondsPerTick()
@@ -783,9 +782,9 @@ MapView *EndstoneServer::getMap(std::int64_t id) const
     return &saved_data->getMapView();
 }
 
-MapView &EndstoneServer::createMap(const Dimension &dimension) const
+MapView &EndstoneServer::createMap(const NotNull<Dimension> &dimension) const
 {
-    auto &dim = static_cast<const EndstoneDimension &>(dimension).getHandle();
+    auto &dim = dimension.cast<EndstoneDimension>()->getHandle();
     auto &level = dim.getLevel();
     // TODO: should we use dimension spawn point instead of BlockPos::ZERO?
     // creates a new map at world spawn with the scale of 3, without tracking position and unlimited tracking
@@ -793,42 +792,42 @@ MapView &EndstoneServer::createMap(const Dimension &dimension) const
     return map.getMapView();
 }
 
-NotNull<EndstoneScoreboard> EndstoneServer::getPlayerBoard(const EndstonePlayer &player) const
+NotNull<EndstoneScoreboard> EndstoneServer::getPlayerBoard(const NotNull<EndstonePlayer> &player) const
 {
-    auto it = player_boards_.find(player.getUniqueId());
+    auto it = player_boards_.find(player->getUniqueId());
     if (it == player_boards_.end()) {
         return scoreboard_;
     }
     return it->second;
 }
 
-void EndstoneServer::setPlayerBoard(EndstonePlayer &player, NotNull<Scoreboard> scoreboard)
+void EndstoneServer::setPlayerBoard(const NotNull<EndstonePlayer> &player, NotNull<Scoreboard> scoreboard)
 {
     auto &old_board = getPlayerBoard(player)->getHandle();
-    auto &new_board = static_cast<EndstoneScoreboard &>(*scoreboard).getHandle();
+    auto &new_board = scoreboard.cast<EndstoneScoreboard>()->getHandle();
 
     if (&old_board == &new_board) {
         return;
     }
 
     // remove player from the old board
-    getPlayerBoard(player)->resetScores(player.getSelf());
+    getPlayerBoard(player)->resetScores(player->getSelf());
 
     // add player to the new board
-    new_board.onPlayerJoined(player.getHandle());
+    new_board.onPlayerJoined(player->getHandle());
 
     // update tracking records
-    if (&*scoreboard == scoreboard_.get()) {
-        player_boards_.erase(player.getUniqueId());
+    if (scoreboard == scoreboard_) {
+        player_boards_.erase(player->getUniqueId());
     }
     else {
-        player_boards_[player.getUniqueId()] = std::static_pointer_cast<EndstoneScoreboard>(scoreboard.get());
+        player_boards_.insert_or_assign(player->getUniqueId(), scoreboard.cast<EndstoneScoreboard>());
     }
 }
 
-void EndstoneServer::removePlayerBoard(EndstonePlayer &player)
+void EndstoneServer::removePlayerBoard(const NotNull<EndstonePlayer> &player)
 {
-    player_boards_.erase(player.getUniqueId());
+    player_boards_.erase(player->getUniqueId());
 }
 
 void EndstoneServer::tick(std::uint64_t current_tick, const std::function<void()> &tick_function)
@@ -841,8 +840,7 @@ void EndstoneServer::tick(std::uint64_t current_tick, const std::function<void()
     scheduler_->mainThreadHeartbeat(current_tick);
     tick_function();
     for (const auto &p : getOnlinePlayers()) {
-        auto *player = static_cast<EndstonePlayer *>(&*p);
-        player->checkOpStatus();
+        p.cast<EndstonePlayer>()->checkOpStatus();
     }
     // tick end
     const auto end = steady_clock::now();

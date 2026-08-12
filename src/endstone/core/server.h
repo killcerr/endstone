@@ -63,10 +63,10 @@ public:
     [[nodiscard]] Language &getLanguage() const override;
     [[nodiscard]] EndstoneCommandMap &getCommandMap() const;
     [[nodiscard]] PluginManager &getPluginManager() const override;
+    [[nodiscard]] EndstonePluginManager &getEndstonePluginManager() const;
     [[nodiscard]] Nullable<PluginCommand> getPluginCommand(std::string name) const override;
-    [[nodiscard]] ConsoleCommandSender &getCommandSender() const override;
-    [[nodiscard]] std::shared_ptr<ConsoleCommandSender> getCommandSenderPtr() const;
-    [[nodiscard]] bool dispatchCommand(CommandSender &sender, std::string command_line) const override;
+    [[nodiscard]] NotNull<ConsoleCommandSender> getCommandSender() const override;
+    [[nodiscard]] bool dispatchCommand(const NotNull<CommandSender> &sender, std::string command_line) const override;
 
     void loadPlugins();
     void enablePlugins(PluginLoadOrder type);
@@ -98,7 +98,7 @@ public:
 
     [[nodiscard]] ItemFactory &getItemFactory() const override;
     [[nodiscard]] Nullable<Scoreboard> getScoreboard() const override;
-    [[nodiscard]] std::shared_ptr<Scoreboard> createScoreboard() override;
+    [[nodiscard]] NotNull<Scoreboard> createScoreboard() override;
     float getCurrentMillisecondsPerTick() override;
     float getAverageMillisecondsPerTick() override;
     float getCurrentTicksPerSecond() override;
@@ -117,11 +117,11 @@ public:
     [[nodiscard]] ServiceManager &getServiceManager() const override;
     [[nodiscard]] IRegistry *_getRegistry(const std::type_info &type) const override;
     [[nodiscard]] MapView *getMap(std::int64_t id) const override;
-    [[nodiscard]] MapView &createMap(const Dimension &dimension) const override;
+    [[nodiscard]] MapView &createMap(const NotNull<Dimension> &dimension) const override;
 
-    [[nodiscard]] NotNull<EndstoneScoreboard> getPlayerBoard(const EndstonePlayer &player) const;
-    void setPlayerBoard(EndstonePlayer &player, NotNull<Scoreboard> scoreboard);
-    void removePlayerBoard(EndstonePlayer &player);
+    [[nodiscard]] NotNull<EndstoneScoreboard> getPlayerBoard(const NotNull<EndstonePlayer> &player) const;
+    void setPlayerBoard(const NotNull<EndstonePlayer> &player, NotNull<Scoreboard> scoreboard);
+    void removePlayerBoard(const NotNull<EndstonePlayer> &player);
 
     void tick(std::uint64_t current_tick, const std::function<void()> &tick_function);
     void init(ServerInstance &server_instance);
@@ -159,9 +159,9 @@ private:
     std::unique_ptr<EndstoneCommandMap> command_map_;
     std::unique_ptr<EndstoneLevel> level_;
     std::unordered_map<std::type_index, std::unique_ptr<IRegistry>> registries_;
-    std::shared_ptr<EndstoneScoreboard> scoreboard_;
+    Nullable<EndstoneScoreboard> scoreboard_;
     std::unique_ptr<EndstoneMetrics> metrics_;
-    std::unordered_map<UUID, std::shared_ptr<EndstoneScoreboard>> player_boards_;
+    std::unordered_map<UUID, NotNull<EndstoneScoreboard>> player_boards_;
     std::chrono::system_clock::time_point start_time_;
     IResourcePackRepository *resource_pack_repository_ = nullptr;
     std::unordered_map<PackIdVersion, std::string> content_keys_;

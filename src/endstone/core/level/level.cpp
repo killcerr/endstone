@@ -53,7 +53,7 @@ EndstoneLevel::EndstoneLevel(::Level &level) : server_(EndstoneServer::getInstan
 
 void EndstoneLevel::addDimension(::Dimension &dimension)
 {
-    dimensions_[dimension.getDimensionId().value] = std::make_unique<EndstoneDimension>(dimension.getWeakRef(), *this);
+    dimensions_[dimension.getDimensionId().value] = std::make_shared<EndstoneDimension>(dimension.getWeakRef(), *this);
 }
 
 std::string EndstoneLevel::getName() const
@@ -75,7 +75,7 @@ std::vector<NotNull<Actor>> EndstoneLevel::getActors() const
         if (&actor->getLevel() != &level_) {
             continue;
         }
-        result.push_back(actor->getEndstoneActorPtr());
+        result.push_back(actor->getEndstoneActor());
     }
     return result;
 }

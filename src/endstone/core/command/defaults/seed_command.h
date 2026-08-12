@@ -22,7 +22,7 @@ namespace endstone::core {
 class SeedCommand : public EndstoneCommand {
 public:
     SeedCommand();
-    bool execute(CommandSender &sender, const std::vector<std::string> &args) const override;
+    bool execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const override;
 };
 
 }  // namespace endstone::core

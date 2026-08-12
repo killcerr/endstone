@@ -20,6 +20,7 @@
 
 #include "endstone/scoreboard/objective_sort_order.h"
 #include "endstone/scoreboard/score.h"
+#include "endstone/util/pointers.h"
 #include "endstone/util/result.h"
 
 namespace endstone {
@@ -73,7 +74,7 @@ public:
      *
      * @return Owning scoreboard
      */
-    [[nodiscard]] virtual Scoreboard &getScoreboard() const = 0;
+    [[nodiscard]] virtual NotNull<Scoreboard> getScoreboard() const = 0;
 
     /**
      * Unregisters this objective from the associated Scoreboard.

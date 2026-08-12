@@ -90,6 +90,20 @@ public:
     }
 
     /**
+     * Checks whether this handler list has no registered handler.
+     *
+     * @return `true` if nothing is listening for this event
+     */
+    [[nodiscard]] bool empty() const
+    {
+        std::lock_guard lock(mtx_);
+        if (!valid_) {
+            bake();
+        }
+        return baked_handlers_.empty();
+    }
+
+    /**
      * Get the baked registered handlers associated with this handler list.
      *
      * @return the array of registered handlers

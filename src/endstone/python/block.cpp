@@ -108,7 +108,7 @@ void init_block(py::module_ &m, py::classh<Block> &block)
         .def_property("type", &BlockState::getType, &BlockState::setType, py::return_value_policy::reference,
                       "The type of this block state.")
         .def_property("data", &BlockState::getData, &BlockState::setData, "The data for this block state.")
-        .def_property_readonly("dimension", &BlockState::getDimension, py::return_value_policy::reference,
+        .def_property_readonly("dimension", &BlockState::getDimension,
                                "The dimension which contains the block represented by this block state.")
         .def_property_readonly("x", &BlockState::getX, "X-coordinate of this block state.")
         .def_property_readonly("y", &BlockState::getY, "Y-coordinate of this block state.")
@@ -338,8 +338,7 @@ void init_block(py::module_ &m, py::classh<Block> &block)
     Returns:
         `Block` at the given face.
 )doc")
-        .def_property_readonly("dimension", &Block::getDimension, "The dimension which contains this `Block`.",
-                               py::return_value_policy::reference)
+        .def_property_readonly("dimension", &Block::getDimension, "The dimension which contains this `Block`.")
         .def_property_readonly("biome", &Block::getBiome, py::return_value_policy::reference,
                                "The biome that this block resides in.")
         .def_property_readonly("x", &Block::getX, "X-coordinate of this block.")

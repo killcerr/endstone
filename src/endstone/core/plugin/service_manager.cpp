@@ -51,7 +51,7 @@ void EndstoneServiceManager::unregisterAll(const Plugin &plugin)
     }
 }
 
-void EndstoneServiceManager::unregister(std::string name, const Service &provider)
+void EndstoneServiceManager::unregister(std::string name, const NotNull<Service> &provider)
 {
     std::lock_guard lock(mutex_);
 
@@ -60,7 +60,7 @@ void EndstoneServiceManager::unregister(std::string name, const Service &provide
 
         // Remove entries matching the given provider
         std::erase_if(services, [&provider](const RegisteredServiceProvider &registered) {
-            return &*registered.getProvider() == &provider;
+            return registered.getProvider() == provider;
         });
 
         // Remove the entire list if it's empty
@@ -70,7 +70,7 @@ void EndstoneServiceManager::unregister(std::string name, const Service &provide
     }
 }
 
-void EndstoneServiceManager::unregister(const Service &provider)
+void EndstoneServiceManager::unregister(const NotNull<Service> &provider)
 {
     std::lock_guard lock(mutex_);
     for (auto it = providers_.begin(); it != providers_.end();) {
@@ -78,7 +78,7 @@ void EndstoneServiceManager::unregister(const Service &provider)
 
         // Remove entries matching the given provider
         std::erase_if(services, [&provider](const RegisteredServiceProvider &registered) {
-            return &*registered.getProvider() == &provider;
+            return registered.getProvider() == provider;
         });
 
         // Remove the entire list if it's empty

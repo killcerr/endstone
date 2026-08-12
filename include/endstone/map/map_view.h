@@ -113,7 +113,7 @@ public:
      *
      * @param dimension The Dimension to associate this map with.
      */
-    virtual void setDimension(const Dimension &dimension) = 0;
+    virtual void setDimension(const NotNull<Dimension> &dimension) = 0;
 
     /**
      * Get a list of MapRenderers currently in effect.

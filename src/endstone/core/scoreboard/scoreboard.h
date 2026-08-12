@@ -22,11 +22,13 @@
 
 namespace endstone::core {
 
-class EndstoneScoreboard : public Scoreboard {
+class EndstoneScoreboard : public Scoreboard, public std::enable_shared_from_this<EndstoneScoreboard> {
 public:
     explicit EndstoneScoreboard(::Scoreboard &board);
     explicit EndstoneScoreboard(std::unique_ptr<::Scoreboard> board);
-    void init();
+
+    static NotNull<EndstoneScoreboard> create(::Scoreboard &board);
+    static NotNull<EndstoneScoreboard> create(std::unique_ptr<::Scoreboard> board);
 
     std::unique_ptr<Objective> addObjective(std::string name, Criteria::Type criteria) override;
     std::unique_ptr<Objective> addObjective(std::string name, Criteria::Type criteria,
@@ -45,6 +47,7 @@ public:
     [[nodiscard]] const ::ScoreboardId &getScoreboardId(ScoreEntry entry) const;
     const ::ScoreboardId &getOrCreateScoreboardId(ScoreEntry entry);
     [[nodiscard]] ::Scoreboard &getHandle() const;
+    [[nodiscard]] NotNull<EndstoneScoreboard> getSelf() const;
 
     static std::string getCriteriaName(Criteria::Type type);
     static std::string toMinecraftSlot(DisplaySlot slot);
@@ -53,6 +56,8 @@ public:
 private:
     friend class EndstoneObjective;
     friend class EndstoneScore;
+
+    void init();
 
     ::Scoreboard &board_;
     std::unique_ptr<::Scoreboard> holder_;

@@ -84,9 +84,9 @@ Nullable<Dimension> EndstoneMapView::getDimension() const
     return level->getDimension(dimension.unwrap()->getDimensionId());
 }
 
-void EndstoneMapView::setDimension(const Dimension &dimension)
+void EndstoneMapView::setDimension(const NotNull<Dimension> &dimension)
 {
-    map_.setDimensionId(static_cast<const EndstoneDimension &>(dimension).getHandle().getDimensionId());
+    map_.setDimensionId(dimension.cast<EndstoneDimension>()->getHandle().getDimensionId());
 }
 
 std::vector<std::shared_ptr<MapRenderer>> EndstoneMapView::getRenderers() const
@@ -141,10 +141,10 @@ void EndstoneMapView::setLocked(const bool locked)
     }
 }
 
-const RenderData &EndstoneMapView::render(EndstonePlayer &player)
+const RenderData &EndstoneMapView::render(const NotNull<EndstonePlayer> &player)
 {
     bool context = isContextual();
-    auto unique_id = context ? player.getId() : ActorUniqueID::INVALID_ID.raw_id;
+    auto unique_id = context ? player->getId() : ActorUniqueID::INVALID_ID.raw_id;
     RenderData &render = render_cache_.emplace(unique_id, RenderData()).first->second;
     if (context) {
         render_cache_.erase(ActorUniqueID::INVALID_ID.raw_id);
@@ -155,7 +155,7 @@ const RenderData &EndstoneMapView::render(EndstonePlayer &player)
 
     for (const auto &renderer : renderers_) {
         auto &canvas = *canvases_.at(renderer)
-                            .emplace(renderer->isContextual() ? player.getId() : ActorUniqueID::INVALID_ID.raw_id,
+                            .emplace(renderer->isContextual() ? player->getId() : ActorUniqueID::INVALID_ID.raw_id,
                                      std::make_unique<EndstoneMapCanvas>(*this))
                             .first->second;
 
@@ -164,7 +164,7 @@ const RenderData &EndstoneMapView::render(EndstonePlayer &player)
             renderer->render(*this, canvas, player);
         }
         catch (std::exception &e) {
-            player.getServer().getLogger().critical("Could not render map: {}", e.what());
+            player->getServer().getLogger().critical("Could not render map: {}", e.what());
         }
         render.buffer = canvas.getBuffer();
 

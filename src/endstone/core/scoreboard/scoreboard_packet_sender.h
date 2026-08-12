@@ -15,6 +15,7 @@
 #pragma once
 
 #include "bedrock/network/packet_sender.h"
+#include "endstone/util/pointers.h"
 
 namespace endstone::core {
 
@@ -23,7 +24,7 @@ class EndstoneServer;
 
 class ScoreboardPacketSender : public PacketSender {
 public:
-    ScoreboardPacketSender(EndstoneServer &server, EndstoneScoreboard &scoreboard, PacketSender &sender);
+    ScoreboardPacketSender(EndstoneServer &server, const NotNull<EndstoneScoreboard> &scoreboard, PacketSender &sender);
     ~ScoreboardPacketSender() override = default;
     [[nodiscard]] bool isInitialized() const override;
     void send(::Packet &) override;
@@ -38,7 +39,7 @@ public:
 
 private:
     EndstoneServer &server_;
-    EndstoneScoreboard &scoreboard_;
+    NotNull<EndstoneScoreboard> scoreboard_;
     PacketSender &sender_;
 };
 

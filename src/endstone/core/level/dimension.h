@@ -27,7 +27,7 @@
 class LevelChunk;
 
 namespace endstone::core {
-class EndstoneDimension : public Dimension {
+class EndstoneDimension : public Dimension, public std::enable_shared_from_this<EndstoneDimension> {
 public:
     explicit EndstoneDimension(WeakRef<::Dimension> dimension, EndstoneLevel &level);
     ~EndstoneDimension() override = default;
@@ -44,11 +44,12 @@ public:
     [[nodiscard]] bool isChunkLoaded(int x, int z) const override;
     bool loadChunk(int x, int z) override;
     bool unloadChunk(int x, int z) override;
-    [[nodiscard]] Item &dropItem(Location location, const ItemStack &item) override;
+    [[nodiscard]] NotNull<Item> dropItem(Location location, const ItemStack &item) override;
     [[nodiscard]] Nullable<Actor> spawnActor(Location location, ActorTypeId type) override;
     [[nodiscard]] std::vector<NotNull<Actor>> getActors() const override;
 
     [[nodiscard]] ::Dimension &getHandle() const;
+    [[nodiscard]] NotNull<EndstoneDimension> getSelf() const;
 
 private:
     WeakRef<::Dimension> dimension_;

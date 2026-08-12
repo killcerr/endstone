@@ -83,7 +83,7 @@ public:
      *
      * @return the player's socket address
      */
-    [[nodiscard]] virtual SocketAddress getAddress() const = 0;
+    [[nodiscard]] virtual const SocketAddress &getAddress() const = 0;
 
     /**
      * Transfers the player to another server.

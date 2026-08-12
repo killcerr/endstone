@@ -37,7 +37,7 @@ public:
     }
 
     explicit EndstoneBlockStateBase(NotNull<Dimension> dimension, BlockPos block_pos, const ::Block &block)
-        : dimension_(std::static_pointer_cast<EndstoneDimension>(dimension.get())),
+        : dimension_(dimension.cast<EndstoneDimension>()),
           block_source_(dimension_->getHandle().getBlockSourceFromMainChunkSource()), block_pos_(block_pos),
           block_(const_cast<::Block *>(&block))
     {

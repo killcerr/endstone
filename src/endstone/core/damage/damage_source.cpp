@@ -34,7 +34,7 @@ Nullable<Actor> EndstoneDamageSource::getActor() const
 {
     const auto *level = EndstoneServer::getInstance().getEndstoneLevel();
     if (const auto *actor = level->getHandle().fetchEntity(damage_source_.getEntityUniqueID(), false); actor) {
-        return actor->getEndstoneActorPtr();
+        return actor->getEndstoneActor();
     }
     return nullptr;
 }
@@ -43,7 +43,7 @@ Nullable<Actor> EndstoneDamageSource::getDamagingActor() const
 {
     const auto *level = EndstoneServer::getInstance().getEndstoneLevel();
     if (const auto *actor = level->getHandle().fetchEntity(damage_source_.getDamagingEntityUniqueID(), false); actor) {
-        return actor->getEndstoneActorPtr();
+        return actor->getEndstoneActor();
     }
     return nullptr;
 }

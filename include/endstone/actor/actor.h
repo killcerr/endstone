@@ -117,7 +117,7 @@ public:
      * @param target Actor to teleport this actor to
      * @return `true` if the teleport was successful.
      */
-    virtual bool teleport(const Actor &target) = 0;
+    virtual bool teleport(const NotNull<Actor> &target) = 0;
 
     /**
      * Returns a unique id for this actor.

@@ -29,7 +29,7 @@ bool handleEvent(const ActorKilledEvent &event)
 {
     if (const auto *mob = WeakEntityRef(event.actor_context).tryUnwrap<::Mob>(); mob && !mob->isPlayer()) {
         const auto &server = endstone::core::EndstoneServer::getInstance();
-        endstone::ActorDeathEvent e{mob->getEndstoneActorPtr<endstone::core::EndstoneMob>(),
+        endstone::ActorDeathEvent e{mob->getEndstoneActor<endstone::core::EndstoneMob>(),
                                     std::make_unique<endstone::core::EndstoneDamageSource>(*event.source)};
         server.getPluginManager().callEvent(e);
     }
@@ -50,7 +50,7 @@ bool handleEvent(const ActorRemovedEvent &event)
             return true;
         }
 
-        endstone::ActorRemoveEvent e{actor->getEndstoneActorPtr()};
+        endstone::ActorRemoveEvent e{actor->getEndstoneActor()};
         endstone::core::EndstoneServer::getInstance().getPluginManager().callEvent(e);
     }
     return true;
@@ -60,7 +60,7 @@ bool handleEvent(::ActorBeforeHurtEvent &event)
 {
     const auto &source = event.source;
     const auto &server = endstone::core::EndstoneServer::getInstance();
-    auto mob = event.entity.getEndstoneActorPtr<endstone::core::EndstoneMob>();
+    auto mob = event.entity.getEndstoneActor<endstone::core::EndstoneMob>();
     endstone::ActorDamageEvent e{mob, std::make_unique<endstone::core::EndstoneDamageSource>(source), event.damage};
     server.getPluginManager().callEvent(e);
     if (e.isCancelled()) {

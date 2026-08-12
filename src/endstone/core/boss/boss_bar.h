@@ -15,13 +15,13 @@
 #pragma once
 
 #include <bitset>
+#include <memory>
+#include <set>
 #include <string>
-#include <unordered_set>
 #include <utility>
 
 #include "bedrock/network/packet/boss_event_packet.h"
 #include "endstone/boss/boss_bar.h"
-#include "endstone/util/uuid.h"
 
 namespace endstone::core {
 
@@ -48,13 +48,13 @@ public:
     void setProgress(float progress) override;
     [[nodiscard]] bool isVisible() const override;
     void setVisible(bool visible) override;
-    void addPlayer(Player &player) override;
-    void removePlayer(Player &player) override;
+    void addPlayer(const NotNull<Player> &player) override;
+    void removePlayer(const NotNull<Player> &player) override;
     void removeAll() override;
     [[nodiscard]] std::vector<NotNull<Player>> getPlayers() const override;
 
 private:
-    void send(BossEventUpdateType event_type, Player &player);
+    void send(BossEventUpdateType event_type, const NotNull<Player> &player);
     void broadcast(BossEventUpdateType event_type);
 
     std::string title_;
@@ -63,7 +63,7 @@ private:
     BarStyle style_;
     std::bitset<2> flags_;
     bool visible_{true};
-    mutable std::unordered_set<UUID> players_;
+    mutable std::set<std::weak_ptr<Player>, std::owner_less<std::weak_ptr<Player>>> players_;
 };
 
 }  // namespace endstone::core

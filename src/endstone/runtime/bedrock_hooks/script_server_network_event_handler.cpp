@@ -52,14 +52,14 @@ GameplayHandlerResult<CoordinatorResult> handleEvent(ChatEvent &event,
         auto r = std::vector<endstone::NotNull<endstone::Player>>();
         for (const auto &weak_ref : event.targets.value()) {
             if (const auto *receipt = WeakEntityRef(weak_ref).tryUnwrap<::Player>(); receipt) {
-                r.emplace_back(receipt->getEndstoneActorPtr<endstone::core::EndstonePlayer>());
+                r.emplace_back(receipt->getEndstoneActor<endstone::core::EndstonePlayer>());
             }
         }
         recipients = r;
     }
 
     // call endstone's chat event before the script api
-    endstone::PlayerChatEvent e{player->getEndstoneActorPtr<endstone::core::EndstonePlayer>(), event.message, recipients};
+    endstone::PlayerChatEvent e{player->getEndstoneActor<endstone::core::EndstonePlayer>(), event.message, recipients};
     auto original_format = e.getFormat();
 
     server.getPluginManager().callEvent(e);
@@ -97,7 +97,7 @@ GameplayHandlerResult<CoordinatorResult> handleEvent(ChatEvent &event,
 
     // Message has been changed, send new text messages and cancel the original event to avoid double sending
     if (e.getMessage() != event.message) {
-        player = &static_cast<endstone::core::EndstonePlayer &>(*e.getPlayer()).getHandle();
+        player = &e.getPlayer().cast<endstone::core::EndstonePlayer>()->getHandle();
         for (const auto &recipient : e.getRecipients()) {
             auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::Text);
             auto &pk = static_cast<TextPacket &>(*packet);
@@ -105,7 +105,7 @@ GameplayHandlerResult<CoordinatorResult> handleEvent(ChatEvent &event,
                 .xuid = player->getXuid(),
                 .platform_id = player->getPlatformOnlineId(),
                 .body = TextPacketPayload::AuthorAndMessage{TextPacketType::Chat, player->getName(), e.getMessage()}};
-            static_cast<endstone::core::EndstonePlayer *>(&*recipient)->getHandle().sendNetworkPacket(*packet);
+            recipient.cast<endstone::core::EndstonePlayer>()->getHandle().sendNetworkPacket(*packet);
         }
         return CANCEL;
     }

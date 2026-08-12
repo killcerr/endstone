@@ -24,9 +24,10 @@ class MinecraftCommandWrapper : public EndstoneCommand {
 public:
     explicit MinecraftCommandWrapper(MinecraftCommands &minecraft_commands,
                                      const CommandRegistry::Signature &minecraft_command);
-    [[nodiscard]] bool execute(CommandSender &sender, const std::vector<std::string> &args) const override;
+    [[nodiscard]] bool execute(const NotNull<CommandSender> &sender,
+                               const std::vector<std::string> &args) const override;
 
-    static std::unique_ptr<CommandOrigin> getCommandOrigin(CommandSender &sender);
+    static std::unique_ptr<CommandOrigin> getCommandOrigin(const NotNull<CommandSender> &sender);
 
 private:
     static std::string getPermission(const CommandRegistry::Signature &minecraft_command);

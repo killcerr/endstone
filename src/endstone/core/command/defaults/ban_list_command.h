@@ -20,7 +20,7 @@ namespace endstone::core {
 class BanListCommand : public EndstoneCommand {
 public:
     BanListCommand();
-    bool execute(CommandSender &sender, const std::vector<std::string> &args) const override;
+    bool execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const override;
 };
 
 }  // namespace endstone::core

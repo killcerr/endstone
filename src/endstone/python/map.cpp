@@ -24,9 +24,9 @@ public:
 
     void initialize(MapView &map) override { PYBIND11_OVERRIDE(void, MapRenderer, initialize, std::ref(map)); }
 
-    void render(MapView &map, MapCanvas &canvas, Player &player) override
+    void render(MapView &map, MapCanvas &canvas, const NotNull<Player> &player) override
     {
-        PYBIND11_OVERRIDE_PURE(void, MapRenderer, render, std::ref(map), std::ref(canvas), std::ref(player));
+        PYBIND11_OVERRIDE_PURE(void, MapRenderer, render, std::ref(map), std::ref(canvas), player);
     }
 };
 
@@ -168,7 +168,7 @@ void init_map(py::module_ &m)
         .def_property("center_x", &MapView::getCenterX, &MapView::setCenterX, "The center X position of this map.")
         .def_property("center_z", &MapView::getCenterZ, &MapView::setCenterZ, "The center Z position of this map.")
         .def_property("dimension", &MapView::getDimension, &MapView::setDimension,
-                      "The dimension that this map is associated with.", py::return_value_policy::reference)
+                      "The dimension that this map is associated with.")
         .def_property_readonly("renderers", &MapView::getRenderers, "A list of `MapRenderer`s currently in effect.",
                                py::return_value_policy::reference_internal)
         .def("add_renderer", &MapView::addRenderer, py::arg("renderer"), R"doc(

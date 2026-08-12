@@ -413,7 +413,7 @@ void init_server(py::classh<Server> &server)
     Returns:
         A `PluginCommand` if found, `None` otherwise.
 )doc")
-        .def_property_readonly("command_sender", &Server::getCommandSender, py::return_value_policy::reference,
+        .def_property_readonly("command_sender", &Server::getCommandSender,
                                "A console `CommandSender` for this server.")
         .def("dispatch_command", &Server::dispatchCommand, py::arg("sender"), py::arg("command_line"), R"doc(
     Dispatches a command on this server, and executes it if found.
@@ -518,8 +518,7 @@ void init_server(py::classh<Server> &server)
 
     Returns:
         The newly created `Scoreboard`.
-)doc",
-             py::return_value_policy::reference)
+)doc")
         .def_property_readonly("current_mspt", &Server::getCurrentMillisecondsPerTick,
                                "The current milliseconds per tick (MSPT).")
         .def_property_readonly("average_mspt", &Server::getAverageMillisecondsPerTick,
@@ -609,7 +608,8 @@ void init_player(py::module_ &m, py_class<Player> &player)
         .def_property_readonly("unique_id", &Player::getUniqueId, "The UUID of this player.")
         .def_property("is_op", &Player::isOp, &Player::setOp, "Whether this player is a server operator.")
         .def_property_readonly("xuid", &Player::getXuid, "The Xbox User ID (XUID) of this player.")
-        .def_property_readonly("address", &Player::getAddress, "The socket address of this player.")
+        .def_property_readonly("address", &Player::getAddress, py::return_value_policy::copy,
+                               "The socket address of this player.")
         .def("transfer", &Player::transfer, py::arg("host"), py::arg("port") = 19132, R"doc(
     Transfers the player to another server.
 
@@ -710,7 +710,7 @@ void init_player(py::module_ &m, py_class<Player> &player)
         .def_property("walk_speed", &Player::getWalkSpeed, &Player::setWalkSpeed,
                       "The current allowed speed that a client can walk. Default is 0.10.")
         .def_property("scoreboard", &Player::getScoreboard, &Player::setScoreboard,
-                      "The player's visible `Scoreboard`.", py::return_value_policy::reference)
+                      "The player's visible `Scoreboard`.")
         .def("send_title", py::overload_cast<std::string, std::string, int, int, int>(&Player::sendTitle, py::const_),
              py::arg("title"), py::arg("subtitle"), py::arg("fade_in") = 10, py::arg("stay") = 70,
              py::arg("fade_out") = 20, R"doc(

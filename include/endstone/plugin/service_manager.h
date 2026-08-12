@@ -60,14 +60,14 @@ public:
      * @param name The service name
      * @param provider The service provider implementation
      */
-    virtual void unregister(std::string name, const Service &provider) = 0;
+    virtual void unregister(std::string name, const NotNull<Service> &provider) = 0;
 
     /**
      * Unregister a particular provider.
      *
      * @param provider The service provider implementation
      */
-    virtual void unregister(const Service &provider) = 0;
+    virtual void unregister(const NotNull<Service> &provider) = 0;
 
     /**
      * Queries for a provider. This may return null if no provider has been registered for the service.
@@ -90,7 +90,7 @@ public:
     template <typename T>
     Nullable<T> load(std::string name) const
     {
-        return std::static_pointer_cast<T>(get(std::move(name)).get());
+        return get(std::move(name)).cast<T>();
     }
 };
 }  // namespace endstone

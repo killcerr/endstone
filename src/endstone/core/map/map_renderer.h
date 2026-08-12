@@ -22,7 +22,7 @@ namespace endstone::core {
 class EndstoneMapRenderer : public MapRenderer {
 public:
     EndstoneMapRenderer(EndstoneMapView &map_view, MapItemSavedData &map);
-    void render(MapView &map, MapCanvas &canvas, Player &player) override;
+    void render(MapView &map, MapCanvas &canvas, const NotNull<Player> &player) override;
 
 private:
     MapItemSavedData &map_;

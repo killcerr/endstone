@@ -234,7 +234,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
         .def_property_readonly("level", &LevelEvent::getLevel, py::return_value_policy::reference,
                                "The `Level` primarily involved with this event.");
     py::class_<DimensionEvent, LevelEvent>(m, "DimensionEvent", "Represents events within a dimension.")
-        .def_property_readonly("dimension", &DimensionEvent::getDimension, py::return_value_policy::reference,
+        .def_property_readonly("dimension", &DimensionEvent::getDimension,
                                "The `Dimension` primarily involved with this event.");
 
     // Chunk events
@@ -277,9 +277,8 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
     py::class_<PlayerDimensionChangeEvent, PlayerEvent>(m, "PlayerDimensionChangeEvent",
                                                         "Called when a player switches to another dimension.")
         .def_property_readonly("from_dimension", &PlayerDimensionChangeEvent::getFrom,
-                               py::return_value_policy::reference, "The player's previous dimension.")
-        .def_property_readonly("to_dimension", &PlayerDimensionChangeEvent::getTo, py::return_value_policy::reference,
-                               "The player's new dimension.");
+                               "The player's previous dimension.")
+        .def_property_readonly("to_dimension", &PlayerDimensionChangeEvent::getTo, "The player's new dimension.");
     py::class_<PlayerDropItemEvent, PlayerEvent, ICancellable>(
         m, "PlayerDropItemEvent", "Called when a player drops an item from their inventory.")
         .def_property_readonly("item", &PlayerDropItemEvent::getItem, py::return_value_policy::reference,
@@ -423,7 +422,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 
     This may return `None` if the packet is sent before the player completes the login process.
 )doc")
-        .def_property_readonly("address", &PacketReceiveEvent::getAddress,
+        .def_property_readonly("address", &PacketReceiveEvent::getAddress, py::return_value_policy::copy,
                                "The network address of the client that sent this packet.")
         .def_property_readonly("sub_client_id", &PacketReceiveEvent::getSubClientId, R"doc(
     The SubClient ID.
@@ -443,7 +442,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 
     This may return `None` if the packet is sent before the player completes the login process.
 )doc")
-        .def_property_readonly("address", &PacketSendEvent::getAddress,
+        .def_property_readonly("address", &PacketSendEvent::getAddress, py::return_value_policy::copy,
                                "The network address to which this packet is being sent.")
         .def_property_readonly("sub_client_id", &PacketSendEvent::getSubClientId, R"doc(
     The SubClient ID.
@@ -480,7 +479,8 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 
     py::class_<ServerListPingEvent, ServerEvent, ICancellable>(m, "ServerListPingEvent",
                                                                "Called when a server ping is coming in.")
-        .def_property_readonly("address", &ServerListPingEvent::getAddress, "The address the ping is coming from.")
+        .def_property_readonly("address", &ServerListPingEvent::getAddress, py::return_value_policy::copy,
+                               "The address the ping is coming from.")
         .def_property("server_guid", &ServerListPingEvent::getServerGuid, &ServerListPingEvent::setServerGuid,
                       "The unique identifier of the server.")
         .def_property("local_port", &ServerListPingEvent::getLocalPort, &ServerListPingEvent::setLocalPort,

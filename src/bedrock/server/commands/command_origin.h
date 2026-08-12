@@ -28,6 +28,7 @@
 #include "bedrock/world/actor/player/abilities.h"
 #include "bedrock/world/level/block_pos.h"
 #include "bedrock/world/level/dimension/dimension.h"
+#include "endstone/util/pointers.h"
 
 class Actor;
 class Level;
@@ -80,7 +81,7 @@ protected:
     virtual void _setUUID(const mce::UUID &uuid) = 0;  // 33
 
 public:
-    [[nodiscard]] std::shared_ptr<endstone::CommandSender> getEndstoneSender(CommandOutput &output) const;  // Endstone
+    [[nodiscard]] endstone::NotNull<endstone::CommandSender> getEndstoneSender(CommandOutput &output) const;  // Endstone
 
 protected:
     mce::UUID uuid_;

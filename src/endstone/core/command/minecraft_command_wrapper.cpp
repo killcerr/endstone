@@ -47,7 +47,7 @@ MinecraftCommandWrapper::MinecraftCommandWrapper(MinecraftCommands &minecraft_co
     setPermissions(getPermission(signature));
 }
 
-bool MinecraftCommandWrapper::execute(CommandSender &sender, const std::vector<std::string> &args) const
+bool MinecraftCommandWrapper::execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const
 {
     if (!testPermission(sender)) {
         return true;
@@ -55,7 +55,7 @@ bool MinecraftCommandWrapper::execute(CommandSender &sender, const std::vector<s
 
     const auto command_origin = getCommandOrigin(sender);
     if (!command_origin) {
-        sender.sendErrorMessage("Unsupported sender type!");
+        sender->sendErrorMessage("Unsupported sender type!");
         return false;
     }
 
@@ -65,7 +65,7 @@ bool MinecraftCommandWrapper::execute(CommandSender &sender, const std::vector<s
     const auto full_command = boost::algorithm::join(command_parts, " ");
     auto *command = minecraft_commands_.compileCommand(  //
         full_command, *command_origin, CurrentCmdVersion::Latest,
-        [&sender](auto const &err) { sender.sendErrorMessage(err); });
+        [&sender](auto const &err) { sender->sendErrorMessage(err); });
 
     if (!command) {
         return false;
@@ -82,10 +82,10 @@ bool MinecraftCommandWrapper::execute(CommandSender &sender, const std::vector<s
     for (const auto &message : output.getMessages()) {
         switch (message.getType()) {
         case CommandOutputMessageType::Success:
-            sender.sendMessage(Translatable(message.getMessageId(), message.getParams()));
+            sender->sendMessage(Translatable(message.getMessageId(), message.getParams()));
             break;
         case CommandOutputMessageType::Error:
-            sender.sendErrorMessage(Translatable(message.getMessageId(), message.getParams()));
+            sender->sendErrorMessage(Translatable(message.getMessageId(), message.getParams()));
             break;
         }
     }
@@ -93,10 +93,10 @@ bool MinecraftCommandWrapper::execute(CommandSender &sender, const std::vector<s
     return output.getSuccessCount() > 0;
 }
 
-std::unique_ptr<CommandOrigin> MinecraftCommandWrapper::getCommandOrigin(CommandSender &sender)
+std::unique_ptr<CommandOrigin> MinecraftCommandWrapper::getCommandOrigin(const NotNull<CommandSender> &sender)
 {
     const auto *level = EndstoneServer::getInstance().getEndstoneLevel();
-    if (const auto *console = sender.as<ConsoleCommandSender>(); console) {
+    if (const auto *console = sender->as<ConsoleCommandSender>(); console) {
         ::CompoundTag tag;
         {
             tag.putByte("OriginType", static_cast<std::uint8_t>(CommandOriginType::DedicatedServer));
@@ -107,7 +107,7 @@ std::unique_ptr<CommandOrigin> MinecraftCommandWrapper::getCommandOrigin(Command
         return CommandOriginLoader::load(tag, static_cast<ServerLevel &>(level->getHandle()));
     }
 
-    if (const auto *player = sender.as<Player>(); player) {
+    if (const auto *player = sender->as<Player>(); player) {
         ::CompoundTag tag;
         {
             tag.putByte("OriginType", static_cast<std::uint8_t>(CommandOriginType::Player));
@@ -116,7 +116,7 @@ std::unique_ptr<CommandOrigin> MinecraftCommandWrapper::getCommandOrigin(Command
         return CommandOriginLoader::load(tag, static_cast<ServerLevel &>(level->getHandle()));
     }
 
-    if (const auto *actor = sender.as<Actor>(); actor) {
+    if (const auto *actor = sender->as<Actor>(); actor) {
         ::CompoundTag tag;
         {
             tag.putByte("OriginType", static_cast<std::uint8_t>(CommandOriginType::Entity));

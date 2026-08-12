@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "endstone/command/command_sender.h"
+#include "endstone/util/pointers.h"
 
 namespace endstone {
 
@@ -52,7 +53,7 @@ public:
      * @param command_line command + arguments. Example: "/test abc 123"
      * @return true if execution is successful, false otherwise
      */
-    virtual bool dispatch(CommandSender &sender, std::string command_line) const = 0;
+    virtual bool dispatch(const NotNull<CommandSender> &sender, std::string command_line) const = 0;
 
     /**
      * Clears all registered commands.

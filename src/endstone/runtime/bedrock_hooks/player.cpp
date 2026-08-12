@@ -44,7 +44,7 @@ void Player::teleportTo(const Vec3 &pos, bool should_stop_riding, int cause, int
     }
 
     const auto &server = endstone::core::EndstoneServer::getInstance();
-    auto player = getEndstoneActorPtr<endstone::core::EndstonePlayer>();
+    auto player = getEndstoneActor<endstone::core::EndstonePlayer>();
     const endstone::Location to{player->getDimension(), pos.x, pos.y, pos.z, getRotation().x, getRotation().y};
     endstone::PlayerTeleportEvent e{player, player->getLocation(), to};
     server.getPluginManager().callEvent(e);
@@ -64,7 +64,7 @@ void Player::completeUsingItem()
     const auto hand = inventory_->getSelectedSlot().container_id == CONTAINER_ID_INVENTORY
                         ? endstone::EquipmentSlot::Hand
                         : endstone::EquipmentSlot::OffHand;
-    endstone::PlayerItemConsumeEvent e{getEndstoneActorPtr<endstone::core::EndstonePlayer>(), std::move(item), hand};
+    endstone::PlayerItemConsumeEvent e{getEndstoneActor<endstone::core::EndstonePlayer>(), std::move(item), hand};
     server.getPluginManager().callEvent(e);
     if (e.isCancelled()) {
         setStatusFlag(ActorFlags::USINGITEM, false);
@@ -78,7 +78,7 @@ void Player::completeUsingItem()
 bool Player::drop(const ItemStack &item, bool randomly)
 {
     const auto &server = endstone::core::EndstoneServer::getInstance();
-    auto player = getEndstoneActorPtr<endstone::core::EndstonePlayer>();
+    auto player = getEndstoneActor<endstone::core::EndstonePlayer>();
     if (isAlive() && isPlayerInitialized()) {
         const auto drop = endstone::core::EndstoneItemStack::fromMinecraft(item);
         endstone::PlayerDropItemEvent e(player, drop);
@@ -99,8 +99,8 @@ bool Player::take(Actor &actor, int unknown, int favored_slot)
     // TODO(refactor): replace with SAPI's ActorBeforeAcquireItemEvent?
     if (actor.hasCategory(ActorCategory::Item)) {
         const auto &server = endstone::core::EndstoneServer::getInstance();
-        auto player = getEndstoneActorPtr<endstone::core::EndstonePlayer>();
-        auto item = actor.getEndstoneActorPtr<endstone::core::EndstoneItem>();
+        auto player = getEndstoneActor<endstone::core::EndstonePlayer>();
+        auto item = actor.getEndstoneActor<endstone::core::EndstoneItem>();
         endstone::PlayerPickupItemEvent e(player, item);
         server.getPluginManager().callEvent(e);
         if (e.isCancelled()) {
@@ -156,7 +156,7 @@ BedSleepingResult Player::startSleepInBed(BlockPos const &bed_block_pos, bool a2
     auto bed_result = getBedResult(bed_block_pos);
     if (bed_result == BedSleepingResult::OK) {
         const auto &server = endstone::core::EndstoneServer::getInstance();
-        auto player = getEndstoneActorPtr<endstone::core::EndstonePlayer>();
+        auto player = getEndstoneActor<endstone::core::EndstonePlayer>();
         const auto block = endstone::core::EndstoneBlock::at(getDimensionBlockSource(), bed_block_pos);
 
         endstone::PlayerBedEnterEvent e(player, *block);

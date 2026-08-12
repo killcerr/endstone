@@ -23,7 +23,7 @@ namespace endstone::core {
 class DevToolsCommand : public core::EndstoneCommand {
 public:
     DevToolsCommand();
-    bool execute(CommandSender &sender, const std::vector<std::string> &args) const override;
+    bool execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const override;
 };
 
 }  // namespace endstone::core

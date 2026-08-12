@@ -27,18 +27,15 @@ namespace {
 bool handleEvent(const ScriptCommandMessageEvent &event)
 {
     const auto &server = endstone::core::EndstoneServer::getInstance();
-    const endstone::CommandSender *sender = nullptr;
+    // TODO(command): add support for BlockCommandSender
+    endstone::NotNull<endstone::CommandSender> sender = server.getCommandSender();
     if (event.source_actor.has_value()) {
         if (const auto *actor = event.level.fetchEntity(event.source_actor.value(), false); actor) {
-            sender = &actor->getEndstoneActor();
+            sender = actor->getEndstoneActor();
         }
     }
-    // TODO(command): add support for BlockCommandSender
-    if (!sender) {
-        sender = &server.getCommandSender();
-    }
 
-    endstone::ScriptMessageEvent e{event.message_id, event.message_value, *sender};
+    endstone::ScriptMessageEvent e{event.message_id, event.message_value, sender};
     server.getPluginManager().callEvent(e);
     return !e.isCancelled();
 }

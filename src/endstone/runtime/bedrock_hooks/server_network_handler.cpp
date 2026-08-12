@@ -41,7 +41,7 @@ void ServerNetworkHandler::disconnectClientWithMessage(const NetworkIdentifier &
         }
         else {
             auto kick_message = getI18n().get(message, nullptr);
-            endstone::PlayerKickEvent e{player->getEndstoneActorPtr<endstone::core::EndstonePlayer>(), kick_message};
+            endstone::PlayerKickEvent e{player->getEndstoneActor<endstone::core::EndstonePlayer>(), kick_message};
             server.getPluginManager().callEvent(e);
             if (e.isCancelled()) {
                 return;
@@ -69,7 +69,7 @@ bool ServerNetworkHandler::tryToLoadPlayer(ServerPlayer &server_player, const Co
     const auto new_player = ENDSTONE_HOOK_CALL_ORIGINAL(&ServerNetworkHandler::tryToLoadPlayer, this, server_player,
                                                         connection_request, player_info);
     const auto &server = endstone::core::EndstoneServer::getInstance();
-    auto endstone_player = server_player.getEndstoneActorPtr<endstone::core::EndstonePlayer>();
+    auto endstone_player = server_player.getEndstoneActor<endstone::core::EndstonePlayer>();
     endstone_player->initFromConnectionRequest(connection_request);
 
     endstone::PlayerLoginEvent e{endstone_player};
@@ -160,7 +160,7 @@ std::optional<PlayerAuthenticationInfo> ServerNetworkHandler::_validateLoginPack
     const auto uuid = endstone::core::EndstoneUUID::fromMinecraft(info.authenticated_uuid);
     const auto &xuid = info.xuid;
     if (server.getBanList().isBanned(name, uuid, xuid)) {
-        const gsl::not_null ban_entry = server.getBanList().getBanEntry(name, uuid, xuid);
+        const endstone::NotNull<endstone::PlayerBanEntry> ban_entry = server.getBanList().getBanEntry(name, uuid, xuid);
         if (const auto reason = ban_entry->getReason(); !reason.empty()) {
             server.getServer().getMinecraft()->getServerNetworkHandler()->disconnect(
                 source, SubClientId::PrimaryClient, "You have been banned from this server. Reason: " + reason);

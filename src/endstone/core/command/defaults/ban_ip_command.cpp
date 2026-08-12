@@ -41,7 +41,7 @@ BanIpCommand::BanIpCommand() : EndstoneCommand("ban-ip")
     setPermissions("endstone.command.banip");
 }
 
-bool BanIpCommand::execute(CommandSender &sender, const std::vector<std::string> &args) const
+bool BanIpCommand::execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const
 {
     if (!testPermission(sender)) {
         return true;
@@ -67,12 +67,12 @@ bool BanIpCommand::execute(CommandSender &sender, const std::vector<std::string>
         address = player->getAddress().getHostname();
     }
     else {
-        sender.sendErrorMessage(Translatable{"commands.banip.invalid"});
+        sender->sendErrorMessage(Translatable{"commands.banip.invalid"});
         return true;
     }
 
     if (ban_list.isBanned(address)) {
-        sender.sendErrorMessage("Nothing changed. That IP is already banned.");
+        sender->sendErrorMessage("Nothing changed. That IP is already banned.");
         return true;
     }
 
@@ -81,13 +81,13 @@ bool BanIpCommand::execute(CommandSender &sender, const std::vector<std::string>
         reason = args[1];
     }
 
-    ban_list.addBan(address, reason, std::nullopt, sender.getName());
+    ban_list.addBan(address, reason, std::nullopt, sender->getName());
     if (player) {
-        sender.sendMessage(Translatable{"commands.banip.success.players", {address, player->getName()}});
+        sender->sendMessage(Translatable{"commands.banip.success.players", {address, player->getName()}});
         player->kick("You have been IP banned from this server.");
     }
     else {
-        sender.sendMessage(Translatable{"commands.banip.success", {address}});
+        sender->sendMessage(Translatable{"commands.banip.success", {address}});
     }
 
     for (const auto &online_player : server.getOnlinePlayers()) {

@@ -32,7 +32,7 @@ public:
     void setValue(int score) override;
     [[nodiscard]] bool isScoreSet() const override;
     [[nodiscard]] Objective &getObjective() const override;
-    [[nodiscard]] Scoreboard &getScoreboard() const override;
+    [[nodiscard]] NotNull<Scoreboard> getScoreboard() const override;
 
 private:
     std::unique_ptr<EndstoneObjective> objective_;

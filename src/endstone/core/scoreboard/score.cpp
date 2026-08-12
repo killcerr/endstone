@@ -35,8 +35,8 @@ ScoreEntry EndstoneScore::getEntry() const
 
 int EndstoneScore::getValue() const
 {
-    auto &board = objective_->checkState();
-    const auto &id = board.getScoreboardId(entry_);
+    const auto board = objective_->checkState();
+    const auto &id = board->getScoreboardId(entry_);
     if (id.isValid() && objective_->objective_->hasScore(id)) {
         return objective_->objective_->getPlayerScore(id).value;
     }
@@ -45,12 +45,12 @@ int EndstoneScore::getValue() const
 
 void EndstoneScore::setValue(int score)
 {
-    auto &board = objective_->checkState();
-    const auto &id = board.getOrCreateScoreboardId(entry_);
+    const auto board = objective_->checkState();
+    const auto &id = board->getOrCreateScoreboardId(entry_);
     Preconditions::checkState(id.isValid(), "Unable to create scoreboard id for entry.");
 
     ScoreboardOperationResult result;
-    board.board_.modifyPlayerScore(result, id, *objective_->objective_, score, PlayerScoreSetFunction::Set);
+    board->board_.modifyPlayerScore(result, id, *objective_->objective_, score, PlayerScoreSetFunction::Set);
     switch (result) {
     case ScoreboardOperationResult::ReadOnlyCriteria:
         throw std::runtime_error("Cannot modify read-only score.");
@@ -63,8 +63,8 @@ void EndstoneScore::setValue(int score)
 
 bool EndstoneScore::isScoreSet() const
 {
-    auto &board = objective_->checkState();
-    const auto &id = board.getScoreboardId(entry_);
+    const auto board = objective_->checkState();
+    const auto &id = board->getScoreboardId(entry_);
     return id.isValid() && objective_->objective_->hasScore(id);
 }
 
@@ -73,7 +73,7 @@ Objective &EndstoneScore::getObjective() const
     return *objective_;
 }
 
-Scoreboard &EndstoneScore::getScoreboard() const
+NotNull<Scoreboard> EndstoneScore::getScoreboard() const
 {
     return objective_->getScoreboard();
 }

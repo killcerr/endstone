@@ -32,12 +32,7 @@ PermissibleBase &ActorPermissibleBase::get()
 }
 }  // namespace endstone::core
 
-endstone::Actor &Actor::getEndstoneActor0() const
-{
-    return *getEndstoneActorPtr();
-}
-
-std::shared_ptr<endstone::Actor> Actor::getEndstoneActorPtr0() const
+std::shared_ptr<endstone::Actor> Actor::getEndstoneActor0() const
 {
     auto *self = const_cast<Actor *>(this);
     auto &component = entity_context_.getOrAddComponent<endstone::core::EndstoneActorComponent>();

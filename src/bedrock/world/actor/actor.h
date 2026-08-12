@@ -492,18 +492,11 @@ private:
 
 public:
     template <typename T = endstone::core::EndstoneActor>
-    [[nodiscard]] T &getEndstoneActor() const
+    [[nodiscard]] std::shared_ptr<T> getEndstoneActor() const
     {
-        return static_cast<T &>(getEndstoneActor0());
-    }
-
-    template <typename T = endstone::core::EndstoneActor>
-    [[nodiscard]] std::shared_ptr<T> getEndstoneActorPtr() const
-    {
-        return std::static_pointer_cast<T>(getEndstoneActorPtr0());
+        return std::static_pointer_cast<T>(getEndstoneActor0());
     }
 
 private:
-    endstone::Actor &getEndstoneActor0() const;
-    std::shared_ptr<endstone::Actor> getEndstoneActorPtr0() const;
+    std::shared_ptr<endstone::Actor> getEndstoneActor0() const;
 };

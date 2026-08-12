@@ -43,7 +43,7 @@ public:
     void setCenterX(int x) override;
     void setCenterZ(int z) override;
     [[nodiscard]] Nullable<Dimension> getDimension() const override;
-    void setDimension(const Dimension &dimension) override;
+    void setDimension(const NotNull<Dimension> &dimension) override;
     [[nodiscard]] std::vector<std::shared_ptr<MapRenderer>> getRenderers() const override;
     void addRenderer(std::shared_ptr<MapRenderer> renderer) override;
     bool removeRenderer(const std::shared_ptr<MapRenderer> &renderer) override;
@@ -52,7 +52,7 @@ public:
     [[nodiscard]] bool isLocked() const override;
     void setLocked(bool locked) override;
 
-    const RenderData &render(EndstonePlayer &player);
+    const RenderData &render(const NotNull<EndstonePlayer> &player);
 
 private:
     bool isContextual() const;

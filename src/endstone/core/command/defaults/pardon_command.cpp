@@ -29,7 +29,7 @@ PardonCommand::PardonCommand() : EndstoneCommand("pardon")
     setPermissions("endstone.command.unban");
 }
 
-bool PardonCommand::execute(CommandSender &sender, const std::vector<std::string> &args) const
+bool PardonCommand::execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const
 {
     if (!testPermission(sender)) {
         return true;
@@ -45,11 +45,11 @@ bool PardonCommand::execute(CommandSender &sender, const std::vector<std::string
 
     const auto entry = ban_list.getBanEntry(name);
     if (!entry) {
-        sender.sendErrorMessage("Nothing changed. The player is not banned.");
+        sender->sendErrorMessage("Nothing changed. The player is not banned.");
         return true;
     }
 
-    sender.sendMessage(Translatable{"commands.unban.success", {entry->getName()}});
+    sender->sendMessage(Translatable{"commands.unban.success", {entry->getName()}});
     ban_list.removeBan(name);
     return true;
 }

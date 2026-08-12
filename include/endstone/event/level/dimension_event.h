@@ -24,17 +24,18 @@ namespace endstone {
  */
 class DimensionEvent : public LevelEvent {
 public:
-    explicit DimensionEvent(Dimension &dimension) : LevelEvent(dimension.getLevel()), dimension_(dimension) {};
+    explicit DimensionEvent(const NotNull<Dimension> &dimension)
+        : LevelEvent(dimension->getLevel()), dimension_(dimension) {};
 
     /**
      * Gets the dimension primarily involved with this event.
      *
      * @return Dimension which caused this event
      */
-    [[nodiscard]] Dimension &getDimension() const { return dimension_; }
+    [[nodiscard]] const NotNull<Dimension> &getDimension() const { return dimension_; }
 
 private:
-    Dimension &dimension_;
+    NotNull<Dimension> dimension_;
 };
 
 }  // namespace endstone

@@ -161,7 +161,7 @@ public:
 
     [[nodiscard]] NotNull<Dimension> getDimension() const override
     {
-        return server_.getEndstoneLevel()->getDimension(getHandle().getDimension().getDimensionId()).get();
+        return server_.getEndstoneLevel()->getDimension(getHandle().getDimension().getDimensionId());
     }
 
     void setRotation(float yaw, float pitch) override { getHandle().setRotationWrapped({pitch, yaw}); }
@@ -174,10 +174,9 @@ public:
 
         setRotation(location.getYaw(), location.getPitch());
         Vec3 to_location{location.getX(), location.getY(), location.getZ()};
-        const auto location_dimension = location.getDimension();
-        if (&location_dimension.value() != &*getDimension()) {
-            const auto to_dimension =
-                static_cast<EndstoneDimension &>(location_dimension.value()).getHandle().getDimensionId();
+        const NotNull<Dimension> location_dimension = location.getDimension();
+        if (location_dimension != getDimension()) {
+            const auto to_dimension = location_dimension.cast<EndstoneDimension>()->getHandle().getDimensionId();
             getHandle().getLevel().entityChangeDimension(getHandle(), to_dimension, to_location);
         }
         else {
@@ -186,7 +185,7 @@ public:
         return true;
     }
 
-    bool teleport(const Actor &target) override { return teleport(target.getLocation()); }
+    bool teleport(const NotNull<Actor> &target) override { return teleport(target->getLocation()); }
 
     [[nodiscard]] std::int64_t getId() const override { return getHandle().getOrCreateUniqueID().raw_id; }
 
@@ -244,7 +243,7 @@ public:
 
     [[nodiscard]] NotNull<Interface> getSelf() const
     {
-        return getHandle().template getEndstoneActorPtr<Interface>();
+        return getHandle().template getEndstoneActor<Interface>();
     }
 
 protected:

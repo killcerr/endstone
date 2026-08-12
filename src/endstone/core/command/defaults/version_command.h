@@ -22,10 +22,10 @@ namespace endstone::core {
 class VersionCommand : public EndstoneCommand {
 public:
     VersionCommand();
-    bool execute(CommandSender &sender, const std::vector<std::string> &args) const override;
+    bool execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const override;
 
 private:
-    void describeToSender(Plugin &plugin, CommandSender &sender) const;
+    void describeToSender(Plugin &plugin, const NotNull<CommandSender> &sender) const;
     [[nodiscard]] std::string getNameList(const std::vector<std::string> &names) const;
 };
 

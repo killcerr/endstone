@@ -47,7 +47,7 @@ public:
      *
      * @return the address
      */
-    [[nodiscard]] SocketAddress getAddress() const { return address_; }
+    [[nodiscard]] const SocketAddress &getAddress() const { return address_; }
 
     /**
      * Get the unique identifier of the server.

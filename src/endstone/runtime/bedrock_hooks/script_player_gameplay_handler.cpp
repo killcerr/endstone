@@ -48,7 +48,7 @@ bool handleEvent(const PlayerDamageEvent &event)
 {
     if (auto *player = WeakEntityRef(event.player).tryUnwrap<::Player>(); player) {
         auto &server = endstone::core::EndstoneServer::getInstance();
-        auto endstone_player = player->getEndstoneActorPtr<endstone::core::EndstonePlayer>();
+        auto endstone_player = player->getEndstoneActor<endstone::core::EndstonePlayer>();
 
         if (!player->isAlive()) {
             // Close any open form on player death
@@ -87,7 +87,7 @@ bool handleEvent(const PlayerDisconnectEvent &event)
 {
     if (auto *player = WeakEntityRef(event.player).tryUnwrap<::Player>(); player) {
         const auto &server = endstone::core::EndstoneServer::getInstance();
-        auto endstone_player = player->getEndstoneActorPtr<endstone::core::EndstonePlayer>();
+        auto endstone_player = player->getEndstoneActor<endstone::core::EndstonePlayer>();
         endstone_player->disconnect();
 
         endstone::Message quit_message = endstone::Translatable{
@@ -107,7 +107,7 @@ bool handleEvent(const PlayerDisconnectEvent &event)
 bool handleEvent(const PlayerFormResponseEvent &event)
 {
     if (auto *player = WeakEntityRef(event.player).tryUnwrap<::Player>(); player) {
-        player->getEndstoneActorPtr<endstone::core::EndstonePlayer>()->onFormResponse(event.form_id, event.form_response);
+        player->getEndstoneActor<endstone::core::EndstonePlayer>()->onFormResponse(event.form_id, event.form_response);
     }
     return true;
 }
@@ -115,7 +115,7 @@ bool handleEvent(const PlayerFormResponseEvent &event)
 bool handleEvent(const PlayerFormCloseEvent &event)
 {
     if (auto *player = WeakEntityRef(event.player).tryUnwrap<::Player>(); player) {
-        player->getEndstoneActorPtr<endstone::core::EndstonePlayer>()->onFormClose(event.form_id, event.form_close_reason);
+        player->getEndstoneActor<endstone::core::EndstonePlayer>()->onFormClose(event.form_id, event.form_close_reason);
     }
     return true;
 }
@@ -126,7 +126,7 @@ bool handleEvent(const ::PlayerRespawnEvent &event)
         const auto &server = endstone::core::EndstoneServer::getInstance();
         const auto reason = player->isRespawningFromTheEnd() ? endstone::PlayerRespawnEvent::RespawnReason::EndPortal
                                                              : endstone::PlayerRespawnEvent::RespawnReason::Death;
-        endstone::PlayerRespawnEvent e{player->getEndstoneActorPtr<endstone::core::EndstonePlayer>(), reason};
+        endstone::PlayerRespawnEvent e{player->getEndstoneActor<endstone::core::EndstonePlayer>(), reason};
         server.getPluginManager().callEvent(e);
     }
     return true;
@@ -137,9 +137,9 @@ bool handleEvent(const PlayerDimensionChangeAfterEvent &event)
     if (const auto *player = WeakEntityRef(event.player).tryUnwrap<::Player>(); player) {
         const auto &server = endstone::core::EndstoneServer::getInstance();
         endstone::PlayerDimensionChangeEvent e{
-            player->getEndstoneActorPtr<endstone::core::EndstonePlayer>(),
-            *server.getEndstoneLevel()->getDimension(event.from_dimension),
-            *server.getEndstoneLevel()->getDimension(event.to_dimension),
+            player->getEndstoneActor<endstone::core::EndstonePlayer>(),
+            server.getEndstoneLevel()->getDimension(event.from_dimension),
+            server.getEndstoneLevel()->getDimension(event.to_dimension),
         };
         server.getPluginManager().callEvent(e);
     }
@@ -157,7 +157,7 @@ bool handleEvent(const PlayerInteractWithBlockBeforeEvent &event)
             item_stack = endstone::core::EndstoneItemStack::fromMinecraft(event.item);
         }
         endstone::PlayerInteractEvent e{
-            player->getEndstoneActorPtr<endstone::core::EndstonePlayer>(),
+            player->getEndstoneActor<endstone::core::EndstonePlayer>(),
             endstone::PlayerInteractEvent::Action::RightClickBlock,
             std::move(item_stack),
             block.get(),
@@ -179,8 +179,8 @@ bool handleEvent(const PlayerInteractWithEntityBeforeEvent &event)
 
     if (player && target) {
         const auto &server = endstone::core::EndstoneServer::getInstance();
-        endstone::PlayerInteractActorEvent e{player->getEndstoneActorPtr<endstone::core::EndstonePlayer>(),
-                                             target->getEndstoneActorPtr()};
+        endstone::PlayerInteractActorEvent e{player->getEndstoneActor<endstone::core::EndstonePlayer>(),
+                                             target->getEndstoneActor()};
         server.getPluginManager().callEvent(e);
         if (e.isCancelled()) {
             return false;
@@ -193,7 +193,7 @@ bool handleEvent(::PlayerGameModeChangeEvent &event)
 {
     if (auto *player = event.player.tryUnwrap<::Player>(); player) {
         const auto &server = endstone::core::EndstoneServer::getInstance();
-        endstone::PlayerGameModeChangeEvent e{player->getEndstoneActorPtr<endstone::core::EndstonePlayer>(),
+        endstone::PlayerGameModeChangeEvent e{player->getEndstoneActor<endstone::core::EndstonePlayer>(),
                                               endstone::core::EndstoneGameMode::fromMinecraft(event.to_game_mode)};
         server.getPluginManager().callEvent(e);
         if (e.isCancelled()) {

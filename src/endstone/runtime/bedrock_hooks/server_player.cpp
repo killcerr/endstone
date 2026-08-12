@@ -28,7 +28,7 @@ void ServerPlayer::changeDimension(DimensionType to_id)
     }
 
     auto &server = endstone::core::EndstoneServer::getInstance();
-    auto player = getEndstoneActorPtr<endstone::core::EndstonePlayer>();
+    auto player = getEndstoneActor<endstone::core::EndstonePlayer>();
     ChangeDimensionRequest request(getDimensionId(), to_id, getPosition(), Vec3::ZERO, true, false);
     static_cast<IPlayerDimensionTransferer &>(
         getLevel().getPlayerDimensionTransferManager()->getPlayerDimensionTransferConnector())

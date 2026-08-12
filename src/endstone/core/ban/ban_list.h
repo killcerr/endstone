@@ -41,7 +41,7 @@ public:
     [[nodiscard]] Nullable<T> getBanEntry(std::string target) const override
     {
         const auto it = std::find_if(entries_.begin(), entries_.end(),
-                                     [&](const NotNull<T> &entry) { return matcher_(*entry, target); });
+                                     [&](const NotNull<T> &entry) { return matcher_(entry, target); });
         if (it != entries_.end()) {
             return *it;
         }
@@ -52,7 +52,7 @@ public:
                       std::optional<std::string> source) override
     {
         entries_.erase(std::remove_if(entries_.begin(), entries_.end(),
-                                      [&](NotNull<T> &entry) { return matcher_(*entry, target); }),
+                                      [&](const NotNull<T> &entry) { return matcher_(entry, target); }),
                        entries_.end());
 
         auto new_entry = std::make_shared<T>(target);
@@ -85,8 +85,8 @@ public:
 
     void removeBan(std::string target) override
     {
-        const auto it =
-            std::find_if(entries_.begin(), entries_.end(), [&](NotNull<T> &entry) { return matcher_(*entry, target); });
+        const auto it = std::find_if(entries_.begin(), entries_.end(),
+                                     [&](const NotNull<T> &entry) { return matcher_(entry, target); });
         if (it != entries_.end()) {
             entries_.erase(it);
             save();

@@ -27,14 +27,14 @@ SeedCommand::SeedCommand() : EndstoneCommand("seed")
     setPermissions("endstone.command.seed");
 }
 
-bool SeedCommand::execute(CommandSender &sender, const std::vector<std::string> &args) const
+bool SeedCommand::execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const
 {
     if (!testPermission(sender)) {
         return true;
     }
 
     const auto &server = EndstoneServer::getInstance();
-    sender.sendMessage("Seed: {}", server.getLevel().getSeed());
+    sender->sendMessage("Seed: {}", server.getLevel().getSeed());
     return true;
 }
 

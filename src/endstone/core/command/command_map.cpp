@@ -54,7 +54,7 @@ EndstoneCommandMap::EndstoneCommandMap(EndstoneServer &server) : server_(server)
     setDefaultCommands();
 }
 
-bool EndstoneCommandMap::dispatch(CommandSender &sender, std::string command_line) const
+bool EndstoneCommandMap::dispatch(const NotNull<CommandSender> &sender, std::string command_line) const
 {
     if (!command_line.empty() && command_line[0] == '/') {
         // remove the leading slash if present
@@ -73,7 +73,7 @@ bool EndstoneCommandMap::dispatch(CommandSender &sender, std::string command_lin
     std::ranges::transform(name, name.begin(), [](unsigned char c) { return std::tolower(c); });
     const std::shared_ptr<Command> command = getCommand(name);
     if (!command) {
-        sender.sendErrorMessage(Translatable("commands.generic.unknown", {args[0]}));
+        sender->sendErrorMessage(Translatable("commands.generic.unknown", {args[0]}));
         return false;
     }
 
@@ -91,12 +91,12 @@ bool EndstoneCommandMap::dispatch(CommandSender &sender, std::string command_lin
         // This is a custom command
         const auto command_origin = MinecraftCommandWrapper::getCommandOrigin(sender);
         if (!command_origin) {
-            sender.sendErrorMessage("Unsupported sender type!");
+            sender->sendErrorMessage("Unsupported sender type!");
             return false;
         }
         const auto *compiled = getHandle().compileCommand(  //
             command_line, *command_origin, CurrentCmdVersion::Latest,
-            [&sender](auto const &err) { sender.sendErrorMessage(err); });
+            [&sender](auto const &err) { sender->sendErrorMessage(err); });
         if (!compiled) {
             return false;
         }

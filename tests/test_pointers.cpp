@@ -56,6 +56,24 @@ TEST(NotNullTest, CovariantConstruction)
     EXPECT_EQ(from_notnull.get(), derived);
 }
 
+TEST(NotNullTest, ConstructionFromNullable)
+{
+    auto ptr = std::make_shared<Base>();
+    const Nullable<Base> filled(ptr);
+    const NotNull<Base> handle = filled;
+    EXPECT_EQ(handle.get(), ptr);
+
+    const Nullable<Base> empty;
+    EXPECT_THROW(NotNull<Base>{empty}, std::invalid_argument);
+}
+
+TEST(NotNullTest, Cast)
+{
+    auto derived = std::make_shared<Derived>();
+    const NotNull<Base> base(derived);
+    EXPECT_EQ(base.cast<Derived>().get(), derived);
+}
+
 TEST(NotNullTest, ComparisonAndHash)
 {
     auto a = std::make_shared<Base>();
@@ -100,6 +118,16 @@ TEST(NullableTest, ConvertsFromNotNullAndCovariant)
     EXPECT_EQ(from_shared.get(), derived);
 }
 
+TEST(NullableTest, Cast)
+{
+    auto derived = std::make_shared<Derived>();
+    const Nullable<Base> base(derived);
+    EXPECT_EQ(base.cast<Derived>().get(), derived);
+
+    const Nullable<Base> empty;
+    EXPECT_FALSE(static_cast<bool>(empty.cast<Derived>()));
+}
+
 TEST(NullableTest, Hashable)
 {
     auto a = std::make_shared<Base>();
@@ -108,4 +136,33 @@ TEST(NullableTest, Hashable)
     set.insert(Nullable<Base>(a));
     set.insert(Nullable<Base>{});
     EXPECT_EQ(set.size(), 2);
+}
+
+TEST(PointersTest, CrossWrapperComparison)
+{
+    auto a = std::make_shared<Base>();
+    auto b = std::make_shared<Base>();
+    const NotNull<Base> not_null(a);
+    const Nullable<Base> same(a);
+    const Nullable<Base> other(b);
+    const Nullable<Base> empty;
+
+    EXPECT_TRUE(not_null == same);
+    EXPECT_TRUE(same == not_null);
+    EXPECT_FALSE(not_null == other);
+    EXPECT_FALSE(other == not_null);
+    EXPECT_FALSE(not_null == empty);
+    EXPECT_FALSE(empty == not_null);
+}
+
+TEST(PointersTest, CrossWrapperComparisonCovariant)
+{
+    auto derived = std::make_shared<Derived>();
+    const NotNull<Derived> not_null(derived);
+    const Nullable<Base> as_base(derived);
+    const Nullable<Base> other(std::make_shared<Base>());
+
+    EXPECT_TRUE(not_null == as_base);
+    EXPECT_TRUE(as_base == not_null);
+    EXPECT_FALSE(not_null == other);
 }

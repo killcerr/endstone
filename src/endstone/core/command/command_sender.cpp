@@ -23,16 +23,16 @@
 #include "endstone/core/player.h"
 #include "endstone/core/server.h"
 
-std::shared_ptr<endstone::CommandSender> CommandOrigin::getEndstoneSender(CommandOutput &output) const
+endstone::NotNull<endstone::CommandSender> CommandOrigin::getEndstoneSender(CommandOutput &output) const
 {
     auto &server = endstone::core::EndstoneServer::getInstance();
     switch (getOriginType()) {
     case CommandOriginType::DedicatedServer: {
-        return server.getCommandSenderPtr();
+        return server.getCommandSender();
     }
     case CommandOriginType::Player:
     case CommandOriginType::Entity: {
-        return getEntity()->getEndstoneActorPtr();
+        return getEntity()->getEndstoneActor();
     }
     case CommandOriginType::CommandBlock: {
         return std::make_shared<endstone::core::EndstoneBlockCommandSender>(*this, output);

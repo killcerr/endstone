@@ -15,6 +15,7 @@
 #pragma once
 
 #include "endstone/map/map_canvas.h"
+#include "endstone/util/pointers.h"
 
 namespace endstone {
 
@@ -65,7 +66,7 @@ public:
      * @param canvas The canvas to use for rendering.
      * @param player The player who triggered the rendering.
      */
-    virtual void render(MapView &map, MapCanvas &canvas, Player &player) = 0;
+    virtual void render(MapView &map, MapCanvas &canvas, const NotNull<Player> &player) = 0;
 
 private:
     bool is_contextual_;

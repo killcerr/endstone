@@ -60,7 +60,7 @@ struct adl_serializer<endstone::PlayerBanEntry> {
 
 namespace endstone::core {
 struct PlayerBanEntryMatcher {
-    bool operator()(const PlayerBanEntry &entry, const std::string &name,
+    bool operator()(const NotNull<PlayerBanEntry> &entry, const std::string &name,
                     const std::optional<UUID> &uuid = std::nullopt,
                     const std::optional<std::string> &xuid = std::nullopt) const;
 };

@@ -77,7 +77,9 @@ namespace endstone::core {
 EndstonePlayer::EndstonePlayer(EndstoneServer &server, ::Player &player)
     : EndstoneMobBase(server, player), perm_(std::make_shared<PermissibleBase>(static_cast<Player *>(this))),
       inventory_(std::make_unique<EndstonePlayerInventory>(player)),
-      ender_chest_(std::make_unique<EndstoneInventory>(*player.getEnderChestContainer()))
+      ender_chest_(std::make_unique<EndstoneInventory>(*player.getEnderChestContainer())),
+      address_(EndstoneSocketAddress::fromNetworkIdentifier(
+          player.getPersistentComponent<UserEntityIdentifierComponent>()->getNetworkId()))
 {
     last_op_status_ = EndstonePlayer::isOp();
 }
@@ -187,13 +189,12 @@ bool EndstonePlayer::teleport(const Location &location)
 
     setRotation(location.getYaw(), location.getPitch());
     Vec3 to_location{location.getX(), location.getY(), location.getZ()};
-    const auto location_dimension = location.getDimension();
-    if (&location_dimension.value() != &*getDimension()) {
+    const NotNull<Dimension> location_dimension = location.getDimension();
+    if (location_dimension != getDimension()) {
         auto current_location = getLocation();
         Vec3 from_location{current_location.getX(), current_location.getY(), current_location.getZ()};
-        const auto from_dimension = static_cast<EndstoneDimension &>(*getDimension()).getHandle().getDimensionId();
-        const auto to_dimension =
-            static_cast<EndstoneDimension &>(location_dimension.value()).getHandle().getDimensionId();
+        const auto from_dimension = getDimension().cast<EndstoneDimension>()->getHandle().getDimensionId();
+        const auto to_dimension = location_dimension.cast<EndstoneDimension>()->getHandle().getDimensionId();
         getHandle().getLevel().requestPlayerChangeDimension(
             getHandle(),
             ChangeDimensionRequest{from_dimension, to_dimension, from_location, to_location, false, false});
@@ -232,10 +233,9 @@ std::string EndstonePlayer::getXuid() const
     return component->getXuid();
 }
 
-SocketAddress EndstonePlayer::getAddress() const
+const SocketAddress &EndstonePlayer::getAddress() const
 {
-    auto component = getHandle().getPersistentComponent<UserEntityIdentifierComponent>();
-    return EndstoneSocketAddress::fromNetworkIdentifier(component->getNetworkId());
+    return address_;
 }
 
 void EndstonePlayer::transfer(std::string host, int port) const
@@ -257,7 +257,7 @@ void EndstonePlayer::kick(std::string message) const
 
 bool EndstonePlayer::performCommand(std::string command) const
 {
-    return server_.dispatchCommand(*const_cast<EndstonePlayer *>(this), command);
+    return server_.dispatchCommand(getSelf(), command);
 }
 
 bool EndstonePlayer::isSneaking() const
@@ -406,12 +406,12 @@ void EndstonePlayer::setWalkSpeed(float value) const
 
 NotNull<Scoreboard> EndstonePlayer::getScoreboard() const
 {
-    return server_.getPlayerBoard(*this);
+    return server_.getPlayerBoard(getSelf().cast<EndstonePlayer>());
 }
 
 void EndstonePlayer::setScoreboard(NotNull<Scoreboard> scoreboard)
 {
-    server_.setPlayerBoard(*this, std::move(scoreboard));
+    server_.setPlayerBoard(getSelf().cast<EndstonePlayer>(), std::move(scoreboard));
 }
 
 void EndstonePlayer::sendActionBar(std::string message) const
@@ -542,7 +542,7 @@ void EndstonePlayer::updateCommands() const
     for (auto it = packet.payload.commands.begin(); it != packet.payload.commands.end();) {
         const auto &name = it->name;
         const auto command = command_map.getCommand(name);
-        if (command && command->isRegistered() && command->testPermissionSilently(*static_cast<const Player *>(this))) {
+        if (command && command->isRegistered() && command->testPermissionSilently(getSelf())) {
             if (auto symbol = registry.findEnumValue(name); symbol.value() != 0) {
                 auto symbol_index = static_cast<std::uint32_t>(symbol.toIndex());
                 if (it->permission_level >= CommandPermissionLevel::Host) {
@@ -1032,7 +1032,7 @@ void EndstonePlayer::initFromConnectionRequest(std::variant<std::reference_wrapp
 
 void EndstonePlayer::disconnect()
 {
-    server_.removePlayerBoard(*this);
+    server_.removePlayerBoard(getSelf().cast<EndstonePlayer>());
 }
 
 void EndstonePlayer::updateAbilities() const

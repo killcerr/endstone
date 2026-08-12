@@ -29,7 +29,7 @@ VersionCommand::VersionCommand() : EndstoneCommand("version")
     setPermissions("endstone.command.version");
 }
 
-bool VersionCommand::execute(CommandSender &sender, const std::vector<std::string> &args) const
+bool VersionCommand::execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const
 {
     if (!testPermission(sender)) {
         return true;
@@ -37,8 +37,8 @@ bool VersionCommand::execute(CommandSender &sender, const std::vector<std::strin
 
     auto &server = EndstoneServer::getInstance();
     if (args.empty()) {
-        sender.sendMessage("{}This server is running {} version: {} (Minecraft: {})", ColorFormat::Gold,
-                           server.getName(), server.getVersion(), server.getMinecraftVersion());
+        sender->sendMessage("{}This server is running {} version: {} (Minecraft: {})", ColorFormat::Gold,
+                            server.getName(), server.getVersion(), server.getMinecraftVersion());
     }
     else {
         auto target_name = args[0];
@@ -56,38 +56,38 @@ bool VersionCommand::execute(CommandSender &sender, const std::vector<std::strin
             }
         }
 
-        sender.sendErrorMessage("This server is not running any plugin by that name.");
-        sender.sendMessage("Use /plugins to get a list of plugins.");
+        sender->sendErrorMessage("This server is not running any plugin by that name.");
+        sender->sendMessage("Use /plugins to get a list of plugins.");
         return false;
     }
 
     return true;
 }
 
-void VersionCommand::describeToSender(Plugin &plugin, CommandSender &sender) const
+void VersionCommand::describeToSender(Plugin &plugin, const NotNull<CommandSender> &sender) const
 {
     const auto &desc = plugin.getDescription();
-    sender.sendMessage(ColorFormat::Green + desc.getName() + ColorFormat::White + " v" + desc.getVersion());
+    sender->sendMessage(ColorFormat::Green + desc.getName() + ColorFormat::White + " v" + desc.getVersion());
 
     if (!desc.getDescription().empty()) {
-        sender.sendMessage(desc.getDescription());
+        sender->sendMessage(desc.getDescription());
     }
 
     if (!desc.getWebsite().empty()) {
-        sender.sendMessage("Website: " + ColorFormat::Green + desc.getWebsite());
+        sender->sendMessage("Website: " + ColorFormat::Green + desc.getWebsite());
     }
 
     if (!desc.getAuthors().empty()) {
         if (desc.getAuthors().size() == 1) {
-            sender.sendMessage("Author: " + getNameList(desc.getAuthors()));
+            sender->sendMessage("Author: " + getNameList(desc.getAuthors()));
         }
         else {
-            sender.sendMessage("Authors: " + getNameList(desc.getAuthors()));
+            sender->sendMessage("Authors: " + getNameList(desc.getAuthors()));
         }
     }
 
     if (!desc.getContributors().empty()) {
-        sender.sendMessage("Contributors: " + getNameList(desc.getContributors()));
+        sender->sendMessage("Contributors: " + getNameList(desc.getContributors()));
     }
 }
 

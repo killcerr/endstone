@@ -21,7 +21,7 @@ namespace endstone::core {
 class RestartCommand : public EndstoneCommand {
 public:
     RestartCommand();
-    bool execute(CommandSender &sender, const std::vector<std::string> &args) const override;
+    bool execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const override;
 };
 
 }  // namespace endstone::core

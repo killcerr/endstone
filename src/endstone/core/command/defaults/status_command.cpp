@@ -27,13 +27,13 @@ StatusCommand::StatusCommand() : EndstoneCommand("status")
     setPermissions("endstone.command.status");
 }
 
-bool StatusCommand::execute(CommandSender &sender, const std::vector<std::string> &args) const
+bool StatusCommand::execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const
 {
     if (!testPermission(sender)) {
         return true;
     }
 
-    sender.sendMessage("{}---- {}Server status{} ----", ColorFormat::Green, ColorFormat::Reset, ColorFormat::Green);
+    sender->sendMessage("{}---- {}Server status{} ----", ColorFormat::Green, ColorFormat::Reset, ColorFormat::Green);
 
     auto &server = EndstoneServer::getInstance();
     auto time =
@@ -44,18 +44,18 @@ bool StatusCommand::execute(CommandSender &sender, const std::vector<std::string
     auto hours = (time / (60 * 60)) % 24;
     auto days = time / (60 * 60 * 24);
     if (days > 0) {
-        sender.sendMessage("{}Uptime: {}{} days {} hours {} minutes {} seconds", ColorFormat::Gold, ColorFormat::Red,
-                           days, hours, minutes, seconds);
+        sender->sendMessage("{}Uptime: {}{} days {} hours {} minutes {} seconds", ColorFormat::Gold, ColorFormat::Red,
+                            days, hours, minutes, seconds);
     }
     else if (hours > 0) {
-        sender.sendMessage("{}Uptime: {}{} hours {} minutes {} seconds", ColorFormat::Gold, ColorFormat::Red, hours,
-                           minutes, seconds);
+        sender->sendMessage("{}Uptime: {}{} hours {} minutes {} seconds", ColorFormat::Gold, ColorFormat::Red, hours,
+                            minutes, seconds);
     }
     else if (minutes > 0) {
-        sender.sendMessage("{}Uptime: {}{} minutes {} seconds", ColorFormat::Gold, ColorFormat::Red, minutes, seconds);
+        sender->sendMessage("{}Uptime: {}{} minutes {} seconds", ColorFormat::Gold, ColorFormat::Red, minutes, seconds);
     }
     else {
-        sender.sendMessage("{}Uptime: {}{} seconds", ColorFormat::Gold, ColorFormat::Red, seconds);
+        sender->sendMessage("{}Uptime: {}{} seconds", ColorFormat::Gold, ColorFormat::Red, seconds);
     }
 
     auto tps = server.getCurrentTicksPerSecond();
@@ -77,22 +77,22 @@ bool StatusCommand::execute(CommandSender &sender, const std::vector<std::string
         avg_tps_color = ColorFormat::Gold;
     }
 
-    sender.sendMessage("{}Current TPS: {}{:.2f} ({:.2f}%). {}MSPT: {}{:.2f}ms", ColorFormat::Gold, tps_color, tps,
-                       server.getCurrentTickUsage() * 100, ColorFormat::Gold, tps_color,
-                       server.getCurrentMillisecondsPerTick());
-    sender.sendMessage("{}Average TPS: {}{:.2f} ({:.2f}%). {}MSPT: {}{:.2f}ms", ColorFormat::Gold, avg_tps_color,
-                       avg_tps, server.getAverageTickUsage() * 100, ColorFormat::Gold, avg_tps_color,
-                       server.getAverageMillisecondsPerTick());
+    sender->sendMessage("{}Current TPS: {}{:.2f} ({:.2f}%). {}MSPT: {}{:.2f}ms", ColorFormat::Gold, tps_color, tps,
+                        server.getCurrentTickUsage() * 100, ColorFormat::Gold, tps_color,
+                        server.getCurrentMillisecondsPerTick());
+    sender->sendMessage("{}Average TPS: {}{:.2f} ({:.2f}%). {}MSPT: {}{:.2f}ms", ColorFormat::Gold, avg_tps_color,
+                        avg_tps, server.getAverageTickUsage() * 100, ColorFormat::Gold, avg_tps_color,
+                        server.getAverageMillisecondsPerTick());
 
-    sender.sendMessage("{}Thread count: {}{}", ColorFormat::Gold, ColorFormat::Red, get_thread_count());
+    sender->sendMessage("{}Thread count: {}{}", ColorFormat::Gold, ColorFormat::Red, get_thread_count());
 
-    sender.sendMessage("{}Used memory: {}{:.2f} MB", ColorFormat::Gold, ColorFormat::Red,
-                       get_used_physical_memory() / 1024.0F / 1024.0F);
-    sender.sendMessage("{}Total memory: {}{:.2f} MB", ColorFormat::Gold, ColorFormat::Red,
-                       get_total_virtual_memory() / 1024.0F / 1024.0F);
+    sender->sendMessage("{}Used memory: {}{:.2f} MB", ColorFormat::Gold, ColorFormat::Red,
+                        get_used_physical_memory() / 1024.0F / 1024.0F);
+    sender->sendMessage("{}Total memory: {}{:.2f} MB", ColorFormat::Gold, ColorFormat::Red,
+                        get_total_virtual_memory() / 1024.0F / 1024.0F);
 
     auto &level = server.getLevel();
-    sender.sendMessage("{}Level \"{}\":", ColorFormat::Gold, level.getName());
+    sender->sendMessage("{}Level \"{}\":", ColorFormat::Gold, level.getName());
     auto actors = level.getActors();
     for (const auto &dimension : level.getDimensions()) {
         auto actor_count = 0;
@@ -101,10 +101,10 @@ bool StatusCommand::execute(CommandSender &sender, const std::vector<std::string
                 actor_count++;
             }
         }
-        sender.sendMessage("- {}Dimension \"{}\": {}{}{} loaded chunks, {}{}{} entities",              //
-                           ColorFormat::Gold, dimension->getId(),                                      //
-                           ColorFormat::Red, dimension->getLoadedChunks().size(), ColorFormat::Green,  //
-                           ColorFormat::Red, actor_count, ColorFormat::Green);
+        sender->sendMessage("- {}Dimension \"{}\": {}{}{} loaded chunks, {}{}{} entities",              //
+                            ColorFormat::Gold, dimension->getId(),                                      //
+                            ColorFormat::Red, dimension->getLoadedChunks().size(), ColorFormat::Green,  //
+                            ColorFormat::Red, actor_count, ColorFormat::Green);
     }
 
     return true;

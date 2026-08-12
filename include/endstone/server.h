@@ -134,7 +134,7 @@ public:
      *
      * @return a console command sender
      */
-    [[nodiscard]] virtual ConsoleCommandSender &getCommandSender() const = 0;
+    [[nodiscard]] virtual NotNull<ConsoleCommandSender> getCommandSender() const = 0;
 
     /**
      * Dispatches a command on this server, and executes it if found.
@@ -143,7 +143,8 @@ public:
      * @param command_line the command + arguments.
      * @return `true` if execution is successful, `false` otherwise
      */
-    [[nodiscard]] virtual bool dispatchCommand(CommandSender &sender, std::string command_line) const = 0;
+    [[nodiscard]] virtual bool dispatchCommand(const NotNull<CommandSender> &sender,
+                                               std::string command_line) const = 0;
 
     /**
      * Gets the scheduler for managing scheduled events.
@@ -302,7 +303,7 @@ public:
      *
      * @return the newly created Scoreboard
      */
-    [[nodiscard]] virtual std::shared_ptr<Scoreboard> createScoreboard() = 0;
+    [[nodiscard]] virtual NotNull<Scoreboard> createScoreboard() = 0;
 
     /**
      * Gets the current milliseconds per tick (MSPT).
@@ -455,7 +456,7 @@ public:
      *
      * @return a newly created map view
      */
-    [[nodiscard]] virtual MapView &createMap(const Dimension &dimension) const = 0;
+    [[nodiscard]] virtual MapView &createMap(const NotNull<Dimension> &dimension) const = 0;
 
     /**
      * Used for all administrative messages, such as an operator using a command.

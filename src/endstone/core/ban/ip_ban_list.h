@@ -33,10 +33,8 @@ struct adl_serializer<endstone::IpBanEntry> {
 }  // namespace nlohmann
 
 namespace endstone::core {
-bool match(const IpBanEntry &entry, const std::string &address);
-
 struct IpBanEntryMatcher {
-    bool operator()(const IpBanEntry &entry, const std::string &address) const;
+    bool operator()(const NotNull<IpBanEntry> &entry, const std::string &address) const;
 };
 
 class EndstoneIpBanList : public EndstoneBanList<IpBanList, IpBanEntryMatcher> {

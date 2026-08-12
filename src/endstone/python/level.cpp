@@ -32,8 +32,7 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
         .def_property_readonly("z", &Chunk::getZ, "Z-coordinate of this chunk.")
         .def_property_readonly("level", &Chunk::getLevel, "The level containing this chunk.",
                                py::return_value_policy::reference)
-        .def_property_readonly("dimension", &Chunk::getDimension, "The dimension containing this chunk.",
-                               py::return_value_policy::reference)
+        .def_property_readonly("dimension", &Chunk::getDimension, "The dimension containing this chunk.")
         .def("__repr__", [](const Chunk &self) { return std::format("{}", self); })
         .def("__str__", [](const Chunk &self) { return std::format("{}", self); });
 
@@ -140,8 +139,7 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
     Returns:
         ``True`` once the ticket has been released.
 )doc")
-        .def("drop_item", &Dimension::dropItem, py::arg("location"), py::arg("item"),
-             py::return_value_policy::reference, R"doc(
+        .def("drop_item", &Dimension::dropItem, py::arg("location"), py::arg("item"), R"doc(
     Drops an item at the specified `Location`.
 
     Args:
@@ -151,8 +149,7 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
     Returns:
         `Item` entity created as a result of this method.
 )doc")
-        .def("spawn_actor", &Dimension::spawnActor, py::arg("location"), py::arg("type"),
-             py::return_value_policy::reference, R"doc(
+        .def("spawn_actor", &Dimension::spawnActor, py::arg("location"), py::arg("type"), R"doc(
     Creates an actor at the given `Location`.
 
     Args:
@@ -189,8 +186,7 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
 
     Returns:
         The `Dimension` with the given id, or `None` if none exists.
-)doc",
-             py::return_value_policy::reference)
+)doc")
         .def("create_dimension", &Level::createDimension, py::arg("creator"), R"doc(
     Creates a new custom dimension within this level.
 
@@ -203,8 +199,7 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
 
     Returns:
         The newly created (or existing) `Dimension`, or `None` if it could not be created.
-)doc",
-             py::return_value_policy::reference)
+)doc")
         .def_property_readonly("seed", &Level::getSeed, "The Seed for this level.")
         .def("has_game_rule", &Level::_hasGameRule, py::arg("rule"), R"doc(
     Checks if a game rule exists.

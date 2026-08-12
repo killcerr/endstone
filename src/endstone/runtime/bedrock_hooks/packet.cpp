@@ -33,7 +33,7 @@ public:
         const auto &server = endstone::core::EndstoneServer::getInstance();
         const auto network_handler = server.getServer().getMinecraft()->getServerNetworkHandler();
         if (const auto *p = network_handler->getServerPlayer(network_id, packet->getSenderSubId())) {
-            if (p->getEndstoneActor<endstone::core::EndstonePlayer>().handlePacket(*packet)) {
+            if (p->getEndstoneActor<endstone::core::EndstonePlayer>()->handlePacket(*packet)) {
                 original_.handle(network_id, callback, packet);
             }
         }

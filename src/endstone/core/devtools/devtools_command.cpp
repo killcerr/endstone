@@ -27,14 +27,14 @@ DevToolsCommand::DevToolsCommand() : EndstoneCommand("devtools")
     setPermissions("endstone.command.devtools");
 }
 
-bool DevToolsCommand::execute(CommandSender &sender, const std::vector<std::string> &args) const
+bool DevToolsCommand::execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const
 {
     if (!testPermission(sender)) {
         return true;
     }
 
-    if (!sender.is<ConsoleCommandSender>()) {
-        sender.sendErrorMessage("This command can only be executed from the console.");
+    if (!sender->is<ConsoleCommandSender>()) {
+        sender->sendErrorMessage("This command can only be executed from the console.");
         return true;
     }
 

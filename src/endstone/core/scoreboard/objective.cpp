@@ -25,7 +25,8 @@
 
 namespace endstone::core {
 
-EndstoneObjective::EndstoneObjective(EndstoneScoreboard &scoreboard, Bedrock::NonOwnerPointer<::Objective> objective)
+EndstoneObjective::EndstoneObjective(const NotNull<EndstoneScoreboard> &scoreboard,
+                                     Bedrock::NonOwnerPointer<::Objective> objective)
     : scoreboard_(scoreboard), objective_(objective), criteria_(objective->getCriteria())
 {
 }
@@ -60,21 +61,21 @@ bool EndstoneObjective::isModifiable() const
     return !criteria_.isReadOnly();
 }
 
-Scoreboard &EndstoneObjective::getScoreboard() const
+NotNull<Scoreboard> EndstoneObjective::getScoreboard() const
 {
     return scoreboard_;
 }
 
 void EndstoneObjective::unregister() const
 {
-    auto &board = checkState();
-    board.board_.removeObjective(objective_.access());
+    const auto board = checkState();
+    board->board_.removeObjective(objective_.access());
 }
 
 bool EndstoneObjective::isDisplayed() const
 {
-    auto &scoreboard = checkState();
-    auto &board = scoreboard.board_;
+    const auto scoreboard = checkState();
+    auto &board = scoreboard->board_;
     for (const auto &i : board.getDisplayObjectiveSlotNames()) {
         if (const auto *display_objective = board.getDisplayObjective(i)) {
             if (display_objective->isDisplaying(*objective_)) {
@@ -87,8 +88,8 @@ bool EndstoneObjective::isDisplayed() const
 
 std::optional<DisplaySlot> EndstoneObjective::getDisplaySlot() const
 {
-    auto &scoreboard = checkState();
-    auto &board = scoreboard.board_;
+    const auto scoreboard = checkState();
+    auto &board = scoreboard->board_;
     for (const auto &i : board.getDisplayObjectiveSlotNames()) {
         if (const auto *display_objective = board.getDisplayObjective(i)) {
             if (display_objective->isDisplaying(*objective_)) {
@@ -101,8 +102,8 @@ std::optional<DisplaySlot> EndstoneObjective::getDisplaySlot() const
 
 std::optional<ObjectiveSortOrder> EndstoneObjective::getSortOrder() const
 {
-    auto &scoreboard = checkState();
-    auto &board = scoreboard.board_;
+    const auto scoreboard = checkState();
+    auto &board = scoreboard->board_;
     for (const auto &i : board.getDisplayObjectiveSlotNames()) {
         if (const auto *display_objective = board.getDisplayObjective(i)) {
             if (display_objective->isDisplaying(*objective_)) {
@@ -115,8 +116,8 @@ std::optional<ObjectiveSortOrder> EndstoneObjective::getSortOrder() const
 
 void EndstoneObjective::setDisplaySlot(std::optional<DisplaySlot> slot)
 {
-    auto &scoreboard = checkState();
-    auto &board = scoreboard.board_;
+    const auto scoreboard = checkState();
+    auto &board = scoreboard->board_;
     std::optional<::ObjectiveSortOrder> order;
     for (const auto &i : board.getDisplayObjectiveSlotNames()) {
         if (const auto *display_objective = board.getDisplayObjective(i)) {
@@ -136,8 +137,8 @@ void EndstoneObjective::setDisplaySlot(std::optional<DisplaySlot> slot)
 
 void EndstoneObjective::setSortOrder(ObjectiveSortOrder order)
 {
-    auto &scoreboard = checkState();
-    auto &board = scoreboard.board_;
+    const auto scoreboard = checkState();
+    auto &board = scoreboard->board_;
     std::optional<std::string> slot;
     for (const auto &i : board.getDisplayObjectiveSlotNames()) {
         if (const auto *display_objective = board.getDisplayObjective(i)) {
@@ -156,8 +157,8 @@ void EndstoneObjective::setSortOrder(ObjectiveSortOrder order)
 
 void EndstoneObjective::setDisplay(const std::optional<DisplaySlot> slot, ObjectiveSortOrder order)
 {
-    auto &scoreboard = checkState();
-    auto &board = scoreboard.board_;
+    const auto scoreboard = checkState();
+    auto &board = scoreboard->board_;
     for (const auto &i : board.getDisplayObjectiveSlotNames()) {
         if (const auto *display_objective = board.getDisplayObjective(i)) {
             if (display_objective->isDisplaying(*objective_)) {
@@ -183,7 +184,7 @@ std::unique_ptr<Score> EndstoneObjective::getScore(ScoreEntry entry) const
     return std::make_unique<EndstoneScore>(copy(), entry);
 }
 
-EndstoneScoreboard &EndstoneObjective::checkState() const
+NotNull<EndstoneScoreboard> EndstoneObjective::checkState() const
 {
     Preconditions::checkState(objective_.isValid(), "Unregistered scoreboard objective.");
     return scoreboard_;

@@ -33,10 +33,10 @@ public:
 
     void onDisable() override { PYBIND11_OVERRIDE_NAME(void, Plugin, "on_disable", onDisable); }
 
-    bool onCommand(CommandSender &sender, const Command &command, const std::vector<std::string> &args) override
+    bool onCommand(const NotNull<CommandSender> &sender, const Command &command,
+                   const std::vector<std::string> &args) override
     {
-        PYBIND11_OVERRIDE_NAME(bool, Plugin, "on_command", onCommand, std::ref(sender), std::ref(command),
-                               std::ref(args));
+        PYBIND11_OVERRIDE_NAME(bool, Plugin, "on_command", onCommand, sender, std::ref(command), std::ref(args));
     }
 };
 
@@ -498,7 +498,7 @@ void init_plugin(py::module &m)
     Args:
         plugin: The plugin.
 )doc")
-        .def("unregister", py::overload_cast<std::string, const Service &>(&ServiceManager::unregister),
+        .def("unregister", py::overload_cast<std::string, const NotNull<Service> &>(&ServiceManager::unregister),
              py::arg("name"), py::arg("provider"), R"doc(
     Unregister a particular provider for a particular service.
 
@@ -506,7 +506,8 @@ void init_plugin(py::module &m)
         name: The service name.
         provider: The service provider implementation.
 )doc")
-        .def("unregister", py::overload_cast<const Service &>(&ServiceManager::unregister), py::arg("provider"), R"doc(
+        .def("unregister", py::overload_cast<const NotNull<Service> &>(&ServiceManager::unregister),
+             py::arg("provider"), R"doc(
     Unregister a particular provider.
 
     Args:

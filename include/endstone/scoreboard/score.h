@@ -15,6 +15,7 @@
 #pragma once
 
 #include "endstone/scoreboard/score_entry.h"
+#include "endstone/util/pointers.h"
 #include "endstone/util/result.h"
 
 namespace endstone {
@@ -70,7 +71,7 @@ public:
      *
      * @return the owning objective's scoreboard
      */
-    [[nodiscard]] virtual Scoreboard &getScoreboard() const = 0;
+    [[nodiscard]] virtual NotNull<Scoreboard> getScoreboard() const = 0;
 };
 
 }  // namespace endstone

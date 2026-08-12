@@ -114,13 +114,13 @@ public:
      * Adds the player to this boss bar causing it to display on their screen.
      * @param player the player to add
      */
-    virtual void addPlayer(Player &player) = 0;
+    virtual void addPlayer(const NotNull<Player> &player) = 0;
 
     /**
      * Removes the player from this boss bar causing it to be removed from their screen.
      * @param player the player to remove
      */
-    virtual void removePlayer(Player &player) = 0;
+    virtual void removePlayer(const NotNull<Player> &player) = 0;
 
     /**
      * Removes all players from this boss bar.

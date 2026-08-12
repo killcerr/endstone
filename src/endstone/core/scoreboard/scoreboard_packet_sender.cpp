@@ -20,7 +20,7 @@
 
 namespace endstone::core {
 
-ScoreboardPacketSender::ScoreboardPacketSender(EndstoneServer &server, EndstoneScoreboard &scoreboard,
+ScoreboardPacketSender::ScoreboardPacketSender(EndstoneServer &server, const NotNull<EndstoneScoreboard> &scoreboard,
                                                PacketSender &sender)
     : server_(server), scoreboard_(scoreboard), sender_(sender)
 {
@@ -54,7 +54,7 @@ void ScoreboardPacketSender::sendToClient(const UserEntityIdentifierComponent *u
         return;
     }
 
-    if (&*player->getScoreboard() != &scoreboard_) {
+    if (player->getScoreboard() != scoreboard_) {
         return;
     }
 
@@ -65,9 +65,9 @@ void ScoreboardPacketSender::sendToClient(const NetworkIdentifier &network_ident
                                           SubClientId sub_id)
 {
     for (const auto &p : server_.getOnlinePlayers()) {
-        auto *player = static_cast<EndstonePlayer *>(&*p);
+        auto player = p.cast<EndstonePlayer>();
 
-        if (&*player->getScoreboard() != &scoreboard_) {
+        if (player->getScoreboard() != scoreboard_) {
             continue;
         }
 
@@ -90,9 +90,9 @@ void ScoreboardPacketSender::sendToClients(
 void ScoreboardPacketSender::sendBroadcast(const ::Packet &packet)
 {
     for (const auto &p : server_.getOnlinePlayers()) {
-        auto *player = static_cast<EndstonePlayer *>(&*p);
+        auto player = p.cast<EndstonePlayer>();
 
-        if (&*player->getScoreboard() != &scoreboard_) {
+        if (player->getScoreboard() != scoreboard_) {
             continue;
         }
 

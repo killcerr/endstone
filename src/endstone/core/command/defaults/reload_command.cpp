@@ -27,7 +27,7 @@ ReloadCommand::ReloadCommand() : EndstoneCommand("reload")
     setAliases("rl");
 }
 
-bool ReloadCommand::execute(CommandSender &sender, const std::vector<std::string> &args) const
+bool ReloadCommand::execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const
 {
     if (!testPermission(sender)) {
         return true;

@@ -178,8 +178,7 @@ void init_actor(py::module_ &m, py_class<Actor> &actor, py_class<Mob> &mob)
         .def_property_readonly("is_in_lava", &Actor::isInLava, "`True` if the actor is in lava.")
         .def_property_readonly("level", &Actor::getLevel, "The current `Level` this actor resides in.",
                                py::return_value_policy::reference)
-        .def_property_readonly("dimension", &Actor::getDimension, "The current `Dimension` this actor resides in.",
-                               py::return_value_policy::reference)
+        .def_property_readonly("dimension", &Actor::getDimension, "The current `Dimension` this actor resides in.")
         .def("set_rotation", &Actor::setRotation, py::arg("yaw"), py::arg("pitch"), R"doc(
     Sets the actor's rotation.
 
@@ -198,7 +197,7 @@ void init_actor(py::module_ &m, py_class<Actor> &actor, py_class<Mob> &mob)
     Returns:
         `True` if the teleport was successful.
 )doc")
-        .def("teleport", py::overload_cast<const Actor &>(&Actor::teleport), py::arg("target"), R"doc(
+        .def("teleport", py::overload_cast<const NotNull<Actor> &>(&Actor::teleport), py::arg("target"), R"doc(
     Teleports this actor to the target `Actor`.
 
     Args:

@@ -19,15 +19,15 @@
 #include <boost/algorithm/string.hpp>
 
 namespace endstone::core {
-bool PlayerBanEntryMatcher::operator()(const PlayerBanEntry &entry, const std::string &name,
+bool PlayerBanEntryMatcher::operator()(const NotNull<PlayerBanEntry> &entry, const std::string &name,
                                        const std::optional<UUID> &uuid, const std::optional<std::string> &xuid) const
 {
-    const bool name_match = boost::iequals(entry.getName(), name);
+    const bool name_match = boost::iequals(entry->getName(), name);
     const bool uuid_match =
-        uuid.has_value() && entry.getUniqueId().has_value() ? entry.getUniqueId().value() == uuid.value() : true;
+        uuid.has_value() && entry->getUniqueId().has_value() ? entry->getUniqueId().value() == uuid.value() : true;
     const bool xuid_match =
-        xuid.has_value() && !xuid.value().empty() && entry.getXuid().has_value() && !entry.getXuid().value().empty()
-            ? entry.getXuid().value() == xuid.value()
+        xuid.has_value() && !xuid.value().empty() && entry->getXuid().has_value() && !entry->getXuid().value().empty()
+            ? entry->getXuid().value() == xuid.value()
             : true;
     return name_match && uuid_match && xuid_match;
 }
@@ -41,7 +41,7 @@ Nullable<PlayerBanEntry> EndstonePlayerBanList::getBanEntry(std::string name, st
                                                             std::optional<std::string> xuid) const
 {
     const auto it = std::ranges::find_if(
-        entries_, [&](const NotNull<PlayerBanEntry> &entry) { return matcher_(*entry, name, uuid, xuid); });
+        entries_, [&](const NotNull<PlayerBanEntry> &entry) { return matcher_(entry, name, uuid, xuid); });
     if (it != entries_.end()) {
         return *it;
     }
@@ -61,7 +61,7 @@ NotNull<PlayerBanEntry> EndstonePlayerBanList::addBan(std::string name, std::opt
                                                       std::optional<BanEntry::Date> expires,
                                                       std::optional<std::string> source)
 {
-    std::erase_if(entries_, [&](const NotNull<PlayerBanEntry> &entry) { return matcher_(*entry, name, uuid, xuid); });
+    std::erase_if(entries_, [&](const NotNull<PlayerBanEntry> &entry) { return matcher_(entry, name, uuid, xuid); });
     auto new_entry = std::make_shared<PlayerBanEntry>(name, uuid, xuid);
     if (reason.has_value()) {
         new_entry->setReason(reason.value());
@@ -109,7 +109,7 @@ void EndstonePlayerBanList::removeBan(std::string name)
 void EndstonePlayerBanList::removeBan(std::string name, std::optional<UUID> uuid, std::optional<std::string> xuid)
 {
     const auto it = std::ranges::find_if(
-        entries_, [&](const NotNull<PlayerBanEntry> &entry) { return matcher_(*entry, name, uuid, xuid); });
+        entries_, [&](const NotNull<PlayerBanEntry> &entry) { return matcher_(entry, name, uuid, xuid); });
     if (it != entries_.end()) {
         entries_.erase(it);
         save();

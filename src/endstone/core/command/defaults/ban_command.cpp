@@ -29,7 +29,7 @@ BanCommand::BanCommand() : EndstoneCommand("ban")
     setPermissions("endstone.command.ban");
 }
 
-bool BanCommand::execute(CommandSender &sender, const std::vector<std::string> &args) const
+bool BanCommand::execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const
 {
     if (!testPermission(sender)) {
         return true;
@@ -44,7 +44,7 @@ bool BanCommand::execute(CommandSender &sender, const std::vector<std::string> &
     auto name = args.front();
 
     if (ban_list.isBanned(name)) {
-        sender.sendErrorMessage("Nothing changed. The player is already banned.");
+        sender->sendErrorMessage("Nothing changed. The player is already banned.");
         return true;
     }
 
@@ -65,8 +65,8 @@ bool BanCommand::execute(CommandSender &sender, const std::vector<std::string> &
         }
     }
 
-    ban_list.addBan(name, uuid, xuid, reason, std::nullopt, sender.getName());
-    sender.sendMessage(Translatable{"commands.ban.success", {name}});
+    ban_list.addBan(name, uuid, xuid, reason, std::nullopt, sender->getName());
+    sender->sendMessage(Translatable{"commands.ban.success", {name}});
 
     if (player) {
         player->kick("You have been banned from this server.");

@@ -74,7 +74,7 @@ TEST_F(EndstoneServiceManagerTest, UnregisterService)
 {
     service_manager_.registerService("TestService", high_priority_service_, plugin1, ServicePriority::High);
     service_manager_.registerService("TestService", medium_priority_service_, plugin1, ServicePriority::Normal);
-    service_manager_.unregister("TestService", *high_priority_service_);
+    service_manager_.unregister("TestService", high_priority_service_);
     auto service = service_manager_.get("TestService");
     ASSERT_EQ(service, medium_priority_service_);
 }
@@ -114,18 +114,18 @@ TEST_F(EndstoneServiceManagerTest, PrioritiesSortedCorrectly)
     auto service = service_manager_.get("TestService");
     ASSERT_EQ(service, high_priority_service_);
 
-    service_manager_.unregister("TestService", *high_priority_service_);
+    service_manager_.unregister("TestService", high_priority_service_);
     service = service_manager_.get("TestService");
     ASSERT_EQ(service, medium_priority_service_);
 
-    service_manager_.unregister("TestService", *medium_priority_service_);
+    service_manager_.unregister("TestService", medium_priority_service_);
     service = service_manager_.get("TestService");
     ASSERT_EQ(service, low_priority_service_);
 }
 
 TEST_F(EndstoneServiceManagerTest, UnregisterNonExistentService)
 {
-    service_manager_.unregister("NonExistentService", *low_priority_service_);
+    service_manager_.unregister("NonExistentService", low_priority_service_);
     auto service = service_manager_.get("NonExistentService");
     ASSERT_EQ(service, nullptr);
 }

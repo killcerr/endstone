@@ -30,13 +30,13 @@ PluginsCommand::PluginsCommand() : EndstoneCommand("plugins")
     setPermissions("endstone.command.plugins");
 }
 
-bool PluginsCommand::execute(CommandSender &sender, const std::vector<std::string> &args) const
+bool PluginsCommand::execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const
 {
     if (!testPermission(sender)) {
         return true;
     }
 
-    sender.sendMessage("Plugins {}", getPluginList());
+    sender->sendMessage("Plugins {}", getPluginList());
     return true;
 }
 

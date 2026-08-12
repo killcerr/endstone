@@ -66,8 +66,7 @@ void init_scoreboard(py::module_ &m)
                                "`True` if this score has been set at any point in time.")
         .def_property_readonly("objective", &Score::getObjective, "The `Objective` being tracked by this `Score`.",
                                py::return_value_policy::reference)
-        .def_property_readonly("scoreboard", &Score::getScoreboard, "The scoreboard for the associated objective.",
-                               py::return_value_policy::reference);
+        .def_property_readonly("scoreboard", &Score::getScoreboard, "The scoreboard for the associated objective.");
 
     objective.def_property_readonly("name", &Objective::getName, "The name of this `Objective`.")
         .def_property("display_name", &Objective::getDisplayName, &Objective::setDisplayName,
@@ -76,8 +75,7 @@ void init_scoreboard(py::module_ &m)
         .def_property_readonly("is_modifiable", &Objective::isModifiable,
                                "`True` if the objective's scores can be modified directly by a plugin.")
         .def_property_readonly("scoreboard", &Objective::getScoreboard,
-                               "The scoreboard to which this objective is attached.",
-                               py::return_value_policy::reference)
+                               "The scoreboard to which this objective is attached.")
         .def("unregister", &Objective::unregister, "Unregisters this objective from the associated `Scoreboard`.")
         .def_property_readonly("is_displayed", &Objective::isDisplayed,
                                "`True` if the objective is currently displayed in a slot.")

@@ -64,7 +64,8 @@ void patchPacket(const ResourcePackStackPacket &packet)
     }
 }
 
-void patchPacket(const ClientboundMapItemDataPacket &packet, endstone::core::EndstonePlayer &player)
+void patchPacket(const ClientboundMapItemDataPacket &packet,
+                 const endstone::NotNull<endstone::core::EndstonePlayer> &player)
 {
     const auto &server = endstone::core::EndstoneServer::getInstance();
     auto *map = static_cast<endstone::core::EndstoneMapView *>(server.getMap(packet.getMapId().raw_id));
@@ -124,7 +125,7 @@ void patchPacket(Packet &packet, const endstone::Nullable<endstone::Player> &pla
     case MinecraftPacketIds::MapData:
         if (player) {
             patchPacket(static_cast<const ClientboundMapItemDataPacket &>(packet),
-                        static_cast<endstone::core::EndstonePlayer &>(*player));
+                        player.cast<endstone::core::EndstonePlayer>());
         }
         break;
     default:
@@ -153,7 +154,7 @@ void BatchedNetworkPeer::sendPacket(const std::string &data, Reliability reliabi
         server.getServer().getMinecraft()->getServerNetworkHandler()->getServerPlayer(id, header.getSenderSubId());
     endstone::Nullable<endstone::Player> player;
     if (server_player) {
-        player = server_player->getEndstoneActorPtr<endstone::core::EndstonePlayer>();
+        player = server_player->getEndstoneActor<endstone::core::EndstonePlayer>();
     }
 
     // Create packet send event
@@ -234,7 +235,7 @@ NetworkPeer::DataStatus BatchedNetworkPeer::_receivePacket(std::string &out_data
         const auto &id = getId();
         endstone::Nullable<endstone::Player> player;
         if (const auto *p = network_handler->getServerPlayer(id, header.getRecipientSubId())) {
-            player = p->getEndstoneActorPtr<endstone::core::EndstonePlayer>();
+            player = p->getEndstoneActor<endstone::core::EndstonePlayer>();
         }
 
         const auto payload = stream.getView().substr(stream.getReadPointer());

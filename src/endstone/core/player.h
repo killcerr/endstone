@@ -67,7 +67,7 @@ public:
     [[nodiscard]] bool isOp() const override;
     void setOp(bool value) override;
     [[nodiscard]] std::string getXuid() const override;
-    [[nodiscard]] SocketAddress getAddress() const override;
+    [[nodiscard]] const SocketAddress &getAddress() const override;
     void transfer(std::string host, int port) const override;
     void kick(std::string message) const override;
     bool performCommand(std::string command) const override;  // NOLINT(*-use-nodiscard)
@@ -142,6 +142,7 @@ private:
     std::shared_ptr<PermissibleBase> perm_;
     std::unique_ptr<EndstonePlayerInventory> inventory_;
     std::unique_ptr<EndstoneInventory> ender_chest_;
+    SocketAddress address_;
     std::string locale_ = "en_US";
     std::string device_os_ = "Unknown";
     std::string device_id_;

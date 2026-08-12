@@ -22,6 +22,7 @@
 #include "endstone/core/scoreboard/criteria.h"
 #include "endstone/scoreboard/display_slot.h"
 #include "endstone/scoreboard/objective.h"
+#include "endstone/util/pointers.h"
 
 namespace endstone::core {
 
@@ -29,14 +30,15 @@ class EndstoneScoreboard;
 
 class EndstoneObjective : public Objective {
 public:
-    explicit EndstoneObjective(EndstoneScoreboard &scoreboard, Bedrock::NonOwnerPointer<::Objective> objective);
+    explicit EndstoneObjective(const NotNull<EndstoneScoreboard> &scoreboard,
+                               Bedrock::NonOwnerPointer<::Objective> objective);
 
     [[nodiscard]] std::string getName() const override;
     [[nodiscard]] std::string getDisplayName() const override;
     void setDisplayName(std::string display_name) override;
     [[nodiscard]] const Criteria &getCriteria() const override;
     [[nodiscard]] bool isModifiable() const override;
-    [[nodiscard]] Scoreboard &getScoreboard() const override;
+    [[nodiscard]] NotNull<Scoreboard> getScoreboard() const override;
     void unregister() const override;
     [[nodiscard]] bool isDisplayed() const override;
     [[nodiscard]] std::optional<DisplaySlot> getDisplaySlot() const override;
@@ -50,12 +52,12 @@ public:
     bool operator==(const Objective &other) const override;
     bool operator!=(const Objective &other) const override;
 
-    EndstoneScoreboard &checkState() const;
+    NotNull<EndstoneScoreboard> checkState() const;
     [[nodiscard]] std::unique_ptr<EndstoneObjective> copy() const;
 
 private:
     friend class EndstoneScore;
-    EndstoneScoreboard &scoreboard_;
+    NotNull<EndstoneScoreboard> scoreboard_;
     Bedrock::NonOwnerPointer<::Objective> objective_;
     EndstoneCriteria criteria_;
 };

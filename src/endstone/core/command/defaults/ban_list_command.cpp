@@ -28,7 +28,7 @@ BanListCommand::BanListCommand() : EndstoneCommand("banlist")
     setPermissions("endstone.command.banlist");
 }
 
-bool BanListCommand::execute(CommandSender &sender, const std::vector<std::string> &args) const
+bool BanListCommand::execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const
 {
     if (!testPermission(sender)) {
         return true;
@@ -41,18 +41,18 @@ bool BanListCommand::execute(CommandSender &sender, const std::vector<std::strin
 
     if (show_players) {
         const auto entries = server.getBanList().getEntries();
-        sender.sendMessage(Translatable{"commands.banlist.players", {std::to_string(entries.size())}});
+        sender->sendMessage(Translatable{"commands.banlist.players", {std::to_string(entries.size())}});
         for (const auto &entry : entries) {
-            sender.sendMessage("- {} was banned by {}: {}", entry->getName(), entry->getSource(), entry->getReason());
+            sender->sendMessage("- {} was banned by {}: {}", entry->getName(), entry->getSource(), entry->getReason());
         }
     }
 
     if (show_ips) {
         const auto entries = server.getIpBanList().getEntries();
-        sender.sendMessage(Translatable{"commands.banlist.ips", {std::to_string(entries.size())}});
+        sender->sendMessage(Translatable{"commands.banlist.ips", {std::to_string(entries.size())}});
         for (const auto &entry : entries) {
-            sender.sendMessage("- {} was banned by {}: {}", entry->getAddress(), entry->getSource(),
-                               entry->getReason());
+            sender->sendMessage("- {} was banned by {}: {}", entry->getAddress(), entry->getSource(),
+                                entry->getReason());
         }
     }
 

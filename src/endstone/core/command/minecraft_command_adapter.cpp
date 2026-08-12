@@ -33,7 +33,7 @@ void MinecraftCommandAdapter::execute(const CommandOrigin &origin, CommandOutput
     }
 
     auto sender = origin.getEndstoneSender(output);
-    if (command->execute(*sender, args_)) {
+    if (command->execute(sender, args_)) {
         output.success();
     }
 }

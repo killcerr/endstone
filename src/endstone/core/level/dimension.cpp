@@ -124,12 +124,13 @@ bool EndstoneDimension::unloadChunk(int x, int z)
     return true;
 }
 
-Item &EndstoneDimension::dropItem(const Location location, const ItemStack &item)
+NotNull<Item> EndstoneDimension::dropItem(const Location location, const ItemStack &item)
 {
     auto item_stack = EndstoneItemStack::toMinecraft(item);
     auto *actor = getHandle().getLevel().getSpawner().spawnItem(
         getHandle().getBlockSourceFromMainChunkSource(), item_stack, nullptr,
         Vec3{location.getX(), location.getY(), location.getZ()}, 10);
+    Preconditions::checkState(actor != nullptr, "Unable to drop item at the specified location.");
     return actor->getEndstoneActor<EndstoneItem>();
 }
 
@@ -144,14 +145,14 @@ Nullable<Actor> EndstoneDimension::spawnActor(Location location, ActorTypeId typ
     if (!actor) {
         return nullptr;
     }
-    return actor->getEndstoneActorPtr();
+    return actor->getEndstoneActor();
 }
 
 std::vector<NotNull<Actor>> EndstoneDimension::getActors() const
 {
     std::vector<NotNull<Actor>> result;
     for (const auto &actor : level_.getActors()) {
-        if (&*actor->getDimension() != this) {
+        if (actor->getDimension() != getSelf()) {
             continue;
         }
         result.push_back(actor);
@@ -167,10 +168,15 @@ std::vector<NotNull<Actor>> EndstoneDimension::getActors() const
     }
     return *handle;
 }
+
+NotNull<EndstoneDimension> EndstoneDimension::getSelf() const
+{
+    return const_cast<EndstoneDimension *>(this)->shared_from_this();
+}
 }  // namespace endstone::core
 
 endstone::NotNull<endstone::Dimension> Dimension::getEndstoneDimension() const
 {
     const auto &server = endstone::core::EndstoneServer::getInstance();
-    return server.getEndstoneLevel()->getDimension(getDimensionId()).get();
+    return server.getEndstoneLevel()->getDimension(getDimensionId());
 }

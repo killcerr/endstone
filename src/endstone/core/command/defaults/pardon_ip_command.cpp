@@ -41,7 +41,7 @@ PardonIpCommand::PardonIpCommand() : EndstoneCommand("pardon-ip")
     setPermissions("endstone.command.unbanip");
 }
 
-bool PardonIpCommand::execute(CommandSender &sender, const std::vector<std::string> &args) const
+bool PardonIpCommand::execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const
 {
     if (!testPermission(sender)) {
         return true;
@@ -62,17 +62,17 @@ bool PardonIpCommand::execute(CommandSender &sender, const std::vector<std::stri
         // valid ipv6 address
     }
     else {
-        sender.sendErrorMessage(Translatable{"commands.unbanip.invalid"});
+        sender->sendErrorMessage(Translatable{"commands.unbanip.invalid"});
         return true;
     }
 
     const auto entry = ban_list.getBanEntry(address);
     if (!entry) {
-        sender.sendErrorMessage("Nothing changed. That IP is not banned.");
+        sender->sendErrorMessage("Nothing changed. That IP is not banned.");
         return true;
     }
 
-    sender.sendMessage(Translatable{"commands.unbanip.success", {entry->getAddress()}});
+    sender->sendMessage(Translatable{"commands.unbanip.success", {entry->getAddress()}});
     ban_list.removeBan(address);
     return true;
 }

@@ -18,7 +18,6 @@
 #include "bedrock/network/packet/boss_event_packet.h"
 #include "endstone/check.h"
 #include "endstone/core/player.h"
-#include "endstone/core/server.h"
 
 namespace endstone::core {
 
@@ -106,22 +105,22 @@ void EndstoneBossBar::setVisible(bool visible)
     if (visible_ != visible) {
         visible_ = visible;
         for (const auto &player : getPlayers()) {
-            send(visible ? BossEventUpdateType::Add : BossEventUpdateType::Remove, *player);
+            send(visible ? BossEventUpdateType::Add : BossEventUpdateType::Remove, player);
         }
     }
 }
 
-void EndstoneBossBar::addPlayer(Player &player)
+void EndstoneBossBar::addPlayer(const NotNull<Player> &player)
 {
-    players_.emplace(player.getUniqueId());
+    players_.emplace(player.get());
     if (visible_) {
         send(BossEventUpdateType::Add, player);
     }
 }
 
-void EndstoneBossBar::removePlayer(Player &player)
+void EndstoneBossBar::removePlayer(const NotNull<Player> &player)
 {
-    players_.erase(player.getUniqueId());
+    players_.erase(player.get());
     if (visible_) {
         send(BossEventUpdateType::Remove, player);
     }
@@ -129,18 +128,20 @@ void EndstoneBossBar::removePlayer(Player &player)
 
 void EndstoneBossBar::removeAll()
 {
-    for (const auto &player : getPlayers()) {
-        removePlayer(*player);
+    if (visible_) {
+        for (const auto &player : getPlayers()) {
+            send(BossEventUpdateType::Remove, player);
+        }
     }
+    players_.clear();
 }
 
 std::vector<NotNull<Player>> EndstoneBossBar::getPlayers() const
 {
     std::vector<NotNull<Player>> players;
-    const auto &server = EndstoneServer::getInstance();
     for (auto it = players_.begin(); it != players_.end();) {
-        if (auto player = server.getPlayer(*it); player) {
-            players.emplace_back(player.get());
+        if (auto player = it->lock(); player) {
+            players.emplace_back(std::move(player));
             ++it;
         }
         else {
@@ -150,11 +151,11 @@ std::vector<NotNull<Player>> EndstoneBossBar::getPlayers() const
     return players;
 }
 
-void EndstoneBossBar::send(BossEventUpdateType event_type, Player &player)
+void EndstoneBossBar::send(BossEventUpdateType event_type, const NotNull<Player> &player)
 {
     const auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::BossEvent);
     const auto pk = std::static_pointer_cast<BossEventPacket>(packet);
-    const auto &handle = static_cast<EndstonePlayer &>(player).getHandle();
+    const auto &handle = player.cast<EndstonePlayer>()->getHandle();
     pk->payload.boss_id = handle.getOrCreateUniqueID();
     pk->payload.player_id = handle.getOrCreateUniqueID();
     pk->payload.event_type = event_type;
@@ -172,7 +173,7 @@ void EndstoneBossBar::broadcast(BossEventUpdateType event_type)
         return;
     }
     for (const auto &player : getPlayers()) {
-        send(event_type, *player);
+        send(event_type, player);
     }
 }
 

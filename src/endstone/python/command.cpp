@@ -20,9 +20,10 @@ class PyCommandExecutor : public CommandExecutor, public py::trampoline_self_lif
 public:
     using CommandExecutor::CommandExecutor;
 
-    bool onCommand(CommandSender &sender, const Command &command, const std::vector<std::string> &args) override
+    bool onCommand(const NotNull<CommandSender> &sender, const Command &command,
+                   const std::vector<std::string> &args) override
     {
-        PYBIND11_OVERRIDE_NAME(bool, CommandExecutor, "on_command", onCommand, std::ref(sender), std::ref(command),
+        PYBIND11_OVERRIDE_NAME(bool, CommandExecutor, "on_command", onCommand, sender, std::ref(command),
                                std::ref(args));
     }
 };
@@ -70,7 +71,7 @@ void init_command(py::module &m, py_class<CommandSender> &command_sender)
     py_class<CommandSenderWrapper>(
         m, "CommandSenderWrapper",
         "Represents a wrapper that forwards commands to the wrapped `CommandSender` and captures its output.")
-        .def(py::init<CommandSender &, CommandSenderWrapper::Callback, CommandSenderWrapper::Callback>(),
+        .def(py::init<const NotNull<CommandSender> &, CommandSenderWrapper::Callback, CommandSenderWrapper::Callback>(),
              py::arg("sender"), py::arg("on_message") = CommandSenderWrapper::Callback{},
              py::arg("on_error") = CommandSenderWrapper::Callback{});
 

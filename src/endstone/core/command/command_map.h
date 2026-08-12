@@ -28,7 +28,7 @@ class EndstoneCommandMap : public CommandMap {
 public:
     explicit EndstoneCommandMap(EndstoneServer &server);
     bool registerCommand(std::shared_ptr<Command> command) override;
-    bool dispatch(CommandSender &sender, std::string command_line) const override;
+    bool dispatch(const NotNull<CommandSender> &sender, std::string command_line) const override;
     void clearCommands() override;
     [[nodiscard]] std::shared_ptr<Command> getCommand(std::string name) const override;
     [[nodiscard]] ::MinecraftCommands &getHandle() const;

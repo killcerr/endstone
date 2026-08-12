@@ -68,8 +68,8 @@ public:
     void registerService(std::string name, NotNull<Service> provider, const Plugin &plugin,
                          ServicePriority priority) override;
     void unregisterAll(const Plugin &plugin) override;
-    void unregister(std::string name, const Service &provider) override;
-    void unregister(const Service &provider) override;
+    void unregister(std::string name, const NotNull<Service> &provider) override;
+    void unregister(const NotNull<Service> &provider) override;
     Nullable<Service> get(std::string name) const override;
 
 private:

@@ -32,7 +32,7 @@ RestartCommand::RestartCommand() : EndstoneCommand("restart")
     setPermissions("endstone.command.restart");
 }
 
-bool RestartCommand::execute(CommandSender &sender, const std::vector<std::string> &args) const
+bool RestartCommand::execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const
 {
     if (!testPermission(sender)) {
         return true;
