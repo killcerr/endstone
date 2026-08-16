@@ -73,9 +73,28 @@ size_t ReadOnlyBinaryStream::getLength() const
     return view_.size();
 }
 
+Bedrock::Result<bool> ReadOnlyBinaryStream::getBool()
+{
+    auto result = getByte();
+    if (!result.ignoreError()) {
+        return BEDROCK_RETHROW(result);
+    }
+    return result.discardError().value() != 0;
+}
+
 Bedrock::Result<unsigned char> ReadOnlyBinaryStream::getByte()
 {
     unsigned char value = 0;
+    auto result = read(&value, sizeof(value));
+    if (!result.ignoreError()) {
+        return BEDROCK_RETHROW(result);
+    }
+    return value;
+}
+
+Bedrock::Result<int> ReadOnlyBinaryStream::getSignedInt()
+{
+    int value = 0;
     auto result = read(&value, sizeof(value));
     if (!result.ignoreError()) {
         return BEDROCK_RETHROW(result);
@@ -96,6 +115,60 @@ Bedrock::Result<unsigned int> ReadOnlyBinaryStream::getUnsignedVarInt()
         if ((byte & 0x80U) == 0) {
             break;
         }
+    }
+    return value;
+}
+
+Bedrock::Result<std::uint64_t> ReadOnlyBinaryStream::getUnsignedVarInt64()
+{
+    std::uint64_t value = 0;
+    for (auto i = 0;; i += 7) {
+        auto byte_result = getByte();
+        if (!byte_result.ignoreError()) {
+            return BEDROCK_RETHROW(byte_result);
+        }
+        const auto byte = byte_result.discardError().value();
+        value |= static_cast<std::uint64_t>(byte & 0x7F) << i;
+        if ((byte & 0x80U) == 0) {
+            break;
+        }
+    }
+    return value;
+}
+
+Bedrock::Result<std::int64_t> ReadOnlyBinaryStream::getVarInt64()
+{
+    auto result = getUnsignedVarInt64();
+    if (!result.ignoreError()) {
+        return BEDROCK_RETHROW(result);
+    }
+    const auto value = result.discardError().value();
+    return static_cast<std::int64_t>(value >> 1) ^ -static_cast<std::int64_t>(value & 1);
+}
+
+Bedrock::Result<std::string> ReadOnlyBinaryStream::getString(std::size_t max_length)
+{
+    auto length_result = getUnsignedVarInt();
+    if (!length_result.ignoreError()) {
+        return BEDROCK_RETHROW(length_result);
+    }
+    const auto length = length_result.discardError().value();
+    if (length > max_length) {
+        return BEDROCK_NEW_ERROR(std::errc::message_size);
+    }
+    if (length > getUnreadLength()) {
+        const auto unread = getUnreadLength();
+        const auto read_pointer = getReadPointer();
+        setReadPointer(getLength());
+        return BEDROCK_NEW_ERROR_MESSAGE(
+            std::errc::argument_out_of_domain,
+            std::format("String length value {} is larger than available data bytes {}. Previous read ptr: {}", length,
+                        unread, read_pointer));
+    }
+    std::string value(length, '\0');
+    auto result = read(value.data(), length);
+    if (!result.ignoreError()) {
+        return BEDROCK_RETHROW(result);
     }
     return value;
 }

@@ -32,8 +32,13 @@ public:
     [[nodiscard]] size_t getReadPointer() const;
     [[nodiscard]] size_t getUnreadLength() const;
     [[nodiscard]] size_t getLength() const;
+    Bedrock::Result<bool> getBool();
     Bedrock::Result<unsigned char> getByte();
+    Bedrock::Result<int> getSignedInt();
     Bedrock::Result<unsigned int> getUnsignedVarInt();
+    Bedrock::Result<std::uint64_t> getUnsignedVarInt64();
+    Bedrock::Result<std::int64_t> getVarInt64();
+    Bedrock::Result<std::string> getString(std::size_t max_length);
     [[nodiscard]] std::string_view getView() const;
     [[nodiscard]] bool hasOverflowed() const;
 
