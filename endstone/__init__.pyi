@@ -770,7 +770,7 @@ class Skin:
         Get the Cape image.
         """
 
-__minecraft_version__ = "26.40"
+__minecraft_version__ = "26.44"
 
 class Registry(typing.Generic[_T]):
     """
