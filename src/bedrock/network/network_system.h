@@ -34,9 +34,14 @@ public:
     [[nodiscard]] Bedrock::NotNullNonOwnerPtr<const RemoteConnector> getRemoteConnector() const;
     void send(const NetworkIdentifier &network_id, const Packet &packet, SubClientId sender_sub_id);
     void sendToMultiple(const std::vector<NetworkIdentifierWithSubId> &recipients, const Packet &packet);
+    [[nodiscard]] NetworkPeer *getPeerForUser(const NetworkIdentifier &id) const;
     void setCloseConnection(const NetworkIdentifier &id, Connection::DisconnectFailReason close_connection_reason);
     void closeConnection(const NetworkIdentifier &id, const Connection::DisconnectFailReason reason,
                          const std::string &message_from_server);
+    [[nodiscard]] const std::vector<std::unique_ptr<NetworkConnection>> &getConnections() const
+    {
+        return connections_;
+    }
     [[nodiscard]] const cereal::ReflectionCtx &getPacketReflectionCtx() const;
     [[nodiscard]] IPacketSerializationController &getPacketOverrides() const { return *packet_overrides_; }  // Endstone
 
@@ -52,6 +57,7 @@ protected:
 
 public:
     NetworkConnection *_getConnectionFromId(const NetworkIdentifier &) const;  // Endstone: private -> public
+    [[nodiscard]] bool _isUsingNetherNetTransportLayer() const;                // Endstone: protected -> public
 
 private:
     void _sendInternal(const NetworkIdentifier &id, const Packet &packet, const std::string &data);

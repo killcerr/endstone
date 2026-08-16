@@ -372,9 +372,21 @@ NetworkPeer::DataStatus BatchedNetworkPeer::_receivePacket(std::string &out_data
 
 const NetworkIdentifier &BatchedNetworkPeer::getId() const
 {
-    auto peer = peer_;
-    while (peer->peer_) {
-        peer = peer->peer_;
+    // The peer stack is transport-specific, so resolve the id by finding the connection we belong to
+    // rather than downcasting the innermost peer.
+    static const NetworkIdentifier invalid = [] {
+        NetworkIdentifier id{};
+        id.type = NetworkIdentifier::Type::Invalid;
+        return id;
+    }();
+
+    const auto &server = endstone::core::EndstoneServer::getInstance();
+    for (const auto &connection : server.getServer().getNetwork().getConnections()) {
+        for (const auto *peer = connection->peer.get(); peer != nullptr; peer = peer->peer_.get()) {
+            if (peer == this) {
+                return connection->id;
+            }
+        }
     }
-    return static_cast<RakNetConnector::RakNetNetworkPeer &>(*peer).getId();
+    return invalid;
 }
