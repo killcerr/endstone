@@ -973,22 +973,36 @@ the `SerializationMode` accessors.
    and carries a `meta_setter_<T>_&T::m<Field>_`; the discriminant is instead bound
    straight through `basic_meta_factory::data` + `custom(MemberDescriptor)` with
    `traits = is_static|is_const` and a *constant-returning* getter named
-   `meta_getter_<T>_<N>_`, `<N>` being that case's tag value. So a case whose
-   first bound entry is `is_static|is_const` returning 0 is tag 0, and that tag is
-   one byte, not a stored field. Each entry also installs a `TypeSchema<...>`
-   vftable that spells the member's type outright
-   (`TypeSchema<std::optional<std::string>>`). `RemoveScore @ 1.26.44` reads as
-   `[uint8 tag][Scoreboard Id][Objective Name: optional<string>]` this way.
-   - **protocol-docs renders that one constant twice** - as the packet-level
-     `"switch": {...}` *and* again as a per-case `"Action"` field of the enum's
-     string type. It is ONE tag on the wire, not a tag plus a length-prefixed
-     name. `bedrock-protocol` spelling it as
-     `action: SomeEnum = field(type=str)` is the same artifact, except
-     `field(type=str)` really does generate a name-coded serializer - so there the
-     DSL and the binary genuinely disagree. bedrock-headers settles it fastest:
-     the case struct simply has no `mAction` member (`RemoveScore` is just
-     `mScoreboardId` + `mObjectiveName`), which proves the tag is the variant
-     discriminant and not a field.
+   `meta_getter_<T>_<N>_`, `<N>` being that case's tag value. Each entry also
+   installs a `TypeSchema<...>` vftable that spells the member's type outright
+   (`TypeSchema<std::optional<std::string>>`).
+   - **A registered `is_static|is_const` member IS still written to the wire** -
+     as cereal's name-coded string. It is a constant, not a stored field, and it
+     is absent from the C++ struct, but the serializer emits it all the same. So
+     a cerealised variant entry carries the discriminant **TWICE**: first the
+     `uvarint32` case index, then that constant again as a length-prefixed name.
+     `SetScorePacket @ 1.26.44` on the wire is
+     `01 | 00 | 06 "remove" | e0 02 | 01 | 01 | 04 "demo"` =
+     count, index 0, name `"remove"`, scoreboard id, the new keyed bool, the
+     optional's presence bool, the objective name.
+   - **Do not read "the struct has no member" as "the wire has no field".**
+     bedrock-headers shows `RemoveScore` as just `mScoreboardId` +
+     `mObjectiveName`, and protocol-docs prints the constant twice (packet-level
+     `switch` plus a per-case `"Action"` of the enum's string type). Both are
+     accurate; neither means one tag. `bedrock-protocol`'s
+     `action: SomeEnum = field(type=str)` was the model that had it right, and
+     `field(type=str)` generating a name-coded serializer is the *point*, not an
+     artifact.
+   - **The name-coded string is not the C++ enumerator spelling.** The binary
+     carries `"ChangeFakePlayer"` as a literal, but the wire writes lowercase
+     `"remove"`. Casing is per enum ([[project_bds_cereal_enum_wire_names]]), so
+     never derive it - and when only transforming a payload, read the case from
+     the index and copy the name through verbatim rather than interpreting it.
+   - This one is only settleable by **capturing a live packet**. The cerealizer
+     binding, protocol-docs and bedrock-headers were each individually
+     consistent with a single one-byte tag, and all three readings were wrong.
+     A 4-case variant plus a short name string still looks plausible at a glance,
+     so budget for a capture before shipping a byte-level rewrite.
    - **In a CEREALISED packet a variant tag is always a `uvarint32`**, whatever
      the enum's underlying type says. This is a cereal rule, not a universal one:
      a hand-written `write` picks its own width and often spells the same
