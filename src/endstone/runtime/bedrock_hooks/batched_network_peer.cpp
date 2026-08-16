@@ -115,14 +115,10 @@ void patchPacket(const ClientboundMapItemDataPacket &packet, endstone::core::End
     }
 }
 
-// #blameMojang - 1.26.44 gave RemoveScore's objective name the isKeyedSetterGetter trait, so cereal
-// now writes a fixed `true` ahead of the optional's own presence bool, yet the network protocol
-// version stayed at 2168. A 1.26.40-43 client negotiates the same version and then mis-parses every
-// scoreboard removal. The in-memory packet is identical either way, so a read/write round trip would
-// just re-emit the new shape - the byte has to come off the serialized payload.
-// Returns nullopt whenever the buffer is not understood end to end, leaving it untouched.
-// TODO(1.26.50): 1.26.50 raises the protocol past 2168, so those clients can no longer connect and
-// this whole path, along with its caller's version gate, can go.
+// #blameMojang - 1.26.44 writes a fixed `true` ahead of RemoveScore's objective name but left the
+// protocol version at 2168, so a 1.26.40-43 client negotiates the same version and mis-parses every
+// scoreboard removal.
+// TODO(1.26.50): drop once the protocol version moves past 2168.
 std::optional<std::string> downgradeSetScorePayload(std::string_view payload)
 {
     ReadOnlyBinaryStream in{payload, false};
@@ -134,9 +130,7 @@ std::optional<std::string> downgradeSetScorePayload(std::string_view payload)
     BinaryStream out;
     out.writeUnsignedVarInt(count.value(), "Score Info", nullptr);
 
-    const auto max_string_length = in.getLength();
     for (unsigned int i = 0; i < count.value(); ++i) {
-        // the variant tag, always a uvarint32 over the cases in declaration order
         auto action = in.getUnsignedVarInt().discardError();
         if (!action) {
             return std::nullopt;
@@ -147,6 +141,12 @@ std::optional<std::string> downgradeSetScorePayload(std::string_view payload)
         }
         out.writeUnsignedVarInt(action.value(), "Action", nullptr);
 
+        auto action_name = in.getString(32).discardError();
+        if (!action_name) {
+            return std::nullopt;
+        }
+        out.writeString(action_name.value(), "Action", nullptr);
+
         auto scoreboard_id = in.getVarInt64().discardError();
         if (!scoreboard_id) {
             return std::nullopt;
@@ -155,7 +155,7 @@ std::optional<std::string> downgradeSetScorePayload(std::string_view payload)
 
         if (entry_action == ScorePacketEntryAction::Remove) {
             auto keyed_marker = in.getBool().discardError();
-            if (!keyed_marker) {  // read and dropped: the byte 1.26.44 added
+            if (!keyed_marker) {
                 return std::nullopt;
             }
             auto has_objective_name = in.getBool().discardError();
@@ -164,7 +164,7 @@ std::optional<std::string> downgradeSetScorePayload(std::string_view payload)
             }
             out.writeBool(has_objective_name.value(), "Objective Name", nullptr);
             if (has_objective_name.value()) {
-                auto objective_name = in.getString(max_string_length).discardError();
+                auto objective_name = in.getString(in.getUnreadLength()).discardError();
                 if (!objective_name) {
                     return std::nullopt;
                 }
@@ -173,7 +173,7 @@ std::optional<std::string> downgradeSetScorePayload(std::string_view payload)
             continue;
         }
 
-        auto objective_name = in.getString(max_string_length).discardError();
+        auto objective_name = in.getString(in.getUnreadLength()).discardError();
         if (!objective_name) {
             return std::nullopt;
         }
@@ -185,8 +185,8 @@ std::optional<std::string> downgradeSetScorePayload(std::string_view payload)
         }
         out.writeSignedInt(score_value.value(), "Score Value", nullptr);
 
-        if (entry_action == ScorePacketEntryAction::ChangeFakePlayer) {  // the other two carry an id
-            auto fake_player_name = in.getString(max_string_length).discardError();
+        if (entry_action == ScorePacketEntryAction::ChangeFakePlayer) {
+            auto fake_player_name = in.getString(in.getUnreadLength()).discardError();
             if (!fake_player_name) {
                 return std::nullopt;
             }
@@ -291,11 +291,11 @@ void BatchedNetworkPeer::sendPacket(const std::string &data, Reliability reliabi
     case MinecraftPacketIds::SetScore: {
         // TODO(1.26.50): drop with downgradeSetScorePayload once the protocol version moves past 2168.
         if (player != nullptr) {
-            static const SemVersion keyed_objective_name_version{1, 26, 44};
             SemVersion client_version;
             auto result =
                 SemVersion::fromString(player->getGameVersion(), client_version, SemVersion::ParseOption::NoWildcards);
-            if (result != SemVersion::MatchType::None && client_version < keyed_objective_name_version) {
+            if (result != SemVersion::MatchType::None && client_version >= SemVersion{1, 26, 40} &&
+                client_version < SemVersion{1, 26, 44}) {
                 if (auto downgraded = downgradeSetScorePayload(payload)) {
                     e.setPayload(*downgraded);
                 }

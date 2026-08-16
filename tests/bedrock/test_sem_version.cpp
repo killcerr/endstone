@@ -103,6 +103,27 @@ TEST(SemVersionTest, InequalityOperator)
     EXPECT_TRUE(SemVersion(1, 0, 0, "rc.1") < SemVersion(1, 0, 0));
 }
 
+TEST(SemVersionTest, RelationalOperators)
+{
+    const SemVersion older(1, 26, 40);
+    const SemVersion newer(1, 26, 44);
+    const SemVersion same(1, 26, 44);
+
+    EXPECT_TRUE(older < newer);
+    EXPECT_TRUE(older <= newer);
+    EXPECT_TRUE(newer > older);
+    EXPECT_TRUE(newer >= older);
+
+    EXPECT_FALSE(newer < older);
+    EXPECT_FALSE(newer <= older);
+    EXPECT_FALSE(older > newer);
+    EXPECT_FALSE(older >= newer);
+
+    EXPECT_FALSE(newer > same);
+    EXPECT_TRUE(newer >= same);
+    EXPECT_TRUE(newer <= same);
+}
+
 TEST(SemVersionFromStringTest, FullVersion)
 {
     SemVersion version;

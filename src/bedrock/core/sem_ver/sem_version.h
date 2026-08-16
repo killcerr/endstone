@@ -139,6 +139,18 @@ bool operator<=(const SemVersionBase<StringTypeLhs> &lhs, const SemVersionBase<S
     return lhs == rhs || lhs < rhs;
 }
 
+template <typename StringTypeLhs, typename StringTypeRhs>
+bool operator>(const SemVersionBase<StringTypeLhs> &lhs, const SemVersionBase<StringTypeRhs> &rhs)
+{
+    return !(lhs <= rhs);
+}
+
+template <typename StringTypeLhs, typename StringTypeRhs>
+bool operator>=(const SemVersionBase<StringTypeLhs> &lhs, const SemVersionBase<StringTypeRhs> &rhs)
+{
+    return !(lhs < rhs);
+}
+
 template <typename StringType>
 class SemVersionBase {
 public:
