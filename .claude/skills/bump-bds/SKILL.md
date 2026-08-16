@@ -966,6 +966,41 @@ the `SerializationMode` accessors.
    its declaration order (teardown offsets map 1:1 onto the 1.26.32 order) even
    though `settings` is the *sixth* field on the wire, because registration order
    is chosen independently of declaration order.
+22. **`cerealizer<T>::bind` is the exact wire field list, and it tells a variant
+   TAG from a real member by how each is bound.** Reach it by grepping the binary
+   for the type-name literal (`"RemoveScore"`) and taking the lone data xref. A
+   genuine data member goes through `cereal::BasicFactory<T>::_bindInternalCommon`
+   and carries a `meta_setter_<T>_&T::m<Field>_`; the discriminant is instead bound
+   straight through `basic_meta_factory::data` + `custom(MemberDescriptor)` with
+   `traits = is_static|is_const` and a *constant-returning* getter named
+   `meta_getter_<T>_<N>_`, `<N>` being that case's tag value. So a case whose
+   first bound entry is `is_static|is_const` returning 0 is tag 0, and that tag is
+   one byte, not a stored field. Each entry also installs a `TypeSchema<...>`
+   vftable that spells the member's type outright
+   (`TypeSchema<std::optional<std::string>>`). `RemoveScore @ 1.26.44` reads as
+   `[uint8 tag][Scoreboard Id][Objective Name: optional<string>]` this way.
+   - **protocol-docs renders that one constant twice** - as the packet-level
+     `"switch": {...}` *and* again as a per-case `"Action"` field of the enum's
+     string type. It is ONE tag on the wire, not a tag plus a length-prefixed
+     name. `bedrock-protocol` spelling it as
+     `action: SomeEnum = field(type=str)` is the same artifact, except
+     `field(type=str)` really does generate a name-coded serializer - so there the
+     DSL and the binary genuinely disagree. bedrock-headers settles it fastest:
+     the case struct simply has no `mAction` member (`RemoveScore` is just
+     `mScoreboardId` + `mObjectiveName`), which proves the tag is the variant
+     discriminant and not a field.
+   - **In a CEREALISED packet a variant tag is always a `uvarint32`**, whatever
+     the enum's underlying type says. This is a cereal rule, not a universal one:
+     a hand-written `write` picks its own width and often spells the same
+     discriminant as a plain `uint8`. So establish which kind of packet it is
+     before encoding anything - **presence in `protocol-docs` IS the test: if a
+     packet is not documented there, it is not cerealised**, and its tag width
+     comes from reading its manual `write`. Everything from protocol 2168 onward
+     is cerealised; earlier releases are a mix.
+   - The trap is that it is invisible: a 4-case variant's tag fits in one byte,
+     so reading a cerealised tag as `uint8` is byte-identical and stays correct
+     until a variant grows past 128 cases. Encode to the packet's actual kind
+     rather than to what the bytes happen to look like today.
 
 Worked example: **BossEventPacket @ 1.26.32** - migrated to cereal-only;
 `color`/`overlay` narrowed 4B->1B, both `darken`/`fog` bools removed, a
