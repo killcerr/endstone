@@ -597,6 +597,17 @@ check can ever detect.
   divergence to the end moved by exactly the same delta, there is exactly ONE
   change and nothing before it moved. A mixed band (some +8, some 0, some +16)
   means multiple changes - keep going.
+- **Index-align the two dtors' displacement LISTS, don't set-difference them.**
+  Collect the distinct `this`-relative displacements each version's D1 touches,
+  sort both, and pair them up by index. When the two lists are the same length
+  the pairing is exact and every shift boundary falls out in one read - a run of
+  `d -> d`, then a run of `d -> d-8`, then `d -> d-16` says there are two
+  independent 8-byte shrinks and tells you the offset each one starts at. A set
+  difference of the same two lists just yields two unaligned piles that look
+  like seven unrelated changes. `ResourcePackManager @ 1.26.44`: unchanged
+  through 144, -8 from 160, -16 from 360, which located both shrinks without
+  decompiling anything. Cross-check the count first - if the lists differ in
+  length, a member was added or removed and index pairing is invalid.
 - **Base-class removal is visible in the typeinfo kind.** Itanium
   `__vmi_class_type_info` (multiple bases, with the secondary vtable groups) ->
   `__si_class_type_info` (single base) is a removed base, and the removed base's
@@ -715,6 +726,23 @@ Two things that make the guard weaker than it looks:
   `ResourcePacksInfoPacket` asserted 128 against a 136-byte object,
   `ClientboundMapItemDataPacket` 200 against 208; both packets are read and
   mutated by hooks).
+- **Sweep the asserts mechanically, but trust the DIFFERENTIAL, not the absolute.**
+  Parse every `BEDROCK_STATIC_ASSERT_SIZE` for its class name, mangle it to
+  `_ZTS<len><Class>` (nested -> `N..E`), and run the Itanium-D0 `sizeof` oracle
+  against **both** the old and the new binary. Comparing new-vs-old is reliable
+  because the same picker runs on both; comparing the oracle's absolute answer
+  against the asserted literal is **not** - a heuristic that takes the first
+  early slot tail-calling sized `operator delete` mis-fires on abstract bases
+  and on classes whose dtor pair is not at slots 0/1, and reports nonsense like
+  `Packet` = 8 or `PlayerAuthInputPacket` = 72. Validate the method per class by
+  requiring it to reproduce the *old* asserted number first; where it does, a
+  changed new number is real. 1.26.44's only genuine hit was
+  `ResourcePackManager` 416 -> 400 (Linux), and the method reproduced 416
+  exactly on 1.26.40, which is what made 400 trustworthy.
+- **Non-polymorphic classes are invisible to this sweep** (no vtable, no D0) -
+  in practice ~half the asserted list, including most `*Payload` structs. Report
+  them as unresolved rather than as "unchanged"; they need the cereal-manager or
+  factory oracles instead.
 - **No `// ...` marker does not mean the class is complete.** `ServerInstance`
   carries no marker yet declares 936 of 1080 bytes. So "add asserts to every
   unmarked class" is not a mechanical sweep: derive the real size first, and
@@ -1112,6 +1140,22 @@ any pattern-only table however the version was resolved.
      qword instead (points into `.text` / into `.rdata` / zero / plain data) and
      compare the **total count of code pointers**. Equal counts across versions
      = no vtable slot added or removed binary-wide.
+   - **When the counts DON'T match, the global number proves nothing - diff
+     per class by RTTI before believing it.** Key every vtable by its Itanium
+     typeinfo name (`_ZTS...` -> typeinfo -> address points with a
+     non-relocated `offset_to_top == 0`), record each class's slot-run lengths,
+     and compare the two name-keyed maps. That turns "18 code pointers
+     disappeared, something moved" into a named set difference. 1.26.44 read
+     -18 on Linux / -7 on Windows and the per-class diff over ~45k classes
+     showed **zero** classes changed shape: the delta was three whole classes
+     going away (a cereal constraint helper plus its and one other
+     `__shared_ptr_emplace<T>` control-block vtable). Template instantiations
+     appearing and vanishing is routine churn and moves the global count
+     without any class changing - only the per-class diff separates the two.
+   - A vanished `__shared_ptr_emplace<T>` is also a **free lead**: it means
+     nothing calls `make_shared<T>` any more, which usually pairs with a member
+     somewhere changing `shared_ptr<T>` -> `unique_ptr<T>`. Go looking for it
+     rather than waiting for the crash.
 4. **Protocol version, statically.** `SharedConstants::NetworkProtocolVersion`
    is compared directly inside
    `ServerNetworkHandler::_validateLoginPacket`, whose offset the table already

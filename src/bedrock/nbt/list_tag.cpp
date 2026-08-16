@@ -15,6 +15,7 @@
 #include "bedrock/nbt/list_tag.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <format>
 #include <ranges>
 
@@ -75,7 +76,13 @@ Bedrock::Result<void> ListTag::load(IDataInput &input, int depth)
     const auto size = int_result.asExpected().value();
     list_.clear();
 
+    if (size < 0) {
+        return BEDROCK_NEW_ERROR(std::errc::bad_message);
+    }
     if (size == 0 || type_ == Type::End) {
+        return {};
+    }
+    if (static_cast<std::size_t>(size) > input.numBytesLeft()) {
         return BEDROCK_NEW_ERROR(std::errc::bad_message);
     }
 
@@ -86,7 +93,10 @@ Bedrock::Result<void> ListTag::load(IDataInput &input, int depth)
             return BEDROCK_RETHROW(tag_result);
         }
         auto tag = std::move(tag_result.discardError().value());
-        NbtIo::loadTagPayload(*tag, input, depth + 1);
+        auto payload_result = NbtIo::loadTagPayload(*tag, input, depth + 1);
+        if (!payload_result.ignoreError()) {
+            return BEDROCK_RETHROW(payload_result);
+        }
         list_.push_back(std::move(tag));
     }
     return {};

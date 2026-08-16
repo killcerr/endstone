@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed `from endstone import ItemRegistry` raising `AttributeError` (Python). The name was re-exported but never existed, as the class bound by the server is `ItemTypeRegistry`.
 
+- Fixed truncated or corrupt NBT being accepted as valid. Errors raised while reading a tag's payload were discarded, so a partially read list or compound tag was handed back as if it had loaded cleanly. A list tag's declared length is now also checked against the bytes actually remaining before that many entries are reserved, and an empty list, which is well-formed, is no longer rejected as corrupt.
+
 - Fixed the server list entry losing its last two fields whenever a plugin listened for `ServerListPingEvent`, or the ping was otherwise answered by Endstone. The reply was rebuilt from a fixed list of fields, so anything the server had added beyond it, currently whether the world is an editor world and whether it is hardcore, was dropped. Any field Endstone does not itself expose is now passed through untouched.
 
 ## [0.11.8] - 2026-08-07
