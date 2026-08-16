@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added support for BDS version 1.26.44. The network protocol version is unchanged at 2168, so clients that could join a 1.26.40 server can still join.
+
 - `PlayerInteractEvent` is now fired with the `LEFT_CLICK_AIR` action when a player swings at nothing, that is, at neither a block nor an actor. The action had been part of the API since the event was introduced, but was never fired. Cancelling the event suppresses the swing, including its attack sound (#316).
 - `endstone.block.BlockType` is now importable from Python. The class was bound but never re-exported, so it could only be reached through `endstone._python`.
 
