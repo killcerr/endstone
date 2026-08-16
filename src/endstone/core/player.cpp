@@ -80,6 +80,7 @@ EndstonePlayer::EndstonePlayer(EndstoneServer &server, ::Player &player)
     const auto component = player.getPersistentComponent<UserEntityIdentifierComponent>();
     uuid_ = EndstoneUUID::fromMinecraft(component->getClientUUID());
     xuid_ = component->getXuid(false);
+    address_ = EndstoneSocketAddress::fromNetworkIdentifier(component->getNetworkId());
     last_op_status_ = EndstonePlayer::isOp();
 }
 
@@ -237,8 +238,7 @@ std::string EndstonePlayer::getXuid() const
 
 SocketAddress EndstonePlayer::getAddress() const
 {
-    auto component = getHandle().getPersistentComponent<UserEntityIdentifierComponent>();
-    return EndstoneSocketAddress::fromNetworkIdentifier(component->getNetworkId());
+    return address_;
 }
 
 void EndstonePlayer::transfer(std::string host, int port) const

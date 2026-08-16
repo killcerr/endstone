@@ -372,8 +372,7 @@ NetworkPeer::DataStatus BatchedNetworkPeer::_receivePacket(std::string &out_data
 
 const NetworkIdentifier &BatchedNetworkPeer::getId() const
 {
-    // The peer stack is transport-specific, so resolve the id by finding the connection we belong to
-    // rather than downcasting the innermost peer.
+    // The innermost peer is transport-specific, so find the connection we belong to instead.
     static const NetworkIdentifier invalid = [] {
         NetworkIdentifier id{};
         id.type = NetworkIdentifier::Type::Invalid;
