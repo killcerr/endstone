@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed the last lines of a session going missing from `logs/`. The log file was written through a buffer that was only handed to the operating system once it filled, so whatever it still held when the server exited was lost, and roughly a quarter of the archives ended mid-line, usually part-way through the plugin shutdown messages. Every message is now flushed as it is written, as the Java edition does.
 
+- Fixed `Metrics` reporting the emulated architecture instead of the host's (Python). `platform.machine()` is faked by qemu-user and Rosetta, so a plugin running in an `arm64` container on an `amd64` machine sent `aarch64` to bStats. The real host architecture is now detected, as Endstone's own metrics have done since 0.11.7.
+
 - Fixed `from endstone import ItemRegistry` raising `AttributeError` (Python). The name was re-exported but never existed, as the class bound by the server is `ItemTypeRegistry`.
 
 - Fixed scoreboard score removals being misread by clients older than 1.26.44. BDS 1.26.44 added a byte to the removal entry on the wire but left the network protocol version at 2168, so a 1.26.40 to 1.26.43 client negotiates the same version and then reads every removal wrongly. Those clients are now sent the older form.
