@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed unreadable archives in `logs/`. A session that ended before writing a single line still had its empty log archived, and compressing nothing produced a zero-byte `.gz` that no tool can open. Such sessions are no longer archived. Every archive also carried a stray empty gzip member at the end, which `gzip` and `zcat` tolerate but stricter readers report as trailing garbage; archives are now written as a single clean stream.
 
+- Fixed the last lines of a session going missing from `logs/`. The log file was written through a buffer that was only handed to the operating system once it filled, so whatever it still held when the server exited was lost, and roughly a quarter of the archives ended mid-line, usually part-way through the plugin shutdown messages. Every message is now flushed as it is written, as the Java edition does.
+
 - Fixed `from endstone import ItemRegistry` raising `AttributeError` (Python). The name was re-exported but never existed, as the class bound by the server is `ItemTypeRegistry`.
 
 - Fixed scoreboard score removals being misread by clients older than 1.26.44. BDS 1.26.44 added a byte to the removal entry on the wire but left the network protocol version at 2168, so a 1.26.40 to 1.26.43 client negotiates the same version and then reads every removal wrongly. Those clients are now sent the older form.
