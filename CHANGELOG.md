@@ -7,38 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.9] - 2026-08-17
+
 ### Added
 
 - Added support for BDS version 1.26.44. The network protocol version is unchanged at 2168, so clients that could join a 1.26.40 server can still join.
 
-- `PlayerInteractEvent` is now fired with the `LEFT_CLICK_AIR` action when a player swings at nothing, that is, at neither a block nor an actor. The action had been part of the API since the event was introduced, but was never fired. Cancelling the event suppresses the swing, including its attack sound (#316).
-- `endstone.block.BlockType` is now importable from Python. The class was bound but never re-exported, so it could only be reached through `endstone._python`.
+- `PlayerInteractEvent` is now fired with the `LEFT_CLICK_AIR` action when a player swings at neither a block nor an actor. The action existed since the event was introduced but was never fired. Cancelling the event suppresses the swing, including its attack sound (#316).
+
+- `endstone.block.BlockType` is now importable from Python.
 
 ### Changed
 
-- **BREAKING**: The concrete registry classes are no longer importable from `endstone` (Python). `EnchantmentRegistry` is gone, and the broken `ItemRegistry` name with it; obtain a registry through `Server.get_registry()` and annotate it as `Registry[T]`.
+- **BREAKING**: The concrete registry classes are no longer importable from `endstone` (Python). `EnchantmentRegistry` and `ItemRegistry` are gone; obtain a registry through `Server.get_registry()` and annotate it as `Registry[T]`.
 
 ### Fixed
 
-- Fixed player ping, the server port, and the player and address carried by `PacketSendEvent` and `PacketReceiveEvent` being read from RakNet-specific types even when the server runs on the NetherNet transport (`transport=nethernet` in `server.properties`). That transport uses different connection and peer types, so these reads returned meaningless values or read past the end of an object. They now go through the interfaces both transports share. Servers on the default RakNet transport behave exactly as before.
+- Fixed services outliving the plugin that registered them. Disabling a plugin left its services in the service manager, so after a `/reload` another plugin could still look one up and call into a plugin that is no longer running. For C++ plugins the provider's library has been unloaded by that point, so the call would crash the server. A plugin's services are now unregistered when it is disabled, as the Java edition does.
 
-- Fixed unreadable archives in `logs/`. A session that ended before writing a single line still had its empty log archived, and compressing nothing produced a zero-byte `.gz` that no tool can open. Such sessions are no longer archived. Every archive also carried a stray empty gzip member at the end, which `gzip` and `zcat` tolerate but stricter readers report as trailing garbage; archives are now written as a single clean stream.
+- Fixed unreadable archives in `logs/`. Sessions that never logged anything are no longer archived, and archives are now written as a single clean gzip stream.
 
-- Fixed the last lines of a session going missing from `logs/`. The log file was written through a buffer that was only handed to the operating system once it filled, so whatever it still held when the server exited was lost, and roughly a quarter of the archives ended mid-line, usually part-way through the plugin shutdown messages. Every message is now flushed as it is written, as the Java edition does.
+- Fixed the last lines of a session going missing from `logs/`. Roughly a quarter of archives ended mid-line, usually part-way through the plugin shutdown messages. Every message is now flushed as it is written.
 
-- Fixed `Metrics` reporting the emulated architecture instead of the host's (Python). `platform.machine()` is faked by qemu-user and Rosetta, so a plugin running in an `arm64` container on an `amd64` machine sent `aarch64` to bStats. The real host architecture is now detected, as Endstone's own metrics have done since 0.11.7.
+- Fixed `Metrics` reporting the emulated architecture instead of the host's (Python), so a plugin running in an emulated container sent the wrong architecture to bStats.
 
-- Fixed ARM servers being reported to bStats under two different names. Windows reported `arm64` while Linux reported `aarch64`, splitting the same hardware across two entries. Both now report `aarch64`, matching what the Java edition sends.
+- Fixed ARM servers being reported to bStats as `arm64` on Windows but `aarch64` on Linux, splitting the same hardware across two entries. Both now report `aarch64`.
 
-- Fixed `from endstone import ItemRegistry` raising `AttributeError` (Python). The name was re-exported but never existed, as the class bound by the server is `ItemTypeRegistry`.
+- Fixed `from endstone import ItemRegistry` raising `AttributeError` (Python). The class bound by the server is `ItemTypeRegistry`.
 
-- Fixed scoreboard score removals being misread by clients older than 1.26.44. BDS 1.26.44 added a byte to the removal entry on the wire but left the network protocol version at 2168, so a 1.26.40 to 1.26.43 client negotiates the same version and then reads every removal wrongly. Those clients are now sent the older form.
+- Fixed scoreboard score removals being misread by clients older than 1.26.44. Those clients negotiate the same network protocol version as 1.26.44 but expect the older form, which they are now sent.
 
-- Fixed truncated or corrupt NBT being accepted as valid. Errors raised while reading a tag's payload were discarded, so a partially read list or compound tag was handed back as if it had loaded cleanly. A list tag's declared length is now also checked against the bytes actually remaining before that many entries are reserved, and an empty list, which is well-formed, is no longer rejected as corrupt.
+- Fixed truncated or corrupt NBT being accepted as valid, and well-formed empty lists being rejected as corrupt.
 
-- Fixed `server.properties` never gaining the entries a Bedrock Dedicated Server update adds. Updating left the file exactly as it was, so a new property, such as `transport`, only appeared if you deleted the file and let the server write a fresh one. The entries a new version adds are now appended to your file, along with the comments documenting them, and everything already in it is left untouched.
+- Fixed `server.properties` never gaining the entries a Bedrock Dedicated Server update adds, such as `transport`, unless you deleted the file and let the server write a fresh one. New entries are now appended along with the comments documenting them, and everything already in the file is left untouched.
 
-- Fixed the server list entry losing its last two fields whenever a plugin listened for `ServerListPingEvent`, or the ping was otherwise answered by Endstone. The reply was rebuilt from a fixed list of fields, so anything the server had added beyond it, currently whether the world is an editor world and whether it is hardcore, was dropped. Any field Endstone does not itself expose is now passed through untouched.
+- Fixed `Player.address` being unreadable once a player's connection has closed, so a handler that asked during disconnect got nothing back.
+
+- Fixed the server list entry losing its last two fields, currently whether the world is an editor world and whether it is hardcore, whenever a plugin listened for `ServerListPingEvent`. Any field Endstone does not itself expose is now passed through untouched.
 
 ## [0.11.8] - 2026-08-07
 
@@ -1161,7 +1166,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic plugin loader for C++ and Python plugins.
 - Basic command system that allows plugins to register custom commands.
 
-[Unreleased]: https://github.com/EndstoneMC/endstone/compare/v0.11.8...HEAD
+[Unreleased]: https://github.com/EndstoneMC/endstone/compare/v0.11.9...HEAD
+[0.11.9]: https://github.com/EndstoneMC/endstone/compare/v0.11.8...v0.11.9
 [0.11.8]: https://github.com/EndstoneMC/endstone/compare/v0.11.7...v0.11.8
 [0.11.7]: https://github.com/EndstoneMC/endstone/compare/v0.11.6...v0.11.7
 [0.11.6]: https://github.com/EndstoneMC/endstone/compare/v0.11.5...v0.11.6
