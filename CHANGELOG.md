@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed `Metrics` reporting the emulated architecture instead of the host's (Python). `platform.machine()` is faked by qemu-user and Rosetta, so a plugin running in an `arm64` container on an `amd64` machine sent `aarch64` to bStats. The real host architecture is now detected, as Endstone's own metrics have done since 0.11.7.
 
+- Fixed ARM servers being reported to bStats under two different names. Windows reported `arm64` while Linux reported `aarch64`, splitting the same hardware across two entries. Both now report `aarch64`, matching what the Java edition sends.
+
 - Fixed `from endstone import ItemRegistry` raising `AttributeError` (Python). The name was re-exported but never existed, as the class bound by the server is `ItemTypeRegistry`.
 
 - Fixed scoreboard score removals being misread by clients older than 1.26.44. BDS 1.26.44 added a byte to the removal entry on the wire but left the network protocol version at 2168, so a 1.26.40 to 1.26.43 client negotiates the same version and then reads every removal wrongly. Those clients are now sent the older form.

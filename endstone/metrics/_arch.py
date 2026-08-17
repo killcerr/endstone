@@ -10,9 +10,16 @@ _ELF_MACHINES = {
 }
 
 
+# Report what Java's os.arch would, so the bStats buckets line up.
+_ARCH_ALIASES = {
+    "x86_64": "amd64",
+    "arm64": "aarch64",
+}
+
+
 def normalise_arch(arch: str) -> str:
     arch = arch.lower()
-    return "amd64" if arch == "x86_64" else arch
+    return _ARCH_ALIASES.get(arch, arch)
 
 
 def detect_host_arch() -> str | None:
