@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed truncated or corrupt NBT being accepted as valid. Errors raised while reading a tag's payload were discarded, so a partially read list or compound tag was handed back as if it had loaded cleanly. A list tag's declared length is now also checked against the bytes actually remaining before that many entries are reserved, and an empty list, which is well-formed, is no longer rejected as corrupt.
 
+- Fixed `server.properties` never gaining the entries a Bedrock Dedicated Server update adds. Updating left the file exactly as it was, so a new property, such as `transport`, only appeared if you deleted the file and let the server write a fresh one. The entries a new version adds are now appended to your file, along with the comments documenting them, and everything already in it is left untouched.
+
 - Fixed the server list entry losing its last two fields whenever a plugin listened for `ServerListPingEvent`, or the ping was otherwise answered by Endstone. The reply was rebuilt from a fixed list of fields, so anything the server had added beyond it, currently whether the world is an editor world and whether it is hardcore, was dropped. Any field Endstone does not itself expose is now passed through untouched.
 
 ## [0.11.8] - 2026-08-07
