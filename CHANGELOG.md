@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed player ping, the server port, and the player and address carried by `PacketSendEvent` and `PacketReceiveEvent` being read from RakNet-specific types even when the server runs on the NetherNet transport (`transport=nethernet` in `server.properties`). That transport uses different connection and peer types, so these reads returned meaningless values or read past the end of an object. They now go through the interfaces both transports share. Servers on the default RakNet transport behave exactly as before.
 
+- Fixed unreadable archives in `logs/`. A session that ended before writing a single line still had its empty log archived, and compressing nothing produced a zero-byte `.gz` that no tool can open. Such sessions are no longer archived. Every archive also carried a stray empty gzip member at the end, which `gzip` and `zcat` tolerate but stricter readers report as trailing garbage; archives are now written as a single clean stream.
+
 - Fixed `from endstone import ItemRegistry` raising `AttributeError` (Python). The name was re-exported but never existed, as the class bound by the server is `ItemTypeRegistry`.
 
 - Fixed scoreboard score removals being misread by clients older than 1.26.44. BDS 1.26.44 added a byte to the removal entry on the wire but left the network protocol version at 2168, so a 1.26.40 to 1.26.43 client negotiates the same version and then reads every removal wrongly. Those clients are now sent the older form.
