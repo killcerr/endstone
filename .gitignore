@@ -27,3 +27,7 @@ conan_provider.cmake
 .venv/**
 .venv
 .env
+
+# Claude Code scratch space (skills/ and styles/ are tracked)
+.claude/notes/
+.claude/worktrees/

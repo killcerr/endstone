@@ -26,21 +26,23 @@ conan install . --build=missing
 > Windows: run from a Visual Studio Developer prompt with clang-cl/lld-link on PATH.
 
 ### Activate Conan build environment (only for the manual CMake path)
+The profile pins `&:build_type=RelWithDebInfo` for endstone itself (dependencies stay `Release`), so the build tree is `build/RelWithDebInfo`:
+
 ```shell
 # Windows (cmd)
-.\build\Release\generators\conanbuild.bat
+.\build\RelWithDebInfo\generators\conanbuild.bat
 
 # Windows (PowerShell)
-.\build\Release\generators\conanbuild.ps1
+.\build\RelWithDebInfo\generators\conanbuild.ps1
 
 # Linux
-source ./build/Release/generators/conanbuild.sh
+source ./build/RelWithDebInfo/generators/conanbuild.sh
 ```
 
 ### Build with CMake
 ```shell
-cmake --preset conan-release
-cmake --build --preset conan-release
+cmake --preset conan-relwithdebinfo
+cmake --build --preset conan-relwithdebinfo
 ```
 
 ### Install from source (builds Python wheel)
@@ -58,17 +60,26 @@ To keep the C++ build tree persistent across reinstalls (much faster after the f
 pip install -U . -C build-dir=./build
 ```
 
+`build/package` is the wheel staging tree and is never pruned, so a module deleted from `endstone/` keeps being packaged, and an old `*.dist-info` makes pip reject the build with a version mismatch. After deleting or renaming anything under `endstone/`, `rm -rf build/package` before reinstalling.
+
 ## Testing
 
 ### C++ tests (GTest)
 ```shell
-ctest --test-dir build/Release
+ctest --test-dir build/RelWithDebInfo
 ```
 
 ### Python tests
+`testpaths` and `norecursedirs` are set in `pyproject.toml`, so this collects `tests/` and skips `tests/plugin`:
+
 ```shell
-pytest tests/endstone/python
+pytest
 ```
+
+These run against the installed wheel, so reinstall (`pip install -U . -C build-dir=./build`) after changing the bindings, or the tests import a stale `endstone`.
+
+### Runtime tests (live server)
+`tests/plugin` is the `endstone-test` plugin, which runs pytest inside a running BDS rather than against the wheel. Install it with `pip install -e tests/plugin`; the server pass runs when the plugin is enabled, and the player/event passes run via `/test` and `/test events`. See `tests/plugin/README.md`.
 
 ## Code Style
 
