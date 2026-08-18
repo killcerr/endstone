@@ -14,7 +14,6 @@
 
 #pragma once
 
-#include <concepts>
 #include <functional>
 #include <memory>
 #include <string>
@@ -44,14 +43,9 @@ public:
             }
             else {
                 details.from_item_stack_ = [](const ::ItemStackBase &stack) -> std::unique_ptr<ItemMeta> {
-                    if constexpr (std::constructible_from<T, const ::ItemStackBase &>) {
-                        return std::make_unique<T>(stack);
-                    }
-                    else {
-                        static auto empty_tag = std::make_unique<::CompoundTag>();
-                        const auto *tag = stack.hasUserData() ? stack.getUserData() : empty_tag.get();
-                        return std::make_unique<T>(*tag);
-                    }
+                    static auto empty_tag = std::make_unique<::CompoundTag>();
+                    const auto *tag = stack.hasUserData() ? stack.getUserData() : empty_tag.get();
+                    return std::make_unique<T>(*tag);
                 };
                 details.from_item_meta_ = [](ItemTypeId, const ItemMeta *meta) -> std::unique_ptr<ItemMeta> {
                     return std::make_unique<T>(meta);

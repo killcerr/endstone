@@ -20,12 +20,6 @@
 namespace endstone::core {
 namespace {
 constexpr auto PotionTypeNamespace = PotionType::Water.getNamespace();
-
-const ::CompoundTag &getUserData(const ::ItemStackBase &item)
-{
-    static const ::CompoundTag empty;
-    return item.hasUserData() ? *item.getUserData() : empty;
-}
 }  // namespace
 
 EndstonePotionMeta::EndstonePotionMeta(const ItemMeta *meta) : EndstoneItemMetaBase(meta)
@@ -39,7 +33,7 @@ EndstonePotionMeta::EndstonePotionMeta(const ItemMeta *meta) : EndstoneItemMetaB
 
 EndstonePotionMeta::EndstonePotionMeta(const ::CompoundTag &tag) : EndstoneItemMetaBase(tag) {}
 
-EndstonePotionMeta::EndstonePotionMeta(const ::ItemStackBase &item) : EndstonePotionMeta(getUserData(item))
+void EndstonePotionMeta::readBasePotionType(const ::ItemStackBase &item)
 {
     if (const auto potion = ::Potion::getPotion(item.getAuxValue()); potion) {
         base_potion_type_ = potion->getNameId();
@@ -70,7 +64,7 @@ void EndstonePotionMeta::setBasePotionType(const std::optional<PotionId> type)
     base_potion_type_ = potion->getNameId();
 }
 
-void EndstonePotionMeta::applyToItemStack(::ItemStackBase &item) const
+void EndstonePotionMeta::applyBasePotionType(::ItemStackBase &item) const
 {
     if (!hasBasePotionType()) {
         return;
@@ -78,11 +72,6 @@ void EndstonePotionMeta::applyToItemStack(::ItemStackBase &item) const
     if (const auto potion = ::Potion::getPotion(base_potion_type_); potion) {
         item.setAuxValue(static_cast<std::int16_t>(potion->getPotionId()));
     }
-}
-
-bool EndstonePotionMeta::isEmpty() const
-{
-    return EndstoneItemMetaBase::isEmpty() && isPotionEmpty();
 }
 
 bool EndstonePotionMeta::equalsCommon(const ItemMeta &meta) const

@@ -18,6 +18,7 @@
 #include "endstone/core/inventory/item_factory.h"
 #include "endstone/core/inventory/item_metas.h"
 #include "endstone/core/inventory/meta/item_meta.h"
+#include "endstone/core/inventory/meta/potion_meta.h"
 #include "endstone/core/nbt.h"
 
 namespace endstone::core {
@@ -169,10 +170,12 @@ const ItemType &EndstoneItemStack::getType(const ItemStackBase *item)
 std::unique_ptr<ItemMeta> EndstoneItemStack::getItemMeta(const ItemStackBase *item)
 {
     const auto &type = getType(item);
-    if (item == nullptr || item->isNull()) {
-        return EndstoneItemFactory::instance().getItemMeta(type);
+    auto meta = hasItemMeta(item) ? EndstoneItemMetas::getItemMetaDetails(type).fromItemStack(*item)
+                                  : EndstoneItemFactory::instance().getItemMeta(type);
+    if (item != nullptr && !item->isNull() && meta && meta->as<PotionMeta>()) {
+        static_cast<EndstonePotionMeta *>(meta.get())->readBasePotionType(*item);
     }
-    return EndstoneItemMetas::getItemMetaDetails(type).fromItemStack(*item);
+    return meta;
 }
 
 bool EndstoneItemStack::hasItemMeta(const ItemStackBase *item)
@@ -201,9 +204,11 @@ bool EndstoneItemStack::setItemMeta(ItemStackBase *item, const ItemMeta *meta)
         return true;
     }
 
-    auto &m = item_meta->getExtras();
-    m.applyToItemStack(*item);
-    if (!m.isEmpty()) {
+    if (const auto *potion_meta = item_meta->as<PotionMeta>()) {
+        static_cast<const EndstonePotionMeta *>(potion_meta)->applyBasePotionType(*item);
+    }
+
+    if (auto &m = item_meta->getExtras(); !m.isEmpty()) {
         auto tag = item->hasUserData() ? item->getUserData()->clone() : std::make_unique<::CompoundTag>();
         m.applyToItem(*tag);
         item->setUserData(std::move(tag));

@@ -24,14 +24,13 @@ class EndstonePotionMeta : public EndstoneItemMetaBase<PotionMeta> {
 public:
     explicit EndstonePotionMeta(const ItemMeta *meta);
     explicit EndstonePotionMeta(const ::CompoundTag &tag);
-    explicit EndstonePotionMeta(const ::ItemStackBase &item);
 
     [[nodiscard]] bool hasBasePotionType() const override;
     [[nodiscard]] std::optional<PotionId> getBasePotionType() const override;
     void setBasePotionType(std::optional<PotionId> type) override;
 
-    void applyToItemStack(::ItemStackBase &item) const override;
-    [[nodiscard]] bool isEmpty() const override;
+    void readBasePotionType(const ::ItemStackBase &item);
+    void applyBasePotionType(::ItemStackBase &item) const;
     [[nodiscard]] bool equalsCommon(const ItemMeta &meta) const override;
     [[nodiscard]] bool notUncommon(const ItemMeta &meta) const override;
     [[nodiscard]] std::unique_ptr<ItemMeta> clone() const override;
