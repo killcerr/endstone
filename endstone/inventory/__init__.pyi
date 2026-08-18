@@ -121,6 +121,8 @@ class ItemType:
     """
     Represents an item type.
     """
+
+    AIR: Identifier[ItemType] = "minecraft:air"
     @property
     def id(self) -> Identifier[ItemType]:
         """

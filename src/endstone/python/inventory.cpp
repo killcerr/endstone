@@ -31,6 +31,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .finalize();
 
     py::class_<ItemType>(m, "ItemType", "Represents an item type.")
+        .def_property_readonly_static("AIR", id(ItemType::Air), "The identifier of the air item type.")
         .def_property_readonly("id", &ItemType::getId, "The identifier of this item type.")
         .def_property_readonly("translation_key", py::overload_cast<>(&ItemType::getTranslationKey, py::const_),
                                "The translation key, suitable for use in a translation component.")

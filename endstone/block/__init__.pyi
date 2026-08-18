@@ -147,6 +147,8 @@ class BlockType:
     """
     Represents a block type.
     """
+
+    AIR: Identifier[BlockType] = "minecraft:air"
     @property
     def id(self) -> Identifier[BlockType]:
         """

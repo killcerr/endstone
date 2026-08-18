@@ -245,6 +245,8 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
              py::arg("pitch") = 0.0, py::arg("yaw") = 0.0)
         .def_property("dimension", &Location::getDimension, &Location::setDimension,
                       "The `Dimension` that contains this position, or `None` if it is not set.")
+        .def_property_readonly("is_dimension_loaded", &Location::isDimensionLoaded,
+                               "Whether the dimension of this location is present and still loaded.")
         .def_property_readonly("block", &Location::getBlock, "The block at the represented location.")
         .def_property("pitch", &Location::getPitch, &Location::setPitch,
                       "The pitch of this location, measured in degrees.")

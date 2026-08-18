@@ -1192,7 +1192,7 @@ class ServerListPingEvent(ServerEvent, Cancellable):
     @game_mode.setter
     def game_mode(self, arg1: GameMode) -> None: ...
 
-class ServerLoadEvent(Event):
+class ServerLoadEvent(ServerEvent):
     """
     Called when either the server startup or reload has completed.
     """
@@ -1202,8 +1202,10 @@ class ServerLoadEvent(Event):
         """
 
         STARTUP = 0
+        RELOAD = 1
 
     STARTUP = LoadType.STARTUP
+    RELOAD = LoadType.RELOAD
     @property
     def type(self) -> LoadType:
         """

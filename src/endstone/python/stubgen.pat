@@ -83,7 +83,7 @@
 # these apart from enum members, which are ALL_CAPS too. The annotation types the
 # constant, the id spells out what is in it. No trailing blank line, so the
 # constants stay packed together.
-^endstone\.\w+\.(?P<owner>ActorType|Attribute|Dimension|EffectType|Enchantment|PotionType)\.(?P<name>[A-Z][A-Z0-9_]*)$:
+^endstone\.\w+\.(?P<owner>ActorType|Attribute|BlockType|Dimension|EffectType|Enchantment|ItemType|PotionType)\.(?P<name>[A-Z][A-Z0-9_]*)$:
     \from endstone import Identifier
     \name: Identifier[\owner] = \value
 ^endstone\.level\.__prefix__$:

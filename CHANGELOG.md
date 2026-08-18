@@ -73,6 +73,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `from endstone import ItemRegistry` (and `EnchantmentRegistry`, `ActorTypeRegistry`) raising `AttributeError`. These names were re-exported but never existed; the registry class is `Registry`, obtained through `Server.get_registry()`.
 - Fixed the server list entry losing its last two fields whenever a plugin listened for `ServerListPingEvent`, or the ping was otherwise answered by Endstone. The reply was rebuilt from a fixed list of fields, so anything the server had added beyond it, currently whether the world is an editor world and whether it is hardcore, was dropped. Any field Endstone does not itself expose is now passed through untouched.
 - Fixed the effect API being unusable from Python. An `Effect` did not keep its own copy of the effect type, so `Effect.type` and `repr()` gave back corrupt text, and `Mob.add_effect()` / `Mob.remove_effect()` rejected a valid effect as an unknown type.
+- Fixed `ServerLoadEvent` in Python. It was missing its `ServerEvent` base, so `isinstance(event, ServerEvent)` was `False`, and `LoadType.RELOAD` was never exposed even though the server fires it on `/reload`, leaving a listener reading an unmapped value.
+- Fixed `BlockType.AIR` and `ItemType.AIR` raising `AttributeError` in Python. Both are documented as the way to name the air block and item, but neither constant was bound.
 
 ## [0.11.9] - 2026-08-17
 

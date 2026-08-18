@@ -312,6 +312,12 @@ class Location:
     @dimension.setter
     def dimension(self, arg1: Dimension | None) -> None: ...
     @property
+    def is_dimension_loaded(self) -> bool:
+        """
+        Whether the dimension of this location is present and still loaded.
+        """
+
+    @property
     def block(self) -> Block:
         """
         The block at the represented location.

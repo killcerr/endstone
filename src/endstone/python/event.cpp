@@ -503,11 +503,12 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
         .def_property("game_mode", &ServerListPingEvent::getGameMode, &ServerListPingEvent::setGameMode,
                       "The current game mode.");
 
-    auto server_load_event = py::class_<ServerLoadEvent, Event>(
+    auto server_load_event = py::class_<ServerLoadEvent, ServerEvent>(
         m, "ServerLoadEvent", "Called when either the server startup or reload has completed.");
     py::native_enum<ServerLoadEvent::LoadType>(server_load_event, "LoadType", "enum.Enum",
                                                "Represents the context in which the server was loaded.")
         .value("STARTUP", ServerLoadEvent::LoadType::Startup)
+        .value("RELOAD", ServerLoadEvent::LoadType::Reload)
         .export_values()
         .finalize();
     server_load_event.def_property_readonly("type", &ServerLoadEvent::getType, "The load type of this event.");

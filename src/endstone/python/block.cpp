@@ -47,7 +47,8 @@ void init_block(py::module_ &m, py::classh<Block> &block)
         .def_property_readonly("runtime_id", &BlockData::getRuntimeId, "The runtime id for this block.")
         .def("__str__", [](const BlockData &self) { return std::format("{}", self); });
 
-    block_type.def_property_readonly("id", &BlockType::getId, "The identifier of this block type.")
+    block_type.def_property_readonly_static("AIR", id(BlockType::Air), "The identifier of the air block type.")
+        .def_property_readonly("id", &BlockType::getId, "The identifier of this block type.")
         .def_property_readonly("translation_key", &BlockType::getTranslationKey,
                                "The translation key, suitable for use in a translation component.")
         .def_property_readonly("has_item_type", &BlockType::hasItemType,
