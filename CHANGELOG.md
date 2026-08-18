@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the `endstone.Identifier` type for namespaced ids: `dim.id.namespace == "minecraft"`, `dim.id.key == "overworld"`, and type checkers can now tell `Identifier[Dimension]` apart from `Identifier[ActorType]`. Plain strings are still accepted where an `Identifier` is required (e.g. `level.get_dimension("overworld")`).
 - Added `BlockData.translation_key` for retrieving the translation key of a block.
 - Added `WritableBookMeta`, `BookMeta`, and `CrossbowMeta` item meta types.
+- Added a `PotionMeta` item meta for potions, splash potions and lingering potions, giving the `PotionType` identifiers a consumer at last: `meta.base_potion_type = PotionType.STRONG_HEALING` sets the potion a bottle holds, and `meta.has_base_potion_type` / `meta.base_potion_type` read it back. Bedrock derives a potion's effects and its colour from the base potion type rather than storing either on the item, so there is no `custom_effects` or `color` as in Bukkit's `PotionMeta`.
 - Added binary NBT serialization (`dump`/`load`) with support for multiple formats.
 - Added unified `Object.as<T>()`/`is<T>()` casting API, replacing the per-type `asPlayer()`, `asMob()`, etc. methods.
 - Added a healthcheck to the Docker image so `docker ps` and Docker Compose report whether the server is actually online.

@@ -9,6 +9,7 @@ from endstone import Identifier
 from endstone.enchantments import Enchantment
 from endstone.map import MapView
 from endstone.nbt import CompoundTag
+from endstone.potion import PotionType
 
 __all__ = [
     "BookMeta",
@@ -22,6 +23,7 @@ __all__ = [
     "ItemType",
     "MapMeta",
     "PlayerInventory",
+    "PotionMeta",
     "WritableBookMeta",
 ]
 
@@ -485,6 +487,28 @@ class CrossbowMeta(ItemMeta):
 
     @charged_projectile.setter
     def charged_projectile(self, arg1: ItemStack | None) -> None: ...
+
+class PotionMeta(ItemMeta):
+    """
+    Represents the metadata for a potion item.
+
+    A potion carries a single base potion type, which determines both the effects it applies and the colour it is
+    rendered with.
+    """
+    @property
+    def has_base_potion_type(self) -> bool:
+        """
+        Whether this has a base potion type.
+        """
+
+    @property
+    def base_potion_type(self) -> Identifier[PotionType] | None:
+        """
+        The base potion type of this potion, or `None` if none is set.
+        """
+
+    @base_potion_type.setter
+    def base_potion_type(self, arg1: Identifier[PotionType] | str | None) -> None: ...
 
 class ItemFactory:
     """

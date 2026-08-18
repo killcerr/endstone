@@ -160,6 +160,7 @@ static_assert(_ITERATOR_DEBUG_LEVEL == 0,
 #include "inventory/meta/crossbow_meta.h"
 #include "inventory/meta/item_meta.h"
 #include "inventory/meta/map_meta.h"
+#include "inventory/meta/potion_meta.h"
 #include "inventory/meta/writable_book_meta.h"
 #include "inventory/player_inventory.h"
 #include "inventory/recipe.h"

@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <functional>
 #include <memory>
 #include <string>
@@ -43,9 +44,14 @@ public:
             }
             else {
                 details.from_item_stack_ = [](const ::ItemStackBase &stack) -> std::unique_ptr<ItemMeta> {
-                    static auto empty_tag = std::make_unique<::CompoundTag>();
-                    const auto *tag = stack.hasUserData() ? stack.getUserData() : empty_tag.get();
-                    return std::make_unique<T>(*tag);
+                    if constexpr (std::constructible_from<T, const ::ItemStackBase &>) {
+                        return std::make_unique<T>(stack);
+                    }
+                    else {
+                        static auto empty_tag = std::make_unique<::CompoundTag>();
+                        const auto *tag = stack.hasUserData() ? stack.getUserData() : empty_tag.get();
+                        return std::make_unique<T>(*tag);
+                    }
                 };
                 details.from_item_meta_ = [](ItemTypeId, const ItemMeta *meta) -> std::unique_ptr<ItemMeta> {
                     return std::make_unique<T>(meta);
@@ -77,6 +83,9 @@ public:
             {"minecraft:writable_book", &WritableBook},
             {"minecraft:written_book", &Book},
             {"minecraft:crossbow", &Crossbow},
+            {"minecraft:potion", &Potion},
+            {"minecraft:splash_potion", &Potion},
+            {"minecraft:lingering_potion", &Potion},
         };
         if (const auto it = look_up.find(type); it != look_up.end()) {
             return *it->second;
@@ -91,5 +100,6 @@ private:
     static ItemMetaDetails WritableBook;
     static ItemMetaDetails Book;
     static ItemMetaDetails Crossbow;
+    static ItemMetaDetails Potion;
 };
 }  // namespace endstone::core

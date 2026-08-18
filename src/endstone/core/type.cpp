@@ -38,6 +38,7 @@
 #include "endstone/inventory/meta/crossbow_meta.h"
 #include "endstone/inventory/meta/item_meta.h"
 #include "endstone/inventory/meta/map_meta.h"
+#include "endstone/inventory/meta/potion_meta.h"
 #include "endstone/inventory/meta/writable_book_meta.h"
 #include "endstone/permissions/permissible.h"
 #include "endstone/player.h"
@@ -74,6 +75,7 @@ void registerTypes()
     registerType<WritableBookMeta>().base<ItemMeta>();
     registerType<BookMeta>().base<WritableBookMeta>();
     registerType<CrossbowMeta>().base<ItemMeta>();
+    registerType<PotionMeta>().base<ItemMeta>();
 
     // BlockState hierarchy
     registerType<BlockState>();
