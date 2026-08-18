@@ -380,6 +380,7 @@ class ActorType:
     SQUID: Identifier[ActorType] = "minecraft:squid"
     STRAY: Identifier[ActorType] = "minecraft:stray"
     STRIDER: Identifier[ActorType] = "minecraft:strider"
+    SULFUR_CUBE: Identifier[ActorType] = "minecraft:sulfur_cube"
     TADPOLE: Identifier[ActorType] = "minecraft:tadpole"
     THROWN_TRIDENT: Identifier[ActorType] = "minecraft:thrown_trident"
     TNT: Identifier[ActorType] = "minecraft:tnt"

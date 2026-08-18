@@ -42,8 +42,8 @@ EndstoneBookMeta::EndstoneBookMeta(const ::CompoundTag &tag) : Base(tag)
     if (const auto &author = tag.getString(WrittenBookItem::TAG_AUTHOR); !author.empty()) {
         author_ = author;
     }
-    if (const auto generation = tag.getInt(WrittenBookItem::TAG_GENERATION)) {
-        generation_ = static_cast<BookMeta::Generation>(generation);
+    if (tag.contains(WrittenBookItem::TAG_GENERATION)) {
+        generation_ = static_cast<BookMeta::Generation>(tag.getInt(WrittenBookItem::TAG_GENERATION));
     }
 }
 

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `/restart` command (console-only) that gracefully restarts the server without manually relaunching.
 - Added support for custom Python events with optional cancellation.
 - Added `ActorType` to the registry API.
+- Added the missing `ActorType.SULFUR_CUBE` constant. The sulfur cube was in the actor type registry, so it was reachable by id, but the class did not name it.
 - Added an attribute API: `Mob.get_attribute()`, `Mob.has_attribute()`, and `Mob.attributes` expose a living entity's attributes (health, movement speed, attack damage, etc.). Each `AttributeInstance` reports its current, base, minimum, and maximum value, and lets you add or remove `AttributeModifier`s at runtime.
 - Added the `endstone.Identifier` type for namespaced ids: `dim.id.namespace == "minecraft"`, `dim.id.key == "overworld"`, and type checkers can now tell `Identifier[Dimension]` apart from `Identifier[ActorType]`. Plain strings are still accepted where an `Identifier` is required (e.g. `level.get_dimension("overworld")`).
 - Added `BlockData.translation_key` for retrieving the translation key of a block.
@@ -78,6 +79,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed the effect API being unusable from Python. An `Effect` did not keep its own copy of the effect type, so `Effect.type` and `repr()` gave back corrupt text, and `Mob.add_effect()` / `Mob.remove_effect()` rejected a valid effect as an unknown type.
 - Fixed `ServerLoadEvent` in Python. It was missing its `ServerEvent` base, so `isinstance(event, ServerEvent)` was `False`, and `LoadType.RELOAD` was never exposed even though the server fires it on `/reload`, leaving a listener reading an unmapped value.
 - Fixed `BlockType.AIR` and `ItemType.AIR` raising `AttributeError` in Python. Both are documented as the way to name the air block and item, but neither constant was bound.
+- Fixed `BookMeta.generation` losing `BookMetaGeneration.ORIGINAL`. Setting a written book's generation to `ORIGINAL` and reading it back gave `None`, because the round trip mistook the stored value `0` for an absent tag. The other three generations were unaffected.
+- Fixed `BlockType.translation_key` returning a key that no language file resolves. It gave the block's base description id, such as `tile.stone.stone`, where the key clients actually translate is `tile.stone.stone.name`. It now agrees with `BlockData.translation_key`.
 
 ## [0.11.9] - 2026-08-17
 
