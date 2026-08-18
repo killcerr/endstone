@@ -5,10 +5,27 @@ from endstone.attribute import Attribute
 from endstone.block import Biome, BlockType
 from endstone.enchantments import Enchantment
 from endstone.inventory import ItemType
-from endstone.potion import EffectType
+from endstone.potion import EffectType, PotionType
 
 # All registry types to test generically
-REGISTRY_TYPES = [ActorType, Biome, BlockType, Enchantment, GameRule, ItemType]
+REGISTRY_TYPES = [
+    ActorType,
+    Biome,
+    BlockType,
+    EffectType,
+    Enchantment,
+    GameRule,
+    ItemType,
+    PotionType,
+]
+
+FULLY_EXPORTED_REGISTRY_TYPES = [
+    ActorType,
+    EffectType,
+    Enchantment,
+    GameRule,
+    PotionType,
+]
 
 
 def _get_enum_constants(cls):
@@ -78,9 +95,15 @@ def test_excess_constants(server: Server, registry_type):
     )
 
 
-@pytest.mark.parametrize("registry_type", [ActorType], ids=lambda t: t.__name__)
+@pytest.mark.parametrize(
+    "registry_type", FULLY_EXPORTED_REGISTRY_TYPES, ids=lambda t: t.__name__
+)
 def test_missing_constants(server: Server, registry_type):
-    """Every registry entry should have a corresponding static constant on the class."""
+    """Every registry entry should have a corresponding static constant on the class.
+
+    Skipped for BlockType and ItemType, which have thousands of entries, and for
+    Biome, which is a registry-only type that exports no constants at all.
+    """
     registry = server.get_registry(registry_type)
     constants = _get_enum_constants(registry_type)
     exported_ids = set(constants.values())
@@ -134,9 +157,7 @@ def test_registry_is_available(server: Server, registry_type):
     assert len(registry) > 0
 
 
-@pytest.mark.parametrize(
-    "not_a_registry", [Attribute, EffectType], ids=lambda t: t.__name__
-)
+@pytest.mark.parametrize("not_a_registry", [Attribute], ids=lambda t: t.__name__)
 def test_constant_holders_have_no_registry(server: Server, not_a_registry):
     """Verify a constants-only type has no registry behind it."""
     assert server.get_registry(not_a_registry) is None
