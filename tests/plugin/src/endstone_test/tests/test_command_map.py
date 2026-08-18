@@ -72,7 +72,10 @@ def test_python_subclass_execute_is_called(
     command_map: CommandMap, sender: CommandSender
 ) -> None:
     """Verify a Python Command subclass has its execute() actually invoked."""
-    command = RecordingCommand("endstone_test_execute")
+    command = RecordingCommand(
+        "endstone_test_execute",
+        usages=["/endstone_test_execute <first: string> <second: string>"],
+    )
     assert command_map.register_command(command) is True
 
     assert command_map.dispatch(sender, "endstone_test_execute alpha beta") is True
