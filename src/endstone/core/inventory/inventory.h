@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include <unordered_map>
 
 #include "bedrock/world/container.h"
@@ -26,15 +28,15 @@ template <typename Interface>
     requires std::is_base_of_v<Inventory, Interface>
 class EndstoneInventoryBase : public Interface {
 public:
-    explicit EndstoneInventoryBase(::Container &container) : container_(container) {}
+    EndstoneInventoryBase() = default;
 
-    [[nodiscard]] int getSize() const override { return container_.getContainerSize(); }
+    [[nodiscard]] int getSize() const override { return getContainer().getContainerSize(); }
 
-    [[nodiscard]] int getMaxStackSize() const override { return container_.getMaxStackSize(); }
+    [[nodiscard]] int getMaxStackSize() const override { return getContainer().getMaxStackSize(); }
 
     [[nodiscard]] std::optional<ItemStack> getItem(int index) const override
     {
-        const auto &item = container_.getItem(index);
+        const auto &item = getContainer().getItem(index);
         if (item.isNull()) {
             return std::nullopt;
         }
@@ -45,7 +47,7 @@ public:
     {
         const auto item_stack =
             item.has_value() ? EndstoneItemStack::toMinecraft(item.value()) : ::ItemStack::EMPTY_ITEM;
-        container_.setItemWithForceBalance(index, item_stack, true);
+        getContainer().setItemWithForceBalance(index, item_stack, true);
     }
 
     std::unordered_map<int, ItemStack> addItem(std::vector<ItemStack> items) override
@@ -135,7 +137,7 @@ public:
 
     [[nodiscard]] std::vector<std::optional<ItemStack>> getContents() const override
     {
-        const auto slots = container_.getSlots();
+        const auto slots = getContainer().getSlots();
         std::vector<std::optional<ItemStack>> contents;
         for (const auto &slot : slots) {
             if (slot->isNull()) {
@@ -281,7 +283,7 @@ public:
         return -1;
     }
 
-    [[nodiscard]] bool isEmpty() const override { return container_.isEmpty(); }
+    [[nodiscard]] bool isEmpty() const override { return getContainer().isEmpty(); }
 
     void remove(ItemTypeId type) override
     {
@@ -315,7 +317,11 @@ public:
     }
 
 protected:
-    ::Container &container_;
+    /**
+     * The container this inventory reads and writes. Re-derived on every access rather than cached, so an inventory
+     * whose holder is gone raises instead of touching freed memory.
+     */
+    [[nodiscard]] virtual ::Container &getContainer() const = 0;
 
 private:
     [[nodiscard]] int first(const ItemStack &item, bool with_amount) const
@@ -347,6 +353,22 @@ private:
     }
 };
 
-using EndstoneInventory = EndstoneInventoryBase<Inventory>;
+/**
+ * An inventory over a container supplied on demand by whoever owns it.
+ */
+class EndstoneInventory : public EndstoneInventoryBase<Inventory> {
+public:
+    using Provider = std::function<::Container &()>;
+
+    explicit EndstoneInventory(Provider provider) : provider_(std::move(provider)) {}
+
+private:
+    [[nodiscard]] ::Container &getContainer() const override
+    {
+        return provider_();
+    }
+
+    Provider provider_;
+};
 
 }  // namespace endstone::core

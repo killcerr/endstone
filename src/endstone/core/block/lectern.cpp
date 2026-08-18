@@ -21,22 +21,22 @@
 namespace endstone::core {
 
 EndstoneLectern::EndstoneLectern(const EndstoneBlock &block, ::LecternBlockActor &lectern)
-    : EndstoneContainerBase<Lectern>(block, lectern), lectern_(lectern)
+    : EndstoneContainerBase<Lectern>(block, lectern)
 {
 }
 
 int EndstoneLectern::getPage() const
 {
-    return lectern_.getPage();
+    return getLectern().getPage();
 }
 
 void EndstoneLectern::setPage(int page)
 {
     Preconditions::checkArgument(page >= 0, "Page must not be negative, got {}.", page);
     // BDS keeps the page within the book it holds; a lectern with no book has no pages to turn to
-    const auto total_pages = lectern_.getTotalPages();
-    lectern_.setPage(total_pages > 0 ? std::min(page, total_pages - 1) : 0);
-    lectern_.setChanged();
+    const auto total_pages = getLectern().getTotalPages();
+    getLectern().setPage(total_pages > 0 ? std::min(page, total_pages - 1) : 0);
+    getLectern().setChanged();
 }
 
 }  // namespace endstone::core

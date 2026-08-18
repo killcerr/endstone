@@ -17,8 +17,19 @@
 #include "bedrock/network/packet/inventory_slot_packet.h"
 #include "endstone/core/inventory/item_stack.h"
 #include "endstone/core/inventory/player_inventory.h"
+#include "endstone/core/player.h"
 
 namespace endstone::core {
+
+::Container &EndstonePlayerInventory::getContainer() const
+{
+    return getHolder().getInventory();
+}
+
+::Player &EndstonePlayerInventory::getHolder() const
+{
+    return owner_.getHandle();
+}
 
 std::optional<ItemStack> EndstonePlayerInventory::getHelmet() const
 {
@@ -62,28 +73,28 @@ void EndstonePlayerInventory::setBoots(std::optional<ItemStack> boots)
 
 std::optional<ItemStack> EndstonePlayerInventory::getItemInMainHand() const
 {
-    return getItem(holder_.getSelectedItemSlot());
+    return getItem(getHolder().getSelectedItemSlot());
 }
 
 void EndstonePlayerInventory::setItemInMainHand(std::optional<ItemStack> item)
 {
-    setItem(holder_.getSelectedItemSlot(), std::move(item));
+    setItem(getHolder().getSelectedItemSlot(), std::move(item));
 }
 
 std::optional<ItemStack> EndstonePlayerInventory::getItemInOffHand() const
 {
-    return EndstoneItemStack::fromMinecraft(holder_.getOffhandSlot());
+    return EndstoneItemStack::fromMinecraft(getHolder().getOffhandSlot());
 }
 
 void EndstonePlayerInventory::setItemInOffHand(std::optional<ItemStack> item)
 {
     const auto item_stack = item.has_value() ? EndstoneItemStack::toMinecraft(*item) : ::ItemStack::EMPTY_ITEM;
-    holder_.setOffhandSlot(item_stack);
+    getHolder().setOffhandSlot(item_stack);
 }
 
 int EndstonePlayerInventory::getHeldItemSlot() const
 {
-    return holder_.getSelectedItemSlot();
+    return getHolder().getSelectedItemSlot();
 }
 
 void EndstonePlayerInventory::setHeldItemSlot(int slot)
@@ -91,12 +102,12 @@ void EndstonePlayerInventory::setHeldItemSlot(int slot)
     Preconditions::checkArgument(slot >= 0 && slot < FillingContainer::HOTBAR_SIZE,
                                  "Slot ({}) is not between 0 and {} inclusive", slot,
                                  FillingContainer::HOTBAR_SIZE - 1);
-    holder_.setSelectedSlot(slot);
+    getHolder().setSelectedSlot(slot);
 }
 
 std::optional<ItemStack> EndstonePlayerInventory::getArmor(ArmorSlot slot) const
 {
-    auto item = holder_.getArmor(slot);
+    auto item = getHolder().getArmor(slot);
     if (item.isNull()) {
         return std::nullopt;
     }
@@ -106,7 +117,7 @@ std::optional<ItemStack> EndstonePlayerInventory::getArmor(ArmorSlot slot) const
 void EndstonePlayerInventory::setArmor(ArmorSlot slot, std::optional<ItemStack> armor)
 {
     const auto item_stack = armor.has_value() ? EndstoneItemStack::toMinecraft(armor.value()) : ::ItemStack::EMPTY_ITEM;
-    holder_.setArmor(slot, item_stack);
+    getHolder().setArmor(slot, item_stack);
 }
 
 }  // namespace endstone::core

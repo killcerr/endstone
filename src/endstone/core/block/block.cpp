@@ -151,8 +151,8 @@ std::unique_ptr<BlockState> EndstoneBlock::captureState() const
         default:
             break;
         }
-        if (auto *container = static_cast<VanillaBlockActor *>(block_entity)->getContainer()) {
-            return std::make_unique<EndstoneContainer>(*this, *container);
+        if (static_cast<VanillaBlockActor *>(block_entity)->getContainer() != nullptr) {
+            return std::make_unique<EndstoneContainer>(*this, *block_entity);
         }
     }
     return std::make_unique<EndstoneBlockState>(*this);

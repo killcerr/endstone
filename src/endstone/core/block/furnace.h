@@ -30,7 +30,7 @@ public:
     void setCookTime(int cook_time) override;
 
 private:
-    ::FurnaceBlockActor &furnace_;
+    [[nodiscard]] ::FurnaceBlockActor &getFurnace() const { return getBlockActor<::FurnaceBlockActor>(); }
 };
 
 }  // namespace endstone::core

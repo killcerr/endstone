@@ -22,10 +22,11 @@
 
 namespace endstone::core {
 
+class EndstonePlayer;
+
 class EndstonePlayerInventory : public EndstoneInventoryBase<PlayerInventory> {
 public:
-    explicit EndstonePlayerInventory(::Player &holder)
-        : EndstoneInventoryBase(holder.getInventory()), holder_(holder) {};
+    explicit EndstonePlayerInventory(const EndstonePlayer &owner) : owner_(owner) {};
 
     [[nodiscard]] std::optional<ItemStack> getHelmet() const override;
     [[nodiscard]] std::optional<ItemStack> getChestplate() const override;
@@ -43,10 +44,12 @@ public:
     void setHeldItemSlot(int slot) override;
 
 private:
+    [[nodiscard]] ::Container &getContainer() const override;
+    [[nodiscard]] ::Player &getHolder() const;
     [[nodiscard]] std::optional<ItemStack> getArmor(ArmorSlot slot) const;
     void setArmor(ArmorSlot slot, std::optional<ItemStack> armor);
 
-    ::Player &holder_;
+    const EndstonePlayer &owner_;
 };
 
 }  // namespace endstone::core

@@ -17,6 +17,7 @@
 #include <memory>
 #include <type_traits>
 
+#include "bedrock/world/level/block/actor/vanilla_block_actor.h"
 #include "endstone/block/container.h"
 #include "endstone/core/block/block_state.h"
 #include "endstone/core/inventory/inventory.h"
@@ -27,14 +28,26 @@ template <typename Interface = Container>
     requires std::is_base_of_v<Container, Interface>
 class EndstoneContainerBase : public EndstoneBlockStateBase<Interface> {
 public:
-    EndstoneContainerBase(const EndstoneBlock &block, ::Container &container)
-        : EndstoneBlockStateBase<Interface>(block), inventory_(std::make_unique<EndstoneInventory>(container))
+    EndstoneContainerBase(const EndstoneBlock &block, const ::BlockActor &block_actor)
+        : EndstoneBlockStateBase<Interface>(block, block_actor),
+          inventory_(std::make_unique<EndstoneInventory>([this]() -> ::Container & { return getContainer(); }))
     {
     }
 
     [[nodiscard]] Inventory &getInventory() const override
     {
         return *inventory_;
+    }
+
+protected:
+    [[nodiscard]] ::Container &getContainer() const
+    {
+        auto &block_actor = static_cast<::VanillaBlockActor &>(this->template getBlockActor<::BlockActor>());
+        auto *container = block_actor.getContainer();
+        if (container == nullptr) {
+            throw std::runtime_error("Trying to access a container block state that is no longer valid.");
+        }
+        return *container;
     }
 
 private:

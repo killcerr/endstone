@@ -76,8 +76,9 @@ namespace endstone::core {
 
 EndstonePlayer::EndstonePlayer(EndstoneServer &server, ::Player &player)
     : EndstoneMobBase(server, player), perm_(std::make_shared<PermissibleBase>(static_cast<Player *>(this))),
-      inventory_(std::make_unique<EndstonePlayerInventory>(player)),
-      ender_chest_(std::make_unique<EndstoneInventory>(*player.getEnderChestContainer())),
+      inventory_(std::make_unique<EndstonePlayerInventory>(*this)),
+      ender_chest_(std::make_unique<EndstoneInventory>(
+          [this]() -> ::Container & { return *getHandle().getEnderChestContainer(); })),
       address_(EndstoneSocketAddress::fromNetworkIdentifier(
           player.getPersistentComponent<UserEntityIdentifierComponent>()->getNetworkId()))
 {

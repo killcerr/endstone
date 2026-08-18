@@ -28,7 +28,7 @@ public:
     void setPage(int page) override;
 
 private:
-    ::LecternBlockActor &lectern_;
+    [[nodiscard]] ::LecternBlockActor &getLectern() const { return getBlockActor<::LecternBlockActor>(); }
 };
 
 }  // namespace endstone::core

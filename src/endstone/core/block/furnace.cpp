@@ -17,30 +17,30 @@
 namespace endstone::core {
 
 EndstoneFurnace::EndstoneFurnace(const EndstoneBlock &block, ::FurnaceBlockActor &furnace)
-    : EndstoneContainerBase<Furnace>(block, furnace), furnace_(furnace)
+    : EndstoneContainerBase<Furnace>(block, furnace)
 {
 }
 
 int EndstoneFurnace::getBurnTime() const
 {
-    return furnace_.getLitTime();
+    return getFurnace().getLitTime();
 }
 
 void EndstoneFurnace::setBurnTime(int burn_time)
 {
-    furnace_.setLitTime(burn_time);
-    furnace_.setChanged();
+    getFurnace().setLitTime(burn_time);
+    getFurnace().setChanged();
 }
 
 int EndstoneFurnace::getCookTime() const
 {
-    return furnace_.getCookingProgress();
+    return getFurnace().getCookingProgress();
 }
 
 void EndstoneFurnace::setCookTime(int cook_time)
 {
-    furnace_.setCookingProgress(cook_time);
-    furnace_.setChanged();
+    getFurnace().setCookingProgress(cook_time);
+    getFurnace().setChanged();
 }
 
 }  // namespace endstone::core
