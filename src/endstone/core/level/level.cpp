@@ -20,6 +20,7 @@
 
 #include "bedrock/entity/gamerefs_entity/gamerefs_entity.h"
 #include "bedrock/network/packet_sender.h"
+#include "bedrock/platform/uuid.h"
 #include "bedrock/world/level/dimension/dimension.h"
 #include "bedrock/world/level/dimension/vanilla_dimensions.h"
 #include "bedrock/world/level/dimension_manager.h"
@@ -118,11 +119,18 @@ Nullable<Dimension> EndstoneLevel::getDimension(DimensionType type) const
     return nullptr;
 }
 
-Nullable<Dimension> EndstoneLevel::createDimension(const DimensionCreator & /*creator*/)
+Nullable<Dimension> EndstoneLevel::createDimension(const DimensionCreator &creator)
 {
-    // Deferred: serverRegisterCustomDimension and getDimensionId are inlined in the shipped BDS build, so there is no
-    // symbol to call. Revisit once a callable registration path is wired.
-    throw std::runtime_error("Level::createDimension is not yet implemented");
+    if (auto existing = getDimension(creator.getId())) {
+        return existing;
+    }
+    const std::string name{creator.getId()};
+    const auto type = level_.getDimensionManager().serverRegisterCustomDimension(name, mce::UUID::EMPTY);
+    if (!type.has_value()) {
+        return nullptr;
+    }
+    level_.getOrCreateDimension(type.value());
+    return getDimension(type.value());
 }
 
 std::int64_t EndstoneLevel::getSeed() const

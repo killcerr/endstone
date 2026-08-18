@@ -349,6 +349,22 @@ rip_relative = true
 rip_offset = 1
 
 [[signatures]]
+name = "?serverRegisterCustomDimension@DimensionManager@@QEAA?AV?$optional@UDimensionType@@@std@@V?$basic_string_view@DU?$char_traits@D@std@@@3@AEBVUUID@mce@@@Z"
+relative = false
+extra = 0
+# 1. find bytes "C0 FF FF FF 40 01 00 00" = the packed DimensionDefinition height range (mHeightMinimum -64,
+#    mHeightMaximum 320) that every custom dimension is registered with; it is built as a `movabs` inside this
+#    function, just after the NameIdStore id is obtained
+# 2. walk up to the .pdata BeginAddress: the function is `if (nameIdStore->contains(name)) { ret.engaged =
+#    false; } else { id = nameIdStore->getOrCreateId(name); def = {-64, 320, GeneratorType::Void, id, packId};
+#    if (_registerCustomDimensionWithDimensionDefinitionGroup(name, def))
+#        _registerCustomDimensionWithFactory(name, id); ret = {id, true}; }`
+# 3. confirm by the sret shape: rdx is the std::optional<DimensionType> out-param, r8 the string_view and r9
+#    the mce::UUID, both passed by pointer
+# function prologue (call sites are all inlined copies, no E8 to anchor on)
+pattern = "41 56 56 57 55 53 48 81 EC ? ? ? ? 4D 89 CE 4C 89 C3"
+
+[[signatures]]
 name = "?explode@Explosion@@QEAA_NAEAVIRandom@@@Z"
 relative = false
 extra = 0

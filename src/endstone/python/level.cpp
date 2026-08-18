@@ -191,7 +191,11 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
     Creates a new custom dimension within this level.
 
     Custom dimensions are empty (void) dimensions identified by a namespaced id, e.g. `myplugin:void_realm`;
-    populate them with blocks, structures or actors afterward. Custom dimensions persist across server restarts.
+    populate them with blocks, structures or actors afterward.
+
+    The level remembers which id belongs to which name, so a dimension's terrain and actors survive a restart.
+    The registration itself does not: call this again on every startup to get the same dimension back.
+
     If a dimension with the requested name already exists, that existing dimension is returned instead.
 
     Args:

@@ -11,7 +11,7 @@
 
 namespace endstone::runtime {
 
-static constexpr std::array<std::pair<std::string_view, std::size_t>, 61> symbols = {{
+static constexpr std::array<std::pair<std::string_view, std::size_t>, 62> symbols = {{
     {"BlockState::StateListNode::mHead", 211294960},
     {"Enchant::mEnchants", 211141912},
     {"MobEffect::mMobEffects", 211424880},
@@ -51,6 +51,8 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 61> symbol
     {"?fromRecipes@CraftingDataPacketPayload@@SA?AU1@AEBVRecipes@@_N@Z", 39627104},
     // DedicatedServer
     {"?start@DedicatedServer@@QEAA?AW4ServerExitCode@1@AEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBVActivationArguments@Bedrock@@@Z", 501600},
+    // DimensionManager
+    {"?serverRegisterCustomDimension@DimensionManager@@QEAA?AV?$optional@UDimensionType@@@std@@V?$basic_string_view@DU?$char_traits@D@std@@@3@AEBVUUID@mce@@@Z", 7151824},
     // Explosion
     {"?explode@Explosion@@QEAA_NAEAVIRandom@@@Z", 7190560},
     // FurnaceBlockActor

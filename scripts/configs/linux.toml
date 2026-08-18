@@ -305,6 +305,21 @@ rip_relative = true
 rip_offset = 1
 
 [[signatures]]
+name = "_ZN16DimensionManager29serverRegisterCustomDimensionENSt3__117basic_string_viewIcNS0_11char_traitsIcEEEERKN3mce4UUIDE"
+relative = false
+extra = 0
+# 1. find bytes "C0 FF FF FF 40 01 00 00" = the packed DimensionDefinition height range (mHeightMinimum -64,
+#    mHeightMaximum 320) that every custom dimension is registered with; it is built as a `movabs` inside this
+#    function, just after the NameIdStore id is obtained
+# 2. walk up to the prologue: the function is `if (nameIdStore->contains(name)) return nullopt;
+#    id = nameIdStore->getOrCreateId(name); def = {-64, 320, GeneratorType::Void, id, packId};
+#    if (_registerCustomDimensionWithDimensionDefinitionGroup(name, def))
+#        _registerCustomDimensionWithFactory(name, id); return id;`
+# 3. confirm by the tail: `movabs rax, 0x100000000; or rax, rcx` - the engaged std::optional<DimensionType>
+# function prologue (call sites are all inlined copies, no E8 to anchor on)
+pattern = "55 41 57 41 56 41 54 53 48 83 EC ? 49 89 CC 48 89 D3 49 89 F6 49 89 FF 48 8B 7F ? E8"
+
+[[signatures]]
 name = "_ZN9Explosion7explodeER7IRandom"
 relative = false
 extra = 0

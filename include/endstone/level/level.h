@@ -82,7 +82,10 @@ public:
      * <p>
      * The dimension is created from the options described by the given DimensionCreator. Custom dimensions are
      * empty (void) dimensions identified by a namespaced id, e.g. `myplugin:void_realm`; populate them with blocks,
-     * structures or actors afterward. Custom dimensions persist across server restarts.
+     * structures or actors afterward.
+     * <p>
+     * The level remembers which id belongs to which name, so a dimension's terrain and actors survive a restart. The
+     * registration itself does not: call this again on every startup to get the same dimension back.
      * <p>
      * If a dimension with the requested name already exists, that existing dimension is returned instead.
      *
