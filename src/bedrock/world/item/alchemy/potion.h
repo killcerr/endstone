@@ -65,14 +65,18 @@ public:
         BASE = 30,
     };
 
-    static const int MAX_POTIONS = 64;
+    static constexpr int MAX_POTIONS = 64;
 
     static std::shared_ptr<const Potion> getPotion(int potion_id);
     static std::shared_ptr<const Potion> getPotion(std::string_view potion_name_id);
 
+    static std::vector<std::shared_ptr<const Potion>> getPotions();
+
     [[nodiscard]] int getPotionId() const { return id_; }
 
     [[nodiscard]] std::string getNameId() const { return name_id_; }
+
+    [[nodiscard]] std::string getDescriptionId() const;
 
     [[nodiscard]] const std::vector<MobEffectInstance> &getMobEffects() const { return effects_; }
 

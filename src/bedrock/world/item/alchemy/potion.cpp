@@ -60,3 +60,22 @@ std::shared_ptr<const Potion> Potion::getPotion(const std::string_view potion_na
     }
     return nullptr;
 }
+
+std::vector<std::shared_ptr<const Potion>> Potion::getPotions()
+{
+    std::vector<std::shared_ptr<const Potion>> potions;
+    for (auto id = 0; id < MAX_POTIONS; ++id) {
+        if (auto potion = getPotion(id); potion) {
+            potions.push_back(std::move(potion));
+        }
+    }
+    return potions;
+}
+
+std::string Potion::getDescriptionId() const
+{
+    if (description_ids_.empty()) {
+        return {};
+    }
+    return description_ids_.front();
+}

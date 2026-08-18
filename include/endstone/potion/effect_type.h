@@ -16,14 +16,15 @@
 
 #include <string_view>
 
-#include "endstone/identifier.h"
+#include "endstone/registry.h"
 
 namespace endstone {
-using EffectId = Identifier<class EffectType>;
+class EffectType;
+using EffectId = Identifier<EffectType>;
 /**
- * All effect types.
+ * Represents an effect type.
  */
-class EffectType {
+class EffectType : public Registry<EffectType>::Type {
 public:
     /**
      * Increases movement speed.

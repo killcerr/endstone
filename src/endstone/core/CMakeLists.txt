@@ -100,6 +100,8 @@ add_library(endstone_core
         plugin/plugin_manager.cpp
         plugin/python_plugin_loader.cpp
         plugin/service_manager.cpp
+        potion/effect_type.cpp
+        potion/potion_type.cpp
         scheduler/async_task.cpp
         scheduler/scheduler.cpp
         scheduler/task.cpp

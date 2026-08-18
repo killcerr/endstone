@@ -18,6 +18,8 @@
 #include <ranges>
 
 #include "bedrock/world/actor/actor_factory.h"
+#include "bedrock/world/effect/mob_effect.h"
+#include "bedrock/world/item/alchemy/potion.h"
 #include "bedrock/world/item/enchanting/enchant.h"
 #include "bedrock/world/item/item.h"
 #include "bedrock/world/item/registry/item_registry_manager.h"
@@ -30,6 +32,8 @@
 #include "endstone/core/enchantments/enchantment.h"
 #include "endstone/core/game_rule.h"
 #include "endstone/core/inventory/item_type.h"
+#include "endstone/core/potion/effect_type.h"
+#include "endstone/core/potion/potion_type.h"
 #include "endstone/core/server.h"
 
 namespace endstone::core {
@@ -205,6 +209,70 @@ std::unique_ptr<Registry<GameRule>> EndstoneRegistry<GameRule, ::GameRule>::crea
     const auto &level = server.getEndstoneLevel()->getHandle();
     for (const auto &game_rule : level.getGameRules().getRules()) {
         auto entry = std::make_unique<EndstoneGameRule>(game_rule);
+        registry->cache_.emplace(std::string(entry->getId()), std::move(entry));
+    }
+    return registry;
+}
+
+template <>
+std::vector<Identifier<EffectType>> EndstoneRegistry<EffectType, ::MobEffect>::identifiers() const
+{
+    std::vector<Identifier<EffectType>> keys;
+    keys.reserve(cache_.size());
+    for (const auto &[key, _] : cache_) {
+        keys.emplace_back(key);
+    }
+    return keys;
+}
+
+template <>
+const ::MobEffect *EndstoneRegistry<EffectType, ::MobEffect>::getMinecraft(Identifier<EffectType> id) const
+{
+    // cache is pre-populated, getMinecraft should not be called
+    return nullptr;
+}
+
+template <>
+std::unique_ptr<Registry<EffectType>> EndstoneRegistry<EffectType, ::MobEffect>::create()
+{
+    auto registry = std::make_unique<EndstoneRegistry>(
+        [](auto, const auto &handle) { return std::make_unique<EndstoneEffectType>(handle); });
+    for (MobEffectId id = 0; id < ::MobEffect::NUM_EFFECTS; ++id) {
+        const auto *effect = ::MobEffect::getById(id);
+        if (!effect) {
+            continue;
+        }
+        auto entry = std::make_unique<EndstoneEffectType>(*effect);
+        registry->cache_.emplace(std::string(entry->getId()), std::move(entry));
+    }
+    return registry;
+}
+
+template <>
+std::vector<Identifier<PotionType>> EndstoneRegistry<PotionType, ::Potion>::identifiers() const
+{
+    std::vector<Identifier<PotionType>> keys;
+    keys.reserve(cache_.size());
+    for (const auto &[key, _] : cache_) {
+        keys.emplace_back(key);
+    }
+    return keys;
+}
+
+template <>
+const ::Potion *EndstoneRegistry<PotionType, ::Potion>::getMinecraft(Identifier<PotionType> id) const
+{
+    // cache is pre-populated, getMinecraft should not be called
+    return nullptr;
+}
+
+template <>
+std::unique_ptr<Registry<PotionType>> EndstoneRegistry<PotionType, ::Potion>::create()
+{
+    auto registry = std::make_unique<EndstoneRegistry>(
+        [](auto, const auto &handle) { return std::make_unique<EndstonePotionType>(handle); });
+    for (const auto &potion : ::Potion::getPotions()) {
+        auto entry = std::make_unique<EndstonePotionType>(*potion);
         registry->cache_.emplace(std::string(entry->getId()), std::move(entry));
     }
     return registry;

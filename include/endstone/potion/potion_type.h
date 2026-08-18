@@ -14,14 +14,18 @@
 
 #pragma once
 
-#include "endstone/identifier.h"
+#include <string_view>
+
+#include "endstone/registry.h"
 
 namespace endstone {
-using PotionId = Identifier<class PotionType>;
+class PotionType;
+using PotionId = Identifier<PotionType>;
 /**
- * All potion types.
+ * Represents a potion type.
  */
-class PotionType {
+class PotionType : public Registry<PotionType>::Type {
+protected:
     static constexpr std::string_view Minecraft = "minecraft:potion_type";
 
 public:

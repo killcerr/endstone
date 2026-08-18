@@ -12,8 +12,35 @@ __all__ = [
 
 class EffectType:
     """
-    All effect types.
+    Represents an effect type.
     """
+    @property
+    def id(self) -> Identifier[EffectType]:
+        """
+        The identifier of this effect type.
+        """
+
+    @property
+    def translation_key(self) -> str:
+        """
+        The translation key, suitable for use in a translation component.
+        """
+
+    @staticmethod
+    def get(name: Identifier[EffectType] | str) -> EffectType:
+        """
+        Attempts to get the `EffectType` with the given name.
+
+        Args:
+            name: The identifier of the effect type (e.g. `minecraft:speed`).
+
+        Returns:
+            The `EffectType`, or `None` if no effect type with that name exists.
+        """
+
+    def __hash__(self) -> int: ...
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
 
     SPEED: Identifier[EffectType] = "minecraft:speed"
     SLOWNESS: Identifier[EffectType] = "minecraft:slowness"
@@ -116,8 +143,35 @@ class Effect:
 
 class PotionType:
     """
-    All potion types.
+    Represents a potion type.
     """
+    @property
+    def id(self) -> Identifier[PotionType]:
+        """
+        The identifier of this potion type.
+        """
+
+    @property
+    def translation_key(self) -> str:
+        """
+        The translation key, suitable for use in a translation component.
+        """
+
+    @staticmethod
+    def get(name: Identifier[PotionType] | str) -> PotionType:
+        """
+        Attempts to get the `PotionType` with the given name.
+
+        Args:
+            name: The identifier of the potion type (e.g. `minecraft:potion_type:water`).
+
+        Returns:
+            The `PotionType`, or `None` if no potion type with that name exists.
+        """
+
+    def __hash__(self) -> int: ...
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
 
     WATER: Identifier[PotionType] = "minecraft:potion_type:water"
     MUNDANE: Identifier[PotionType] = "minecraft:potion_type:mundane"
