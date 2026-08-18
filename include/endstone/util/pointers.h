@@ -27,11 +27,11 @@ template <class T>
 class Nullable;
 
 /**
- * A wrapper around a std::shared_ptr that is guaranteed never to be null.
+ * A wrapper around a std::shared_ptr that documents that it is never null.
  *
- * Construction from a null pointer throws, and the pointer-mutating operators are deleted. This mirrors
- * `gsl::not_null<std::shared_ptr<T>>`, but throws `std::invalid_argument` on a null pointer (instead of a contract
- * violation) so that a misbehaving plugin cannot crash the host.
+ * This carries the same weight as Java's `@NotNull`: it states the contract and costs nothing at run time. Passing
+ * `nullptr` is a compile error, as are the pointer-mutating operators, but a null `shared_ptr` handed over at run time
+ * is not diagnosed. Validate at the boundary where the pointer enters the API, not here.
  */
 template <class T>
 class NotNull {
@@ -40,10 +40,7 @@ public:
     using element_type = T;
 
     NotNull() = delete;
-    NotNull(std::shared_ptr<T> ptr) : ptr_(std::move(ptr))
-    {
-        Preconditions::checkArgument(ptr_ != nullptr, "pointer must not be null.");
-    }
+    NotNull(std::shared_ptr<T> ptr) : ptr_(std::move(ptr)) {}
     NotNull(const NotNull &other) = default;
     NotNull &operator=(const NotNull &other) = default;
 
@@ -61,7 +58,7 @@ public:
     {
     }
 
-    /** Narrowing conversion from a Nullable, throwing if it holds no value. */
+    /** Narrowing conversion from a Nullable. */
     NotNull(const Nullable<T> &other);
 
     const pointer_type &get() const noexcept { return ptr_; }

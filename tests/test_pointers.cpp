@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <stdexcept>
+#include <type_traits>
 #include <unordered_set>
 
 #include <gtest/gtest.h>
@@ -31,9 +32,12 @@ struct Base {
 struct Derived : Base {};
 }  // namespace
 
-TEST(NotNullTest, ThrowsOnNull)
+TEST(NotNullTest, RejectsNullptrAtCompileTime)
 {
-    EXPECT_THROW(NotNull<Base>(std::shared_ptr<Base>{}), std::invalid_argument);
+    // NotNull states the contract without checking it, so nullptr is the only null it can catch.
+    static_assert(!std::is_constructible_v<NotNull<Base>, std::nullptr_t>);
+    static_assert(!std::is_assignable_v<NotNull<Base> &, std::nullptr_t>);
+    static_assert(!std::is_default_constructible_v<NotNull<Base>>);
 }
 
 TEST(NotNullTest, DereferenceAndAccess)
@@ -64,7 +68,7 @@ TEST(NotNullTest, ConstructionFromNullable)
     EXPECT_EQ(handle.get(), ptr);
 
     const Nullable<Base> empty;
-    EXPECT_THROW(NotNull<Base>{empty}, std::invalid_argument);
+    EXPECT_EQ(NotNull<Base>{empty}.get(), nullptr);  // unchecked, the caller owns the contract
 }
 
 TEST(NotNullTest, Cast)

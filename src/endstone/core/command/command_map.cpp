@@ -146,19 +146,19 @@ MinecraftCommands &EndstoneCommandMap::getHandle() const
 
 void EndstoneCommandMap::setDefaultCommands()
 {
-    registerCommand(std::make_shared<BanCommand>());
-    registerCommand(std::make_shared<BanIpCommand>());
-    registerCommand(std::make_shared<BanListCommand>());
-    registerCommand(std::make_shared<PardonCommand>());
-    registerCommand(std::make_shared<PardonIpCommand>());
-    registerCommand(std::make_shared<PluginsCommand>());
-    registerCommand(std::make_shared<ReloadCommand>());
-    registerCommand(std::make_shared<RestartCommand>());
-    registerCommand(std::make_shared<SeedCommand>());
-    registerCommand(std::make_shared<StatusCommand>());
-    registerCommand(std::make_shared<VersionCommand>());
+    registerCommand<BanCommand>();
+    registerCommand<BanIpCommand>();
+    registerCommand<BanListCommand>();
+    registerCommand<PardonCommand>();
+    registerCommand<PardonIpCommand>();
+    registerCommand<PluginsCommand>();
+    registerCommand<ReloadCommand>();
+    registerCommand<RestartCommand>();
+    registerCommand<SeedCommand>();
+    registerCommand<StatusCommand>();
+    registerCommand<VersionCommand>();
 #ifdef ENDSTONE_WITH_DEVTOOLS
-    registerCommand(std::make_shared<DevToolsCommand>());
+    registerCommand<DevToolsCommand>();
 #endif
 }
 
@@ -173,7 +173,7 @@ void EndstoneCommandMap::setPluginCommands()
 
         auto commands = plugin->getDescription().getCommands();
         for (const auto &command : commands) {
-            registerCommand(std::make_shared<PluginCommand>(command, *plugin));
+            registerCommand<PluginCommand>(command, *plugin);
         }
     }
     clearEnumValues("PluginName");
@@ -264,6 +264,11 @@ bool EndstoneCommandMap::registerCommand(NotNull<Command> command)
 {
     std::lock_guard lock(mutex_);
     auto &registry = getHandle().getRegistry();
+
+    if (command.get() == nullptr) {
+        server_.getLogger().error("Unable to register a null command.");
+        return false;
+    }
 
     // Check if the command name is available
     auto name = command->getName();

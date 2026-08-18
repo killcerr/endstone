@@ -395,8 +395,14 @@ public:
 
     bool load(handle src, bool convert)
     {
-        if (!src || src.is_none()) {
+        if (!src) {
             return false;
+        }
+        if (src.is_none()) {
+            // NotNull has no null form, so None is an outright error rather than a failed overload match. This is
+            // the boundary that enforces the contract: NotNull itself does not check at run time.
+            const auto *info = get_type_info(typeid(T));
+            throw type_error(std::string(info != nullptr ? info->type->tp_name : "argument") + " must not be None.");
         }
         value_conv caster;
         if (!caster.load(src, convert)) {
