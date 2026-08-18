@@ -160,8 +160,9 @@ GameRuleValue EndstoneLevel::_getGameRule(Identifier<GameRule> rule) const
     case ::GameRule::Type::Float:
         return std::get<float>(value);
     case ::GameRule::Type::Invalid:
-        std::abort();
+        break;
     }
+    throw std::runtime_error("Game rule holds no value type.");
 }
 
 bool EndstoneLevel::_setGameRule(Identifier<GameRule> rule, GameRuleValue value)
