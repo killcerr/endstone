@@ -25,6 +25,7 @@
 #include "endstone/inventory/meta/crossbow_meta.h"
 #include "endstone/inventory/meta/item_meta.h"
 #include "endstone/inventory/meta/map_meta.h"
+#include "endstone/inventory/meta/potion_meta.h"
 #include "endstone/inventory/meta/writable_book_meta.h"
 #include "endstone/permissions/permissible.h"
 #include "endstone/player.h"
@@ -141,6 +142,11 @@ TEST_F(ObjectTypeTest, MapMetaIsNotWritableBookMeta)
 TEST_F(ObjectTypeTest, CrossbowMetaIsItemMeta)
 {
     EXPECT_TRUE(core::isTypeInstanceOf(typeid(CrossbowMeta), typeid(ItemMeta)));
+}
+
+TEST_F(ObjectTypeTest, PotionMetaIsItemMeta)
+{
+    EXPECT_TRUE(core::isTypeInstanceOf(typeid(PotionMeta), typeid(ItemMeta)));
 }
 
 // --- Cross-hierarchy rejection ---

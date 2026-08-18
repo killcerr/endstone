@@ -18,6 +18,7 @@
 #include "endstone/core/inventory/meta/crossbow_meta.h"
 #include "endstone/core/inventory/meta/item_meta.h"
 #include "endstone/core/inventory/meta/map_meta.h"
+#include "endstone/core/inventory/meta/potion_meta.h"
 #include "endstone/core/inventory/meta/writable_book_meta.h"
 
 namespace endstone::core {
@@ -27,4 +28,5 @@ EndstoneItemMetas::ItemMetaDetails EndstoneItemMetas::Map = ItemMetaDetails::cre
 EndstoneItemMetas::ItemMetaDetails EndstoneItemMetas::WritableBook = ItemMetaDetails::create<EndstoneWritableBookMeta>();
 EndstoneItemMetas::ItemMetaDetails EndstoneItemMetas::Book = ItemMetaDetails::create<EndstoneBookMeta>();
 EndstoneItemMetas::ItemMetaDetails EndstoneItemMetas::Crossbow = ItemMetaDetails::create<EndstoneCrossbowMeta>();
+EndstoneItemMetas::ItemMetaDetails EndstoneItemMetas::Potion = ItemMetaDetails::create<EndstonePotionMeta>();
 }  // namespace endstone::core

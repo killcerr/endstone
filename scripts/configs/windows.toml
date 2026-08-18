@@ -80,6 +80,27 @@ rip_relative = true
 rip_offset = 3
 
 [[signatures]]
+name = "Potion::mPotionsById"
+relative = false
+extra = 0
+# 1. find bytes "83 FE 3F 77" = `cmp <id>, 3Fh; ja` (3Fh = MAX_POTIONS-1 = 63) - the id bounds check made
+#    before reading the registry; only three sites in .text carry the check at all
+#    (PotionItem::isValidAuxValue, PotionItem::isDestructive, SpawnAoECloudSubcomponent::doOnHitEffect)
+# 2. the `mov <r32>, <id>` / `shl <r>, 4` / `lea <reg>, [rip+mPotionsById]` / `lea rax, [<reg>+<r>]` right
+#    below it reads the array of std::shared_ptr<const Potion> (stride 16); that rip-relative lea is the base
+# 3. the two PotionItem twins are byte-identical to each other bar their jump displacements and cannot be told
+#    apart until 39 bytes in, so cut from the SpawnAoECloudSubcomponent::doOnHitEffect site (index in esi,
+#    base in rdx), which is unique at 22 bytes
+# 4. do NOT anchor on Potion::addPotion's store - it materialises the base with the same lea shape as the
+#    statics beside it and a store-anchored pattern lands on a neighbour; always cut the indexed read
+# 5. confirm vs the old named DB: Potion::getPotion(string_view) ("minecraft:potion_type:") strips the 22-char
+#    prefix, looks up mPotionsByName (= base + 0x400) and indexes the base; Potion::addPotion writes both
+# rip-relative load in SpawnAoECloudSubcomponent::doOnHitEffect
+pattern = "83 FE 3F 77 ? 89 F1 48 C1 E1 04 48 8D 15 ? ? ? ? 48 8D 04 0A"
+rip_relative = true
+rip_offset = 14
+
+[[signatures]]
 name = "?teleportTo@Actor@@UEAAXAEBVVec3@@_NHH1@Z"
 relative = false
 extra = 0

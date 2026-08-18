@@ -169,8 +169,8 @@ const ItemType &EndstoneItemStack::getType(const ItemStackBase *item)
 std::unique_ptr<ItemMeta> EndstoneItemStack::getItemMeta(const ItemStackBase *item)
 {
     const auto &type = getType(item);
-    if (!hasItemMeta(item)) {
-        return EndstoneItemFactory::instance().getItemMeta(getType(item));
+    if (item == nullptr || item->isNull()) {
+        return EndstoneItemFactory::instance().getItemMeta(type);
     }
     return EndstoneItemMetas::getItemMetaDetails(type).fromItemStack(*item);
 }
@@ -201,7 +201,9 @@ bool EndstoneItemStack::setItemMeta(ItemStackBase *item, const ItemMeta *meta)
         return true;
     }
 
-    if (auto &m = item_meta->getExtras(); !m.isEmpty()) {
+    auto &m = item_meta->getExtras();
+    m.applyToItemStack(*item);
+    if (!m.isEmpty()) {
         auto tag = item->hasUserData() ? item->getUserData()->clone() : std::make_unique<::CompoundTag>();
         m.applyToItem(*tag);
         item->setUserData(std::move(tag));

@@ -49,6 +49,28 @@ rip_relative = true
 rip_offset = 9
 
 [[signatures]]
+name = "Potion::mPotionsById"
+relative = false
+extra = 0
+# 1. Potion::getPotion(int) is always inlined as `cmp <id>, 3Fh` (MAX_POTIONS-1) / `ja` / `mov <r32>, <id>` /
+#    `shl <r>, 4` (sizeof(shared_ptr) = 16) / `lea <reg>, mPotionsById` / `mov <r>, [<r>+<reg>]` / `test`;
+#    the lea target is the array base
+# 2. reach one such site from PotionItem::isValidAuxValue(int) - a ~0x5f-byte leaf returning whether
+#    mPotionsById[auxValue] is non-null; PotionItem::isDestructive just below it and
+#    SpawnAoECloudSubcomponent::doOnHitEffect carry the same bounds-checked load with other registers
+# 3. confirm the base with Potion::getPotion(string_view): find "6D 69 6E 65 63 72 61 66 74 3A 70 6F 74 69 6F
+#    6E 5F 74 79 70 65 3A" = "minecraft:potion_type:" (unique); the function that strips those 22 chars looks
+#    up mPotionsByName (= base + 0x400) and indexes the base, and Potion::shutdownPotions walks it with
+#    `cmp <r>, 400h` = 64 * 16, which pins both the base and the element count
+# 4. do NOT anchor on the initializer stores - Potion::addPotion writes the base with the same rip-relative
+#    lea shape as the statics beside it; always cut the indexed read
+# rip-relative load in an inlined Potion::getPotion(int) inside PotionItem::isValidAuxValue, anchored on the
+# MAX_POTIONS bound check (unique)
+pattern = "83 FE 3F 77 ? 89 F0 48 C1 E0 04 48 8D 0D ? ? ? ? 4C 8B 34 08"
+rip_relative = true
+rip_offset = 14
+
+[[signatures]]
 name = "_ZN5Actor10teleportToERK4Vec3biib"
 relative = false
 extra = 0

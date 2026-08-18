@@ -215,6 +215,17 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def_property("charged_projectile", &CrossbowMeta::getChargedProjectile, &CrossbowMeta::setChargedProjectile,
                       "The charged projectile, or `None` if none.");
 
+    py::classh<PotionMeta, ItemMeta>(m, "PotionMeta", R"doc(
+    Represents the metadata for a potion item.
+
+    A potion carries a single base potion type, which determines both the effects it applies and the colour it is
+    rendered with.
+)doc")
+        .def_property_readonly("has_base_potion_type", &PotionMeta::hasBasePotionType,
+                               "Whether this has a base potion type.")
+        .def_property("base_potion_type", &PotionMeta::getBasePotionType, &PotionMeta::setBasePotionType,
+                      "The base potion type of this potion, or `None` if none is set.");
+
     py::classh<ItemFactory>(m, "ItemFactory", "An interface to the methods used to create item metadata.")
         .def("get_item_meta", &ItemFactory::getItemMeta, py::arg("type"), R"doc(
     This creates a new item meta for the item type.
