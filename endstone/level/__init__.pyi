@@ -243,8 +243,8 @@ class Dimension:
         Requests the `Chunk` at the given coordinates to be loaded, and keeps it loaded until unloaded again.
 
         Unlike Java Edition, Bedrock has no synchronous chunk load: this registers a plugin-owned ticket for the chunk,
-        honoured on the next server tick (so the chunk may not be available right away). The chunk stays loaded and ticking
-        until ``unload_chunk`` is called or the server restarts. Intended for keeping a handful of chunks resident, not for
+        honoured on the next server tick (so the chunk may not be available right away). The chunk stays loaded until
+        ``unload_chunk`` is called or the server restarts. Intended for keeping a handful of chunks resident, not for
         loading large regions.
 
         Args:

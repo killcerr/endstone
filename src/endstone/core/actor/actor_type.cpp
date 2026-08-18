@@ -27,7 +27,9 @@ ActorTypeId EndstoneActorType::getId() const
 
 std::string EndstoneActorType::getTranslationKey() const
 {
-    return std::format("entity.{}.name", getId().getKey());
+    const auto id = getId();
+    return id.getNamespace() == ActorTypeId::Minecraft ? std::format("entity.{}.name", id.getKey())
+                                                       : std::format("entity.{}.name", id);
 }
 
 }  // namespace endstone::core

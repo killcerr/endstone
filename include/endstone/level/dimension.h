@@ -136,12 +136,14 @@ public:
     /**
      * Requests the Chunk at the given coordinates to be loaded, and keeps it loaded until it is unloaded again.
      *
-     * The chunk is loaded and then held resident by Endstone until removed with `unloadChunk()` or the server restarts.
-     * Intended for keeping a handful of chunks resident; it is not suited to loading large regions.
+     * The chunk is held resident by Endstone from the moment this returns until removed with `unloadChunk()` or the
+     * server restarts. Loading itself is asynchronous: unless the chunk was already resident, it finishes on a later
+     * tick, so `isChunkLoaded()` may still report `false` immediately afterwards. Intended for keeping a handful of
+     * chunks resident; it is not suited to loading large regions.
      *
      * @param x X-coordinate of the chunk
      * @param z Z-coordinate of the chunk
-     * @return `true` if the chunk was loaded (or already resident), otherwise `false`
+     * @return `true` if the request was accepted, otherwise `false`
      */
     virtual bool loadChunk(int x, int z) = 0;
 

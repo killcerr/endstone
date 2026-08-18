@@ -81,6 +81,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `BlockType.AIR` and `ItemType.AIR` raising `AttributeError` in Python. Both are documented as the way to name the air block and item, but neither constant was bound.
 - Fixed `BookMeta.generation` losing `BookMetaGeneration.ORIGINAL`. Setting a written book's generation to `ORIGINAL` and reading it back gave `None`, because the round trip mistook the stored value `0` for an absent tag. The other three generations were unaffected.
 - Fixed `BlockType.translation_key` returning a key that no language file resolves. It gave the block's base description id, such as `tile.stone.stone`, where the key clients actually translate is `tile.stone.stone.name`. It now agrees with `BlockData.translation_key`.
+- Fixed `Dimension.load_chunk()` never loading a chunk. It asked the chunk source for the chunk without requesting any work, so it only ever succeeded for a chunk that happened to be resident already and returned `False` for everything else. It now queues the load, which completes on a later tick — the chunk is pinned as soon as the call returns, so `is_chunk_loaded()` may still report `False` immediately afterwards.
+- Fixed `ActorType.translation_key` for entities outside the `minecraft` namespace. It always dropped the namespace, so an addon entity `wiki:my_entity` gave `entity.my_entity.name` where the client keys on `entity.wiki:my_entity.name`. Vanilla entities were unaffected.
 
 ## [0.11.9] - 2026-08-17
 

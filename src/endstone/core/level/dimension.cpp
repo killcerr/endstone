@@ -107,9 +107,7 @@ bool EndstoneDimension::isChunkLoaded(int x, int z) const
 
 bool EndstoneDimension::loadChunk(int x, int z)
 {
-    // Load the chunk and keep it resident by holding a strong reference to the LevelChunk, rather than registering a
-    // ticking area. LoadMode::None loads it in full, so the chunk is ready when this returns.
-    auto chunk = getHandle().getChunkSource().getOrLoadChunk(ChunkPos(x, z), ::ChunkSource::LoadMode::None, false);
+    auto chunk = getHandle().getChunkSource().getOrLoadChunk(ChunkPos(x, z), ::ChunkSource::LoadMode::Deferred, false);
     if (!chunk) {
         return false;
     }
