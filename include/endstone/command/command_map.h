@@ -14,7 +14,10 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "endstone/command/command_sender.h"
@@ -44,6 +47,20 @@ public:
      * @return true on success, false if a command with the same name is already registered
      */
     virtual bool registerCommand(NotNull<Command> command) = 0;
+
+    /**
+     * Constructs a command of the given type and registers it.
+     *
+     * @tparam T the type of command to construct
+     * @param args the arguments to construct the command with
+     * @return true on success, false if a command with the same name is already registered
+     */
+    template <class T, class... Args>
+        requires std::is_base_of_v<Command, T>
+    bool registerCommand(Args &&...args)
+    {
+        return registerCommand(std::make_shared<T>(std::forward<Args>(args)...));
+    }
 
     /**
      * Looks for the requested command and executes it if found.

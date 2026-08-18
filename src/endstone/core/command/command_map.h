@@ -27,6 +27,7 @@ class EndstoneServer;
 class EndstoneCommandMap : public CommandMap {
 public:
     explicit EndstoneCommandMap(EndstoneServer &server);
+    using CommandMap::registerCommand;
     bool registerCommand(NotNull<Command> command) override;
     bool dispatch(const NotNull<CommandSender> &sender, std::string command_line) const override;
     void clearCommands() override;
