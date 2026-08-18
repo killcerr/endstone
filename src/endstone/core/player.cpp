@@ -1040,6 +1040,7 @@ void EndstonePlayer::initFromConnectionRequest(std::variant<std::reference_wrapp
 void EndstonePlayer::disconnect()
 {
     server_.removePlayerBoard(getSelf().cast<EndstonePlayer>());
+    forms_.clear();  // a form callback may hold the last reference back to this player
 }
 
 void EndstonePlayer::updateAbilities() const
