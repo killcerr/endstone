@@ -20,7 +20,7 @@
 Bedrock::Result<void> NbtIo::loadTagPayload(Tag &tag, IDataInput &dis, int depth)
 {
     if (depth > MAX_NESTING_DEPTH) {
-        return BEDROCK_NEW_ERROR(std::errc::value_too_large);
+        return BEDROCK_NEW_ERROR(std::errc::bad_message);
     }
     switch (tag.getId()) {
     case Tag::Type::Compound:
@@ -43,6 +43,9 @@ Bedrock::Result<std::unique_ptr<Tag>> NbtIo::readNamedTag(IDataInput &dis, std::
     if (type == Tag::Type::End) {
         return std::make_unique<EndTag>();
     }
+    if (type >= Tag::Type::NumTagTypes) {
+        return BEDROCK_NEW_ERROR(std::errc::bad_message);
+    }
 
     auto name_result = dis.readStringResult();
     if (!name_result.ignoreError()) {
@@ -56,7 +59,10 @@ Bedrock::Result<std::unique_ptr<Tag>> NbtIo::readNamedTag(IDataInput &dis, std::
     }
 
     auto tag = std::move(tag_result.discardError().value());
-    loadTagPayload(*tag, dis, depth);
+    auto payload_result = loadTagPayload(*tag, dis, depth);
+    if (!payload_result.ignoreError()) {
+        return BEDROCK_RETHROW(payload_result);
+    }
     return std::move(tag);
 }
 
@@ -79,7 +85,10 @@ Bedrock::Result<std::unique_ptr<CompoundTag>> NbtIo::readNamedCompoundTag(IDataI
     name = name_result.discardError().value();
 
     auto tag = std::make_unique<CompoundTag>();
-    tag->load(dis, 0);
+    auto load_result = tag->load(dis, 0);
+    if (!load_result.ignoreError()) {
+        return BEDROCK_RETHROW(load_result);
+    }
     return std::move(tag);
 }
 
@@ -90,9 +99,6 @@ void NbtIo::writeNamedTag(const std::string &name, const Tag &tag, IDataOutput &
 
 void NbtIo::writeTagPayload(const Tag &tag, IDataOutput &output, int depth)
 {
-    if (depth > MAX_NESTING_DEPTH) {
-        return;
-    }
     switch (tag.getId()) {
     case Tag::Type::Compound:
         static_cast<const CompoundTag &>(tag).write(output, depth);

@@ -14,10 +14,16 @@
 
 #include "bedrock/network/batched_network_peer.h"
 
+#include <optional>
+#include <string>
+#include <string_view>
+
+#include "bedrock/core/sem_ver/sem_version.h"
 #include "bedrock/network/packet.h"
 #include "bedrock/network/packet/clientbound_map_item_data_packet.h"
 #include "bedrock/network/packet/resource_pack_stack_packet.h"
 #include "bedrock/network/packet/resource_packs_info_packet.h"
+#include "bedrock/network/packet/set_score_packet.h"
 #include "bedrock/network/packet/start_game_packet.h"
 #include "bedrock/network/raknet_connector.h"
 #include "bedrock/network/server_network_system.h"
@@ -110,6 +116,98 @@ void patchPacket(const ClientboundMapItemDataPacket &packet,
     }
 }
 
+// #blameMojang - 1.26.44 writes a fixed `true` ahead of RemoveScore's objective name but left the
+// protocol version at 2168, so a 1.26.40-43 client negotiates the same version and mis-parses every
+// scoreboard removal.
+// TODO(1.26.50): drop once the protocol version moves past 2168.
+std::optional<std::string> downgradeSetScorePayload(std::string_view payload)
+{
+    ReadOnlyBinaryStream in{payload, false};
+    auto count = in.getUnsignedVarInt().discardError();
+    if (!count) {
+        return std::nullopt;
+    }
+
+    BinaryStream out;
+    out.writeUnsignedVarInt(count.value(), "Score Info", nullptr);
+
+    for (unsigned int i = 0; i < count.value(); ++i) {
+        auto action = in.getUnsignedVarInt().discardError();
+        if (!action) {
+            return std::nullopt;
+        }
+        const auto entry_action = static_cast<ScorePacketEntryAction>(action.value());
+        if (entry_action > ScorePacketEntryAction::ChangeFakePlayer) {
+            return std::nullopt;
+        }
+        out.writeUnsignedVarInt(action.value(), "Action", nullptr);
+
+        auto action_name = in.getString(32).discardError();
+        if (!action_name) {
+            return std::nullopt;
+        }
+        out.writeString(action_name.value(), "Action", nullptr);
+
+        auto scoreboard_id = in.getVarInt64().discardError();
+        if (!scoreboard_id) {
+            return std::nullopt;
+        }
+        out.writeVarInt64(scoreboard_id.value(), "Scoreboard Id", nullptr);
+
+        if (entry_action == ScorePacketEntryAction::Remove) {
+            auto keyed_marker = in.getBool().discardError();
+            if (!keyed_marker) {
+                return std::nullopt;
+            }
+            auto has_objective_name = in.getBool().discardError();
+            if (!has_objective_name) {
+                return std::nullopt;
+            }
+            out.writeBool(has_objective_name.value(), "Objective Name", nullptr);
+            if (has_objective_name.value()) {
+                auto objective_name = in.getString(in.getUnreadLength()).discardError();
+                if (!objective_name) {
+                    return std::nullopt;
+                }
+                out.writeString(objective_name.value(), "Objective Name", nullptr);
+            }
+            continue;
+        }
+
+        auto objective_name = in.getString(in.getUnreadLength()).discardError();
+        if (!objective_name) {
+            return std::nullopt;
+        }
+        out.writeString(objective_name.value(), "Objective Name", nullptr);
+
+        auto score_value = in.getSignedInt().discardError();
+        if (!score_value) {
+            return std::nullopt;
+        }
+        out.writeSignedInt(score_value.value(), "Score Value", nullptr);
+
+        if (entry_action == ScorePacketEntryAction::ChangeFakePlayer) {
+            auto fake_player_name = in.getString(in.getUnreadLength()).discardError();
+            if (!fake_player_name) {
+                return std::nullopt;
+            }
+            out.writeString(fake_player_name.value(), "Fake Player Name", nullptr);
+        }
+        else {
+            auto unique_id = in.getVarInt64().discardError();
+            if (!unique_id) {
+                return std::nullopt;
+            }
+            out.writeVarInt64(unique_id.value(), "Player Unique Id", nullptr);
+        }
+    }
+
+    if (in.getUnreadLength() != 0) {
+        return std::nullopt;
+    }
+    return out.getBuffer();
+}
+
 void patchPacket(Packet &packet, const endstone::Nullable<endstone::Player> &player)
 {
     switch (packet.getId()) {
@@ -191,6 +289,21 @@ void BatchedNetworkPeer::sendPacket(const std::string &data, Reliability reliabi
         e.setPayload(out.getBuffer());
         break;
     }
+    case MinecraftPacketIds::SetScore: {
+        // TODO(1.26.50): drop with downgradeSetScorePayload once the protocol version moves past 2168.
+        if (player) {
+            SemVersion client_version;
+            auto result =
+                SemVersion::fromString(player->getGameVersion(), client_version, SemVersion::ParseOption::NoWildcards);
+            if (result != SemVersion::MatchType::None && client_version >= SemVersion{1, 26, 40} &&
+                client_version < SemVersion{1, 26, 44}) {
+                if (auto downgraded = downgradeSetScorePayload(payload)) {
+                    e.setPayload(*downgraded);
+                }
+            }
+        }
+        break;
+    }
     default:
         break;
     }
@@ -260,9 +373,20 @@ NetworkPeer::DataStatus BatchedNetworkPeer::_receivePacket(std::string &out_data
 
 const NetworkIdentifier &BatchedNetworkPeer::getId() const
 {
-    auto peer = peer_;
-    while (peer->peer_) {
-        peer = peer->peer_;
+    // The innermost peer is transport-specific, so find the connection we belong to instead.
+    static const NetworkIdentifier invalid = [] {
+        NetworkIdentifier id{};
+        id.type = NetworkIdentifier::Type::Invalid;
+        return id;
+    }();
+
+    const auto &server = endstone::core::EndstoneServer::getInstance();
+    for (const auto &connection : server.getServer().getNetwork().getConnections()) {
+        for (const auto *peer = connection->peer.get(); peer != nullptr; peer = peer->peer_.get()) {
+            if (peer == this) {
+                return connection->id;
+            }
+        }
     }
-    return static_cast<RakNetConnector::RakNetNetworkPeer &>(*peer).getId();
+    return invalid;
 }

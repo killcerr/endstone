@@ -16,6 +16,8 @@
 
 #include <chrono>
 
+#include "bedrock/network/network_session_owner.h"
+
 Bedrock::NotNullNonOwnerPtr<RemoteConnector> NetworkSystem::getRemoteConnector()
 {
     return remote_connector_.get();
@@ -34,9 +36,24 @@ void NetworkSystem::closeConnection(const NetworkIdentifier &id, const Connectio
     getRemoteConnector()->closeNetworkConnection(id);
 }
 
+NetworkPeer *NetworkSystem::getPeerForUser(const NetworkIdentifier &id) const
+{
+    const auto *connection = _getConnectionFromId(id);
+    if (!connection || connection->shouldCloseConnection()) {
+        return nullptr;
+    }
+    return connection->peer.get();
+}
+
 const cereal::ReflectionCtx &NetworkSystem::getPacketReflectionCtx() const
 {
     return *reflection_ctx_.get();
+}
+
+bool NetworkSystem::_isUsingNetherNetTransportLayer() const
+{
+    const auto &session = network_session_owner_->network_session_;
+    return session && session->getTransportLayer() == TransportLayer::NetherWebSockets;
 }
 
 NetworkConnection *NetworkSystem::_getConnectionFromId(const NetworkIdentifier &id) const

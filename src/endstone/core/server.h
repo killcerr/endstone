@@ -37,6 +37,7 @@
 #include "endstone/server.h"
 
 class RakNetConnector;
+class RemoteConnector;
 class ServerInstance;
 
 namespace endstone::core {
@@ -134,6 +135,8 @@ public:
     [[nodiscard]] bool isServerTextEnabled(ServerTextEvent event) const;
 
     [[nodiscard]] ServerInstance &getServer() const;
+    [[nodiscard]] RemoteConnector &getRemoteConnector() const;
+    // Only valid on the RakNet transport.
     [[nodiscard]] RakNetConnector &getRakNetConnector() const;
 
     [[nodiscard]] static EndstoneServer &getInstance();

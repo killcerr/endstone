@@ -522,9 +522,15 @@ void EndstonePlayer::spawnParticle(std::string name, float x, float y, float z,
 
 std::chrono::milliseconds EndstonePlayer::getPing() const
 {
-    auto *peer = server_.getRakNetConnector().getPeer();
     const auto *component = getHandle().tryGetComponent<UserEntityIdentifierComponent>();
-    return std::chrono::milliseconds(peer->GetAveragePing(component->getNetworkId().guid));
+    if (!component) {
+        return {};
+    }
+    const auto *peer = server_.getServer().getNetwork().getPeerForUser(component->getNetworkId());
+    if (!peer) {
+        return {};
+    }
+    return peer->getNetworkStatus().average_ping;
 }
 
 std::string EndstonePlayer::getLocale() const
