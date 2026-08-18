@@ -193,7 +193,7 @@ build needs a VS Developer environment: `VsDevCmd.bat -arch=amd64` then
 
 Compile-time `static_assert`s prove *layout*, not *behaviour*. The authoritative
 runtime check is the `endstone_test` plugin's in-server `/test`, which runs the
-`tests/endstone_test` pytest suite live against a running server — the only way
+`tests/plugin` pytest suite live against a running server — the only way
 to confirm a reconstructed read path returns the right value. **You can't issue
 it; ask the user to run `/test`** after the wheel is installed.
 

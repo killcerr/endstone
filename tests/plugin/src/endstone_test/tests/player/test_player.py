@@ -312,3 +312,24 @@ def test_player_send_message_empty_translatable_raises(player: Player):
     """Verify send_message rejects a Translatable with empty text."""
     with pytest.raises(ValueError):
         player.send_message(Translatable(""))
+
+
+# =============================================================================
+# Section: send_action_bar, new in v0.12
+# =============================================================================
+
+
+def test_send_action_bar(player: Player) -> None:
+    """Verify a message can be sent above the player's hotbar."""
+    assert player.send_action_bar("This is the action bar") is None
+
+
+def test_send_action_bar_takes_a_plain_string_only(player: Player) -> None:
+    """Verify send_action_bar does not accept a Translatable, unlike send_message."""
+    with pytest.raises(TypeError):
+        player.send_action_bar(Translatable("chat.type.announcement", ["a", "b"]))
+
+
+def test_send_action_bar_accepts_an_empty_message(player: Player) -> None:
+    """Verify an empty action bar message clears it rather than raising."""
+    assert player.send_action_bar("") is None

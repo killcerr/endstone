@@ -121,14 +121,17 @@ Runtime tests verify the API works correctly within a live Bedrock Dedicated Ser
 **Install the test plugin:**
 
 ```bash
-pip install -e plugins/test
+pip install -e tests/plugin
 ```
 
 **Run runtime tests:**
 
 1. Start a Bedrock Dedicated Server with Endstone
-2. The `endstone_test` plugin will load automatically
-3. Run `/test` in-game or from the console to execute the test suite
+2. The `endstone_test` plugin will load automatically and runs the server-only tests on startup
+3. Join the server and run `/test` to execute the tests that need a connected player
+4. Run `/test events` to see which events have fired and to assert on what was recorded
+5. Run the `/test <subcommand>` probes for the API a real client is needed for (forms, toasts, particles, sounds,
+   maps) — see [tests/plugin/README.md](tests/plugin/README.md)
 
 Before submitting a PR, please ensure:
 
@@ -256,10 +259,10 @@ endstone/
 │       └── python/           # Python bindings via pybind11
 ├── endstone/                  # Python package (CLI, plugin loader, metrics)
 ├── plugins/                   # First-party Python plugins
-│   ├── devtools/             # Registry inspector (Dear ImGui)
-│   └── test/                 # Runtime test plugin (pip install -e plugins/test)
+│   └── devtools/             # Registry inspector (Dear ImGui)
 ├── tests/                     # Test files
 │   ├── bedrock/              # C++ tests for bedrock layer
+│   ├── plugin/               # Runtime test plugin (pip install -e tests/plugin)
 │   ├── *.cpp                 # C++ unit tests
 │   └── *.py                  # Python unit tests
 └── conanfile.py              # Dependency management

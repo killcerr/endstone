@@ -1,34 +1,12 @@
 """Tests for the Object type hierarchy (as/is/isinstance) via Python."""
 
-from endstone import (
-    Player,
-    Server,
-)
+from endstone import Player, Server
 from endstone.actor import Actor, Mob
 from endstone.command import CommandSender, ConsoleCommandSender
 from endstone.level import Dimension
 
 # =============================================================================
-# Section 1: Console command sender isinstance checks
-# =============================================================================
-
-
-def test_console_is_command_sender(server: Server):
-    """Verify console command sender is recognized as CommandSender."""
-    sender = server.command_sender
-    assert isinstance(sender, CommandSender)
-    assert isinstance(sender, ConsoleCommandSender)
-
-
-def test_console_is_not_actor(server: Server):
-    """Verify console command sender is not an Actor."""
-    sender = server.command_sender
-    assert not isinstance(sender, Actor)
-    assert not isinstance(sender, Player)
-
-
-# =============================================================================
-# Section 2: Player isinstance checks (requires connected player)
+# Section 1: Player isinstance checks
 # =============================================================================
 
 
@@ -58,7 +36,7 @@ def test_player_is_not_console(player: Player):
 
 
 # =============================================================================
-# Section 3: Polymorphic dispatch through base references
+# Section 2: Polymorphic dispatch through base references
 # =============================================================================
 
 

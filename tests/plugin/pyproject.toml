@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "endstone-test"
-version = "0.11.0"
-dependencies = ["babel", "pytest"]
+version = "0.12.0"
+dependencies = ["pytest"]
 authors = [
     { name = "Vincent Wu", email = "magicdroidx@gmail.com" },
 ]

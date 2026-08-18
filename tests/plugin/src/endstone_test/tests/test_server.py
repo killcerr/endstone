@@ -164,13 +164,18 @@ def test_online_players(server: Server) -> None:
 
 def test_max_players(server: Server) -> None:
     """Test getting and setting max players."""
-    # Set max players using command
-    server.dispatch_command(server.command_sender, "setmaxplayers 5")
-    assert server.max_players == 5
+    original = server.max_players
+    try:
+        # Set max players using command
+        server.dispatch_command(server.command_sender, "setmaxplayers 5")
+        assert server.max_players == 5
 
-    # Set max players directly
-    server.max_players = 100
-    assert server.max_players == 100
+        # Set max players directly
+        server.max_players = 100
+        assert server.max_players == 100
+    finally:
+        server.max_players = original
+    assert server.max_players == original
 
 
 def test_get_player_by_name(server: Server) -> None:

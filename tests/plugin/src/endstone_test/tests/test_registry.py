@@ -1,12 +1,14 @@
 import pytest
-from endstone import Server
-from endstone._python import Identifier
+from endstone import GameRule, Identifier, Server
 from endstone.actor import ActorType
+from endstone.attribute import Attribute
+from endstone.block import Biome, BlockType
 from endstone.enchantments import Enchantment
 from endstone.inventory import ItemType
+from endstone.potion import EffectType
 
 # All registry types to test generically
-REGISTRY_TYPES = [ActorType, Enchantment, ItemType]
+REGISTRY_TYPES = [ActorType, Biome, BlockType, Enchantment, GameRule, ItemType]
 
 
 def _get_enum_constants(cls):
@@ -122,3 +124,33 @@ def test_item_type_attributes(server: Server, key, expected: dict):
     assert entry is not None
     for attr, expected_value in expected.items():
         assert getattr(entry, attr) == expected_value
+
+
+@pytest.mark.parametrize("registry_type", REGISTRY_TYPES, ids=lambda t: t.__name__)
+def test_registry_is_available(server: Server, registry_type):
+    """Verify every documented registry type resolves to a non-empty registry."""
+    registry = server.get_registry(registry_type)
+    assert registry is not None
+    assert len(registry) > 0
+
+
+@pytest.mark.parametrize(
+    "not_a_registry", [Attribute, EffectType], ids=lambda t: t.__name__
+)
+def test_constant_holders_have_no_registry(server: Server, not_a_registry):
+    """Verify a constants-only type has no registry behind it."""
+    assert server.get_registry(not_a_registry) is None
+
+
+def test_str_is_the_plain_namespaced_id(server: Server):
+    """Verify str() on a registry entry gives namespace:key, not the Identifier repr."""
+    for registry_type, key in (
+        (Enchantment, "minecraft:sharpness"),
+        (ItemType, "minecraft:diamond"),
+        (BlockType, "minecraft:stone"),
+        (Biome, "minecraft:plains"),
+    ):
+        entry = server.get_registry(registry_type).get_or_throw(key)
+        assert str(entry) == key
+        assert entry == key
+        assert hash(entry) == hash(key)
