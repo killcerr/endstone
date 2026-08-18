@@ -15,6 +15,7 @@
 #pragma once
 
 #include <optional>
+#include <string>
 
 #include "endstone/potion/effect_type.h"
 
@@ -38,27 +39,27 @@ public:
      * @param particles the particle status, see Effect::hasParticles
      * @param icon the icon status, see Effect::hasIcon
      */
-    constexpr Effect(EffectId type, std::optional<int> duration, int amplifier, bool ambient = false,
-                     bool particles = true, bool icon = true)
-        : type_(type), duration_(duration), amplifier_(amplifier), ambient_(ambient), particles_(particles),
-          icon_(icon)
+    Effect(EffectId type, std::optional<int> duration, int amplifier, bool ambient = false, bool particles = true,
+           bool icon = true)
+        : type_(std::string(type)), duration_(duration), amplifier_(amplifier), ambient_(ambient),
+          particles_(particles), icon_(icon)
     {
     }
 
-    constexpr bool operator==(const Effect &other) const noexcept
+    bool operator==(const Effect &other) const noexcept
     {
         return type_ == other.type_ && duration_ == other.duration_ && amplifier_ == other.amplifier_ &&
                ambient_ == other.ambient_ && particles_ == other.particles_ && icon_ == other.icon_;
     }
 
-    constexpr bool operator!=(const Effect &other) const noexcept { return !(*this == other); }
+    bool operator!=(const Effect &other) const noexcept { return !(*this == other); }
 
     /**
      * Gets the type of this effect.
      *
      * @return the type
      */
-    [[nodiscard]] constexpr EffectId getType() const noexcept { return type_; }
+    [[nodiscard]] EffectId getType() const noexcept { return EffectId{type_}; }
 
     /**
      * Gets the duration of this effect, in ticks.
@@ -108,7 +109,7 @@ public:
     [[nodiscard]] constexpr bool hasIcon() const noexcept { return icon_; }
 
 private:
-    EffectId type_;
+    std::string type_;
     std::optional<int> duration_;
     int amplifier_;
     bool ambient_;

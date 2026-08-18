@@ -72,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Plugin.default_permission` now accepts a string or a bool (`"operator"`, `"not op"`, `True`) as well as a `PermissionDefault`, matching the `default` of an individual entry in `Plugin.permissions` and the string form already accepted by `Plugin.load`. Previously only `PermissionDefault` worked, and anything else raised `TypeError`.
 - Fixed `from endstone import ItemRegistry` (and `EnchantmentRegistry`, `ActorTypeRegistry`) raising `AttributeError`. These names were re-exported but never existed; the registry class is `Registry`, obtained through `Server.get_registry()`.
 - Fixed the server list entry losing its last two fields whenever a plugin listened for `ServerListPingEvent`, or the ping was otherwise answered by Endstone. The reply was rebuilt from a fixed list of fields, so anything the server had added beyond it, currently whether the world is an editor world and whether it is hardcore, was dropped. Any field Endstone does not itself expose is now passed through untouched.
+- Fixed the effect API being unusable from Python. An `Effect` did not keep its own copy of the effect type, so `Effect.type` and `repr()` gave back corrupt text, and `Mob.add_effect()` / `Mob.remove_effect()` rejected a valid effect as an unknown type.
 
 ## [0.11.9] - 2026-08-17
 
