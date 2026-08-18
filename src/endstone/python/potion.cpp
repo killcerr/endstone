@@ -20,7 +20,7 @@ namespace endstone::python {
 void init_potion(py::module_ &m)
 {
     // Declared before Effect, whose signatures name Identifier<EffectType>.
-    py::class_<EffectType> effect_type(m, "EffectType", "All effect types.");
+    py::class_<EffectType> effect_type(m, "EffectType", "Represents an effect type.");
 
     py::class_<Effect>(m, "Effect", "Represents an effect that can be added to a `Mob`.")
         .def(py::init<EffectId, std::optional<int>, int, bool, bool, bool>(), py::arg("type"), py::arg("duration"),
@@ -45,7 +45,27 @@ void init_potion(py::module_ &m)
         .def_property_readonly("particles", &Effect::hasParticles, "Whether this effect has particles.")
         .def_property_readonly("icon", &Effect::hasIcon, "Whether this effect has an icon.");
 
-    effect_type.def_property_readonly_static("SPEED", id(EffectType::Speed), "Increases movement speed.")
+    effect_type.def_property_readonly("id", &EffectType::getId, "The identifier of this effect type.")
+        .def_property_readonly("translation_key", &EffectType::getTranslationKey,
+                               "The translation key, suitable for use in a translation component.")
+        .def_static("get", &EffectType::get, py::arg("name"), R"doc(
+    Attempts to get the `EffectType` with the given name.
+
+    Args:
+        name: The identifier of the effect type (e.g. `minecraft:speed`).
+
+    Returns:
+        The `EffectType`, or `None` if no effect type with that name exists.
+)doc",
+                    py::return_value_policy::reference)
+        .def("__str__", [](const EffectType &self) { return std::string(self.getId()); })
+        .def("__repr__", [](const EffectType &self) { return std::format("EffectType({})", self.getId()); })
+        .def("__hash__", [](const EffectType &self) { return py::hash(py::str(std::string(self.getId()))); })
+        .def(py::self == py::self)  // NOLINT(misc-redundant-expression)
+        .def(py::self != py::self)  // NOLINT(misc-redundant-expression)
+        .def(py::self == std::string_view())
+        .def(py::self != std::string_view())
+        .def_property_readonly_static("SPEED", id(EffectType::Speed), "Increases movement speed.")
         .def_property_readonly_static("SLOWNESS", id(EffectType::Slowness), "Decreases movement speed.")
         .def_property_readonly_static("HASTE", id(EffectType::Haste), "Increases dig speed.")
         .def_property_readonly_static("MINING_FATIGUE", id(EffectType::MiningFatigue), "Decreases dig speed.")
@@ -100,7 +120,27 @@ void init_potion(py::module_ &m)
             "BREATH_OF_THE_NAUTILUS", id(EffectType::BreathOfTheNautilus),
             "Prevents the rider's oxygen bar from depleting while riding a nautilus or zombie nautilus.");
 
-    py::class_<PotionType>(m, "PotionType", "All potion types.")
+    py::class_<PotionType>(m, "PotionType", "Represents a potion type.")
+        .def_property_readonly("id", &PotionType::getId, "The identifier of this potion type.")
+        .def_property_readonly("translation_key", &PotionType::getTranslationKey,
+                               "The translation key, suitable for use in a translation component.")
+        .def_static("get", &PotionType::get, py::arg("name"), R"doc(
+    Attempts to get the `PotionType` with the given name.
+
+    Args:
+        name: The identifier of the potion type (e.g. `minecraft:potion_type:water`).
+
+    Returns:
+        The `PotionType`, or `None` if no potion type with that name exists.
+)doc",
+                    py::return_value_policy::reference)
+        .def("__str__", [](const PotionType &self) { return std::string(self.getId()); })
+        .def("__repr__", [](const PotionType &self) { return std::format("PotionType({})", self.getId()); })
+        .def("__hash__", [](const PotionType &self) { return py::hash(py::str(std::string(self.getId()))); })
+        .def(py::self == py::self)  // NOLINT(misc-redundant-expression)
+        .def(py::self != py::self)  // NOLINT(misc-redundant-expression)
+        .def(py::self == std::string_view())
+        .def(py::self != std::string_view())
         .def_property_readonly_static("WATER", id(PotionType::Water))
         .def_property_readonly_static("MUNDANE", id(PotionType::Mundane))
         .def_property_readonly_static("LONG_MUNDANE", id(PotionType::LongMundane))

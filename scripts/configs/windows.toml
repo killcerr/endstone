@@ -80,6 +80,23 @@ rip_relative = true
 rip_offset = 3
 
 [[signatures]]
+name = "Potion::mPotionsById"
+relative = false
+extra = 0
+# 1. find bytes "6D 69 6E 65 63 72 61 66 74 3A 70 6F 74 69 6F 6E 5F 74 79 70 65 3A" = "minecraft:potion_type:"
+#    (unique); its lone data xref is in Potion::getPotion(string_view), which strips that prefix before the
+#    mPotionsByName lookup and then indexes mPotionsById with the id it found
+# 2. mPotionsById has many xrefs (getPotion(int) is inlined everywhere); the one to anchor on is
+#    Potion::addPotion, the only site that post-increments Potion::mLastId right before it:
+#    `movsxd r14, mLastId` / `lea eax, [r14+1]` / `mov mLastId, eax` / `mov rax, [rcx]` / `mov [rax], r14d` /
+#    `shl rcx, 4` / `lea rax, mPotionsById`
+# 3. confirm vs the old named DB (std::shared_ptr<const Potion> mPotionsById[64]): Potion::mPotionsByName
+#    sits exactly 0x400 bytes (64 * sizeof(shared_ptr)) after the base
+pattern = "4C 63 35 ? ? ? ? 41 8D 46 01 89 05 ? ? ? ? 48 8B 01 44 89 30 4C 89 F1 48 C1 E1 04 48 8D 05 ? ? ? ?"
+rip_relative = true
+rip_offset = 33
+
+[[signatures]]
 name = "?teleportTo@Actor@@UEAAXAEBVVec3@@_NHH1@Z"
 relative = false
 extra = 0

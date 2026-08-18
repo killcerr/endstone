@@ -49,6 +49,22 @@ rip_relative = true
 rip_offset = 9
 
 [[signatures]]
+name = "Potion::mPotionsById"
+relative = false
+extra = 0
+# 1. find bytes "61 66 74 3A 70 6F 74 69 6F 6E 5F 74 79 70 65 3A" = "aft:potion_type:"; the copy that has a
+#    data xref is one of the two SIMD constants the inlined prefix compare of Potion::getPotion(string_view)
+#    uses - that function strips "minecraft:potion_type:" before looking the name up in mPotionsByName
+# 2. at its tail the hash-map hit is turned into an index into the id table:
+#    `movsxd rcx, [rax+28h]` / `shl rcx, 4` / `lea rdx, mPotionsById` / `mov rax, [rcx+rdx+8]` /
+#    `movdqa xmm0, [rcx+rdx]` (the shared_ptr copy); the lea target is the array base
+# 3. confirm vs the old named DB (std::shared_ptr<const Potion> mPotionsById[64]): Potion::mPotionsByName
+#    sits exactly 0x400 bytes (64 * sizeof(shared_ptr)) after the base
+pattern = "48 63 48 28 48 C1 E1 04 48 8D 15 ? ? ? ? 48 8B 44 11 08 66 0F 6F 04 11"
+rip_relative = true
+rip_offset = 11
+
+[[signatures]]
 name = "_ZN5Actor10teleportToERK4Vec3biib"
 relative = false
 extra = 0

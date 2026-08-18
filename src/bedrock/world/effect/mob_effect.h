@@ -61,6 +61,8 @@ public:
 
     [[nodiscard]] const std::string &getResourceName() const { return resource_name_; }
 
+    [[nodiscard]] const std::string &getDescriptionId() const { return description_id_; }
+
     [[nodiscard]] bool isVisible() const { return effect_visible_; }
 
 private:
