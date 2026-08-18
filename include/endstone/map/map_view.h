@@ -15,7 +15,6 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
 #include <vector>
 
 #include "endstone/map/map_renderer.h"
@@ -120,14 +119,14 @@ public:
      *
      * @return A list of references to each MapRenderer.
      */
-    [[nodiscard]] virtual std::vector<std::shared_ptr<MapRenderer>> getRenderers() const = 0;
+    [[nodiscard]] virtual std::vector<NotNull<MapRenderer>> getRenderers() const = 0;
 
     /**
      * Add a renderer to this map.
      *
      * @param renderer The MapRenderer to add.
      */
-    virtual void addRenderer(std::shared_ptr<MapRenderer> renderer) = 0;
+    virtual void addRenderer(NotNull<MapRenderer> renderer) = 0;
 
     /**
      * Remove a renderer from this map.
@@ -136,7 +135,7 @@ public:
      *
      * @return True if the renderer was successfully removed.
      */
-    virtual bool removeRenderer(const std::shared_ptr<MapRenderer> &renderer) = 0;
+    virtual bool removeRenderer(const NotNull<MapRenderer> &renderer) = 0;
 
     /**
      * Whether the map will show a smaller position cursor (`true`), or no position cursor (`false`) when cursor is

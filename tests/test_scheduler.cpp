@@ -66,7 +66,7 @@ TEST_F(SchedulerTest, RunTaskAsync)
     auto future = executed.get_future();
     auto task = scheduler_->runTaskAsync(plugin_, [&]() { executed.set_value(); });
     ASSERT_TRUE(task != nullptr);
-    task.reset();
+    task = nullptr;
 
     scheduler_->mainThreadHeartbeat(++tick_count_);
 
@@ -194,8 +194,8 @@ TEST_F(SchedulerTest, CancelTaskReleasesQueuedCallback)
     const auto cancelled_id = cancelled->getTaskId();
     const auto kept_id = kept->getTaskId();
     // Drop our task handles: the callback must be released by the scheduler alone.
-    cancelled.reset();
-    kept.reset();
+    cancelled = nullptr;
+    kept = nullptr;
 
     scheduler_->mainThreadHeartbeat(++tick_count_);  // move both into the scheduled queue
     scheduler_->cancelTask(cancelled_id);
@@ -267,7 +267,7 @@ TEST_F(SchedulerTest, CancelRunningAsyncTask)
 TEST_F(SchedulerTest, TaskIsRunning)
 {
     bool executed = false;
-    std::shared_ptr<endstone::Task> task;
+    endstone::Nullable<endstone::Task> task;
     task = scheduler_->runTask(plugin_, [&]() {
         executed = true;
         EXPECT_TRUE(scheduler_->isRunning(task->getTaskId()));

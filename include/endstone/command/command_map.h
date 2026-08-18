@@ -14,7 +14,6 @@
 
 #pragma once
 
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -44,7 +43,7 @@ public:
      * @param command the command to register
      * @return true on success, false if a command with the same name is already registered
      */
-    virtual bool registerCommand(std::shared_ptr<Command> command) = 0;
+    virtual bool registerCommand(NotNull<Command> command) = 0;
 
     /**
      * Looks for the requested command and executes it if found.
@@ -64,8 +63,8 @@ public:
      * Gets the command registered to the specified name.
      *
      * @param name Name of the command to retrieve
-     * @return Command with the specified name or nullptr if a command with that label doesn't exist
+     * @return Command with the specified name, a null handle if a command with that label doesn't exist
      */
-    [[nodiscard]] virtual std::shared_ptr<Command> getCommand(std::string name) const = 0;
+    [[nodiscard]] virtual Nullable<Command> getCommand(std::string name) const = 0;
 };
 }  // namespace endstone

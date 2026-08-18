@@ -14,7 +14,6 @@
 
 #pragma once
 
-#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -58,9 +57,9 @@ public:
     /**
      * Sets the CommandExecutor to run when parsing this command.
      *
-     * @param executor New executor to run
+     * @param executor New executor to run, a null handle to fall back to the owning plugin
      */
-    virtual void setExecutor(std::shared_ptr<CommandExecutor> executor) { executor_ = std::move(executor); }
+    virtual void setExecutor(Nullable<CommandExecutor> executor) { executor_ = std::move(executor); }
 
     /**
      * Gets the CommandExecutor associated with this command.
@@ -90,6 +89,6 @@ public:
 
 private:
     Plugin &owner_;
-    std::shared_ptr<CommandExecutor> executor_;
+    Nullable<CommandExecutor> executor_;
 };
 }  // namespace endstone

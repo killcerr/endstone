@@ -50,7 +50,7 @@ class Scheduler:
     """
     def run_task(
         self, plugin: Plugin, task: collections.abc.Callable[[], None], delay: int = 0, period: int = 0
-    ) -> Task:
+    ) -> Task | None:
         """
         Returns a task that will be executed repeatedly (and synchronously) until cancelled, starting after the
         specified number of server ticks.
@@ -62,7 +62,7 @@ class Scheduler:
             period: The ticks to wait between runs.
 
         Returns:
-            A `Task` that contains the id number (`None` if task is empty).
+            A `Task` that contains the id number, `None` if the task is empty.
         """
 
     def cancel_task(self, id: int) -> None:

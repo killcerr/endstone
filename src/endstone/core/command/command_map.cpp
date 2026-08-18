@@ -71,7 +71,7 @@ bool EndstoneCommandMap::dispatch(const NotNull<CommandSender> &sender, std::str
     // get the command by name
     auto name = args[0];
     std::ranges::transform(name, name.begin(), [](unsigned char c) { return std::tolower(c); });
-    const std::shared_ptr<Command> command = getCommand(name);
+    const auto command = getCommand(name);
     if (!command) {
         sender->sendErrorMessage(Translatable("commands.generic.unknown", {args[0]}));
         return false;
@@ -121,7 +121,7 @@ void EndstoneCommandMap::clearCommands()
     setDefaultCommands();
 }
 
-std::shared_ptr<Command> EndstoneCommandMap::getCommand(std::string name) const
+Nullable<Command> EndstoneCommandMap::getCommand(std::string name) const
 {
     std::ranges::transform(name, name.begin(), [](unsigned char c) { return std::tolower(c); });
     // Try to find the custom command we've registered
@@ -146,19 +146,19 @@ MinecraftCommands &EndstoneCommandMap::getHandle() const
 
 void EndstoneCommandMap::setDefaultCommands()
 {
-    registerCommand(std::make_unique<BanCommand>());
-    registerCommand(std::make_unique<BanIpCommand>());
-    registerCommand(std::make_unique<BanListCommand>());
-    registerCommand(std::make_unique<PardonCommand>());
-    registerCommand(std::make_unique<PardonIpCommand>());
-    registerCommand(std::make_unique<PluginsCommand>());
-    registerCommand(std::make_unique<ReloadCommand>());
-    registerCommand(std::make_unique<RestartCommand>());
-    registerCommand(std::make_unique<SeedCommand>());
-    registerCommand(std::make_unique<StatusCommand>());
-    registerCommand(std::make_unique<VersionCommand>());
+    registerCommand(std::make_shared<BanCommand>());
+    registerCommand(std::make_shared<BanIpCommand>());
+    registerCommand(std::make_shared<BanListCommand>());
+    registerCommand(std::make_shared<PardonCommand>());
+    registerCommand(std::make_shared<PardonIpCommand>());
+    registerCommand(std::make_shared<PluginsCommand>());
+    registerCommand(std::make_shared<ReloadCommand>());
+    registerCommand(std::make_shared<RestartCommand>());
+    registerCommand(std::make_shared<SeedCommand>());
+    registerCommand(std::make_shared<StatusCommand>());
+    registerCommand(std::make_shared<VersionCommand>());
 #ifdef ENDSTONE_WITH_DEVTOOLS
-    registerCommand(std::make_unique<DevToolsCommand>());
+    registerCommand(std::make_shared<DevToolsCommand>());
 #endif
 }
 
@@ -173,7 +173,7 @@ void EndstoneCommandMap::setPluginCommands()
 
         auto commands = plugin->getDescription().getCommands();
         for (const auto &command : commands) {
-            registerCommand(std::make_unique<PluginCommand>(command, *plugin));
+            registerCommand(std::make_shared<PluginCommand>(command, *plugin));
         }
     }
     clearEnumValues("PluginName");
@@ -260,15 +260,10 @@ void EndstoneCommandMap::removeEnumValueFromExisting(const std::string &enum_nam
     }
 }
 
-bool EndstoneCommandMap::registerCommand(std::shared_ptr<Command> command)
+bool EndstoneCommandMap::registerCommand(NotNull<Command> command)
 {
     std::lock_guard lock(mutex_);
     auto &registry = getHandle().getRegistry();
-
-    if (!command) {
-        server_.getLogger().error("Unable to register a null command.");
-        return false;
-    }
 
     // Check if the command name is available
     auto name = command->getName();

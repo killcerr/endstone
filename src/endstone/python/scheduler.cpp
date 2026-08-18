@@ -30,7 +30,7 @@ void init_scheduler(py::module &m)
 
     py::classh<Scheduler>(m, "Scheduler", "Represents a scheduler that executes various tasks.")
         .def("run_task", &Scheduler::runTaskTimer, py::arg("plugin"), py::arg("task"), py::arg("delay") = 0,
-             py::arg("period") = 0, py::return_value_policy::reference, R"doc(
+             py::arg("period") = 0, R"doc(
     Returns a task that will be executed repeatedly (and synchronously) until cancelled, starting after the
     specified number of server ticks.
 
@@ -41,7 +41,7 @@ void init_scheduler(py::module &m)
         period: The ticks to wait between runs.
 
     Returns:
-        A `Task` that contains the id number (`None` if task is empty).
+        A `Task` that contains the id number, `None` if the task is empty.
 )doc")
         .def("cancel_task", &Scheduler::cancelTask, py::arg("id"), R"doc(
     Removes task from scheduler.

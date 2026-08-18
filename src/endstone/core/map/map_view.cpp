@@ -25,7 +25,7 @@
 namespace endstone::core {
 EndstoneMapView::EndstoneMapView(MapItemSavedData &map) : map_(map)
 {
-    EndstoneMapView::addRenderer(std::make_unique<EndstoneMapRenderer>(*this, map));
+    EndstoneMapView::addRenderer(std::make_shared<EndstoneMapRenderer>(*this, map));
 }
 
 std::int64_t EndstoneMapView::getId() const
@@ -89,12 +89,12 @@ void EndstoneMapView::setDimension(const NotNull<Dimension> &dimension)
     map_.setDimensionId(dimension.cast<EndstoneDimension>()->getHandle().getDimensionId());
 }
 
-std::vector<std::shared_ptr<MapRenderer>> EndstoneMapView::getRenderers() const
+std::vector<NotNull<MapRenderer>> EndstoneMapView::getRenderers() const
 {
     return renderers_;
 }
 
-void EndstoneMapView::addRenderer(std::shared_ptr<MapRenderer> renderer)
+void EndstoneMapView::addRenderer(NotNull<MapRenderer> renderer)
 {
     auto it = std::ranges::find_if(renderers_, [&](const auto &r) { return renderer == r; });
     if (it == renderers_.end()) {
@@ -104,7 +104,7 @@ void EndstoneMapView::addRenderer(std::shared_ptr<MapRenderer> renderer)
     }
 }
 
-bool EndstoneMapView::removeRenderer(const std::shared_ptr<MapRenderer> &renderer)
+bool EndstoneMapView::removeRenderer(const NotNull<MapRenderer> &renderer)
 {
     auto it = std::ranges::find_if(renderers_, [&](const auto &r) { return renderer == r; });
     if (it != renderers_.end()) {

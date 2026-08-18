@@ -34,21 +34,21 @@ class EndstoneScheduler : public Scheduler {
 public:
     explicit EndstoneScheduler(Server &server);
     ~EndstoneScheduler() override = default;
-    std::shared_ptr<Task> runTask(Plugin &plugin, std::function<void()> task) override;
-    std::shared_ptr<Task> runTaskLater(Plugin &plugin, std::function<void()> task, std::uint64_t delay) override;
-    std::shared_ptr<Task> runTaskTimer(Plugin &plugin, std::function<void()> task, std::uint64_t delay,
-                                       std::uint64_t period) override;
-    std::shared_ptr<Task> runTaskAsync(Plugin &plugin, std::function<void()> task) override;
-    std::shared_ptr<Task> runTaskLaterAsync(Plugin &plugin, std::function<void()> task, std::uint64_t delay) override;
-    std::shared_ptr<Task> runTaskTimerAsync(Plugin &plugin, std::function<void()> task, std::uint64_t delay,
-                                            std::uint64_t period) override;
+    Nullable<Task> runTask(Plugin &plugin, std::function<void()> task) override;
+    Nullable<Task> runTaskLater(Plugin &plugin, std::function<void()> task, std::uint64_t delay) override;
+    Nullable<Task> runTaskTimer(Plugin &plugin, std::function<void()> task, std::uint64_t delay,
+                                std::uint64_t period) override;
+    Nullable<Task> runTaskAsync(Plugin &plugin, std::function<void()> task) override;
+    Nullable<Task> runTaskLaterAsync(Plugin &plugin, std::function<void()> task, std::uint64_t delay) override;
+    Nullable<Task> runTaskTimerAsync(Plugin &plugin, std::function<void()> task, std::uint64_t delay,
+                                     std::uint64_t period) override;
     void cancelTask(TaskId id) override;
     void cancelTasks(Plugin &plugin) override;
     bool isRunning(TaskId id) override;
     bool isQueued(TaskId id) override;
     std::vector<Task *> getPendingTasks() override;
 
-    std::shared_ptr<Task> runTask(std::function<void()> task);
+    Nullable<Task> runTask(std::function<void()> task);
     void addTask(std::shared_ptr<EndstoneTask> task);
     void mainThreadHeartbeat(std::uint64_t current_tick);
     void removeTask(TaskId id);

@@ -16,10 +16,10 @@
 
 #include <cstdint>
 #include <functional>
-#include <memory>
 #include <vector>
 
 #include "endstone/scheduler/task.h"
+#include "endstone/util/pointers.h"
 
 namespace endstone {
 
@@ -35,9 +35,9 @@ public:
      *
      * @param plugin the reference to the plugin scheduling task
      * @param task the task to be run
-     * @return a Task that contains the id number (nullptr if task is empty)
+     * @return a Task that contains the id number, a null handle if the task is empty
      */
-    virtual std::shared_ptr<Task> runTask(Plugin &plugin, std::function<void()> task) = 0;
+    virtual Nullable<Task> runTask(Plugin &plugin, std::function<void()> task) = 0;
 
     /**
      * Returns a task that will be executed synchronously after the specified number of server ticks.
@@ -45,9 +45,9 @@ public:
      * @param plugin the reference to the plugin scheduling task
      * @param task the task to be run
      * @param delay the ticks to wait before running the task
-     * @return a Task that contains the id number (nullptr if task is empty)
+     * @return a Task that contains the id number, a null handle if the task is empty
      */
-    virtual std::shared_ptr<Task> runTaskLater(Plugin &plugin, std::function<void()> task, std::uint64_t delay) = 0;
+    virtual Nullable<Task> runTaskLater(Plugin &plugin, std::function<void()> task, std::uint64_t delay) = 0;
 
     /**
      * Returns a task that will be executed repeatedly (and synchronously) until cancelled, starting after the
@@ -57,10 +57,10 @@ public:
      * @param task the task to be run
      * @param delay the ticks to wait before running the task
      * @param period the ticks to wait between runs
-     * @return a Task that contains the id number (nullptr if task is empty)
+     * @return a Task that contains the id number, a null handle if the task is empty
      */
-    virtual std::shared_ptr<Task> runTaskTimer(Plugin &plugin, std::function<void()> task, std::uint64_t delay,
-                                               std::uint64_t period) = 0;
+    virtual Nullable<Task> runTaskTimer(Plugin &plugin, std::function<void()> task, std::uint64_t delay,
+                                        std::uint64_t period) = 0;
 
     /**
      * Returns a task that will be executed asynchronously on the next server tick.
@@ -68,9 +68,9 @@ public:
      *
      * @param plugin the reference to the plugin scheduling task
      * @param task the task to be run
-     * @return a Task that contains the id number (nullptr if task is empty)
+     * @return a Task that contains the id number, a null handle if the task is empty
      */
-    virtual std::shared_ptr<Task> runTaskAsync(Plugin &plugin, std::function<void()> task) = 0;
+    virtual Nullable<Task> runTaskAsync(Plugin &plugin, std::function<void()> task) = 0;
 
     /**
      * Returns a task that will be executed asynchronously after the specified number of server ticks.
@@ -79,10 +79,9 @@ public:
      * @param plugin the reference to the plugin scheduling task
      * @param task the task to be run
      * @param delay the ticks to wait before running the task
-     * @return a Task that contains the id number (nullptr if task is empty)
+     * @return a Task that contains the id number, a null handle if the task is empty
      */
-    virtual std::shared_ptr<Task> runTaskLaterAsync(Plugin &plugin, std::function<void()> task,
-                                                    std::uint64_t delay) = 0;
+    virtual Nullable<Task> runTaskLaterAsync(Plugin &plugin, std::function<void()> task, std::uint64_t delay) = 0;
 
     /**
      * Returns a task that will be executed repeatedly (and asynchronously) until cancelled, starting after the
@@ -93,10 +92,10 @@ public:
      * @param task the task to be run
      * @param delay the ticks to wait before running the task
      * @param period the ticks to wait between runs
-     * @return a Task that contains the id number (nullptr if task is empty)
+     * @return a Task that contains the id number, a null handle if the task is empty
      */
-    virtual std::shared_ptr<Task> runTaskTimerAsync(Plugin &plugin, std::function<void()> task, std::uint64_t delay,
-                                                    std::uint64_t period) = 0;
+    virtual Nullable<Task> runTaskTimerAsync(Plugin &plugin, std::function<void()> task, std::uint64_t delay,
+                                             std::uint64_t period) = 0;
 
     /**
      * Removes task from scheduler.

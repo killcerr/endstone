@@ -102,7 +102,7 @@ class PluginCommand(Command):
         """
 
     @executor.setter
-    def executor(self, arg1: CommandExecutor) -> None: ...
+    def executor(self, arg1: CommandExecutor | None) -> None: ...
     @property
     def plugin(self) -> Plugin:
         """

@@ -44,9 +44,9 @@ public:
     void setCenterZ(int z) override;
     [[nodiscard]] Nullable<Dimension> getDimension() const override;
     void setDimension(const NotNull<Dimension> &dimension) override;
-    [[nodiscard]] std::vector<std::shared_ptr<MapRenderer>> getRenderers() const override;
-    void addRenderer(std::shared_ptr<MapRenderer> renderer) override;
-    bool removeRenderer(const std::shared_ptr<MapRenderer> &renderer) override;
+    [[nodiscard]] std::vector<NotNull<MapRenderer>> getRenderers() const override;
+    void addRenderer(NotNull<MapRenderer> renderer) override;
+    bool removeRenderer(const NotNull<MapRenderer> &renderer) override;
     [[nodiscard]] bool isUnlimitedTracking() const override;
     void setUnlimitedTracking(bool unlimited) override;
     [[nodiscard]] bool isLocked() const override;
@@ -60,9 +60,8 @@ private:
     friend class EndstonePlayer;
 
     std::unordered_map<std::uint64_t, RenderData> render_cache_;
-    std::vector<std::shared_ptr<MapRenderer>> renderers_;
-    std::unordered_map<std::shared_ptr<MapRenderer>,
-                       std::unordered_map<std::uint64_t, std::unique_ptr<EndstoneMapCanvas>>>
+    std::vector<NotNull<MapRenderer>> renderers_;
+    std::unordered_map<NotNull<MapRenderer>, std::unordered_map<std::uint64_t, std::unique_ptr<EndstoneMapCanvas>>>
         canvases_;
     MapItemSavedData &map_;
 };

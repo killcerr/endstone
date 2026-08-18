@@ -169,8 +169,7 @@ void init_map(py::module_ &m)
         .def_property("center_z", &MapView::getCenterZ, &MapView::setCenterZ, "The center Z position of this map.")
         .def_property("dimension", &MapView::getDimension, &MapView::setDimension,
                       "The dimension that this map is associated with.")
-        .def_property_readonly("renderers", &MapView::getRenderers, "A list of `MapRenderer`s currently in effect.",
-                               py::return_value_policy::reference_internal)
+        .def_property_readonly("renderers", &MapView::getRenderers, "A list of `MapRenderer`s currently in effect.")
         .def("add_renderer", &MapView::addRenderer, py::arg("renderer"), R"doc(
     Add a renderer to this map.
 

@@ -31,18 +31,18 @@ Result<void> validate(const Plugin &plugin, const std::function<void()> &task)
 
 EndstoneScheduler::EndstoneScheduler(Server &server) : server_(server) {}
 
-std::shared_ptr<Task> EndstoneScheduler::runTask(Plugin &plugin, std::function<void()> task)
+Nullable<Task> EndstoneScheduler::runTask(Plugin &plugin, std::function<void()> task)
 {
     return runTaskLater(plugin, task, 0);
 }
 
-std::shared_ptr<Task> EndstoneScheduler::runTaskLater(Plugin &plugin, std::function<void()> task, std::uint64_t delay)
+Nullable<Task> EndstoneScheduler::runTaskLater(Plugin &plugin, std::function<void()> task, std::uint64_t delay)
 {
     return runTaskTimer(plugin, task, delay, 0);
 }
 
-std::shared_ptr<Task> EndstoneScheduler::runTaskTimer(Plugin &plugin, std::function<void()> task, std::uint64_t delay,
-                                                      std::uint64_t period)
+Nullable<Task> EndstoneScheduler::runTaskTimer(Plugin &plugin, std::function<void()> task, std::uint64_t delay,
+                                               std::uint64_t period)
 {
     if (!validate(plugin, task)) {
         return nullptr;
@@ -54,19 +54,18 @@ std::shared_ptr<Task> EndstoneScheduler::runTaskTimer(Plugin &plugin, std::funct
     return t;
 }
 
-std::shared_ptr<Task> EndstoneScheduler::runTaskAsync(Plugin &plugin, std::function<void()> task)
+Nullable<Task> EndstoneScheduler::runTaskAsync(Plugin &plugin, std::function<void()> task)
 {
     return runTaskLaterAsync(plugin, task, 0);
 }
 
-std::shared_ptr<Task> EndstoneScheduler::runTaskLaterAsync(Plugin &plugin, std::function<void()> task,
-                                                           std::uint64_t delay)
+Nullable<Task> EndstoneScheduler::runTaskLaterAsync(Plugin &plugin, std::function<void()> task, std::uint64_t delay)
 {
     return runTaskTimerAsync(plugin, task, delay, 0);
 }
 
-std::shared_ptr<Task> EndstoneScheduler::runTaskTimerAsync(Plugin &plugin, std::function<void()> task,
-                                                           std::uint64_t delay, std::uint64_t period)
+Nullable<Task> EndstoneScheduler::runTaskTimerAsync(Plugin &plugin, std::function<void()> task, std::uint64_t delay,
+                                                    std::uint64_t period)
 {
     if (!validate(plugin, task)) {
         return nullptr;
@@ -167,7 +166,7 @@ std::vector<Task *> EndstoneScheduler::getPendingTasks()
     return pending;
 }
 
-std::shared_ptr<Task> EndstoneScheduler::runTask(std::function<void()> task)
+Nullable<Task> EndstoneScheduler::runTask(std::function<void()> task)
 {
     if (!task) {
         return nullptr;

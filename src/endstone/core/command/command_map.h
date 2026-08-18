@@ -27,10 +27,10 @@ class EndstoneServer;
 class EndstoneCommandMap : public CommandMap {
 public:
     explicit EndstoneCommandMap(EndstoneServer &server);
-    bool registerCommand(std::shared_ptr<Command> command) override;
+    bool registerCommand(NotNull<Command> command) override;
     bool dispatch(const NotNull<CommandSender> &sender, std::string command_line) const override;
     void clearCommands() override;
-    [[nodiscard]] std::shared_ptr<Command> getCommand(std::string name) const override;
+    [[nodiscard]] Nullable<Command> getCommand(std::string name) const override;
     [[nodiscard]] ::MinecraftCommands &getHandle() const;
 
 private:
@@ -43,7 +43,7 @@ private:
 
     EndstoneServer &server_;
     std::recursive_mutex mutex_;
-    std::unordered_map<std::string, std::shared_ptr<Command>> custom_commands_;
+    std::unordered_map<std::string, NotNull<Command>> custom_commands_;
 
     static const std::unordered_map<std::string, CommandRegistry::HardNonTerminal> TYPE_SYMBOLS;
 };

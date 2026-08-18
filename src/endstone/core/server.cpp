@@ -421,7 +421,7 @@ EndstonePluginManager &EndstoneServer::getEndstonePluginManager() const
 Nullable<PluginCommand> EndstoneServer::getPluginCommand(std::string name) const
 {
     if (auto command = command_map_->getCommand(name); command && command->is<PluginCommand>()) {
-        return std::static_pointer_cast<PluginCommand>(command);
+        return command.cast<PluginCommand>();
     }
     return nullptr;
 }
