@@ -35,7 +35,7 @@ public:
 private:
     void checkIndex(int index) const;
 
-    ::CampfireBlockActor &campfire_;
+    [[nodiscard]] ::CampfireBlockActor &getCampfire() const { return getBlockActor<::CampfireBlockActor>(); }
 };
 
 }  // namespace endstone::core

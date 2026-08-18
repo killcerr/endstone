@@ -42,7 +42,7 @@ public:
     void setSpawnRange(int range) override;
 
 private:
-    ::MobSpawnerBlockActor &spawner_;
+    [[nodiscard]] ::MobSpawnerBlockActor &getSpawner() const { return getBlockActor<::MobSpawnerBlockActor>(); }
 };
 
 }  // namespace endstone::core

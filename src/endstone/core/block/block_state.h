@@ -14,8 +14,11 @@
 
 #pragma once
 
+#include <optional>
+#include <stdexcept>
 #include <type_traits>
 
+#include "bedrock/world/level/block/actor/block_actor.h"
 #include "bedrock/world/level/block/block_descriptor.h"
 #include "endstone/block/block.h"
 #include "endstone/block/block_state.h"
@@ -36,9 +39,14 @@ public:
     {
     }
 
+    EndstoneBlockStateBase(const EndstoneBlock &block, const ::BlockActor &block_actor)
+        : EndstoneBlockStateBase(block)
+    {
+        block_actor_type_ = block_actor.getType();
+    }
+
     explicit EndstoneBlockStateBase(NotNull<Dimension> dimension, BlockPos block_pos, const ::Block &block)
-        : dimension_(dimension.cast<EndstoneDimension>()),
-          block_source_(dimension_->getHandle().getBlockSourceFromMainChunkSource()), block_pos_(block_pos),
+        : dimension_(dimension.cast<EndstoneDimension>()), block_pos_(block_pos),
           block_(const_cast<::Block *>(&block))
     {
     }
@@ -55,7 +63,7 @@ public:
 
     [[nodiscard]] std::unique_ptr<Block> getBlock() const override
     {
-        return EndstoneBlock::at(block_source_, block_pos_);
+        return EndstoneBlock::at(getBlockSource(), block_pos_);
     }
 
     [[nodiscard]] const BlockType &getType() const override
@@ -130,10 +138,26 @@ public:
     }
 
 protected:
+    [[nodiscard]] BlockSource &getBlockSource() const
+    {
+        return dimension_->getHandle().getBlockSourceFromMainChunkSource();
+    }
+
+    template <typename T>
+    [[nodiscard]] T &getBlockActor() const
+    {
+        auto *block_entity = getBlockSource().getBlockEntity(block_pos_);
+        if (block_entity == nullptr || !block_actor_type_.has_value() ||
+            block_entity->getType() != block_actor_type_.value()) {
+            throw std::runtime_error("Trying to access a block state that is no longer valid.");
+        }
+        return static_cast<T &>(*block_entity);
+    }
+
     NotNull<EndstoneDimension> dimension_;
-    BlockSource &block_source_;
     BlockPos block_pos_;
     ::Block *block_;
+    std::optional<::BlockActorType> block_actor_type_;
 };
 
 using EndstoneBlockState = EndstoneBlockStateBase<BlockState>;

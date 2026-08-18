@@ -34,13 +34,14 @@ using endstone::core::EndstoneServer;
 
 namespace endstone::core {
 EndstoneBlock::EndstoneBlock(BlockSource &block_source, BlockPos block_pos)
-    : block_source_(block_source), block_pos_(block_pos)
+    : dimension_(block_source.getDimension().getEndstoneDimension().cast<EndstoneDimension>()),
+      block_pos_(block_pos)
 {
 }
 
 const BlockType &EndstoneBlock::getType() const
 {
-    return *BlockType::get(block_source_.getBlock(block_pos_).getName().getString());
+    return *BlockType::get(getBlockSource().getBlock(block_pos_).getName().getString());
 }
 
 void EndstoneBlock::setType(BlockTypeId type)
@@ -68,11 +69,11 @@ void EndstoneBlock::setData(const BlockData &data, bool apply_physics)
 {
     const ::Block &block = static_cast<const EndstoneBlockData &>(data).getHandle();
     if (apply_physics) {
-        block_source_.setBlock(block_pos_, block, ::BlockType::UPDATE_NEIGHBORS | ::BlockType::UPDATE_CLIENTS, nullptr,
+        getBlockSource().setBlock(block_pos_, block, ::BlockType::UPDATE_NEIGHBORS | ::BlockType::UPDATE_CLIENTS, nullptr,
                                nullptr);
     }
     else {
-        block_source_.setBlock(block_pos_, block, ::BlockType::UPDATE_CLIENTS, nullptr, nullptr);  // NETWORK
+        getBlockSource().setBlock(block_pos_, block, ::BlockType::UPDATE_CLIENTS, nullptr, nullptr);  // NETWORK
     }
 }
 
@@ -94,12 +95,12 @@ std::unique_ptr<Block> EndstoneBlock::getRelative(BlockFace face, int distance)
 
 NotNull<Dimension> EndstoneBlock::getDimension() const
 {
-    return block_source_.getDimension().getEndstoneDimension();
+    return dimension_;
 }
 
 const Biome &EndstoneBlock::getBiome() const
 {
-    const auto &biome = block_source_.getBiome(block_pos_);
+    const auto &biome = getBlockSource().getBiome(block_pos_);
     return EndstoneServer::getInstance().getRegistry<Biome>().getOrThrow(biome.getFullName());
 }
 
@@ -125,7 +126,7 @@ Location EndstoneBlock::getLocation() const
 
 std::unique_ptr<BlockState> EndstoneBlock::captureState() const
 {
-    if (auto *block_entity = block_source_.getBlockEntity(block_pos_)) {
+    if (auto *block_entity = getBlockSource().getBlockEntity(block_pos_)) {
         // TODO(block-state): once we add more type-specific block states (Sign, Furnace, CreatureSpawner, ...),
         // replace this switch with a BlockActorType -> factory registry (cf. CraftBukkit's CraftBlockStates),
         // keeping the generic getContainer() check as the fallback for container blocks.
@@ -157,6 +158,11 @@ std::unique_ptr<BlockState> EndstoneBlock::captureState() const
     return std::make_unique<EndstoneBlockState>(*this);
 }
 
+BlockSource &EndstoneBlock::getBlockSource() const
+{
+    return dimension_->getHandle().getBlockSourceFromMainChunkSource();
+}
+
 std::unique_ptr<Block> EndstoneBlock::clone() const
 {
     return std::make_unique<EndstoneBlock>(*this);
@@ -169,7 +175,7 @@ BlockPos EndstoneBlock::getPosition() const
 
 ::Block &EndstoneBlock::getMinecraftBlock() const
 {
-    return const_cast<::Block &>(block_source_.getBlock(block_pos_));
+    return const_cast<::Block &>(getBlockSource().getBlock(block_pos_));
 }
 
 std::unique_ptr<EndstoneBlock> EndstoneBlock::at(BlockSource &block_source, BlockPos block_pos)

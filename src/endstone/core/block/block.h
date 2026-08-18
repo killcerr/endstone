@@ -17,6 +17,7 @@
 #include "bedrock/world/level/block_pos.h"
 #include "bedrock/world/level/block_source.h"
 #include "endstone/block/block.h"
+#include "endstone/core/level/dimension.h"
 #include "endstone/util/result.h"
 
 namespace endstone::core {
@@ -48,7 +49,9 @@ public:
     static BlockFace toBlockFace(Direction::Type direction);
 
 protected:
-    BlockSource &block_source_;
+    [[nodiscard]] BlockSource &getBlockSource() const;
+
+    NotNull<EndstoneDimension> dimension_;
     BlockPos block_pos_;
 };
 }  // namespace endstone::core

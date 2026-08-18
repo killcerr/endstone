@@ -74,11 +74,16 @@ std::string joinLines(const std::vector<std::string> &lines)
 
 }  // namespace
 
-EndstoneSignSide::EndstoneSignSide(::SignBlockActor &sign, ::SignTextSide side) : sign_(sign), side_(side) {}
+EndstoneSignSide::EndstoneSignSide(const EndstoneSign &sign, ::SignTextSide side) : sign_(sign), side_(side) {}
+
+::SignBlockActor &EndstoneSignSide::getSign() const
+{
+    return sign_.getSign();
+}
 
 std::vector<std::string> EndstoneSignSide::getLines() const
 {
-    return splitLines(sign_.getMessage(side_));
+    return splitLines(getSign().getMessage(side_));
 }
 
 std::string EndstoneSignSide::getLine(int index) const
@@ -96,34 +101,34 @@ void EndstoneSignSide::setLine(int index, std::string line)
                                  index);
     auto lines = getLines();
     lines[index] = std::move(line);
-    sign_.setMessageForServerScripingOnly(side_, joinLines(lines), {});
+    getSign().setMessageForServerScripingOnly(side_, joinLines(lines), {});
 }
 
 bool EndstoneSignSide::isGlowingText() const
 {
-    return sign_.getIsGlowing(side_);
+    return getSign().getIsGlowing(side_);
 }
 
 void EndstoneSignSide::setGlowingText(bool glowing)
 {
-    sign_.setIsGlowing(side_, glowing);
-    sign_.setChanged();
+    getSign().setIsGlowing(side_, glowing);
+    getSign().setChanged();
 }
 
 Color EndstoneSignSide::getColor() const
 {
-    return fromMinecraft(sign_.getSignTextColor(side_));
+    return fromMinecraft(getSign().getSignTextColor(side_));
 }
 
 void EndstoneSignSide::setColor(Color color)
 {
-    sign_.setSignTextColor(side_, toMinecraft(color));
-    sign_.setChanged();
+    getSign().setSignTextColor(side_, toMinecraft(color));
+    getSign().setChanged();
 }
 
 EndstoneSign::EndstoneSign(const EndstoneBlock &block, ::SignBlockActor &sign)
-    : EndstoneBlockStateBase<Sign>(block), sign_(sign), front_(sign, ::SignTextSide::Front),
-      back_(sign, ::SignTextSide::Back)
+    : EndstoneBlockStateBase<Sign>(block, sign), front_(*this, ::SignTextSide::Front),
+      back_(*this, ::SignTextSide::Back)
 {
 }
 
@@ -134,13 +139,13 @@ SignSide &EndstoneSign::getSide(Side side) const
 
 bool EndstoneSign::isWaxed() const
 {
-    return sign_.getIsWaxed();
+    return getSign().getIsWaxed();
 }
 
 void EndstoneSign::setWaxed(bool waxed)
 {
-    sign_.setWaxed(waxed);
-    sign_.setChanged();
+    getSign().setWaxed(waxed);
+    getSign().setChanged();
 }
 
 }  // namespace endstone::core

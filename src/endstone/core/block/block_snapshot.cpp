@@ -58,7 +58,7 @@ std::unique_ptr<BlockState> EndstoneBlockSnapshot::captureState() const
 
 std::unique_ptr<Block> EndstoneBlockSnapshot::clone() const
 {
-    return std::make_unique<EndstoneBlockSnapshot>(block_source_, block_pos_, *placed_);
+    return std::make_unique<EndstoneBlockSnapshot>(getBlockSource(), block_pos_, *placed_);
 }
 
 }  // namespace endstone::core

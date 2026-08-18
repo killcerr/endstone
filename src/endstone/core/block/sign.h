@@ -23,9 +23,11 @@
 
 namespace endstone::core {
 
+class EndstoneSign;
+
 class EndstoneSignSide : public SignSide {
 public:
-    EndstoneSignSide(::SignBlockActor &sign, ::SignTextSide side);
+    EndstoneSignSide(const EndstoneSign &sign, ::SignTextSide side);
 
     [[nodiscard]] std::vector<std::string> getLines() const override;
     [[nodiscard]] std::string getLine(int index) const override;
@@ -36,7 +38,9 @@ public:
     void setColor(Color color) override;
 
 private:
-    ::SignBlockActor &sign_;
+    [[nodiscard]] ::SignBlockActor &getSign() const;
+
+    const EndstoneSign &sign_;
     ::SignTextSide side_;
 };
 
@@ -49,7 +53,9 @@ public:
     void setWaxed(bool waxed) override;
 
 private:
-    ::SignBlockActor &sign_;
+    friend class EndstoneSignSide;
+
+    [[nodiscard]] ::SignBlockActor &getSign() const { return getBlockActor<::SignBlockActor>(); }
     mutable EndstoneSignSide front_;
     mutable EndstoneSignSide back_;
 };

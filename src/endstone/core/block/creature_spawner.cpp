@@ -20,98 +20,98 @@
 namespace endstone::core {
 
 EndstoneCreatureSpawner::EndstoneCreatureSpawner(const EndstoneBlock &block, ::MobSpawnerBlockActor &spawner)
-    : EndstoneBlockStateBase<CreatureSpawner>(block), spawner_(spawner)
+    : EndstoneBlockStateBase<CreatureSpawner>(block, spawner)
 {
 }
 
 const ActorType &EndstoneCreatureSpawner::getSpawnedType() const
 {
-    const auto &id = spawner_.getSpawner().getEntityId();
+    const auto &id = getSpawner().getSpawner().getEntityId();
     return EndstoneServer::getInstance().getRegistry<ActorType>().getOrThrow(id.getFullName());
 }
 
 void EndstoneCreatureSpawner::setSpawnedType(ActorTypeId type)
 {
     Preconditions::checkArgument(ActorType::get(type) != nullptr, "Unknown actor type: {}", type);
-    spawner_.getSpawner().setEntityId(ActorDefinitionIdentifier(std::string(type)));
-    spawner_.setChanged();
+    getSpawner().getSpawner().setEntityId(ActorDefinitionIdentifier(std::string(type)));
+    getSpawner().setChanged();
 }
 
 int EndstoneCreatureSpawner::getDelay() const
 {
-    return spawner_.getSpawner().getSpawnDelay();
+    return getSpawner().getSpawner().getSpawnDelay();
 }
 
 void EndstoneCreatureSpawner::setDelay(int delay)
 {
-    spawner_.getSpawner().setSpawnDelay(delay);
-    spawner_.setChanged();
+    getSpawner().getSpawner().setSpawnDelay(delay);
+    getSpawner().setChanged();
 }
 
 int EndstoneCreatureSpawner::getMinSpawnDelay() const
 {
-    return spawner_.getSpawner().getMinSpawnDelay();
+    return getSpawner().getSpawner().getMinSpawnDelay();
 }
 
 void EndstoneCreatureSpawner::setMinSpawnDelay(int delay)
 {
-    spawner_.getSpawner().setMinSpawnDelay(delay);
-    spawner_.setChanged();
+    getSpawner().getSpawner().setMinSpawnDelay(delay);
+    getSpawner().setChanged();
 }
 
 int EndstoneCreatureSpawner::getMaxSpawnDelay() const
 {
-    return spawner_.getSpawner().getMaxSpawnDelay();
+    return getSpawner().getSpawner().getMaxSpawnDelay();
 }
 
 void EndstoneCreatureSpawner::setMaxSpawnDelay(int delay)
 {
-    spawner_.getSpawner().setMaxSpawnDelay(delay);
-    spawner_.setChanged();
+    getSpawner().getSpawner().setMaxSpawnDelay(delay);
+    getSpawner().setChanged();
 }
 
 int EndstoneCreatureSpawner::getSpawnCount() const
 {
-    return spawner_.getSpawner().getSpawnCount();
+    return getSpawner().getSpawner().getSpawnCount();
 }
 
 void EndstoneCreatureSpawner::setSpawnCount(int count)
 {
-    spawner_.getSpawner().setSpawnCount(count);
-    spawner_.setChanged();
+    getSpawner().getSpawner().setSpawnCount(count);
+    getSpawner().setChanged();
 }
 
 int EndstoneCreatureSpawner::getMaxNearbyEntities() const
 {
-    return spawner_.getSpawner().getMaxNearbyEntities();
+    return getSpawner().getSpawner().getMaxNearbyEntities();
 }
 
 void EndstoneCreatureSpawner::setMaxNearbyEntities(int count)
 {
-    spawner_.getSpawner().setMaxNearbyEntities(count);
-    spawner_.setChanged();
+    getSpawner().getSpawner().setMaxNearbyEntities(count);
+    getSpawner().setChanged();
 }
 
 int EndstoneCreatureSpawner::getRequiredPlayerRange() const
 {
-    return spawner_.getSpawner().getRequiredPlayerRange();
+    return getSpawner().getSpawner().getRequiredPlayerRange();
 }
 
 void EndstoneCreatureSpawner::setRequiredPlayerRange(int range)
 {
-    spawner_.getSpawner().setRequiredPlayerRange(range);
-    spawner_.setChanged();
+    getSpawner().getSpawner().setRequiredPlayerRange(range);
+    getSpawner().setChanged();
 }
 
 int EndstoneCreatureSpawner::getSpawnRange() const
 {
-    return spawner_.getSpawner().getSpawnRange();
+    return getSpawner().getSpawner().getSpawnRange();
 }
 
 void EndstoneCreatureSpawner::setSpawnRange(int range)
 {
-    spawner_.getSpawner().setSpawnRange(range);
-    spawner_.setChanged();
+    getSpawner().getSpawner().setSpawnRange(range);
+    getSpawner().setChanged();
 }
 
 }  // namespace endstone::core

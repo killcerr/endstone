@@ -22,13 +22,13 @@
 namespace endstone::core {
 
 EndstoneItemFrame::EndstoneItemFrame(const EndstoneBlock &block, ::ItemFrameBlockActor &item_frame)
-    : EndstoneBlockStateBase<ItemFrame>(block), item_frame_(item_frame)
+    : EndstoneBlockStateBase<ItemFrame>(block, item_frame)
 {
 }
 
 std::optional<ItemStack> EndstoneItemFrame::getItem() const
 {
-    const auto &item = item_frame_.getFramedItem();
+    const auto &item = getItemFrame().getFramedItem();
     if (item.isNull()) {
         return std::nullopt;
     }
@@ -38,37 +38,37 @@ std::optional<ItemStack> EndstoneItemFrame::getItem() const
 void EndstoneItemFrame::setItem(const std::optional<ItemStack> &item)
 {
     if (!item.has_value()) {
-        item_frame_.setItem(block_source_, ItemInstance::EMPTY_ITEM, nullptr);
+        getItemFrame().setItem(getBlockSource(), ItemInstance::EMPTY_ITEM, nullptr);
         return;
     }
     const auto minecraft_item = EndstoneItemStack::toMinecraft(item.value());
-    item_frame_.setItem(block_source_, ItemInstance(minecraft_item), nullptr);
+    getItemFrame().setItem(getBlockSource(), ItemInstance(minecraft_item), nullptr);
 }
 
 float EndstoneItemFrame::getItemDropChance() const
 {
-    return item_frame_.getDropChance();
+    return getItemFrame().getDropChance();
 }
 
 void EndstoneItemFrame::setItemDropChance(float chance)
 {
     Preconditions::checkArgument(chance >= 0.0F && chance <= 1.0F, "Item drop chance must be between 0.0 and 1.0.");
-    item_frame_.setDropChance(chance);
-    item_frame_.setChanged();
+    getItemFrame().setDropChance(chance);
+    getItemFrame().setChanged();
 }
 
 Rotation EndstoneItemFrame::getRotation() const
 {
     // BDS keeps the rotation in [0, 360) degrees, in steps of ROTATION_DEGREES
-    const auto steps = std::lround(item_frame_.getRotation() / ::ItemFrameBlockActor::ROTATION_DEGREES);
+    const auto steps = std::lround(getItemFrame().getRotation() / ::ItemFrameBlockActor::ROTATION_DEGREES);
     return static_cast<Rotation>(steps % ::ItemFrameBlockActor::NUM_ROTATIONS);
 }
 
 void EndstoneItemFrame::setRotation(Rotation rotation)
 {
     // ItemFrameBlock::use rotates by one step the same way: write the degrees back, then setChanged
-    item_frame_.setRotation(static_cast<float>(rotation) * ::ItemFrameBlockActor::ROTATION_DEGREES);
-    item_frame_.setChanged();
+    getItemFrame().setRotation(static_cast<float>(rotation) * ::ItemFrameBlockActor::ROTATION_DEGREES);
+    getItemFrame().setChanged();
 }
 
 }  // namespace endstone::core

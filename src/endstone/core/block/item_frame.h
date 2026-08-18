@@ -34,7 +34,7 @@ public:
     void setRotation(Rotation rotation) override;
 
 private:
-    ::ItemFrameBlockActor &item_frame_;
+    [[nodiscard]] ::ItemFrameBlockActor &getItemFrame() const { return getBlockActor<::ItemFrameBlockActor>(); }
 };
 
 }  // namespace endstone::core

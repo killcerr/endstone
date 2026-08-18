@@ -20,7 +20,7 @@
 namespace endstone::core {
 
 EndstoneCampfire::EndstoneCampfire(const EndstoneBlock &block, ::CampfireBlockActor &campfire)
-    : EndstoneBlockStateBase<Campfire>(block), campfire_(campfire)
+    : EndstoneBlockStateBase<Campfire>(block, campfire)
 {
 }
 
@@ -32,7 +32,7 @@ int EndstoneCampfire::getSize() const
 std::optional<ItemStack> EndstoneCampfire::getItem(int index) const
 {
     checkIndex(index);
-    const auto &item = campfire_.getCookingItem(index);
+    const auto &item = getCampfire().getCookingItem(index);
     if (item.isNull()) {
         return std::nullopt;
     }
@@ -43,25 +43,25 @@ void EndstoneCampfire::setItem(int index, const std::optional<ItemStack> &item)
 {
     checkIndex(index);
     if (!item.has_value()) {
-        campfire_.setCookingItem(index, ItemInstance::EMPTY_ITEM);
+        getCampfire().setCookingItem(index, ItemInstance::EMPTY_ITEM);
     }
     else {
-        campfire_.setCookingItem(index, ItemInstance(EndstoneItemStack::toMinecraft(item.value())));
+        getCampfire().setCookingItem(index, ItemInstance(EndstoneItemStack::toMinecraft(item.value())));
     }
-    campfire_.setChanged();
+    getCampfire().setChanged();
 }
 
 int EndstoneCampfire::getCookTime(int index) const
 {
     checkIndex(index);
-    return campfire_.getCookingTime(index);
+    return getCampfire().getCookingTime(index);
 }
 
 void EndstoneCampfire::setCookTime(int index, int cook_time)
 {
     checkIndex(index);
-    campfire_.setCookingTime(index, cook_time);
-    campfire_.setChanged();
+    getCampfire().setCookingTime(index, cook_time);
+    getCampfire().setChanged();
 }
 
 void EndstoneCampfire::checkIndex(int index) const
