@@ -404,6 +404,8 @@ void init_server(py::classh<Server> &server)
                                "The current language interface used by the server for translations.")
         .def_property_readonly("plugin_manager", &Server::getPluginManager, py::return_value_policy::reference,
                                "The plugin manager for interfacing with plugins.")
+        .def_property_readonly("command_map", &Server::getCommandMap, py::return_value_policy::reference,
+                               "The command map for registering and looking up commands.")
         .def("get_plugin_command", &Server::getPluginCommand, py::arg("name"), R"doc(
     Gets a `PluginCommand` with the given name or alias.
 

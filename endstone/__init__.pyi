@@ -11,7 +11,7 @@ from endstone.actor import Mob
 from endstone.ban import IpBanList, PlayerBanList
 from endstone.block import BlockData, BlockType
 from endstone.boss import BarColor, BarFlag, BarStyle, BossBar
-from endstone.command import CommandSender, ConsoleCommandSender
+from endstone.command import CommandMap, CommandSender, ConsoleCommandSender
 from endstone.form import ActionForm, MessageForm, ModalForm
 from endstone.inventory import Inventory, ItemFactory, PlayerInventory
 from endstone.lang import Language, Translatable
@@ -149,6 +149,12 @@ class Server:
     def plugin_manager(self) -> PluginManager:
         """
         The plugin manager for interfacing with plugins.
+        """
+
+    @property
+    def command_map(self) -> CommandMap:
+        """
+        The command map for registering and looking up commands.
         """
 
     def get_plugin_command(self, name: str) -> PluginCommand | None:

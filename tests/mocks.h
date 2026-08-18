@@ -27,6 +27,7 @@ public:
     MOCK_METHOD(endstone::Logger &, getLogger, (), (const, override));
     MOCK_METHOD(endstone::Language &, getLanguage, (), (const, override));
     MOCK_METHOD(endstone::PluginManager &, getPluginManager, (), (const, override));
+    MOCK_METHOD(endstone::CommandMap &, getCommandMap, (), (const, override));
     MOCK_METHOD(endstone::Nullable<endstone::PluginCommand>, getPluginCommand, (std::string), (const, override));
     MOCK_METHOD(endstone::NotNull<endstone::ConsoleCommandSender>, getCommandSender, (), (const, override));
     MOCK_METHOD(bool, dispatchCommand, (const endstone::NotNull<endstone::CommandSender> &, std::string),

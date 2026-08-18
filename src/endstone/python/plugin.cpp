@@ -118,7 +118,7 @@ void init_plugin(py::module &m)
 
     auto plugin_loader = py::classh<PluginLoader, PyPluginLoader>(
         m, "PluginLoader", "Represents a plugin loader, which handles direct access to specific types of plugins.");
-    auto plugin_command = py::class_<PluginCommand, Command, std::shared_ptr<PluginCommand>>(
+    auto plugin_command = py::class_<PluginCommand, Command, py::smart_holder>(
         m, "PluginCommand", "Represents a Command belonging to a Plugin.");
 
     py::class_<PluginDescription>(

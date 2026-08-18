@@ -29,6 +29,7 @@
 #include "endstone/ban/player_ban_list.h"
 #include "endstone/block/block_data.h"
 #include "endstone/boss/boss_bar.h"
+#include "endstone/command/command_map.h"
 #include "endstone/command/command_sender.h"
 #include "endstone/identifier.h"
 #include "endstone/lang/language.h"
@@ -120,6 +121,13 @@ public:
      * @return a plugin manager for this Server instance
      */
     [[nodiscard]] virtual PluginManager &getPluginManager() const = 0;
+
+    /**
+     * Gets the command map for registering and looking up commands.
+     *
+     * @return the command map of this Server instance
+     */
+    [[nodiscard]] virtual CommandMap &getCommandMap() const = 0;
 
     /**
      * Gets a PluginCommand with the given name or alias.

@@ -62,7 +62,7 @@ public:
 
     [[nodiscard]] Logger &getLogger() const override;
     [[nodiscard]] Language &getLanguage() const override;
-    [[nodiscard]] EndstoneCommandMap &getCommandMap() const;
+    [[nodiscard]] EndstoneCommandMap &getCommandMap() const override;
     [[nodiscard]] PluginManager &getPluginManager() const override;
     [[nodiscard]] EndstonePluginManager &getEndstonePluginManager() const;
     [[nodiscard]] Nullable<PluginCommand> getPluginCommand(std::string name) const override;

@@ -7,6 +7,7 @@ __getattr__, __dir__, __all__ = lazy.attach(
             "BlockCommandSender",
             "Command",
             "CommandExecutor",
+            "CommandMap",
             "CommandSender",
             "CommandSenderWrapper",
             "ConsoleCommandSender",

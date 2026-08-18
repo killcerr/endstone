@@ -28,6 +28,16 @@ public:
     }
 };
 
+class PyCommand : public Command, public py::trampoline_self_life_support {
+public:
+    using Command::Command;
+
+    bool execute(const NotNull<CommandSender> &sender, const std::vector<std::string> &args) const override
+    {
+        PYBIND11_OVERRIDE(bool, Command, execute, sender, std::ref(args));
+    }
+};
+
 namespace {
 Command createCommand(const std::string &name, const std::optional<std::string> &description,
                       const std::optional<std::vector<std::string>> &usages,
@@ -37,6 +47,16 @@ Command createCommand(const std::string &name, const std::optional<std::string> 
 {
     return Command(std::move(name), description.value_or(""), usages.value_or(std::vector<std::string>{}),
                    aliases.value_or(std::vector<std::string>{}), permissions.value_or(std::vector<std::string>{}));
+}
+
+PyCommand createCommandAlias(const std::string &name, const std::optional<std::string> &description,
+                             const std::optional<std::vector<std::string>> &usages,
+                             const std::optional<std::vector<std::string>> &aliases,
+                             const std::optional<std::vector<std::string>> &permissions, const py::args & /*args*/,
+                             const py::kwargs & /*kwargs*/)
+{
+    return PyCommand(std::move(name), description.value_or(""), usages.value_or(std::vector<std::string>{}),
+                     aliases.value_or(std::vector<std::string>{}), permissions.value_or(std::vector<std::string>{}));
 }
 }  // namespace
 
@@ -77,9 +97,9 @@ void init_command(py::module &m, py_class<CommandSender> &command_sender)
 
     py_class<ConsoleCommandSender>(m, "ConsoleCommandSender", "Represents a console command sender.");
 
-    py::class_<Command, std::shared_ptr<Command>>(m, "Command",
-                                                  "Represents a Command, which executes various tasks upon user input.")
-        .def(py::init(&createCommand), py::arg("name"), py::arg("description") = py::none(),
+    py::class_<Command, PyCommand, py::smart_holder>(
+        m, "Command", "Represents a Command, which executes various tasks upon user input.")
+        .def(py::init(&createCommand, &createCommandAlias), py::arg("name"), py::arg("description") = py::none(),
              py::arg("usages") = py::none(), py::arg("aliases") = py::none(), py::arg("permissions") = py::none())
         .def("execute", &Command::execute, py::arg("sender"), py::arg("args"), R"doc(
     Executes the command, returning its success.
@@ -130,6 +150,38 @@ void init_command(py::module &m, py_class<CommandSender> &command_sender)
             "The permissions required by users to be able to perform this command.")
         .def_property_readonly("is_registered", &Command::isRegistered,
                                "The current registered state of this command.");
+
+    py::classh<CommandMap>(m, "CommandMap", "Represents a command map that manages all commands of the Server.")
+        .def("register_command", static_cast<bool (CommandMap::*)(NotNull<Command>)>(&CommandMap::registerCommand),
+             py::arg("command"), R"doc(
+    Registers a command.
+
+    Args:
+        command: The command to register.
+
+    Returns:
+        `True` on success, `False` if a command with the same name is already registered.
+)doc")
+        .def("dispatch", &CommandMap::dispatch, py::arg("sender"), py::arg("command_line"), R"doc(
+    Looks for the requested command and executes it if found.
+
+    Args:
+        sender: The command's sender.
+        command_line: The command and its arguments, e.g. "/test abc 123".
+
+    Returns:
+        `True` if the execution was successful, `False` otherwise.
+)doc")
+        .def("clear_commands", &CommandMap::clearCommands, "Clears all registered commands.")
+        .def("get_command", &CommandMap::getCommand, py::arg("name"), R"doc(
+    Gets the command registered to the specified name.
+
+    Args:
+        name: The name of the command to retrieve.
+
+    Returns:
+        The command with the specified name, `None` if a command with that label doesn't exist.
+)doc");
 
     py::class_<CommandExecutor, PyCommandExecutor, py::smart_holder>(
         m, "CommandExecutor", "Represents a class which contains a single method for executing commands.")

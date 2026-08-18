@@ -14,6 +14,7 @@ __all__ = [
     "BlockCommandSender",
     "Command",
     "CommandExecutor",
+    "CommandMap",
     "CommandSender",
     "CommandSenderWrapper",
     "ConsoleCommandSender",
@@ -173,6 +174,49 @@ class Command:
     def is_registered(self) -> bool:
         """
         The current registered state of this command.
+        """
+
+class CommandMap:
+    """
+    Represents a command map that manages all commands of the Server.
+    """
+    def register_command(self, command: Command) -> bool:
+        """
+        Registers a command.
+
+        Args:
+            command: The command to register.
+
+        Returns:
+            `True` on success, `False` if a command with the same name is already registered.
+        """
+
+    def dispatch(self, sender: CommandSender, command_line: str) -> bool:
+        """
+        Looks for the requested command and executes it if found.
+
+        Args:
+            sender: The command's sender.
+            command_line: The command and its arguments, e.g. "/test abc 123".
+
+        Returns:
+            `True` if the execution was successful, `False` otherwise.
+        """
+
+    def clear_commands(self) -> None:
+        """
+        Clears all registered commands.
+        """
+
+    def get_command(self, name: str) -> Command | None:
+        """
+        Gets the command registered to the specified name.
+
+        Args:
+            name: The name of the command to retrieve.
+
+        Returns:
+            The command with the specified name, `None` if a command with that label doesn't exist.
         """
 
 class CommandExecutor:

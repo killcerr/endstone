@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a chunk loading API: `Dimension.load_chunk()`, `Dimension.unload_chunk()`, and `Dimension.is_chunk_loaded()`. `load_chunk()` loads a chunk and keeps it resident for as long as your plugin needs it, and `unload_chunk()` releases it again so it can unload once nothing else (a nearby player, the spawn area, etc.) is keeping it loaded.
 - `PlayerInteractEvent` is now fired with the `LEFT_CLICK_AIR` action when a player swings at nothing, that is, at neither a block nor an actor. The action had been part of the API since the event was introduced, but was never fired. Cancelling the event suppresses the swing, including its attack sound (#316).
 - Added `PlayerToggleSneakEvent` and `PlayerToggleSprintEvent`, fired when a player starts or stops sneaking or sprinting. Read the new state from `is_sneaking` / `is_sprinting`. Both carry the same names as their Bukkit counterparts, so a plugin ported from Spigot or Paper listens for them unchanged.
+- Added `Server.command_map` (`Server::getCommandMap()`) for reaching the server's command map, mirroring Paper's `Server#getCommandMap()`. Bukkit leaves it off the `Server` interface, so plugins there resort to reflection. `CommandMap` is now available from Python with `register_command()`, `dispatch()`, `clear_commands()` and `get_command()`, so a plugin can register a command at runtime rather than declaring it up front.
+- `Command` can now be subclassed in Python to override `execute()`, the way Paper plugins subclass `Command`. Previously a Python subclass could be written but its `execute()` was never called.
 
 ### Changed
 
