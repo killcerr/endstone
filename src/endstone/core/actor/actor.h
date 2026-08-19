@@ -195,11 +195,11 @@ public:
 
     [[nodiscard]] bool isValid() const override
     {
-        const auto *handle = handle_.tryUnwrap<Handle>();
+        const auto *handle = handle_.tryUnwrap<Handle>(/*include_removed*/ true);
         if (!handle) {
             return false;
         }
-        return handle->isAlive();
+        return !handle->isRemoved() && handle->isAlive();
     }
 
     [[nodiscard]] std::vector<std::string> getScoreboardTags() const override { return getHandle().getTags(); }
@@ -232,9 +232,14 @@ public:
 
     void setScoreTag(std::string score) override { getHandle().setScoreTag(score); }
 
+    [[nodiscard]] Handle *tryGetHandle() const
+    {
+        return handle_.template tryUnwrap<Handle>(/*include_removed*/ true);
+    }
+
     Handle &getHandle() const
     {
-        auto *ptr = handle_.tryUnwrap<Handle>();
+        auto *ptr = handle_.tryUnwrap<Handle>(/*include_removed*/ true);
         if (!ptr) {
             throw std::runtime_error("Trying to access an actor that is no longer valid.");
         }
