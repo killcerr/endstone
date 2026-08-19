@@ -18,6 +18,7 @@
 #include "bedrock/network/packet/boss_event_packet.h"
 #include "endstone/check.h"
 #include "endstone/core/player.h"
+#include "endstone/core/server.h"
 
 namespace endstone::core {
 
@@ -112,16 +113,16 @@ void EndstoneBossBar::setVisible(bool visible)
 
 void EndstoneBossBar::addPlayer(const NotNull<Player> &player)
 {
-    players_.emplace(player.get());
-    if (visible_) {
+    players_.emplace(player->getUniqueId());
+    if (visible_ && player->isValid()) {
         send(BossEventUpdateType::Add, player);
     }
 }
 
 void EndstoneBossBar::removePlayer(const NotNull<Player> &player)
 {
-    players_.erase(player.get());
-    if (visible_) {
+    players_.erase(player->getUniqueId());
+    if (visible_ && player->isValid()) {
         send(BossEventUpdateType::Remove, player);
     }
 }
@@ -139,8 +140,9 @@ void EndstoneBossBar::removeAll()
 std::vector<NotNull<Player>> EndstoneBossBar::getPlayers() const
 {
     std::vector<NotNull<Player>> players;
+    auto &server = EndstoneServer::getInstance();
     for (auto it = players_.begin(); it != players_.end();) {
-        if (auto player = it->lock(); player) {
+        if (auto player = server.getPlayer(*it); player) {
             players.emplace_back(std::move(player));
             ++it;
         }

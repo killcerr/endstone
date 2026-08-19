@@ -16,12 +16,13 @@
 
 #include <bitset>
 #include <memory>
-#include <set>
 #include <string>
+#include <unordered_set>
 #include <utility>
 
 #include "bedrock/network/packet/boss_event_packet.h"
 #include "endstone/boss/boss_bar.h"
+#include "endstone/util/uuid.h"
 
 namespace endstone::core {
 
@@ -63,7 +64,7 @@ private:
     BarStyle style_;
     std::bitset<2> flags_;
     bool visible_{true};
-    mutable std::set<std::weak_ptr<Player>, std::owner_less<std::weak_ptr<Player>>> players_;
+    mutable std::unordered_set<UUID> players_;
 };
 
 }  // namespace endstone::core
