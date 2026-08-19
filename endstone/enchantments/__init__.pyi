@@ -32,6 +32,7 @@ class Enchantment:
     EFFICIENCY: Identifier[Enchantment] = "minecraft:efficiency"
     SILK_TOUCH: Identifier[Enchantment] = "minecraft:silk_touch"
     UNBREAKING: Identifier[Enchantment] = "minecraft:unbreaking"
+    FORTUNE: Identifier[Enchantment] = "minecraft:fortune"
     POWER: Identifier[Enchantment] = "minecraft:power"
     PUNCH: Identifier[Enchantment] = "minecraft:punch"
     FLAME: Identifier[Enchantment] = "minecraft:flame"

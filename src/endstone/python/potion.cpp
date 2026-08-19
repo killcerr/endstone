@@ -104,7 +104,7 @@ void init_potion(py::module_ &m)
         .def_property_readonly_static("SLOW_FALLING", id(EffectType::SlowFalling), "Slows entity fall rate.")
         .def_property_readonly_static("BAD_OMEN", id(EffectType::BadOmen),
                                       "Triggers an ominous event when the player enters a village or trial chambers.")
-        .def_property_readonly_static("HERO_OF_THE_VILLAGE", id(EffectType::HeroOfTheVillage),
+        .def_property_readonly_static("VILLAGE_HERO", id(EffectType::VillageHero),
                                       "Reduces the cost of villager trades.")
         .def_property_readonly_static("DARKNESS", id(EffectType::Darkness),
                                       "Causes the player's vision to dim occasionally.")

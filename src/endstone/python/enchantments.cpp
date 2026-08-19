@@ -58,6 +58,8 @@ void init_enchantments(py::module_ &m)
             "Allows blocks to drop themselves instead of fragments (for example, stone instead of cobblestone).")
         .def_property_readonly_static("UNBREAKING", id(Enchantment::Unbreaking),
                                       "Decreases the rate at which a tool looses durability.")
+        .def_property_readonly_static("FORTUNE", id(Enchantment::Fortune),
+                                      "Provides a chance of gaining extra loot when destroying blocks.")
         .def_property_readonly_static("POWER", id(Enchantment::Power),
                                       "Provides extra damage when shooting arrows from bows.")
         .def_property_readonly_static("PUNCH", id(Enchantment::Punch),

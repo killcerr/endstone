@@ -70,7 +70,7 @@ class EffectType:
     CONDUIT_POWER: Identifier[EffectType] = "minecraft:conduit_power"
     SLOW_FALLING: Identifier[EffectType] = "minecraft:slow_falling"
     BAD_OMEN: Identifier[EffectType] = "minecraft:bad_omen"
-    HERO_OF_THE_VILLAGE: Identifier[EffectType] = "minecraft:hero_of_the_village"
+    VILLAGE_HERO: Identifier[EffectType] = "minecraft:village_hero"
     DARKNESS: Identifier[EffectType] = "minecraft:darkness"
     TRIAL_OMEN: Identifier[EffectType] = "minecraft:trial_omen"
     WIND_CHARGED: Identifier[EffectType] = "minecraft:wind_charged"

@@ -68,6 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed the NBT bindings hiding what their containers hold: `ByteArrayTag(iterable)` and `IntArrayTag(iterable)` take an `Iterable[int]`, `ListTag(iterable)` an `Iterable[Tag]`, `CompoundTag(mapping)` a `dict[str, Tag]`, and `to_list()`/`to_dict()` return `list[Any]`/`dict[str, Any]`.
 - Fixed `Plugin.default_permission` rejecting a string or a bool (`"operator"`, `"not op"`, `True`), which the `default` of an individual entry in `Plugin.permissions` already accepted. Only `PermissionDefault` worked; anything else raised `TypeError`.
 - Fixed `ServerLoadEvent` missing its `ServerEvent` base in Python, so `isinstance(event, ServerEvent)` was `False`, and `LoadType.RELOAD` never being exposed even though the server fires it on `/reload`.
+- Fixed every vanilla command failing when dispatched through a `CommandSenderWrapper`. The wrapper did not report its own type, so the command origin could not be resolved from it and the command was refused as an unsupported sender before it ran.
+- Fixed `Enchantment.FORTUNE` missing from Python. The constant existed in C++ but was never bound.
 
 ## [0.11.9] - 2026-08-17
 
