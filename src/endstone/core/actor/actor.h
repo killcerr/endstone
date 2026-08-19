@@ -234,7 +234,7 @@ public:
 
     Handle &getHandle() const
     {
-        auto *ptr = handle_.tryUnwrap<Handle>(/*include_removed*/ true);
+        auto *ptr = handle_.tryUnwrap<Handle>();
         if (!ptr) {
             throw std::runtime_error("Trying to access an actor that is no longer valid.");
         }
