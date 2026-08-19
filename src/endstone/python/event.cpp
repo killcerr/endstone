@@ -257,6 +257,12 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
     py::class_<PlayerBedLeaveEvent, PlayerEvent>(m, "PlayerBedLeaveEvent", "Called when a player is leaving a bed.")
         .def_property_readonly("bed", &PlayerBedLeaveEvent::getBed, py::return_value_policy::reference,
                                "The bed block involved in this event.");
+    py::class_<PlayerLevelChangeEvent, PlayerEvent>(m, "PlayerLevelChangeEvent",
+                                                    "Called when a player's level changes.")
+        .def_property_readonly("old_level", &PlayerLevelChangeEvent::getOldLevel,
+                               "The player's level before the change.")
+        .def_property_readonly("new_level", &PlayerLevelChangeEvent::getNewLevel,
+                               "The player's level after the change.");
     py::class_<PlayerPickupArrowEvent, PlayerEvent, ICancellable>(
         m, "PlayerPickupArrowEvent", "Called when a player picks up an arrow from the ground.")
         .def_property_readonly("arrow", &PlayerPickupArrowEvent::getArrow,
