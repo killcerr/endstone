@@ -564,6 +564,7 @@ class PlayerLevelChangeEvent(PlayerEvent):
     def new_level(self) -> int:
         """
         The player's level after the change.
+        """
 
 class PlayerPickupArrowEvent(PlayerEvent, Cancellable):
     """
