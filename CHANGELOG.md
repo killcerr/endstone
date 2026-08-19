@@ -71,6 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `ServerLoadEvent` missing its `ServerEvent` base in Python, so `isinstance(event, ServerEvent)` was `False`, and `LoadType.RELOAD` never being exposed even though the server fires it on `/reload`.
 - Fixed every vanilla command failing when dispatched through a `CommandSenderWrapper`. The wrapper did not report its own type, so the command origin could not be resolved from it and the command was refused as an unsupported sender before it ran.
 - Fixed `Enchantment.FORTUNE` missing from Python. The constant existed in C++ but was never bound.
+- Fixed `Mob.has_attribute()` raising for a name that is not an attribute, instead of answering `False`.
 - Fixed `Dimension.actors` and `Level.actors` leaving out connected players. Bedrock keeps players in a separate list from other entities and only the latter was read, so a player was never among the actors of the dimension they were standing in.
 - Fixed `str()` on a `Translatable` giving `<endstone._python.lang.Translatable object at 0x...>` instead of its text. Command output captured through a `CommandSenderWrapper` arrives as `Translatable`, so it was unreadable without reaching for `.text` by hand.
 
