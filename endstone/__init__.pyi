@@ -875,6 +875,9 @@ class GameRule(typing.Generic[_T]):
     """
     Represents a game rule.
     """
+    def __hash__(self) -> int: ...
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
     @property
     def id(self) -> Identifier[GameRule[_T]]:
         """
@@ -902,8 +905,6 @@ class GameRule(typing.Generic[_T]):
         Returns:
             The `GameRule`, or `None` if no game rule with that name exists.
         """
-
-    def __hash__(self) -> int: ...
 
     COMMAND_BLOCK_OUTPUT: Identifier[GameRule[bool]] = "minecraft:commandblockoutput"
     COMMAND_BLOCKS_ENABLED: Identifier[GameRule[bool]] = "minecraft:commandblocksenabled"
