@@ -72,7 +72,7 @@ void init_block(py::module_ &m, py::classh<Block> &block)
     def_registry_type(py::class_<Biome>(m, "Biome", "Represents a biome."))
         .def_property_readonly("id", &Biome::getId, "The identifier of this biome.")
         .def_property_readonly("translation_key", &Biome::getTranslationKey,
-                               "The translation key, suitable for use in a translation component.")
+                               "Raises, as Bedrock does not localize biome names.")
         .def_static("get", &Biome::get, py::arg("name"), R"doc(
     Attempts to get the `Biome` with the given name.
 

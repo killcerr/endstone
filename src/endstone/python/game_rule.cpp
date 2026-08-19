@@ -22,7 +22,7 @@ void init_game_rule(py::module_ &m)
     def_registry_type(py::class_<GameRule>(m, "GameRule", "Represents a game rule."))
         .def_property_readonly("id", &GameRule::getId, "The identifier of this game rule.")
         .def_property_readonly("translation_key", &GameRule::getTranslationKey,
-                               "The translation key, suitable for use in a translation component.")
+                               "Raises, as Bedrock does not localize game rule names.")
         .def_static("get", &GameRule::get, py::arg("name"), R"doc(
     Attempts to get the `GameRule` with the given name.
 

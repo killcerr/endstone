@@ -237,7 +237,7 @@ class Biome:
     @property
     def translation_key(self) -> str:
         """
-        The translation key, suitable for use in a translation component.
+        Raises, as Bedrock does not localize biome names.
         """
 
     @staticmethod

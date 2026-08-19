@@ -887,7 +887,7 @@ class GameRule(typing.Generic[_T]):
     @property
     def translation_key(self) -> str:
         """
-        The translation key, suitable for use in a translation component.
+        Raises, as Bedrock does not localize game rule names.
         """
 
     @typing.overload
