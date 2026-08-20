@@ -130,6 +130,14 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
                       "The location that this actor moved from.")
         .def_property("to_location", &ActorTeleportEvent::getTo, &ActorTeleportEvent::setTo,
                       "The location that this actor moved to.");
+    py::class_<ActorToggleGlideEvent, ActorEvent<Mob>>(
+        m, "ActorToggleGlideEvent", "Called when an `Actor`'s gliding state is toggled with an elytra.")
+        .def_property_readonly("is_gliding", &ActorToggleGlideEvent::isGliding,
+                               "Whether the actor is now gliding or not.");
+    py::class_<ActorToggleSwimEvent, ActorEvent<Mob>>(m, "ActorToggleSwimEvent",
+                                                      "Called when an `Actor`'s swimming state is toggled.")
+        .def_property_readonly("is_swimming", &ActorToggleSwimEvent::isSwimming,
+                               "Whether the actor is now swimming or not.");
 
     // Block events
     py::class_<BlockEvent, Event>(m, "BlockEvent", "Represents an `Block`-related event.")
@@ -361,6 +369,14 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
                                                      "Called when a player toggles their sprinting state.")
         .def_property_readonly("is_sprinting", &PlayerToggleSprintEvent::isSprinting,
                                "Whether the player is now sprinting or not.");
+    py::class_<PlayerToggleCrawlEvent, PlayerEvent>(m, "PlayerToggleCrawlEvent",
+                                                    "Called when a player toggles their crawling state.")
+        .def_property_readonly("is_crawling", &PlayerToggleCrawlEvent::isCrawling,
+                               "Whether the player is now crawling or not.");
+    py::class_<PlayerToggleFlightEvent, PlayerEvent>(m, "PlayerToggleFlightEvent",
+                                                     "Called when a player toggles their flying state.")
+        .def_property_readonly("is_flying", &PlayerToggleFlightEvent::isFlying,
+                               "Whether the player is now flying or not.");
     py::class_<PlayerJoinEvent, PlayerEvent>(m, "PlayerJoinEvent", "Called when a player joins a server.")
         .def_property("join_message", &PlayerJoinEvent::getJoinMessage, &PlayerJoinEvent::setJoinMessage,
                       "The join message to send to all online players.");
