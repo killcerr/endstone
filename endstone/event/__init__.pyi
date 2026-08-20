@@ -932,7 +932,7 @@ class PlayerPortalEvent(PlayerTeleportEvent):
 
 class PlayerPickupArrowEvent(PlayerEvent, Cancellable):
     """
-    Called when a player picks up an arrow from the ground.
+    Called when a player picks up an arrow or a thrown trident from the ground.
     """
     @property
     def arrow(self) -> Actor:

@@ -108,7 +108,7 @@ bool Player::take(Actor &actor, int unknown, int favored_slot)
             return false;
         }
     }
-    else if (actor.isType(ActorType::Arrow)) {
+    else if (actor.hasType(ActorType::AbstractArrow)) {
         const auto &server = endstone::core::EndstoneServer::getInstance();
         auto player = getEndstoneActor<endstone::core::EndstonePlayer>();
         auto arrow = actor.getEndstoneActor();
