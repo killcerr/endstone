@@ -87,6 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING**: `Block.type`, `BlockState.type` and `BlockData.type` return a `BlockType` instead of a string, matching `ItemStack.type`. It still compares equal to its `"namespace:key"` string and stringifies to it, but is no longer a `str`.
 - `str()` on `BlockType`, `Enchantment` and `ItemType` returns a plain `"namespace:key"` string instead of the underlying `Identifier` repr.
 - `Block.set_type`, `BlockState.type`, `Server.create_block_data` and `Inventory.contains`/`contains_at_least`/`all`/`first`/`remove` take an `Identifier` (e.g. `BlockType.AIR`) instead of a plain string, matching `ItemStack.type` and `Dimension.spawn_actor`. Plain `"namespace:key"` strings are still accepted.
+- Dropped Python 3.10 support (end-of-life). Minimum version is now Python 3.11.
 
 ### Fixed
 
