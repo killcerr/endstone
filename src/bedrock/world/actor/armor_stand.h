@@ -20,5 +20,6 @@
 
 class ArmorStand : public Mob {
 public:
+    ~ArmorStand() override;
     ENDSTONE_HOOK InteractionResult getInteraction(Player &, ActorInteraction &, Vec3 const &) override;
 };
