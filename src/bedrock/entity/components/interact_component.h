@@ -14,30 +14,14 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
-
 #include "bedrock/bedrock.h"
-#include "bedrock/platform/brstd/move_only_function.h"
+#include "bedrock/world/gamemode/interaction_result.h"
 
-class ActorInteraction {
+class Actor;
+class ActorInteraction;
+class Player;
+
+class InteractComponent {
 public:
-    using OnInteraction = brstd::move_only_function<void()>;
-
-    [[nodiscard]] bool shouldCapture() const { return !no_capture_; }
-
-    [[nodiscard]] const std::string &getInteractText() const { return interact_text_; }
-
-    void suppressInteraction()  // Endstone
-    {
-        std::destroy_at(&interaction_);
-        std::construct_at(&interaction_, [] {});
-    }
-
-private:
-    std::string interact_text_;
-    OnInteraction interaction_;
-    bool no_capture_;
+    ENDSTONE_HOOK InteractionResult getInteraction(Actor &owner, Player &player, ActorInteraction &interaction);
 };
-
-BEDROCK_STATIC_ASSERT_SIZE(ActorInteraction, 104, 112);
