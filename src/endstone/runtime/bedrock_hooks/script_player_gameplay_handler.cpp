@@ -35,11 +35,10 @@
 #include "endstone/event/actor/player_death_event.h"
 #include "endstone/event/player/player_arm_swing_event.h"
 #include "endstone/event/player/player_dimension_change_event.h"
-#include "endstone/event/player/player_drop_item_event.h"
-#include "endstone/event/player/player_emote_event.h"
 #include "endstone/event/player/player_game_mode_change_event.h"
 #include "endstone/event/player/player_interact_actor_event.h"
 #include "endstone/event/player/player_interact_event.h"
+#include "endstone/event/player/player_pickup_experience_event.h"
 #include "endstone/event/player/player_quit_event.h"
 #include "endstone/event/player/player_respawn_event.h"
 #include "endstone/runtime/vtable_hook.h"
@@ -161,6 +160,24 @@ bool handleEvent(const PlayerSwingStartEvent &event)
     return true;
 }
 
+bool handleEvent(const PlayerGetExperienceOrbEvent &event)
+{
+    const auto &server = endstone::core::EndstoneServer::getInstance();
+    if (!server.getEndstonePluginManager().isEventRegistered<endstone::PlayerPickupExperienceEvent>()) {
+        return true;
+    }
+
+    if (const auto *player = WeakEntityRef(event.player).tryUnwrap<::Player>(); player) {
+        endstone::PlayerPickupExperienceEvent e{player->getEndstoneActor<endstone::core::EndstonePlayer>(),
+                                                event.experience_value};
+        server.getPluginManager().callEvent(e);
+        if (e.isCancelled()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool handleEvent(const PlayerInteractWithBlockBeforeEvent &event)
 {
     if (const auto *player = WeakEntityRef(event.player).tryUnwrap<::Player>(); player) {
@@ -254,7 +271,8 @@ GameplayHandlerResult<CoordinatorResult> ScriptPlayerGameplayHandler::handleEven
     auto visitor = [&](auto &&arg) -> GameplayHandlerResult<CoordinatorResult> {
         using T = std::decay_t<decltype(arg)>;
         if constexpr (std::is_same_v<T, Details::ValueOrRef<const PlayerInteractWithBlockBeforeEvent>> ||
-                      std::is_same_v<T, Details::ValueOrRef<const PlayerInteractWithEntityBeforeEvent>>) {
+                      std::is_same_v<T, Details::ValueOrRef<const PlayerInteractWithEntityBeforeEvent>> ||
+                      std::is_same_v<T, Details::ValueOrRef<const PlayerGetExperienceOrbEvent>>) {
             if (!handleEvent(arg.value())) {
                 return {HandlerResult::BypassListeners, CoordinatorResult::Cancel};
             }

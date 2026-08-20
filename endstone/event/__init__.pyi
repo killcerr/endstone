@@ -15,15 +15,20 @@ from endstone.lang import Translatable
 from endstone.level import Chunk, Dimension, Level, Location
 from endstone.map import MapView
 from endstone.plugin import Plugin
+from endstone.potion import Effect
 from endstone.util import SocketAddress, Vector
 
 __all__ = [
+    "ActorChangeBlockEvent",
     "ActorCollideWithActorEvent",
     "ActorDamageEvent",
     "ActorDeathEvent",
+    "ActorDismountEvent",
+    "ActorEffectEvent",
     "ActorEvent",
     "ActorExplodeEvent",
     "ActorKnockbackEvent",
+    "ActorPickupItemEvent",
     "ActorRemoveEvent",
     "ActorSpawnEvent",
     "ActorTeleportEvent",
@@ -81,6 +86,7 @@ __all__ = [
     "PlayerLoginEvent",
     "PlayerMoveEvent",
     "PlayerPickupArrowEvent",
+    "PlayerPickupExperienceEvent",
     "PlayerPickupItemEvent",
     "PlayerPortalEvent",
     "PlayerQuitEvent",
@@ -297,6 +303,60 @@ class ActorExplodeEvent(ActorEvent, Cancellable):
     @block_list.setter
     def block_list(self, arg1: list[Block]) -> None: ...
 
+class ActorEffectEvent(MobEvent, Cancellable):
+    """
+    Called when an effect on a `Mob` changes.
+
+    This is fired before the change is applied. Cancelling the event prevents it, and the effect may be
+    replaced with a different one by assigning to `effect`.
+    """
+    class Action(enum.Enum):
+        """
+        An enum to specify how the effect changed.
+        """
+
+        ADDED = 0
+
+    ADDED = Action.ADDED
+    @property
+    def action(self) -> Action:
+        """
+        How the effect changed.
+        """
+
+    @property
+    def effect(self) -> Effect:
+        """
+        The effect involved in this event.
+        """
+
+    @effect.setter
+    def effect(self, arg1: Effect) -> None: ...
+
+class ActorDismountEvent(ActorEvent, Cancellable):
+    """
+    Called when an `Actor` stops riding another `Actor`.
+    """
+    @property
+    def vehicle(self) -> Actor:
+        """
+        The actor that is being dismounted.
+        """
+
+class ActorChangeBlockEvent(ActorEvent, Cancellable):
+    """
+    Called when an `Actor` changes a block through its own behaviour, such as a creeper exploding, an
+    enderman picking a block up, a ravager trampling crops or a zombie breaking a door.
+
+    Unlike Bukkit's equivalent, this covers only the mob griefing paths. It is not called for falling
+    blocks landing or for sheep eating grass, and the resulting block state is not available.
+    """
+    @property
+    def block(self) -> Block:
+        """
+        The block that will be changed.
+        """
+
 class ActorKnockbackEvent(MobEvent, Cancellable):
     """
     Called when a living entity receives knockback.
@@ -317,6 +377,24 @@ class ActorKnockbackEvent(MobEvent, Cancellable):
 
     @knockback.setter
     def knockback(self, arg1: Vector) -> None: ...
+
+class ActorPickupItemEvent(ActorEvent, Cancellable):
+    """
+    Called when an `Actor` picks an item up from the ground.
+
+    This is not called for players; see `PlayerPickupItemEvent` instead.
+    """
+    @property
+    def item(self) -> Item:
+        """
+        The Item picked up by the actor.
+        """
+
+    @property
+    def amount(self) -> int:
+        """
+        The number of items that will be picked up from the stack.
+        """
 
 class ActorRemoveEvent(ActorEvent):
     """
@@ -1134,6 +1212,18 @@ class PlayerPickupArrowEvent(PlayerEvent, Cancellable):
     def arrow(self) -> Actor:
         """
         The arrow picked up by the player.
+        """
+
+class PlayerPickupExperienceEvent(PlayerEvent, Cancellable):
+    """
+    Called when a player picks up an experience orb.
+
+    Cancelling the event leaves the orb in the world.
+    """
+    @property
+    def amount(self) -> int:
+        """
+        The amount of experience the orb is worth.
         """
 
 class PlayerPickupItemEvent(PlayerEvent, Cancellable):

@@ -112,6 +112,32 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
             },
             py::return_value_policy::reference_internal,
             "The list of blocks that would have been removed or were removed from the explosion event.");
+    auto actor_effect_event = py::class_<ActorEffectEvent, ActorEvent<Mob>, ICancellable>(m, "ActorEffectEvent", R"doc(
+    Called when an effect on a `Mob` changes.
+
+    This is fired before the change is applied. Cancelling the event prevents it, and the effect may be
+    replaced with a different one by assigning to `effect`.
+)doc");
+    py::native_enum<ActorEffectEvent::Action>(actor_effect_event, "Action", "enum.Enum",
+                                              "An enum to specify how the effect changed.")
+        .value("ADDED", ActorEffectEvent::Action::Added)
+        .export_values()
+        .finalize();
+    actor_effect_event.def_property_readonly("action", &ActorEffectEvent::getAction, "How the effect changed.")
+        .def_property("effect", &ActorEffectEvent::getEffect, &ActorEffectEvent::setEffect,
+                      "The effect involved in this event.");
+    py::class_<ActorDismountEvent, ActorEvent<Actor>, ICancellable>(
+        m, "ActorDismountEvent", "Called when an `Actor` stops riding another `Actor`.")
+        .def_property_readonly("vehicle", &ActorDismountEvent::getVehicle, "The actor that is being dismounted.");
+    py::class_<ActorChangeBlockEvent, ActorEvent<Actor>, ICancellable>(m, "ActorChangeBlockEvent", R"doc(
+    Called when an `Actor` changes a block through its own behaviour, such as a creeper exploding, an
+    enderman picking a block up, a ravager trampling crops or a zombie breaking a door.
+
+    Unlike Bukkit's equivalent, this covers only the mob griefing paths. It is not called for falling
+    blocks landing or for sheep eating grass, and the resulting block state is not available.
+)doc")
+        .def_property_readonly("block", &ActorChangeBlockEvent::getBlock, py::return_value_policy::reference,
+                               "The block that will be changed.");
     py::class_<ActorKnockbackEvent, ActorEvent<Mob>, ICancellable>(m, "ActorKnockbackEvent",
                                                                    "Called when a living entity receives knockback.")
         .def_property_readonly("source", &ActorKnockbackEvent::getSource,
@@ -122,6 +148,14 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 
     Note: the getter returns a copy; changes must be applied via the setter.
 )doc");
+    py::class_<ActorPickupItemEvent, ActorEvent<Actor>, ICancellable>(m, "ActorPickupItemEvent", R"doc(
+    Called when an `Actor` picks an item up from the ground.
+
+    This is not called for players; see `PlayerPickupItemEvent` instead.
+)doc")
+        .def_property_readonly("item", &ActorPickupItemEvent::getItem, "The Item picked up by the actor.")
+        .def_property_readonly("amount", &ActorPickupItemEvent::getAmount,
+                               "The number of items that will be picked up from the stack.");
     py::class_<ActorRemoveEvent, ActorEvent<Actor>>(m, "ActorRemoveEvent", R"doc(
     Called when an `Actor` is removed.
 
@@ -478,6 +512,13 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
     py::class_<PlayerPickupArrowEvent, PlayerEvent, ICancellable>(
         m, "PlayerPickupArrowEvent", "Called when a player picks up an arrow or a thrown trident from the ground.")
         .def_property_readonly("arrow", &PlayerPickupArrowEvent::getArrow, "The arrow picked up by the player.");
+    py::class_<PlayerPickupExperienceEvent, PlayerEvent, ICancellable>(m, "PlayerPickupExperienceEvent", R"doc(
+    Called when a player picks up an experience orb.
+
+    Cancelling the event leaves the orb in the world.
+)doc")
+        .def_property_readonly("amount", &PlayerPickupExperienceEvent::getAmount,
+                               "The amount of experience the orb is worth.");
     py::class_<PlayerPickupItemEvent, PlayerEvent, ICancellable>(
         m, "PlayerPickupItemEvent", "Called when a player picks an item up from the ground.")
         .def_property_readonly("item", &PlayerPickupItemEvent::getItem,

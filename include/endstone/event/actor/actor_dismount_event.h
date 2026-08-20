@@ -14,10 +14,32 @@
 
 #pragma once
 
-#include "bedrock/gameplayhandlers/gameplay_handler_result.h"
-#include "bedrock/world/events/level_events.h"
+#include "endstone/event/actor/actor_event.h"
+#include "endstone/event/cancellable.h"
 
-class ScriptLevelGameplayHandler {
+namespace endstone {
+
+/**
+ * Called when an Actor stops riding another Actor.
+ */
+class ActorDismountEvent : public Cancellable<ActorEvent<Actor>> {
 public:
-    ENDSTONE_VHOOK HandlerResult handleEvent1(LevelGameplayEvent<void> const &event);
+    ENDSTONE_EVENT(ActorDismountEvent);
+
+    explicit ActorDismountEvent(const NotNull<Actor> &actor, const NotNull<Actor> &vehicle)
+        : Cancellable(actor), vehicle_(vehicle)
+    {
+    }
+
+    /**
+     * Gets the actor that is being dismounted.
+     *
+     * @return the vehicle
+     */
+    [[nodiscard]] const NotNull<Actor> &getVehicle() const { return vehicle_; }
+
+private:
+    NotNull<Actor> vehicle_;
 };
+
+}  // namespace endstone
