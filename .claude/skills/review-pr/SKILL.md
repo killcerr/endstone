@@ -378,10 +378,21 @@ reason.
 1. **A BDS gameplay event already carries the signal.** Grep
    `src/bedrock/world/events/*_events.h`. Zero new symbols, and it fires on
    every path BDS itself considers the action. You MUST try this first.
-2. **An already-resolved anchor reaches it.** Virtuals cost nothing - call
-   through the vtable slot. A member read costs nothing - reconstruct the
-   struct. If the target is called from a function already in the table, hook
-   the caller.
+2. **An already-resolved anchor reaches it.** A member read costs nothing -
+   reconstruct the struct. If the target is called from a function already in
+   the table, hook the caller.
+
+   **A vtable slot does NOT count as free, and SHOULD NOT be preferred over a
+   signature.** `vhook::create<Ordinal>` needs a per-platform ordinal, and a
+   wrong or drifted one fails **silently** - it dispatches the wrong function
+   with no error. A byte pattern that stops matching fails **loudly**, at
+   `dump_symbols.py` time, and on Windows `--pdb` resolves the name directly.
+   So prefer a `[[signatures]]` entry with a proper §5.4 recipe over a vtable
+   hook, even though the ladder would otherwise call the vtable cheaper -
+   maintainability wins over symbol count here. *Confirmed: PR #489 shipped
+   Windows ordinal 109, which is `Actor::openContainerComponent`, where the
+   target `getInteraction` is 117; it compiled, linked and asserted clean.*
+   Reserve `vhook` for cases where no stable pattern can be cut, and say so.
 3. **Re-implement it in `src/bedrock`.** A non-virtual function whose body you
    can read MAY be reconstructed faithfully (§4.11) instead of resolved,
    trading a maintenance subscription for a one-time correctness risk - usually

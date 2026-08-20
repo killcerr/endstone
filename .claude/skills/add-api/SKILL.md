@@ -111,6 +111,14 @@ Layout mechanics:
   definition with `#ifndef NO_UNIQUE_ADDRESS`. (This is how `SpinLockImpl`
   stays 24 bytes with its `std::hash` member.)
 
+Hooking:
+- **Prefer a `[[signatures]]` entry + `ENDSTONE_HOOK` over a vtable hook.** A
+  vtable ordinal is per-platform and fails *silently* when it drifts - it just
+  dispatches the wrong function. A byte pattern fails loudly at
+  `dump_symbols.py` time, and on Windows `--pdb` resolves the name outright.
+  Reserve `vhook::create<Ordinal>` for targets where no stable pattern can be
+  cut, and say why in the PR.
+
 Packets:
 - Reconstruct only the **layout** — the payload member, `serialization_mode`,
   and the size assert. Don't override `getId`, `getName`, `write` or `_read`:
