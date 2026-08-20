@@ -234,7 +234,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 
     If a Block Grow event is cancelled, the block will not grow.
 )doc")
-        .def_property_readonly("new_state", &BlockGrowEvent::getNewState, py::return_value_policy::reference,
+        .def_property_readonly("new_state", &BlockGrowEvent::getNewState,
                                "The new state of the block after it has grown.");
     py::class_<BlockFormEvent, BlockGrowEvent>(m, "BlockFormEvent", R"doc(
     Called when a block is formed or spreads based on world conditions.
@@ -274,7 +274,6 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
         .def_property_readonly("block_placed", &BlockPlaceEvent::getBlockPlaced, py::return_value_policy::reference,
                                "The `Block` that was placed.")
         .def_property_readonly("block_replaced_state", &BlockPlaceEvent::getBlockReplacedState,
-                               py::return_value_policy::reference,
                                "The `BlockState` of the block that was replaced.")
         .def_property_readonly("block_against", &BlockPlaceEvent::getBlockAgainst, py::return_value_policy::reference,
                                "The block that the new block was placed against.");

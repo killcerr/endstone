@@ -39,7 +39,7 @@ public:
     [[nodiscard]] int getY() const override;
     [[nodiscard]] int getZ() const override;
     [[nodiscard]] Location getLocation() const override;
-    [[nodiscard]] std::unique_ptr<BlockState> captureState() const override;
+    [[nodiscard]] NotNull<BlockState> captureState() const override;
     [[nodiscard]] std::unique_ptr<Block> clone() const override;
 
     [[nodiscard]] BlockPos getPosition() const;

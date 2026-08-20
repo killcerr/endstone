@@ -124,7 +124,7 @@ Location EndstoneBlock::getLocation() const
     return {getDimension(), getX(), getY(), getZ()};
 }
 
-std::unique_ptr<BlockState> EndstoneBlock::captureState() const
+NotNull<BlockState> EndstoneBlock::captureState() const
 {
     if (auto *block_entity = getBlockSource().getBlockEntity(block_pos_)) {
         // TODO(block-state): once we add more type-specific block states (Sign, Furnace, CreatureSpawner, ...),
@@ -133,29 +133,29 @@ std::unique_ptr<BlockState> EndstoneBlock::captureState() const
         switch (block_entity->getType()) {
         case BlockActorType::ItemFrame:
         case BlockActorType::GlowItemFrame:
-            return std::make_unique<EndstoneItemFrame>(*this, static_cast<ItemFrameBlockActor &>(*block_entity));
+            return std::make_shared<EndstoneItemFrame>(*this, static_cast<ItemFrameBlockActor &>(*block_entity));
         case BlockActorType::Sign:
         case BlockActorType::HangingSign:
-            return std::make_unique<EndstoneSign>(*this, static_cast<SignBlockActor &>(*block_entity));
+            return std::make_shared<EndstoneSign>(*this, static_cast<SignBlockActor &>(*block_entity));
         case BlockActorType::MobSpawner:
-            return std::make_unique<EndstoneCreatureSpawner>(*this,
+            return std::make_shared<EndstoneCreatureSpawner>(*this,
                                                              static_cast<MobSpawnerBlockActor &>(*block_entity));
         case BlockActorType::Campfire:
-            return std::make_unique<EndstoneCampfire>(*this, static_cast<CampfireBlockActor &>(*block_entity));
+            return std::make_shared<EndstoneCampfire>(*this, static_cast<CampfireBlockActor &>(*block_entity));
         case BlockActorType::Lectern:
-            return std::make_unique<EndstoneLectern>(*this, static_cast<LecternBlockActor &>(*block_entity));
+            return std::make_shared<EndstoneLectern>(*this, static_cast<LecternBlockActor &>(*block_entity));
         case BlockActorType::Furnace:
         case BlockActorType::BlastFurnace:
         case BlockActorType::Smoker:
-            return std::make_unique<EndstoneFurnace>(*this, static_cast<FurnaceBlockActor &>(*block_entity));
+            return std::make_shared<EndstoneFurnace>(*this, static_cast<FurnaceBlockActor &>(*block_entity));
         default:
             break;
         }
         if (static_cast<VanillaBlockActor *>(block_entity)->getContainer() != nullptr) {
-            return std::make_unique<EndstoneContainer>(*this, *block_entity);
+            return std::make_shared<EndstoneContainer>(*this, *block_entity);
         }
     }
-    return std::make_unique<EndstoneBlockState>(*this);
+    return std::make_shared<EndstoneBlockState>(*this);
 }
 
 BlockSource &EndstoneBlock::getBlockSource() const

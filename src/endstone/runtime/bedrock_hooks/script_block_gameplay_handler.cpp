@@ -67,8 +67,7 @@ bool handleEvent(const BlockTryPlaceByPlayerEvent &event)
     const auto opposite = endstone::core::EndstoneBlockFace::getOpposite(block_face);
     auto block_against = block_at_pos->getRelative(opposite);
 
-    endstone::BlockPlaceEvent e{std::move(block_placed), std::move(replaced_state), std::move(block_against),
-                                endstone_player};
+    endstone::BlockPlaceEvent e{std::move(block_placed), replaced_state, std::move(block_against), endstone_player};
     server.getPluginManager().callEvent(e);
     if (e.isCancelled()) {
         return false;
