@@ -709,6 +709,8 @@ class StubGen:
         name = obj.name
         if name in SKIP_LIST:
             return False
+        if name.startswith("__pybind11"):
+            return False
         if is_private(name) and not self.include_private:
             return False
         # Drop an undocumented __repr__/__str__; object's says the same.
