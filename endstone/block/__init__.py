@@ -8,6 +8,7 @@ __getattr__, __dir__, __all__ = lazy.attach(
             "Block",
             "BlockData",
             "BlockFace",
+            "BlockList",
             "BlockState",
             "BlockType",
             "Campfire",

@@ -2,6 +2,7 @@
 Classes relating to the blocks in a world, including special states.
 """
 
+import collections.abc
 import enum
 import typing
 
@@ -15,6 +16,7 @@ __all__ = [
     "Block",
     "BlockData",
     "BlockFace",
+    "BlockList",
     "BlockState",
     "BlockType",
     "Campfire",
@@ -134,6 +136,121 @@ class Block:
         Returns:
             A `BlockState` snapshot of the current state of this block.
         """
+
+class BlockList:
+    """
+    A mutable list of blocks, backed by the event that owns it.
+    """
+    @typing.overload
+    def __init__(self) -> None: ...
+    @typing.overload
+    def __init__(self, arg0: BlockList) -> None:
+        """
+        Copy constructor
+        """
+
+    @typing.overload
+    def __init__(self, arg0: collections.abc.Iterable) -> None: ...
+
+    __pybind11_module_local_v11_system_libcpp_abi1__ = ...
+    """
+    Capsule objects let you wrap a C "void *" pointer in a Python
+    object.  They're a way of passing data through the Python interpreter
+    without creating your own custom type.
+
+    Capsules are used for communication between extension modules.
+    They provide a way for an extension module to export a C interface
+    to other extension modules, so that extension modules can use the
+    Python import mechanism to link to one another.
+    """
+
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
+    def count(self, x: Block) -> int:
+        """
+        Return the number of times ``x`` appears in the list
+        """
+
+    def remove(self, x: Block) -> None:
+        """
+        Remove the first item from the list whose value is x. It is an error if there is no such item.
+        """
+
+    def __contains__(self, x: Block) -> bool:
+        """
+        Return true the container contains ``x``
+        """
+
+    def append(self, x: Block) -> None:
+        """
+        Add an item to the end of the list
+        """
+
+    def clear(self) -> None:
+        """
+        Clear the contents
+        """
+
+    @typing.overload
+    def extend(self, L: BlockList) -> None: ...
+    @typing.overload
+    def extend(self, L: collections.abc.Iterable) -> None:
+        """
+        Extend the list by appending all the items in the given list
+        """
+
+    def insert(self, i: int, x: Block) -> None:
+        """
+        Insert an item at a given position.
+        """
+
+    @typing.overload
+    def pop(self) -> Block:
+        """
+        Remove and return the last item
+        """
+
+    @typing.overload
+    def pop(self, i: int) -> Block:
+        """
+        Remove and return the item at index ``i``
+        """
+
+    @typing.overload
+    def __setitem__(self, arg0: int, arg1: Block) -> None: ...
+    @typing.overload
+    def __setitem__(self, arg0: slice, arg1: BlockList) -> None:
+        """
+        Assign list elements using a slice object
+        """
+
+    @typing.overload
+    def __getitem__(self, s: slice) -> BlockList:
+        """
+        Retrieve list elements using a slice object
+        """
+
+    @typing.overload
+    def __getitem__(self, arg0: int) -> Block: ...
+    @typing.overload
+    def __delitem__(self, arg0: int) -> None:
+        """
+        Delete the list elements at index ``i``
+        """
+
+    @typing.overload
+    def __delitem__(self, arg0: slice) -> None:
+        """
+        Delete list elements using a slice object
+        """
+
+    def __iter__(self) -> collections.abc.Iterator[Block]: ...
+    def __bool__(self) -> bool:
+        """
+        Check whether the list is nonempty
+        """
+
+    def __len__(self) -> int: ...
 
 class BlockFace(enum.Enum):
     DOWN = 0
