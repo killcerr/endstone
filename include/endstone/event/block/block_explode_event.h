@@ -31,9 +31,9 @@ namespace endstone {
  * If a BlockExplodeEvent is cancelled, the explosion will not occur.
  */
 class BlockExplodeEvent : public Cancellable<BlockEvent> {
+public:
     using BlockList = std::vector<NotNull<Block>>;
 
-public:
     ENDSTONE_EVENT(BlockExplodeEvent);
     explicit BlockExplodeEvent(const NotNull<Block> &block, BlockList blocks)
         : Cancellable(block), blocks_(std::move(blocks))
@@ -54,6 +54,13 @@ public:
      * @return All blown-up blocks
      */
     [[nodiscard]] BlockList &getBlockList() { return blocks_; }
+
+    /**
+     * Sets the list of blocks that would have been removed or were removed from the explosion event.
+     *
+     * @param blocks All blown-up blocks
+     */
+    void setBlockList(BlockList blocks) { blocks_ = std::move(blocks); }
 
 private:
     BlockList blocks_;

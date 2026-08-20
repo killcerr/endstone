@@ -91,12 +91,9 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
     It is not possible to get this value from the `Entity` as the `Entity` no longer exists in the
     world.
 )doc")
-        .def_property(
-            "block_list", [](const ActorExplodeEvent &self) { return self.getBlockList(); },
-            [](ActorExplodeEvent &self, std::vector<NotNull<Block>> blocks) {
-                self.getBlockList() = std::move(blocks);
-            },
-            "The list of blocks that would have been removed or were removed from the explosion event.");
+        .def_property("block_list", py::overload_cast<>(&ActorExplodeEvent::getBlockList, py::const_),
+                      &ActorExplodeEvent::setBlockList,
+                      "The list of blocks that would have been removed or were removed from the explosion event.");
     auto actor_effect_event = py::class_<ActorEffectEvent, ActorEvent<Mob>, ICancellable>(m, "ActorEffectEvent", R"doc(
     Called when an effect on a `Mob` changes.
 
@@ -187,12 +184,9 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 
     If a `BlockExplodeEvent` is cancelled, the explosion will not occur.
 )doc")
-        .def_property(
-            "block_list", [](const BlockExplodeEvent &self) { return self.getBlockList(); },
-            [](BlockExplodeEvent &self, std::vector<NotNull<Block>> blocks) {
-                self.getBlockList() = std::move(blocks);
-            },
-            "The list of blocks that would have been removed or were removed from the explosion event.");
+        .def_property("block_list", py::overload_cast<>(&BlockExplodeEvent::getBlockList, py::const_),
+                      &BlockExplodeEvent::setBlockList,
+                      "The list of blocks that would have been removed or were removed from the explosion event.");
     py::class_<BlockCookEvent, BlockEvent, ICancellable>(m, "BlockCookEvent",
                                                          "Called when an `ItemStack` is successfully cooked in a block.")
         .def_property_readonly("source", &BlockCookEvent::getSource, py::return_value_policy::reference,

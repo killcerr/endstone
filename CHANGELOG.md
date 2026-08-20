@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `ActorExplodeEvent::setBlockList()` and `BlockExplodeEvent::setBlockList()`, and made their `BlockList` alias public, so the blown-up block list can be replaced wholesale from C++ as it already could from Python.
 - Added `Player.send_action_bar()` for sending a message above the player's hotbar.
 - Added `/restart` command (console-only) that gracefully restarts the server without manually relaunching.
 - Added support for custom Python events with optional cancellation.
