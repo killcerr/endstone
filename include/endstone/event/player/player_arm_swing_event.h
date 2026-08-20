@@ -27,52 +27,10 @@ namespace endstone {
  */
 class PlayerArmSwingEvent final : public PlayerEvent {
 public:
-    /**
-     * An enum to specify what the player was doing when they swung their arm.
-     */
-    enum class SwingSource {
-        /**
-         * No particular source.
-         */
-        None,
-        /**
-         * Placing a block.
-         */
-        Build,
-        /**
-         * Mining a block.
-         */
-        Mine,
-        /**
-         * Interacting with a block or an actor.
-         */
-        Interact,
-        /**
-         * Attacking a target.
-         */
-        Attack,
-        /**
-         * Using the held item.
-         */
-        UseItem,
-        /**
-         * Throwing the held item.
-         */
-        ThrowItem,
-        /**
-         * Dropping an item.
-         */
-        DropItem,
-        /**
-         * Requested by the server, e.g. by a script or an add-on.
-         */
-        Event,
-    };
-
     ENDSTONE_EVENT(PlayerArmSwingEvent);
 
-    PlayerArmSwingEvent(const NotNull<Player> &player, std::optional<ItemStack> item, SwingSource swing_source)
-        : PlayerEvent(player), item_(std::move(item)), swing_source_(swing_source)
+    PlayerArmSwingEvent(const NotNull<Player> &player, std::optional<ItemStack> item)
+        : PlayerEvent(player), item_(std::move(item))
     {
     }
 
@@ -83,16 +41,8 @@ public:
      */
     [[nodiscard]] const std::optional<ItemStack> &getItem() const { return item_; }
 
-    /**
-     * Gets what the player was doing when they swung their arm.
-     *
-     * @return the source of this swing.
-     */
-    [[nodiscard]] SwingSource getSwingSource() const { return swing_source_; }
-
 private:
     std::optional<ItemStack> item_;
-    SwingSource swing_source_;
 };
 
 }  // namespace endstone

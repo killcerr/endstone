@@ -155,8 +155,7 @@ bool handleEvent(const PlayerSwingStartEvent &event)
         if (!event.held_item.isNull()) {
             item = endstone::core::EndstoneItemStack::fromMinecraft(event.held_item);
         }
-        endstone::PlayerArmSwingEvent e{player->getEndstoneActor<endstone::core::EndstonePlayer>(), std::move(item),
-                                        static_cast<endstone::PlayerArmSwingEvent::SwingSource>(event.swing_source)};
+        endstone::PlayerArmSwingEvent e{player->getEndstoneActor<endstone::core::EndstonePlayer>(), std::move(item)};
         server.getPluginManager().callEvent(e);
     }
     return true;
