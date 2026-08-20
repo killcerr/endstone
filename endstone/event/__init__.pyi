@@ -18,6 +18,7 @@ from endstone.plugin import Plugin
 from endstone.util import SocketAddress, Vector
 
 __all__ = [
+    "ActorCollideWithActorEvent",
     "ActorDamageEvent",
     "ActorDeathEvent",
     "ActorEvent",
@@ -26,6 +27,8 @@ __all__ = [
     "ActorRemoveEvent",
     "ActorSpawnEvent",
     "ActorTeleportEvent",
+    "ActorToggleGlideEvent",
+    "ActorToggleSwimEvent",
     "BlockBreakEvent",
     "BlockCookEvent",
     "BlockEvent",
@@ -53,8 +56,10 @@ __all__ = [
     "PacketReceiveEvent",
     "PacketSendEvent",
     "PlayerArmSwingEvent",
+    "PlayerArmorStandManipulateEvent",
     "PlayerBedEnterEvent",
     "PlayerBedLeaveEvent",
+    "PlayerBucketActorEvent",
     "PlayerChatEvent",
     "PlayerCommandEvent",
     "PlayerDeathEvent",
@@ -84,6 +89,8 @@ __all__ = [
     "PlayerRiptideEvent",
     "PlayerSkinChangeEvent",
     "PlayerTeleportEvent",
+    "PlayerToggleCrawlEvent",
+    "PlayerToggleFlightEvent",
     "PlayerToggleSneakEvent",
     "PlayerToggleSprintEvent",
     "PluginDisableEvent",
@@ -201,6 +208,24 @@ class MobEvent(Event):
     def actor(self) -> Mob:
         """
         The `Mob` which is involved in this event.
+        """
+
+class ActorCollideWithActorEvent(Event, Cancellable):
+    """
+    Called when two actors collide with each other.
+
+    If this event is cancelled, the actors will not be pushed away from each other. Cancelling also stops
+    either actor from being pulled onto the other when the other is a rideable vehicle, so a listener that
+    cancels every collision also stops boats and minecarts from being boarded by walking into them.
+
+    The server fires this before it decides whether the collision leads to a push, so it is also called for
+    pairs the server then leaves alone, and it is called more than once per tick for a pair that keeps
+    overlapping.
+    """
+    @property
+    def actors(self) -> list[Actor]:
+        """
+        The actors that are involved in this event.
         """
 
 class ActorDamageEvent(MobEvent, Cancellable):
@@ -331,6 +356,26 @@ class ActorTeleportEvent(ActorEvent, Cancellable):
 
     @to_location.setter
     def to_location(self, arg1: Location) -> None: ...
+
+class ActorToggleGlideEvent(MobEvent):
+    """
+    Called when an `Actor`'s gliding state is toggled with an elytra.
+    """
+    @property
+    def is_gliding(self) -> bool:
+        """
+        Whether the actor is now gliding or not.
+        """
+
+class ActorToggleSwimEvent(MobEvent):
+    """
+    Called when an `Actor`'s swimming state is toggled.
+    """
+    @property
+    def is_swimming(self) -> bool:
+        """
+        Whether the actor is now swimming or not.
+        """
 
 class BlockEvent(Event):
     """
@@ -563,6 +608,28 @@ class PlayerBedLeaveEvent(PlayerEvent):
     def bed(self) -> Block:
         """
         The bed block involved in this event.
+        """
+
+class PlayerBucketActorEvent(PlayerEvent, Cancellable):
+    """
+    Called when a player captures an actor in a bucket.
+    """
+    @property
+    def actor(self) -> Actor:
+        """
+        The actor being captured.
+        """
+
+    @property
+    def original_bucket(self) -> ItemStack:
+        """
+        The bucket used to capture the actor.
+        """
+
+    @property
+    def hand(self) -> EquipmentSlot:
+        """
+        The hand used to capture the actor.
         """
 
 class PlayerChatEvent(PlayerEvent, Cancellable):
@@ -845,6 +912,26 @@ class PlayerToggleSprintEvent(PlayerEvent):
     def is_sprinting(self) -> bool:
         """
         Whether the player is now sprinting or not.
+        """
+
+class PlayerToggleCrawlEvent(PlayerEvent):
+    """
+    Called when a player toggles their crawling state.
+    """
+    @property
+    def is_crawling(self) -> bool:
+        """
+        Whether the player is now crawling or not.
+        """
+
+class PlayerToggleFlightEvent(PlayerEvent):
+    """
+    Called when a player toggles their flying state.
+    """
+    @property
+    def is_flying(self) -> bool:
+        """
+        Whether the player is now flying or not.
         """
 
 class PlayerJoinEvent(PlayerEvent):
