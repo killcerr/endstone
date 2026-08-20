@@ -184,6 +184,34 @@ rip_relative = true
 rip_offset = 1
 
 [[signatures]]
+name = "_ZN19BucketableComponent14getInteractionER5ActorR6PlayerR16ActorInteraction"
+relative = false
+extra = 0
+# 1. find bytes "6D 69 6E 65 63 72 61 66 74 3A 77 61 74 65 72 5F 62 75 63 6B 65 74 00"
+#    = "minecraft:water_bucket\0"; it is unique and has exactly one data xref, inside the huge
+#    VanillaItemNames static initialiser
+# 2. at that xref the initialiser fills one HashedString: a `movups xmm0, <the string>` followed by
+#    `movups <buf>, xmm0` / `mov <buf+14h>, rax` / `mov byte <buf+16h>, 0` writing the 23-byte libc++
+#    SSO buffer. The std::string starts one byte below that buffer and the enclosing HashedString
+#    eight bytes below the string - that address is VanillaItemNames::WaterBucket
+# 3. take the code xrefs to VanillaItemNames::WaterBucket. Discard the initialiser itself, and discard
+#    BucketItem::_useOn (independently identifiable as the last function pointer of the RTTI-named
+#    `_ZTV10BucketItem`). BucketableComponent::getInteraction is the small one, ~0x529 bytes
+# 4. confirm identity from the body, not the prologue: it opens on `cmp byte ptr [rcx+60h], 0` /
+#    `jnz <return 0>` - that byte is ActorInteraction::mNoCapture, so this is the shouldCapture guard;
+#    it then writes a three-word closure (move_only_function vtable, `owner` from rsi, `player` from
+#    rdx) into stack slots and moves it into `interaction + 20h` (ActorInteraction::mInteraction); the
+#    tail inlines two HashedString comparisons - VanillaItemNames::Bucket then
+#    VanillaItemNames::WaterBucket - and returns 1 or 0
+# 5. cross-check vs the old named DB: Linux 1.21.132.3 carries
+#    `_ZN19BucketableComponent14getInteractionER5ActorR6PlayerR16ActorInteraction` with the same
+#    shape (ActorInteraction::shouldCapture is still an out-of-line call at that version)
+# 6. uniqueness: the pattern below matches exactly once in the 1.26.33, 1.26.40 and 1.26.44 ELFs.
+#    The wildcarded operands absorb the frame size, the jnz displacement, the closure-vtable lea and
+#    the three stack displacements
+pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC ? ? 00 00 80 79 60 00 0F 85 ? ? ? ? 48 89 CB 49 89 D6 48 8D 05 ? ? ? ? 48 89 84 24 ? ? 00 00 48 89 B4 24 ? ? 00 00 48 89 94 24 ? ? 00 00 48 83 C3 20"
+
+[[signatures]]
 name = "_ZN18CampfireBlockActor14_finishCookingER11BlockSourcei"
 relative = false
 extra = 0
