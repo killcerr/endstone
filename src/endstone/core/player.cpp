@@ -146,6 +146,10 @@ void EndstonePlayer::sendMessage(const Message &message) const
 {
     Preconditions::checkArgument(!std::visit([](const auto &msg) { return msg.empty(); }, message),
                                  "Message must not be empty");
+    if (!tryGetHandle()) {
+        return;
+    }
+
     auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::Text);
     auto &pk = static_cast<TextPacket &>(*packet);
     std::visit(overloaded{[&](const std::string &msg) {
@@ -221,7 +225,11 @@ UUID EndstonePlayer::getUniqueId() const
 
 bool EndstonePlayer::isOp() const
 {
-    return getHandle().getCommandPermissionLevel() > CommandPermissionLevel::Any;
+    const auto *handle = tryGetHandle();
+    if (!handle) {
+        return last_op_status_;
+    }
+    return handle->getCommandPermissionLevel() > CommandPermissionLevel::Any;
 }
 
 void EndstonePlayer::setOp(bool value)
@@ -1129,6 +1137,7 @@ void EndstonePlayer::disconnect()
 {
     server_.removePlayerBoard(getSelf().cast<EndstonePlayer>());
     forms_.clear();  // a form callback may hold the last reference back to this player
+    perm_->clearPermissions();
 }
 
 void EndstonePlayer::updateAbilities() const

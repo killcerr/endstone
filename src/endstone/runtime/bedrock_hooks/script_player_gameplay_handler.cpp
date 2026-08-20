@@ -88,12 +88,12 @@ bool handleEvent(const PlayerDisconnectEvent &event)
     if (auto *player = WeakEntityRef(event.player).tryUnwrap<::Player>(); player) {
         const auto &server = endstone::core::EndstoneServer::getInstance();
         auto endstone_player = player->getEndstoneActor<endstone::core::EndstonePlayer>();
-        endstone_player->disconnect();
 
         endstone::Message quit_message = endstone::Translatable{
             endstone::ColorFormat::Yellow + "%multiplayer.player.left", {endstone_player->getName()}};
         endstone::PlayerQuitEvent e{endstone_player, quit_message};
         server.getPluginManager().callEvent(e);
+        endstone_player->disconnect();
 
         quit_message = e.getQuitMessage().value_or("");
         if (server.isServerTextEnabled(ServerTextEvent::PlayerConnection) &&
