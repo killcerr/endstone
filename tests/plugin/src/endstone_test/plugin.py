@@ -1,3 +1,5 @@
+import gc
+
 import pytest
 from endstone import Player
 from endstone.command import Command, CommandSender
@@ -113,3 +115,4 @@ class EndstoneTest(Plugin):
             return pytest.main(["-s", "-m", marker, "--pyargs", "endstone_test.tests"])
         finally:
             clear_runtime_context()
+            gc.collect()
