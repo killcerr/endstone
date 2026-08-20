@@ -550,32 +550,6 @@ class PlayerBedLeaveEvent(PlayerEvent):
         The bed block involved in this event.
         """
 
-class PlayerLevelChangeEvent(PlayerEvent):
-    """
-    Called when a player's level changes.
-    """
-    @property
-    def old_level(self) -> int:
-        """
-        The player's level before the change.
-        """
-
-    @property
-    def new_level(self) -> int:
-        """
-        The player's level after the change.
-        """
-
-class PlayerPickupArrowEvent(PlayerEvent, Cancellable):
-    """
-    Called when a player picks up an arrow from the ground.
-    """
-    @property
-    def arrow(self) -> Actor:
-        """
-        The arrow picked up by the player.
-        """
-
 class PlayerChatEvent(PlayerEvent, Cancellable):
     """
     Called when a player sends a chat message.
@@ -839,6 +813,22 @@ class PlayerKickEvent(PlayerEvent, Cancellable):
     @reason.setter
     def reason(self, arg1: str) -> None: ...
 
+class PlayerLevelChangeEvent(PlayerEvent):
+    """
+    Called when a player's level changes.
+    """
+    @property
+    def old_level(self) -> int:
+        """
+        The player's level before the change.
+        """
+
+    @property
+    def new_level(self) -> int:
+        """
+        The player's level after the change.
+        """
+
 class PlayerLoginEvent(PlayerEvent, Cancellable):
     """
     Called when a player attempts to login in.
@@ -939,6 +929,16 @@ class PlayerPortalEvent(PlayerTeleportEvent):
     """
     Called when a player is about to teleport because it is in contact with a portal.
     """
+
+class PlayerPickupArrowEvent(PlayerEvent, Cancellable):
+    """
+    Called when a player picks up an arrow from the ground.
+    """
+    @property
+    def arrow(self) -> Actor:
+        """
+        The arrow picked up by the player.
+        """
 
 class PlayerPickupItemEvent(PlayerEvent, Cancellable):
     """
