@@ -28,7 +28,7 @@ InteractionResult InteractComponent::getInteraction(Actor &owner, Player &player
 {
     const auto result =
         ENDSTONE_HOOK_CALL_ORIGINAL(&InteractComponent::getInteraction, this, owner, player, interaction);
-    if (!result.isSuccessful()) {
+    if (!result.isSuccessful() || !interaction.shouldCapture()) {
         return result;
     }
 

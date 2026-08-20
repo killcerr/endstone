@@ -382,6 +382,7 @@ class PlayerEventListener(EventListener):
             f"{event.player.name} swaps {event.player_item} for "
             f"{event.armor_stand_item} in the {event.slot} slot of "
             f"{event.actor.name}",
+            always_log=True,
             player=event.player.name,
             actor_type=str(event.actor.type),
             slot=str(event.slot),
@@ -395,6 +396,7 @@ class PlayerEventListener(EventListener):
             event,
             f"{event.player.name} captures {event.actor.name} "
             f"({event.actor.type}) with {event.original_bucket}",
+            always_log=True,
             player=event.player.name,
             actor_type=str(event.actor.type),
             original_bucket_type=str(event.original_bucket.type),
@@ -486,6 +488,7 @@ class PlayerEventListener(EventListener):
             event,
             f"{event.player.name} shears {event.actor.name} ({event.actor.type}) "
             f"with {event.item}",
+            always_log=True,
             player=event.player.name,
             actor_type=str(event.actor.type),
             item_type=str(event.item.type),
