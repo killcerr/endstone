@@ -92,25 +92,10 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
     world.
 )doc")
         .def_property(
-            "block_list",
-            [](const ActorExplodeEvent &self) {
-                std::vector<Block *> blocks;
-                for (const auto &block : self.getBlockList()) {
-                    if (block) {
-                        blocks.emplace_back(block.get());
-                    }
-                }
-                return blocks;
+            "block_list", [](const ActorExplodeEvent &self) { return self.getBlockList(); },
+            [](ActorExplodeEvent &self, std::vector<NotNull<Block>> blocks) {
+                self.getBlockList() = std::move(blocks);
             },
-            [](ActorExplodeEvent &self, const std::vector<Block *> &blocks) {
-                self.getBlockList().clear();
-                for (const auto &block : blocks) {
-                    if (block) {
-                        self.getBlockList().emplace_back(block->clone());
-                    }
-                }
-            },
-            py::return_value_policy::reference_internal,
             "The list of blocks that would have been removed or were removed from the explosion event.");
     auto actor_effect_event = py::class_<ActorEffectEvent, ActorEvent<Mob>, ICancellable>(m, "ActorEffectEvent", R"doc(
     Called when an effect on a `Mob` changes.
@@ -203,25 +188,10 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
     If a `BlockExplodeEvent` is cancelled, the explosion will not occur.
 )doc")
         .def_property(
-            "block_list",
-            [](const BlockExplodeEvent &self) {
-                std::vector<Block *> blocks;
-                for (const auto &block : self.getBlockList()) {
-                    if (block) {
-                        blocks.emplace_back(block.get());
-                    }
-                }
-                return blocks;
+            "block_list", [](const BlockExplodeEvent &self) { return self.getBlockList(); },
+            [](BlockExplodeEvent &self, std::vector<NotNull<Block>> blocks) {
+                self.getBlockList() = std::move(blocks);
             },
-            [](BlockExplodeEvent &self, const std::vector<Block *> &blocks) {
-                self.getBlockList().clear();
-                for (const auto &block : blocks) {
-                    if (block) {
-                        self.getBlockList().emplace_back(block->clone());
-                    }
-                }
-            },
-            py::return_value_policy::reference_internal,
             "The list of blocks that would have been removed or were removed from the explosion event.");
     py::class_<BlockCookEvent, BlockEvent, ICancellable>(m, "BlockCookEvent",
                                                          "Called when an `ItemStack` is successfully cooked in a block.")
@@ -382,8 +352,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
         .def_property_readonly("item", &PlayerInteractEvent::getItem,
                                "The item in hand represented by this event, or `None` if no item.")
         .def_property_readonly("has_block", &PlayerInteractEvent::hasBlock, "`True` if this event involved a block.")
-        .def_property_readonly("block", &PlayerInteractEvent::getBlock, py::return_value_policy::reference,
-                               "The block clicked with this item.")
+        .def_property_readonly("block", &PlayerInteractEvent::getBlock, "The block clicked with this item.")
         .def_property_readonly("block_face", &PlayerInteractEvent::getBlockFace,
                                "The face of the block that was clicked.")
         .def_property_readonly("clicked_position", &PlayerInteractEvent::getClickedPosition, R"doc(

@@ -59,7 +59,7 @@ bool handleEvent(const PlayerDamageEvent &event)
             endstone::Message death_message =
                 endstone::Translatable(death_cause_message.first, death_cause_message.second);
             endstone::PlayerDeathEvent e{endstone_player,
-                                         std::make_unique<endstone::core::EndstoneDamageSource>(*event.damage_source),
+                                         std::make_shared<endstone::core::EndstoneDamageSource>(*event.damage_source),
                                          death_message};
             server.getPluginManager().callEvent(e);
             death_message = e.getDeathMessage().value_or("");

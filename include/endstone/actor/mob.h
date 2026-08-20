@@ -21,6 +21,7 @@
 #include "endstone/actor/actor.h"
 #include "endstone/attribute/attribute_instance.h"
 #include "endstone/potion/effect.h"
+#include "endstone/util/pointers.h"
 
 namespace endstone {
 /**
@@ -85,13 +86,13 @@ public:
      *
      * @param id The attribute to get
      */
-    [[nodiscard]] virtual std::unique_ptr<AttributeInstance> getAttribute(AttributeId id) = 0;
+    [[nodiscard]] virtual Nullable<AttributeInstance> getAttribute(AttributeId id) = 0;
 
     /**
      * Gets all attribute instances from the object. This instance will be backed directly to the object and any
      * changes will be visible at once.
      */
-    [[nodiscard]] virtual std::vector<std::unique_ptr<AttributeInstance>> getAttributes() = 0;
+    [[nodiscard]] virtual std::vector<NotNull<AttributeInstance>> getAttributes() = 0;
 
     /**
      * Adds the given Effect to this entity.

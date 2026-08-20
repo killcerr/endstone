@@ -702,7 +702,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
     case MinecraftPacketIds::PlayerAction: {
         auto &pk = static_cast<PlayerActionPacket &>(packet);
         if (pk.payload.action == PlayerActionType::StopSleeping && getHandle().isSleeping()) {
-            std::unique_ptr<Block> bed;
+            Nullable<Block> bed;
             if (getHandle().hasBedPosition()) {
                 const auto bed_position = getHandle().getBedPosition();
                 bed = getDimension()->getBlockAt(bed_position.x, bed_position.y, bed_position.z);
@@ -887,7 +887,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
                     getSelf(),
                     PlayerInteractEvent::Action::LeftClickBlock,
                     item,
-                    block.get(),
+                    block,
                     static_cast<BlockFace>(action.facing),
                     Vector{action.pos.x, action.pos.y, action.pos.z},
                 };

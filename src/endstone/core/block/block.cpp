@@ -55,9 +55,9 @@ void EndstoneBlock::setType(BlockTypeId type, bool apply_physics)
     return setData(*server.createBlockData(type), apply_physics);
 }
 
-std::unique_ptr<BlockData> EndstoneBlock::getData() const
+NotNull<BlockData> EndstoneBlock::getData() const
 {
-    return std::make_unique<EndstoneBlockData>(getMinecraftBlock());
+    return std::make_shared<EndstoneBlockData>(getMinecraftBlock());
 }
 
 void EndstoneBlock::setData(const BlockData &data)
@@ -77,17 +77,17 @@ void EndstoneBlock::setData(const BlockData &data, bool apply_physics)
     }
 }
 
-std::unique_ptr<Block> EndstoneBlock::getRelative(int offset_x, int offset_y, int offset_z)
+NotNull<Block> EndstoneBlock::getRelative(int offset_x, int offset_y, int offset_z)
 {
     return getDimension()->getBlockAt(getX() + offset_x, getY() + offset_y, getZ() + offset_z);
 }
 
-std::unique_ptr<Block> EndstoneBlock::getRelative(BlockFace face)
+NotNull<Block> EndstoneBlock::getRelative(BlockFace face)
 {
     return getRelative(face, 1);
 }
 
-std::unique_ptr<Block> EndstoneBlock::getRelative(BlockFace face, int distance)
+NotNull<Block> EndstoneBlock::getRelative(BlockFace face, int distance)
 {
     return getRelative(EndstoneBlockFace::getOffsetX(face) * distance, EndstoneBlockFace::getOffsetY(face) * distance,
                        EndstoneBlockFace::getOffsetZ(face) * distance);
@@ -163,11 +163,6 @@ BlockSource &EndstoneBlock::getBlockSource() const
     return dimension_->getHandle().getBlockSourceFromMainChunkSource();
 }
 
-std::unique_ptr<Block> EndstoneBlock::clone() const
-{
-    return std::make_unique<EndstoneBlock>(*this);
-}
-
 BlockPos EndstoneBlock::getPosition() const
 {
     return block_pos_;
@@ -178,8 +173,8 @@ BlockPos EndstoneBlock::getPosition() const
     return const_cast<::Block &>(getBlockSource().getBlock(block_pos_));
 }
 
-std::unique_ptr<EndstoneBlock> EndstoneBlock::at(BlockSource &block_source, BlockPos block_pos)
+NotNull<EndstoneBlock> EndstoneBlock::at(BlockSource &block_source, BlockPos block_pos)
 {
-    return std::make_unique<EndstoneBlock>(block_source, block_pos);
+    return std::make_shared<EndstoneBlock>(block_source, block_pos);
 }
 }  // namespace endstone::core

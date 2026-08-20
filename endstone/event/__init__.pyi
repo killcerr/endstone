@@ -883,7 +883,7 @@ class PlayerInteractEvent(PlayerEvent, Cancellable):
         """
 
     @property
-    def block(self) -> Block:
+    def block(self) -> Block | None:
         """
         The block clicked with this item.
         """

@@ -724,23 +724,23 @@ std::chrono::system_clock::time_point EndstoneServer::getStartTime()
     return start_time_;
 }
 
-std::unique_ptr<BossBar> EndstoneServer::createBossBar(std::string title, BarColor color, BarStyle style) const
+NotNull<BossBar> EndstoneServer::createBossBar(std::string title, BarColor color, BarStyle style) const
 {
-    return std::make_unique<EndstoneBossBar>(std::move(title), color, style);
+    return std::make_shared<EndstoneBossBar>(std::move(title), color, style);
 }
 
-std::unique_ptr<BossBar> EndstoneServer::createBossBar(std::string title, BarColor color, BarStyle style,
-                                                       std::vector<BarFlag> flags) const
+NotNull<BossBar> EndstoneServer::createBossBar(std::string title, BarColor color, BarStyle style,
+                                               std::vector<BarFlag> flags) const
 {
-    return std::make_unique<EndstoneBossBar>(std::move(title), color, style, flags);
+    return std::make_shared<EndstoneBossBar>(std::move(title), color, style, flags);
 }
 
-std::unique_ptr<BlockData> EndstoneServer::createBlockData(BlockTypeId type) const
+NotNull<BlockData> EndstoneServer::createBlockData(BlockTypeId type) const
 {
     return createBlockData(type, {});
 }
 
-std::unique_ptr<BlockData> EndstoneServer::createBlockData(BlockTypeId type, BlockStates block_states) const
+NotNull<BlockData> EndstoneServer::createBlockData(BlockTypeId type, BlockStates block_states) const
 {
     std::unordered_map<std::string, std::variant<int, std::string, bool>> states;
     for (const auto &state : block_states) {
@@ -750,7 +750,7 @@ std::unique_ptr<BlockData> EndstoneServer::createBlockData(BlockTypeId type, Blo
         ScriptModuleMinecraft::ScriptBlockUtils::createBlockDescriptor(std::string(type), states);
     const auto *block = block_descriptor.tryGetBlockNoLogging();
     Preconditions::checkArgument(block != nullptr, "Block type {} cannot be found in the registry.", type);
-    return std::make_unique<EndstoneBlockData>(const_cast<::Block &>(*block));
+    return std::make_shared<EndstoneBlockData>(const_cast<::Block &>(*block));
 }
 
 PlayerBanList &EndstoneServer::getBanList() const
