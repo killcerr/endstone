@@ -485,9 +485,15 @@ and cannot be unit-tested.
   Hand-writing the wire format hardcodes field order, widths and varint
   encoding that BDS owns and revises. A reconstructed payload gets those from
   the compiler and fails at build time when the layout moves, instead of
-  emitting a malformed packet at runtime. *`EndstonePlayer::spawnParticle` on
-  `develop` still hand-writes SpawnParticleEffect this way - existing debt, not
-  a precedent to copy.*
+  emitting a malformed packet at runtime.
+
+  **The one sanctioned exception** is a payload whose types would drag in a
+  whole subsystem for no gain. `EndstonePlayer::spawnParticle` hand-writes
+  SpawnParticleEffect deliberately, because reconstructing it faithfully means
+  reconstructing Molang. That is accepted and MUST NOT be raised as a finding.
+  A PR MAY invoke the same exception, but it MUST name the subsystem it is
+  avoiding and why the trade is worth it - "it was easier" is not that. Absent
+  such a justification, the rule stands.
 
 **6.3** The trigger SHOULD match Paper's, not merely the name. Firing semantics
 are part of the contract plugin authors rely on. You MUST determine where Paper

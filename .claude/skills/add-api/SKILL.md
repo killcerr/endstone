@@ -127,8 +127,11 @@ Packets:
   send with `sendNetworkPacket`. Field order, widths and varint encoding belong
   to BDS; a reconstruction gets them from the compiler and breaks the build
   when they move, where hand-written bytes just emit a malformed packet.
-  (`EndstonePlayer::spawnParticle` still does it the old way - debt, not a
-  model.)
+  The one sanctioned exception is a payload whose types would drag in a whole
+  subsystem for no gain: `EndstonePlayer::spawnParticle` hand-writes
+  SpawnParticleEffect on purpose, because doing it faithfully means
+  reconstructing Molang. Invoking the exception means naming the subsystem
+  you are avoiding, not just preferring bytes.
 - Reconstruct only the **layout** — the payload member, `serialization_mode`,
   and the size assert. Don't override `getId`, `getName`, `write` or `_read`:
   we never construct these by value, we `static_cast` a packet BDS already
