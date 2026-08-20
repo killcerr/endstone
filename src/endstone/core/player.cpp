@@ -62,6 +62,7 @@
 #include "endstone/core/util/uuid.h"
 #include "endstone/event/player/player_bed_leave_event.h"
 #include "endstone/event/player/player_emote_event.h"
+#include "endstone/event/player/player_input_event.h"
 #include "endstone/event/player/player_interact_event.h"
 #include "endstone/event/player/player_item_held_event.h"
 #include "endstone/event/player/player_join_event.h"
@@ -788,6 +789,18 @@ bool EndstonePlayer::handlePacket(Packet &packet)
     }
     case MinecraftPacketIds::PlayerAuthInputPacket: {
         auto &pk = static_cast<PlayerAuthInputPacket &>(packet);
+        const Input player_input{
+            pk.getInput(PlayerAuthInputPacket::InputData::Up),
+            pk.getInput(PlayerAuthInputPacket::InputData::Down),
+            pk.getInput(PlayerAuthInputPacket::InputData::Left),
+            pk.getInput(PlayerAuthInputPacket::InputData::Right),
+            pk.getInput(PlayerAuthInputPacket::InputData::Jumping),
+            pk.getInput(PlayerAuthInputPacket::InputData::Sneaking),
+            pk.getInput(PlayerAuthInputPacket::InputData::Sprinting),
+        };
+        const bool input_changed = last_input_ != player_input;
+        last_input_ = player_input;
+
         if (pk.getInput(PlayerAuthInputPacket::InputData::StartSprinting) && !getHandle().isSprinting()) {
             PlayerToggleSprintEvent e(getSelf(), true);
             getServer().getPluginManager().callEvent(e);
@@ -817,6 +830,10 @@ bool EndstonePlayer::handlePacket(Packet &packet)
             if (e.isCancelled()) {
                 pk.setInput(PlayerAuthInputPacket::InputData::MissedSwing, false);
             }
+        }
+        if (input_changed) {
+            PlayerInputEvent e(getSelf(), player_input);
+            getServer().getPluginManager().callEvent(e);
         }
 
         auto &actions = pk.payload.player_block_actions.actions_;

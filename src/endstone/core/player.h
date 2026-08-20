@@ -27,6 +27,7 @@
 #include "bedrock/world/events/player_events.h"
 #include "endstone/core/actor/mob.h"
 #include "endstone/core/inventory/player_inventory.h"
+#include "endstone/input.h"
 #include "endstone/player.h"
 #include "permissions/permissible_base.h"
 
@@ -157,6 +158,7 @@ private:
     std::string game_version_;
     std::uint32_t form_ids_ = 0xffff;  // Set to a large value to avoid collision with forms created by script api
     std::unordered_map<std::uint32_t, FormVariant> forms_;
+    Input last_input_;
     std::optional<RecipeBookSettings> last_recipe_book_settings_;
     bool spawned_ = false;
     bool last_op_status_ = false;
