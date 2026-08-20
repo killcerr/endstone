@@ -35,11 +35,11 @@
 #include "endstone/event/actor/player_death_event.h"
 #include "endstone/event/player/player_dimension_change_event.h"
 #include "endstone/event/player/player_drop_item_event.h"
-#include "endstone/event/player/player_level_change_event.h"
 #include "endstone/event/player/player_emote_event.h"
 #include "endstone/event/player/player_game_mode_change_event.h"
 #include "endstone/event/player/player_interact_actor_event.h"
 #include "endstone/event/player/player_interact_event.h"
+#include "endstone/event/player/player_level_change_event.h"
 #include "endstone/event/player/player_quit_event.h"
 #include "endstone/event/player/player_respawn_event.h"
 #include "endstone/runtime/vtable_hook.h"
@@ -125,9 +125,8 @@ bool handleEvent(const PlayerAddLevelEvent &event)
 {
     if (const auto *player = WeakEntityRef(event.player).tryUnwrap<::Player>(); player) {
         auto &server = endstone::core::EndstoneServer::getInstance();
-        endstone::PlayerLevelChangeEvent level_event{
-            player->getEndstoneActor<endstone::core::EndstonePlayer>(), event.new_level - event.add_level,
-            event.new_level};
+        endstone::PlayerLevelChangeEvent level_event{player->getEndstoneActor<endstone::core::EndstonePlayer>(),
+                                                     event.new_level - event.add_level, event.new_level};
         server.getPluginManager().callEvent(level_event);
     }
     return true;

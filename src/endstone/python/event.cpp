@@ -398,8 +398,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
         m, "PlayerPortalEvent", "Called when a player is about to teleport because it is in contact with a portal.");
     py::class_<PlayerPickupArrowEvent, PlayerEvent, ICancellable>(
         m, "PlayerPickupArrowEvent", "Called when a player picks up an arrow or a thrown trident from the ground.")
-        .def_property_readonly("arrow", &PlayerPickupArrowEvent::getArrow,
-                               "The arrow picked up by the player.");
+        .def_property_readonly("arrow", &PlayerPickupArrowEvent::getArrow, "The arrow picked up by the player.");
     py::class_<PlayerPickupItemEvent, PlayerEvent, ICancellable>(
         m, "PlayerPickupItemEvent", "Called when a player picks an item up from the ground.")
         .def_property_readonly("item", &PlayerPickupItemEvent::getItem,
