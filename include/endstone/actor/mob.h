@@ -35,6 +35,12 @@ public:
     [[nodiscard]] virtual bool isGliding() const = 0;
 
     /**
+     * Checks to see if an actor is swimming.
+     * @return True if this actor is swimming.
+     */
+    [[nodiscard]] virtual bool isSwimming() const = 0;
+
+    /**
      * Gets the entity's health from 0 to its max possible value, where 0 is dead.
      *
      * @return Health represented from 0 to max

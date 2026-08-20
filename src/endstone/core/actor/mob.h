@@ -50,6 +50,8 @@ public:
 
     [[nodiscard]] bool isGliding() const override { return Base::getHandle().isGliding(); }
 
+    [[nodiscard]] bool isSwimming() const override { return Base::getHandle().isSwimming(); }
+
     [[nodiscard]] int getHealth() const override { return Base::getHandle().getHealth(); }
 
     void setHealth(int health) const override

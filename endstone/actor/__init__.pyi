@@ -209,6 +209,12 @@ class Mob(Actor):
         """
 
     @property
+    def is_swimming(self) -> bool:
+        """
+        `True` if this actor is swimming.
+        """
+
+    @property
     def health(self) -> int:
         """
         The entity's health from 0 to its max possible value, where 0 is dead.
