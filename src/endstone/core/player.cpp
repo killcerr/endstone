@@ -378,6 +378,11 @@ bool EndstonePlayer::isFlying() const
     return getHandle().isFlying();
 }
 
+bool EndstonePlayer::isCrawling() const
+{
+    return getHandle().isCrawling();
+}
+
 void EndstonePlayer::setFlying(bool value)
 {
     if (!getAllowFlight()) {

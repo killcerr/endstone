@@ -89,6 +89,7 @@ public:
     [[nodiscard]] bool getAllowFlight() const override;
     void setAllowFlight(bool flight) override;
     [[nodiscard]] bool isFlying() const override;
+    [[nodiscard]] bool isCrawling() const override;
     void setFlying(bool value) override;
     [[nodiscard]] float getFlySpeed() const override;
     void setFlySpeed(float value) const override;
