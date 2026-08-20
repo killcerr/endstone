@@ -76,6 +76,7 @@ __all__ = [
     "PlayerPickupItemEvent",
     "PlayerPortalEvent",
     "PlayerQuitEvent",
+    "PlayerRecipeBookSettingsChangeEvent",
     "PlayerRespawnEvent",
     "PlayerSkinChangeEvent",
     "PlayerTeleportEvent",
@@ -880,6 +881,42 @@ class PlayerQuitEvent(PlayerEvent):
 
     @quit_message.setter
     def quit_message(self, arg1: str | Translatable | None) -> None: ...
+
+class PlayerRecipeBookSettingsChangeEvent(PlayerEvent):
+    """
+    Called when a player changes recipe book settings.
+    """
+    class RecipeBookType(enum.Enum):
+        """
+        The recipe book type.
+        """
+
+        CRAFTING = 0
+        FURNACE = 1
+        BLAST_FURNACE = 2
+        SMOKER = 3
+
+    CRAFTING = RecipeBookType.CRAFTING
+    FURNACE = RecipeBookType.FURNACE
+    BLAST_FURNACE = RecipeBookType.BLAST_FURNACE
+    SMOKER = RecipeBookType.SMOKER
+    @property
+    def recipe_book_type(self) -> RecipeBookType:
+        """
+        The type of recipe book whose settings changed.
+        """
+
+    @property
+    def is_filtering(self) -> bool:
+        """
+        Whether recipe filtering is enabled.
+        """
+
+    @property
+    def is_open(self) -> bool:
+        """
+        Whether the recipe book is open.
+        """
 
 class PlayerRespawnEvent(PlayerEvent):
     """

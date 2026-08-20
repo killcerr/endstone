@@ -376,6 +376,23 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
     py::class_<PlayerQuitEvent, PlayerEvent>(m, "PlayerQuitEvent", "Called when a player leaves a server.")
         .def_property("quit_message", &PlayerQuitEvent::getQuitMessage, &PlayerQuitEvent::setQuitMessage,
                       "The quit message to send to all online players.");
+    auto player_recipe_book_settings_change_event = py::class_<PlayerRecipeBookSettingsChangeEvent, PlayerEvent>(
+        m, "PlayerRecipeBookSettingsChangeEvent", "Called when a player changes recipe book settings.");
+    py::native_enum<PlayerRecipeBookSettingsChangeEvent::RecipeBookType>(
+        player_recipe_book_settings_change_event, "RecipeBookType", "enum.Enum", "The recipe book type.")
+        .value("CRAFTING", PlayerRecipeBookSettingsChangeEvent::RecipeBookType::Crafting)
+        .value("FURNACE", PlayerRecipeBookSettingsChangeEvent::RecipeBookType::Furnace)
+        .value("BLAST_FURNACE", PlayerRecipeBookSettingsChangeEvent::RecipeBookType::BlastFurnace)
+        .value("SMOKER", PlayerRecipeBookSettingsChangeEvent::RecipeBookType::Smoker)
+        .export_values()
+        .finalize();
+    player_recipe_book_settings_change_event
+        .def_property_readonly("recipe_book_type", &PlayerRecipeBookSettingsChangeEvent::getRecipeBookType,
+                               "The type of recipe book whose settings changed.")
+        .def_property_readonly("is_filtering", &PlayerRecipeBookSettingsChangeEvent::isFiltering,
+                               "Whether recipe filtering is enabled.")
+        .def_property_readonly("is_open", &PlayerRecipeBookSettingsChangeEvent::isOpen,
+                               "Whether the recipe book is open.");
     auto player_respawn_event =
         py::class_<PlayerRespawnEvent, PlayerEvent>(m, "PlayerRespawnEvent", "Called when a player respawns.");
     py::native_enum<PlayerRespawnEvent::RespawnReason>(player_respawn_event, "RespawnReason", "enum.Enum",
