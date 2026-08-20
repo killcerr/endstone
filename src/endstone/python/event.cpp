@@ -73,10 +73,10 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
                                                                 "Called when an `Actor` is damaged.")
         .def_property("damage", &ActorDamageEvent::getDamage, &ActorDamageEvent::setDamage,
                       "The raw amount of damage caused by the event.")
-        .def_property_readonly("damage_source", &ActorDamageEvent::getDamageSource, py::return_value_policy::reference,
+        .def_property_readonly("damage_source", &ActorDamageEvent::getDamageSource,
                                "A `DamageSource` detailing the source of the damage.");
     py::class_<ActorDeathEvent, ActorEvent<Mob>>(m, "ActorDeathEvent", "Called when an `Actor` dies.")
-        .def_property_readonly("damage_source", &ActorDeathEvent::getDamageSource, py::return_value_policy::reference,
+        .def_property_readonly("damage_source", &ActorDeathEvent::getDamageSource,
                                "A `DamageSource` detailing the source of the damage for the death.");
     py::class_<PlayerDeathEvent, ActorDeathEvent>(m, "PlayerDeathEvent", "Called when a `Player` dies.")
         .def_property_readonly("player", &PlayerDeathEvent::getPlayer,
@@ -118,7 +118,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
     Unlike Bukkit's equivalent, this covers only the mob griefing paths. It is not called for falling
     blocks landing or for sheep eating grass, and the resulting block state is not available.
 )doc")
-        .def_property_readonly("block", &ActorChangeBlockEvent::getBlock, py::return_value_policy::reference,
+        .def_property_readonly("block", &ActorChangeBlockEvent::getBlock,
                                "The block that will be changed.");
     py::class_<ActorKnockbackEvent, ActorEvent<Mob>, ICancellable>(m, "ActorKnockbackEvent",
                                                                    "Called when a living entity receives knockback.")
@@ -170,7 +170,7 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 
     // Block events
     py::class_<BlockEvent, Event>(m, "BlockEvent", "Represents an `Block`-related event.")
-        .def_property_readonly("block", &BlockEvent::getBlock, py::return_value_policy::reference,
+        .def_property_readonly("block", &BlockEvent::getBlock,
                                "The `Block` which is involved in this event.");
     py::class_<BlockBreakEvent, BlockEvent, ICancellable>(m, "BlockBreakEvent", R"doc(
     Called when a block is broken by a player.
@@ -235,11 +235,11 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 )doc")
         .def_property_readonly("player", &BlockPlaceEvent::getPlayer,
                                "The `Player` who placed the block involved in this event.")
-        .def_property_readonly("block_placed", &BlockPlaceEvent::getBlockPlaced, py::return_value_policy::reference,
+        .def_property_readonly("block_placed", &BlockPlaceEvent::getBlockPlaced,
                                "The `Block` that was placed.")
         .def_property_readonly("block_replaced_state", &BlockPlaceEvent::getBlockReplacedState,
                                "The `BlockState` of the block that was replaced.")
-        .def_property_readonly("block_against", &BlockPlaceEvent::getBlockAgainst, py::return_value_policy::reference,
+        .def_property_readonly("block_against", &BlockPlaceEvent::getBlockAgainst,
                                "The block that the new block was placed against.");
     py::class_<LeavesDecayEvent, BlockEvent, ICancellable>(m, "LeavesDecayEvent", R"doc(
     Called when leaves are decaying naturally.
