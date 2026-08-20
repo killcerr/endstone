@@ -34,10 +34,11 @@ def test_actor_death(recorder: EventRecorder) -> None:
     assert snapshot["damage_type"]
 
 
-def test_actor_death_excludes_players(recorder: EventRecorder) -> None:
-    """Verify a player death is reported by PlayerDeathEvent alone."""
-    types = {s["actor_type"] for s in recorder.require("ActorDeathEvent")}
-    assert "minecraft:player" not in types
+def test_player_death_also_fires_actor_death(recorder: EventRecorder) -> None:
+    """Verify a player death reaches ActorDeathEvent, since Player is a Mob."""
+    if recorder.count("PlayerDeathEvent"):
+        types = {s["actor_type"] for s in recorder.require("ActorDeathEvent")}
+        assert "minecraft:player" in types
 
 
 def test_actor_knockback(recorder: EventRecorder) -> None:

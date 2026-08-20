@@ -87,6 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING**: `Block.type`, `BlockState.type` and `BlockData.type` return a `BlockType` instead of a string, matching `ItemStack.type`. It still compares equal to its `"namespace:key"` string and stringifies to it, but is no longer a `str`.
 - `str()` on `BlockType`, `Enchantment` and `ItemType` returns a plain `"namespace:key"` string instead of the underlying `Identifier` repr.
 - `Block.set_type`, `BlockState.type`, `Server.create_block_data` and `Inventory.contains`/`contains_at_least`/`all`/`first`/`remove` take an `Identifier` (e.g. `BlockType.AIR`) instead of a plain string, matching `ItemStack.type` and `Dimension.spawn_actor`. Plain `"namespace:key"` strings are still accepted.
+- **BREAKING**: `ActorDeathEvent` is now called when a player dies, as well as for every other mob. It previously skipped players, even though `PlayerDeathEvent` derives from it, so a listener on `ActorDeathEvent` never saw them. Bukkit's `EntityDeathEvent` receives player deaths, and this now matches. A listener that assumed it only ever saw non-player mobs should check `actor.type` or listen for `PlayerDeathEvent` instead.
 - Dropped Python 3.10 support (end-of-life). Minimum version is now Python 3.11.
 
 ### Fixed

@@ -33,7 +33,7 @@
 namespace {
 bool handleEvent(const ActorDiedEvent &event)
 {
-    if (const auto *mob = event.entity.tryUnwrap<::Mob>(); mob && !mob->isPlayer()) {
+    if (const auto *mob = event.entity.tryUnwrap<::Mob>(); mob) {
         const auto &server = endstone::core::EndstoneServer::getInstance();
         endstone::ActorDeathEvent e{mob->getEndstoneActor<endstone::core::EndstoneMob>(),
                                     std::make_shared<endstone::core::EndstoneDamageSource>(*event.source)};
