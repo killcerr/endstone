@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added graceful shutdown on Linux, so stopping the server (e.g. via `docker stop`) lets the Bedrock server save the world before it exits.
 - Added `PlayerRespawnEvent.respawn_reason` (`RespawnReason.DEATH` / `RespawnReason.END_PORTAL`) so plugins can tell a normal death respawn apart from a player returning through the End exit portal.
 - Added `PlayerLevelChangeEvent`, called when a player's experience level changes, reporting `old_level` and `new_level`.
+- Added `PlayerExpChangeEvent`, called when a player gains experience, reporting the `amount` gained. It is not called when experience is reset on death.
 - Added `PlayerPickupArrowEvent`, called when a player picks up an arrow or a thrown trident from the ground. Cancelling it leaves the projectile on the ground.
 - Added `PlayerRecipeBookSettingsChangeEvent`, called when a player opens, closes or filters their recipe book, reporting `recipe_book_type`, `is_open` and `is_filtering`.
 - Added `PlayerInputEvent`, called when a player's movement input changes, and the `Input` type it carries: `is_forward`, `is_backward`, `is_left`, `is_right`, `is_jump`, `is_sneak` and `is_sprint`. Like Bukkit's event, it fires only when the input differs from the last one the player sent, not every tick.

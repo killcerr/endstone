@@ -61,6 +61,7 @@ __all__ = [
     "PlayerDropItemEvent",
     "PlayerEmoteEvent",
     "PlayerEvent",
+    "PlayerExpChangeEvent",
     "PlayerGameModeChangeEvent",
     "PlayerInputEvent",
     "PlayerInteractActorEvent",
@@ -647,6 +648,19 @@ class PlayerEmoteEvent(PlayerEvent, Cancellable):
 
     @is_muted.setter
     def is_muted(self, arg1: bool) -> None: ...
+
+class PlayerExpChangeEvent(PlayerEvent):
+    """
+    Called when a player's experience changes.
+    """
+    @property
+    def amount(self) -> int:
+        """
+        The amount of experience the player will be given.
+        """
+
+    @amount.setter
+    def amount(self, arg1: int) -> None: ...
 
 class PlayerGameModeChangeEvent(PlayerEvent, Cancellable):
     """

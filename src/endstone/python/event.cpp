@@ -291,6 +291,10 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 
     When `True`, the emote is executed without sending a chat message about the emote.
 )doc");
+    py::class_<PlayerExpChangeEvent, PlayerEvent>(m, "PlayerExpChangeEvent",
+                                                  "Called when a player's experience changes.")
+        .def_property("amount", &PlayerExpChangeEvent::getAmount, &PlayerExpChangeEvent::setAmount,
+                      "The amount of experience the player will be given.");
     py::class_<PlayerGameModeChangeEvent, PlayerEvent, ICancellable>(
         m, "PlayerGameModeChangeEvent", "Called when the `GameMode` of the player is changed.")
         .def_property_readonly("new_game_mode", &PlayerGameModeChangeEvent::getNewGameMode,
