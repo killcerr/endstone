@@ -7,7 +7,7 @@ import typing
 
 from endstone import GameMode, Input, Player, Skin
 from endstone.actor import Actor, Item, Mob
-from endstone.block import Block, BlockFace, BlockList, BlockState
+from endstone.block import Block, BlockFace, BlockState
 from endstone.command import CommandSender
 from endstone.damage import DamageSource
 from endstone.inventory import EquipmentSlot, ItemStack
@@ -296,13 +296,13 @@ class ActorExplodeEvent(ActorEvent, Cancellable):
         """
 
     @property
-    def block_list(self) -> BlockList:
+    def block_list(self) -> list[Block]:
         """
         The list of blocks that would have been removed or were removed from the explosion event.
         """
 
     @block_list.setter
-    def block_list(self, arg1: BlockList) -> None: ...
+    def block_list(self, arg1: list[Block]) -> None: ...
 
 class ActorEffectEvent(MobEvent, Cancellable):
     """
@@ -485,13 +485,13 @@ class BlockExplodeEvent(BlockEvent, Cancellable):
     If a `BlockExplodeEvent` is cancelled, the explosion will not occur.
     """
     @property
-    def block_list(self) -> BlockList:
+    def block_list(self) -> list[Block]:
         """
         The list of blocks that would have been removed or were removed from the explosion event.
         """
 
     @block_list.setter
-    def block_list(self, arg1: BlockList) -> None: ...
+    def block_list(self, arg1: list[Block]) -> None: ...
 
 class BlockCookEvent(BlockEvent, Cancellable):
     """

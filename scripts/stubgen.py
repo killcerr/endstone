@@ -32,6 +32,9 @@ PACKAGE = "endstone"
 # Rewritten before imports are registered, so the stubs never import these.
 ALIASES = {
     "collections.abc.Sequence": "list",
+    # An opaque std::vector bound so Python can mutate the event's list in place; devs
+    # should still see and use it as a plain list.
+    "endstone.block.BlockList": "list[endstone.block.Block]",
     "typing.SupportsFloat": "float",
     "typing.SupportsInt": "int",
     # pybind11 puts py::array_t<T>'s dtype in ndarray's shape slot.
