@@ -460,10 +460,34 @@ correctness requirement, not a style preference. In descending preference:
 3. **`EndstonePlayer::handlePacket`** - last resort, for client intent with no
    server-side action behind it.
 
-**6.2** The PR MUST NOT hand-parse packet payload bytes. *A hand-written varint
-reader for `ItemStackRequest` in `batched_network_peer.cpp` duplicates BDS's own
-deserialization, breaks silently on every protocol bump, and cannot be tested.*
-BDS's `ItemStackRequestAction*` types exist and MUST be used.
+**6.2** The PR MUST NOT touch raw packet bytes, in **either** direction. Both
+halves duplicate BDS's own wire handling, break silently on a protocol bump,
+and cannot be unit-tested.
+
+- **Inbound:** MUST NOT hand-parse payload bytes. *A hand-written varint reader
+  for `ItemStackRequest` in `batched_network_peer.cpp` duplicated BDS's own
+  deserialization; its `10`/`11` constants were cereal variant indices, not the
+  `ItemStackRequestActionType` values they looked like, and would have shifted
+  silently on any change to the variant list.* BDS's
+  `ItemStackRequestAction*` types exist and MUST be used.
+- **Outbound:** MUST NOT compose a packet by writing fields into a
+  `BinaryStream`, and MUST NOT send raw bytes. Reconstruct the packet's layout
+  under `src/bedrock/network/packet/` (§4.13), build it through the factory,
+  assign the payload, and send it:
+
+  ```cpp
+  auto packet = MinecraftPackets::createPacket(MinecraftPacketIds::Text);
+  auto &pk = static_cast<TextPacket &>(*packet);
+  pk.payload = { /* typed fields */ };
+  getHandle().sendNetworkPacket(*packet);
+  ```
+
+  Hand-writing the wire format hardcodes field order, widths and varint
+  encoding that BDS owns and revises. A reconstructed payload gets those from
+  the compiler and fails at build time when the layout moves, instead of
+  emitting a malformed packet at runtime. *`EndstonePlayer::spawnParticle` on
+  `develop` still hand-writes SpawnParticleEffect this way - existing debt, not
+  a precedent to copy.*
 
 **6.3** The trigger SHOULD match Paper's, not merely the name. Firing semantics
 are part of the contract plugin authors rely on. You MUST determine where Paper

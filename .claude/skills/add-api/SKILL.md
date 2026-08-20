@@ -120,6 +120,15 @@ Hooking:
   cut, and say why in the PR.
 
 Packets:
+- **Never touch raw wire bytes, in either direction.** Don't hand-parse an
+  inbound payload, and don't compose an outbound one by writing fields into a
+  `BinaryStream` or sending raw bytes. Reconstruct the packet layout, build it
+  with `MinecraftPackets::createPacket(...)`, assign the typed payload, and
+  send with `sendNetworkPacket`. Field order, widths and varint encoding belong
+  to BDS; a reconstruction gets them from the compiler and breaks the build
+  when they move, where hand-written bytes just emit a malformed packet.
+  (`EndstonePlayer::spawnParticle` still does it the old way - debt, not a
+  model.)
 - Reconstruct only the **layout** — the payload member, `serialization_mode`,
   and the size assert. Don't override `getId`, `getName`, `write` or `_read`:
   we never construct these by value, we `static_cast` a packet BDS already
