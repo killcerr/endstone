@@ -127,7 +127,6 @@ public:
     void sendPacket(int packet_id, std::string_view payload) const override;
     void sendMap(MapView &map) override;
 
-    bool handlePacket(Packet &packet);
     void onFormClose(std::uint32_t form_id, PlayerFormCloseReason reason);
     void onFormResponse(std::uint32_t form_id, const nlohmann::json &json);
     void doFirstSpawn();
@@ -140,6 +139,7 @@ public:
 
 private:
     friend class ::ServerNetworkHandler;
+    friend class EndstonePacketHandler;
 
     struct RecipeBookSettings {
         bool filtering;
