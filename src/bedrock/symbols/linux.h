@@ -11,7 +11,7 @@
 
 namespace endstone::runtime {
 
-static constexpr std::array<std::pair<std::string_view, std::size_t>, 74> symbols = {{
+static constexpr std::array<std::pair<std::string_view, std::size_t>, 75> symbols = {{
     {"BlockState::StateListNode::mHead", 245468000},
     {"Enchant::mEnchants", 245294016},
     {"MobEffect::mMobEffects", 245274360},
@@ -58,6 +58,7 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 74> symbol
     // DedicatedServer
     {"_ZN15DedicatedServer5startERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEERKN7Bedrock19ActivationArgumentsE", 71550016},
     // DimensionManager
+    {"_ZN16DimensionManager20getOrCreateDimensionENSt3__117basic_string_viewIcNS0_11char_traitsIcEEEE", 202068400},
     {"_ZN16DimensionManager29serverRegisterCustomDimensionENSt3__117basic_string_viewIcNS0_11char_traitsIcEEEERKN3mce4UUIDE", 202063456},
     // Explosion
     {"_ZN9Explosion7explodeER7IRandom", 202093568},

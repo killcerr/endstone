@@ -393,6 +393,21 @@ rip_relative = true
 rip_offset = 1
 
 [[signatures]]
+name = "?getOrCreateDimension@DimensionManager@@QEAA?AV?$WeakRef@VDimension@@@@V?$basic_string_view@DU?$char_traits@D@std@@@std@@@Z"
+relative = false
+extra = 0
+# 1. find the string "T *Bedrock::NonOwnerPointer<IDimensionFactory>::_get() const [T = IDimensionFactory]"
+#    (unique); it has six data xrefs from exactly two functions - two in
+#    _registerCustomDimensionWithFactory and four here
+# 2. this is the larger of the pair (~0x71a): it opens with `id = mDimensionNameIdStore->getId(name);
+#    if (id == 0xFFFF) return {};`, looks the id up in mDimensionRegistry, and only then falls back to
+#    mDimensionFactory->create(name) / initializeDimension / registerDimension and fires
+#    mOnNewDimensionCreatedPublisher
+# 3. walk up to the prologue; confirm the `mov rcx, [rcx+8]` that loads mDimensionNameIdStore at +0x8
+#    (its only caller is the DimensionType overload, which resolves the name via NameIdStore::getName)
+pattern = "55 41 57 41 56 41 55 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 0F 29 B5 ? ? ? ? 48 C7 85 ? ? ? ? FE FF FF FF 4C 89 C3 49 89 D4 48 89 CF 48 8B 49 08"
+
+[[signatures]]
 name = "?serverRegisterCustomDimension@DimensionManager@@QEAA?AV?$optional@UDimensionType@@@std@@V?$basic_string_view@DU?$char_traits@D@std@@@3@AEBVUUID@mce@@@Z"
 relative = false
 extra = 0

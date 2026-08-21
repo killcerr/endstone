@@ -127,12 +127,17 @@ Nullable<Dimension> EndstoneLevel::createDimension(const DimensionCreator &creat
         return existing;
     }
     const std::string name{creator.getId()};
-    const auto type = level_.getDimensionManager().serverRegisterCustomDimension(name, mce::UUID::EMPTY);
-    if (!type.has_value()) {
+    auto &dimension_manager = level_.getDimensionManager();
+    if (const auto type = dimension_manager.serverRegisterCustomDimension(name, mce::UUID::EMPTY)) {
+        level_.getOrCreateDimension(type.value());
+        return getDimension(type.value());
+    }
+
+    const auto dimension = dimension_manager.getOrCreateDimension(name);
+    if (!dimension.isSet()) {
         return nullptr;
     }
-    level_.getOrCreateDimension(type.value());
-    return getDimension(type.value());
+    return getDimension(dimension.unwrap()->getDimensionId());
 }
 
 std::int64_t EndstoneLevel::getSeed() const
