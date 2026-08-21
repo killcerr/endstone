@@ -475,8 +475,8 @@ void EndstoneServer::enablePlugin(Plugin &plugin)
 {
     auto perms = plugin.getDescription().getPermissions();
     for (const auto &perm : perms) {
-        if (plugin_manager_->getPermission(perm.getName()) == nullptr) {
-            plugin_manager_->addPermission(std::make_unique<Permission>(perm));
+        if (!plugin_manager_->getPermission(perm.getName())) {
+            plugin_manager_->addPermission(std::make_shared<Permission>(perm));
         }
         else {
             getLogger().error("Plugin {} tried to register permission '{}' that was already registered.",
@@ -624,10 +624,10 @@ void EndstoneServer::reloadData()
 
 void EndstoneServer::broadcast(const Message &message, const std::string &permission) const
 {
-    std::unordered_set<const CommandSender *> recipients;
-    for (const auto *permissible : getPluginManager().getPermissionSubscriptions(permission)) {
-        if (const auto *sender = permissible->as<CommandSender>(); sender && sender->hasPermission(permission)) {
-            recipients.insert(sender);
+    std::unordered_set<NotNull<CommandSender>> recipients;
+    for (const auto &permissible : getPluginManager().getPermissionSubscriptions(permission)) {
+        if (permissible->is<CommandSender>() && permissible->hasPermission(permission)) {
+            recipients.insert(permissible.cast<CommandSender>());
         }
     }
 

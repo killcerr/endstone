@@ -102,7 +102,7 @@ bool EndstonePlayer::isPermissionSet(std::string name) const
     return perm_->isPermissionSet(name);
 }
 
-bool EndstonePlayer::isPermissionSet(const Permission &perm) const
+bool EndstonePlayer::isPermissionSet(const NotNull<Permission> &perm) const
 {
     return perm_->isPermissionSet(perm);
 }
@@ -112,22 +112,22 @@ bool EndstonePlayer::hasPermission(std::string name) const
     return perm_->hasPermission(name);
 }
 
-bool EndstonePlayer::hasPermission(const Permission &perm) const
+bool EndstonePlayer::hasPermission(const NotNull<Permission> &perm) const
 {
     return perm_->hasPermission(perm);
 }
 
-PermissionAttachment *EndstonePlayer::addAttachment(Plugin &plugin, const std::string &name, bool value)
+NotNull<PermissionAttachment> EndstonePlayer::addAttachment(Plugin &plugin, const std::string &name, bool value)
 {
     return perm_->addAttachment(plugin, name, value);
 }
 
-PermissionAttachment *EndstonePlayer::addAttachment(Plugin &plugin)
+NotNull<PermissionAttachment> EndstonePlayer::addAttachment(Plugin &plugin)
 {
     return perm_->addAttachment(plugin);
 }
 
-bool EndstonePlayer::removeAttachment(PermissionAttachment &attachment)
+bool EndstonePlayer::removeAttachment(const NotNull<PermissionAttachment> &attachment)
 {
     return perm_->removeAttachment(attachment);
 }
@@ -137,7 +137,7 @@ void EndstonePlayer::recalculatePermissions()
     perm_->recalculatePermissions();
 }
 
-std::unordered_set<PermissionAttachmentInfo *> EndstonePlayer::getEffectivePermissions() const
+std::unordered_set<NotNull<PermissionAttachmentInfo>> EndstonePlayer::getEffectivePermissions() const
 {
     return perm_->getEffectivePermissions();
 }

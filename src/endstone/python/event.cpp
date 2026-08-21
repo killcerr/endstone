@@ -501,7 +501,6 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
         .def_property("message", &BroadcastMessageEvent::getMessage, &BroadcastMessageEvent::setMessage,
                       "The message to broadcast.")
         .def_property_readonly("recipients", &BroadcastMessageEvent::getRecipients,
-                               py::return_value_policy::reference_internal,
                                "The set of `CommandSender`s who will see this broadcast message.");
     py::class_<MapInitializeEvent, ServerEvent>(m, "MapInitializeEvent", "Called when a map is initialized.")
         .def_property_readonly("map", &MapInitializeEvent::getMap, py::return_value_policy::reference,

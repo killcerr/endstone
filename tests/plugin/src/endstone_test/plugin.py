@@ -66,6 +66,10 @@ class EndstoneTest(Plugin):
             "description": "Allow users to use the /testoptmsg command.",
             "default": "op",
         },
+        "endstone_test.granted": {
+            "description": "Never granted by default, only via a permission attachment.",
+            "default": "false",
+        },
     }
 
     def __init__(self):
