@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `WritableBookMeta`, `BookMeta` and `CrossbowMeta` item meta types.
 - Added `PotionMeta` for potions, splash potions and lingering potions, giving the `PotionType` identifiers a consumer: `meta.base_potion_type` reads and writes the potion a bottle holds. Bedrock derives a potion's effects and its colour from the base potion type, so there is no `custom_effects` or `color` as in Bukkit's `PotionMeta`.
 - Added binary NBT serialization (`dump`/`load`) with support for multiple formats.
-- Added a unified `Object.as<T>()`/`is<T>()` casting API, replacing the per-type `asPlayer()`, `asMob()`, etc.
+- Added a unified `Object.as<T>()`/`is<T>()` casting API, replacing the per-type `asPlayer()`, `asMob()`, etc. `NotNull<T>` and `Nullable<T>` carry the same pair, so a handle can be narrowed without unwrapping it: `event.getActor().as<Player>()` returns a `Nullable<Player>` that shares ownership with the original, or a null one if the actor is not a player.
 - Added a healthcheck to the Docker image so `docker ps` and Docker Compose report whether the server is actually online.
 - Added `PUID`/`PGID` environment variables to the Docker image to keep server files owned by your host user.
 - Added a `docker-compose.yml` for running the server with Docker Compose.
