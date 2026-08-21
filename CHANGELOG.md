@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PlayerCraftItemEvent` for crafting from a grid or the recipe book, reporting the crafted `item`, the `recipe_id` and the `amount` of crafts.
 - `PlayerRecipeBookClickEvent` for crafting straight from the recipe book, reporting the `recipe` identifier and a writable `amount`. Cancelling it suppresses the following `PlayerCraftItemEvent` too.
 - `PlayerEditBookEvent` for editing a page of a book and quill or signing it, reporting the book metadata before and after the edit, the inventory `slot`, and whether the book is being signed. `new_book_meta` and `is_signing` are writable.
+- `PlayerSetSpawnEvent` for a player's respawn point being set, reporting the `cause` (`BED`, `RESPAWN_ANCHOR`, `COMMAND`, `PLUGIN` or `UNKNOWN`) and a writable `location`. Cancelling leaves the respawn point untouched, though `/spawnpoint` still reports success and a respawn anchor still plays its sound. It does not fire when Bedrock clears a respawn point, so `/clearspawnpoint` and breaking the bed are both silent.
 - `PlayerToggleSneakEvent`, `PlayerToggleSprintEvent`, `PlayerToggleFlightEvent` and `PlayerToggleCrawlEvent`, carrying the new state in `is_sneaking`, `is_sprinting`, `is_flying` and `is_crawling`.
 - `ActorToggleSwimEvent` and `ActorToggleGlideEvent`, carrying the new state in `is_swimming` and `is_gliding`.
 - `ActorCollideWithActorEvent`, reporting both actors in `actors`. Cancelling it also stops boats and minecarts being boarded by walking into them.
@@ -38,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Effect API: `Mob.add_effect()`, `Mob.remove_effect()`, `Mob.has_effect()`, `Mob.get_effect()` and `Mob.active_effects`, with the new `Effect` type carrying effect type, duration, amplifier and the ambient/particles/icon flags.
 - `Mob.is_swimming` and `Player.is_crawling`.
 - `Player.send_action_bar()` for sending a message above the hotbar.
+- `Player.respawn_location` for reading and writing where a player will respawn, or `None` when they have no valid respawn point. Bedrock does not persist yaw/pitch for a respawn point, so only the block coordinates and the dimension are kept.
 
 #### Blocks
 

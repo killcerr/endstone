@@ -37,13 +37,16 @@
 #include "bedrock/platform/build_platform.h"
 #include "bedrock/server/server_instance.h"
 #include "bedrock/world/actor/player/player.h"
+#include "bedrock/world/level/dimension/vanilla_dimensions.h"
 #include "bedrock/world/level/level.h"
 #include "endstone/color_format.h"
 #include "endstone/core/base64.h"
+#include "endstone/core/entity/components/flag_components.h"
 #include "endstone/core/form/form_codec.h"
 #include "endstone/core/game_mode.h"
 #include "endstone/core/inventory/item_stack.h"
 #include "endstone/core/inventory/player_inventory.h"
+#include "endstone/core/level/dimension.h"
 #include "endstone/core/map/map_view.h"
 #include "endstone/core/message.h"
 #include "endstone/core/network/data_packet.h"
@@ -250,6 +253,38 @@ void EndstonePlayer::kick(std::string message) const
 bool EndstonePlayer::performCommand(std::string command) const
 {
     return server_.dispatchCommand(self(), command);
+}
+
+std::optional<Location> EndstonePlayer::getRespawnLocation() const
+{
+    const auto &point = getHandle().getPlayerRespawnPoint();
+    if (point.player_position == BlockPos::MIN || point.dimension == VanillaDimensions::Undefined) {
+        return std::nullopt;
+    }
+
+    const auto dimension = server_.getEndstoneLevel()->getDimension(point.dimension);
+    if (!dimension) {
+        return std::nullopt;
+    }
+    return Location{dimension, point.player_position.x, point.player_position.y, point.player_position.z};
+}
+
+void EndstonePlayer::setRespawnLocation(std::optional<Location> location)
+{
+    if (!location) {
+        getHandle().addOrRemoveComponent<InternalSpawnChangeFlagComponent>(true);
+        getHandle().setRespawnPosition(BlockPos::MIN, VanillaDimensions::Undefined);
+        return;
+    }
+
+    if (!location->isDimensionLoaded()) {
+        return;
+    }
+
+    const auto dimension = location->getDimension();
+    const auto dimension_id = static_cast<const EndstoneDimension &>(dimension.value()).getHandle().getDimensionId();
+    getHandle().addOrRemoveComponent<InternalSpawnChangeFlagComponent>(true);
+    getHandle().setRespawnPosition(BlockPos(location->getX(), location->getY(), location->getZ()), dimension_id);
 }
 
 bool EndstonePlayer::isSneaking() const

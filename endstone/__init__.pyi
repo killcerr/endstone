@@ -529,6 +529,20 @@ class Player(Mob):
         """
 
     @property
+    def respawn_location(self) -> Location | None:
+        """
+        The location where the player will respawn, or `None` if they don't have a valid respawn point.
+
+        Assigning `None` clears the respawn point. When a location is assigned, its dimension must be loaded.
+
+        Note:
+            Only the block coordinates and the dimension are written back; Bedrock does not persist yaw/pitch for a
+            respawn point.
+        """
+
+    @respawn_location.setter
+    def respawn_location(self, arg1: Location | None) -> None: ...
+    @property
     def is_sneaking(self) -> bool:
         """
         Whether the player is in sneak mode.

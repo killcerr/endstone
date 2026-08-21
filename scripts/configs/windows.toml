@@ -781,6 +781,58 @@ extra = 0
 pattern = "55 41 57 41 56 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 44 0F 29 9D ? ? ? ? 44 0F 29 95 ? ? ? ? 44 0F 29 8D ? ? ? ? 44 0F 29 45"
 
 [[signatures]]
+name = "?setSpawnBlockRespawnPosition@Player@@QEAA_NAEBVBlockPos@@UDimensionType@@@Z"
+relative = false
+extra = 0
+# 1. find bytes "31 20 73 65 74 53 70 61 77 6E 50 6F 69 6E 74 00" = "1 setSpawnPoint\0". It occurs exactly ONCE in
+#    read-only data and is the label BDS hands to ActorValueValidation::validateBlockPos
+# 2. take its rip-relative lea references in .text. On Windows there is exactly one and it is inside this
+#    function; on Linux there are three - Player::readAdditionalSaveData (~0x3ae0, far larger than the
+#    other two), this function (~0x2c7) and the 2-arg Player::setRespawnPosition (~0x283)
+# 3. separate the two small ones by their direct call sites, which is decisive and identical on both
+#    platforms: this function has exactly THREE direct callers (Player::setBedRespawnPosition,
+#    RespawnAnchorBlock::_trySetSpawn and SimulatedPlayer::create) and none of them references
+#    "commands.spawnpoint.success.single", whereas setRespawnPosition has exactly two and one of them does
+# 4. confirm the body: it opens by calling Actor::getPosition and Actor::getAABB, rounds the AABB's max Y
+#    through mce::Math::ceil to build a BlockPos, and builds SetSpawnPositionPacketPayload from
+#    (dimension, &mPlayerRespawnPoint.mPlayerPosition, &mPlayerRespawnPoint.mSpawnBlockPos). It returns bool,
+#    where setRespawnPosition returns void
+# 5. the pattern below starts at the function's first byte, which is also its .pdata / .eh_frame entry point
+# Verified against 1.26.44.3 (the version at the top of this file): the pattern matches EXACTLY ONCE in
+# .text, that match is the function's start address, and it resolves to the offset committed in
+# src/bedrock/symbols/.
+pattern = "41 57 41 56 41 54 56 57 55 53 48 81 EC A0 00 00 00 0F 29 BC 24 ? ? ? ? 0F 29 B4 24 ? ? ? ? 44 89 C5"
+
+[[signatures]]
+name = "?setRespawnPosition@Player@@QEAAXAEBVBlockPos@@UDimensionType@@@Z"
+relative = false
+extra = 0
+# NOTE: the prologue alone (`41 56 56 57 53 48 83 EC 78`) matches 1436 times in 1.26.44.3, so the pattern is
+# deliberately carried past it into the body - the `mov rsi, rcx; mov eax, [rdx]` argument setup and the
+# first `cmp eax, [rcx+mPlayerRespawnPoint]; jne` of the "did anything change?" test. The member offset and
+# the jump displacement are wildcarded so a layout shift does not break it gratuitously, while the shape
+# still pins it to one function. Do not shorten it back to the prologue: find_signature takes the lowest
+# .text hit and would bind silently.
+# 1. same anchor family as setSpawnBlockRespawnPosition above, but do not rely on it alone: on Windows this
+#    function carries no rip-relative reference to "1 setSpawnPoint" at all, and on Linux it is one of three
+#    that do
+# 2. the version-stable anchor is the caller. Find "commands.spawnpoint.success.single\0" (exactly one
+#    occurrence in read-only data); its lone referring function is SpawnPointCommand::execute
+# 3. this function is the target of a direct `call rel32` from SpawnPointCommand::execute. It has exactly TWO
+#    direct callers binary-wide - that one and ScriptModuleMinecraft::ScriptPlayer::setSpawnPoint - which is
+#    what separates it from setSpawnBlockRespawnPosition (three callers, none of them the command)
+# 4. confirm the body: unlike setSpawnBlockRespawnPosition it never calls Actor::getPosition or
+#    Actor::getAABB. It opens by comparing the incoming BlockPos and dimension against mPlayerRespawnPoint,
+#    references BlockPos::MIN and VanillaDimensions::Undefined, clears mSpawnBlockPos, and builds
+#    SetSpawnPositionPacketPayload through the (SpawnPositionType, dimension, BlockPos) ctor. It returns void
+# 5. it sits immediately after setSpawnBlockRespawnPosition in .text on both platforms - a useful sanity
+#    check, never the primary anchor
+# Verified against 1.26.44.3 (the version at the top of this file): the pattern matches EXACTLY ONCE in
+# .text, that match is the function's start address, and it resolves to the offset committed in
+# src/bedrock/symbols/.
+pattern = "41 56 56 57 53 48 83 EC 78 48 89 CE 8B 02 3B 81 ? ? 00 00 75 ?"
+
+[[signatures]]
 name = "?stopSleepInBed@Player@@UEAAX_N0@Z"
 relative = false
 extra = 0

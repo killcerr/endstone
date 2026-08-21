@@ -111,6 +111,23 @@ public:
     virtual bool performCommand(std::string command) const = 0;  // NOLINT(*-use-nodiscard)
 
     /**
+     * Gets the location where the player will spawn.
+     *
+     * @note Bedrock does not persist yaw/pitch for a respawn point, so both are 0 on the returned location.
+     * @return the respawn location, or std::nullopt if the player has no valid respawn point
+     */
+    [[nodiscard]] virtual std::optional<Location> getRespawnLocation() const = 0;
+
+    /**
+     * Sets the location where the player will respawn.
+     *
+     * Fires PlayerSetSpawnEvent with PlayerSetSpawnEvent::Cause::Plugin, whether setting or clearing.
+     *
+     * @param location the respawn location, or std::nullopt to clear it; its dimension must be loaded when set
+     */
+    virtual void setRespawnLocation(std::optional<Location> location) = 0;
+
+    /**
      * Returns if the player is in sneak mode.
      *
      * @return `true` if player is in sneak mode

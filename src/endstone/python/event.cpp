@@ -488,6 +488,33 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
     undesired effects.
 )doc")
         .def_property_readonly("item", &PlayerRiptideEvent::getItem, "An `ItemStack` for the trident being used.");
+    auto player_set_spawn_event =
+        py::class_<PlayerSetSpawnEvent, PlayerEvent, ICancellable>(m, "PlayerSetSpawnEvent", R"doc(
+    Called when a player's spawn is set, either by themselves or otherwise.
+
+    Assigning a new `location` redirects the spawn that is about to be written; cancelling leaves the respawn point
+    untouched.
+
+    Note:
+        Only the location's block coordinates and dimension are written back; Bedrock does not persist yaw/pitch for
+        a respawn point. Cancelling stops the respawn point from changing, but not the feedback around it:
+        `/spawnpoint` still reports success and a respawn anchor still plays its sound and message, because neither
+        consults the setter. The event is not fired when Bedrock clears a respawn point, so `/clearspawnpoint` and
+        breaking the bed a player is bound to are both silent.
+)doc");
+    py::native_enum<PlayerSetSpawnEvent::Cause>(player_set_spawn_event, "Cause", "enum.Enum",
+                                                "The cause of the spawn change.")
+        .value("BED", PlayerSetSpawnEvent::Cause::Bed)
+        .value("RESPAWN_ANCHOR", PlayerSetSpawnEvent::Cause::RespawnAnchor)
+        .value("COMMAND", PlayerSetSpawnEvent::Cause::Command)
+        .value("PLUGIN", PlayerSetSpawnEvent::Cause::Plugin)
+        .value("UNKNOWN", PlayerSetSpawnEvent::Cause::Unknown)
+        .export_values()
+        .finalize();
+    player_set_spawn_event
+        .def_property_readonly("cause", &PlayerSetSpawnEvent::getCause, "The cause of the spawn change.")
+        .def_property("location", &PlayerSetSpawnEvent::getLocation, &PlayerSetSpawnEvent::setLocation,
+                      "The spawn location, or `None` to remove the spawn location.");
     py::class_<PlayerShearActorEvent, PlayerEvent, ICancellable>(m, "PlayerShearActorEvent",
                                                                  "Called when a player shears an actor.")
         .def_property_readonly("actor", &PlayerShearActorEvent::getActor, "The actor being sheared.")
