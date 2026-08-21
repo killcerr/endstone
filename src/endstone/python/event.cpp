@@ -319,6 +319,15 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
         m, "PlayerDropItemEvent", "Called when a player drops an item from their inventory.")
         .def_property_readonly("item", &PlayerDropItemEvent::getItem, py::return_value_policy::reference,
                                "The `ItemStack` dropped by the player.");
+    py::class_<PlayerEditBookEvent, PlayerEvent, ICancellable>(m, "PlayerEditBookEvent",
+                                                               "Called when a player edits or signs a book.")
+        .def_property_readonly("slot", &PlayerEditBookEvent::getSlot, "The inventory slot containing the book.")
+        .def_property_readonly("previous_book_meta", &PlayerEditBookEvent::getPreviousBookMeta,
+                               "The book metadata before the edit.")
+        .def_property("new_book_meta", &PlayerEditBookEvent::getNewBookMeta, &PlayerEditBookEvent::setNewBookMeta,
+                      "The book metadata that will be applied after the edit.")
+        .def_property("is_signing", &PlayerEditBookEvent::isSigning, &PlayerEditBookEvent::setSigning,
+                      "Whether the player is signing the book.");
     py::class_<PlayerEmoteEvent, PlayerEvent, ICancellable>(m, "PlayerEmoteEvent",
                                                             "Called when a player uses an emote.")
         .def_property_readonly("emote_id", &PlayerEmoteEvent::getEmoteId, "The emote piece ID.")

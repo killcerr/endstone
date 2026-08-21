@@ -15,10 +15,13 @@
 #include "bedrock/network/packet.h"
 
 #include <memory>
+#include <utility>
+#include <variant>
 
 #include "bedrock/entity/components/user_entity_identifier_component.h"
 #include "bedrock/network/net_event_callback.h"
 #include "bedrock/network/network_identifier.h"
+#include "bedrock/network/packet/book_edit_packet.h"
 #include "bedrock/network/packet/correct_player_move_prediction_packet.h"
 #include "bedrock/network/packet/emote_packet.h"
 #include "bedrock/network/packet/mob_equipment_packet.h"
@@ -32,11 +35,13 @@
 #include "endstone/block/block.h"
 #include "endstone/color_format.h"
 #include "endstone/core/entity/components/flag_components.h"
+#include "endstone/core/inventory/item_factory.h"
 #include "endstone/core/player.h"
 #include "endstone/core/server.h"
 #include "endstone/core/skin.h"
 #include "endstone/event/actor/actor_toggle_glide_event.h"
 #include "endstone/event/actor/actor_toggle_swim_event.h"
+#include "endstone/event/player/player_edit_book_event.h"
 #include "endstone/event/player/player_emote_event.h"
 #include "endstone/event/player/player_input_event.h"
 #include "endstone/event/player/player_interact_event.h"
@@ -49,7 +54,10 @@
 #include "endstone/event/player/player_toggle_flight_event.h"
 #include "endstone/event/player/player_toggle_sneak_event.h"
 #include "endstone/event/player/player_toggle_sprint_event.h"
+#include "endstone/inventory/item_stack.h"
+#include "endstone/inventory/meta/book_meta.h"
 #include "endstone/runtime/hook.h"
+#include "endstone/variant.h"
 
 namespace endstone::core {
 
@@ -104,6 +112,124 @@ void EndstonePacketHandler::handle(MobEquipmentPacket &packet)
         return;
     }
     handle();
+}
+
+template <>
+void EndstonePacketHandler::handle(BookEditPacket &packet)
+{
+    constexpr auto writable_book = ItemTypeId::minecraft("writable_book");
+    constexpr auto written_book = ItemTypeId::minecraft("written_book");
+    constexpr int max_page_count = 50;
+
+    const auto *player = getPlayer();
+    if (player == nullptr) {
+        return;
+    }
+    const auto endstone_player = player->getEndstoneActor<EndstonePlayer>();
+    auto &inventory = endstone_player->getInventory();
+    const auto slot = packet.payload.book_slot;
+    if (slot < 0 || slot >= inventory.getSize()) {
+        handle();
+        return;
+    }
+
+    const auto item = inventory.getItem(slot);
+    if (!item || item->getType().getId() != writable_book) {
+        handle();
+        return;
+    }
+
+    auto &item_factory = EndstoneItemFactory::instance();
+    const auto meta = item->getItemMeta();
+    const auto previous_book_meta = item_factory.asMetaFor(meta.get().get(), written_book).as<BookMeta>();
+    const auto new_book_meta = item_factory.asMetaFor(meta.get().get(), written_book).as<BookMeta>();
+    if (!previous_book_meta || !new_book_meta) {
+        handle();
+        return;
+    }
+
+    std::visit(overloaded{
+                   [&](const BookEditAction::ReplacePage &action) {
+                       if (action.page_index < 0 || action.page_index >= max_page_count) {
+                           return;
+                       }
+                       auto pages = new_book_meta->getPages();
+                       if (action.page_index >= static_cast<int>(pages.size())) {
+                           pages.resize(action.page_index);
+                           pages.emplace_back(action.page_text);
+                       }
+                       else {
+                           pages[action.page_index] = action.page_text;
+                       }
+                       new_book_meta->setPages(std::move(pages));
+                   },
+                   [&](const BookEditAction::AddPage &action) {
+                       if (action.page_index < 0 || action.page_index >= max_page_count) {
+                           return;
+                       }
+                       auto pages = new_book_meta->getPages();
+                       if (static_cast<int>(pages.size()) >= max_page_count) {
+                           return;
+                       }
+                       if (action.page_index >= static_cast<int>(pages.size())) {
+                           pages.resize(action.page_index);
+                           pages.emplace_back(action.page_text);
+                       }
+                       else {
+                           pages.insert(pages.begin() + action.page_index, action.page_text);
+                       }
+                       new_book_meta->setPages(std::move(pages));
+                   },
+                   [&](const BookEditAction::DeletePage &action) {
+                       auto pages = new_book_meta->getPages();
+                       if (action.page_index >= 0 && action.page_index < static_cast<int>(pages.size())) {
+                           pages.erase(pages.begin() + action.page_index);
+                           new_book_meta->setPages(std::move(pages));
+                       }
+                   },
+                   [&](const BookEditAction::SwapPages &action) {
+                       auto pages = new_book_meta->getPages();
+                       if (action.page_index >= 0 && action.page_index < static_cast<int>(pages.size()) &&
+                           action.swap_with_index >= 0 && action.swap_with_index < static_cast<int>(pages.size())) {
+                           std::swap(pages[action.page_index], pages[action.swap_with_index]);
+                           new_book_meta->setPages(std::move(pages));
+                       }
+                   },
+                   [&](const BookEditAction::Finalize &action) {
+                       new_book_meta->setTitle(action.title);
+                       new_book_meta->setAuthor(action.author);
+                       new_book_meta->setGeneration(BookMeta::Generation::Original);
+                   },
+               },
+               packet.payload.operation);
+    const auto is_signing = std::holds_alternative<BookEditAction::Finalize>(packet.payload.operation);
+
+    PlayerEditBookEvent e{endstone_player, slot, previous_book_meta, new_book_meta, is_signing};
+    endstone_player->getServer().getPluginManager().callEvent(e);
+    if (e.isCancelled()) {
+        return;
+    }
+
+    if (e.isSigning() != is_signing) {
+        auto edited_item = *item;
+        edited_item.setType(e.isSigning() ? written_book : writable_book);
+        if (edited_item.setItemMeta(e.getNewBookMeta().get().get())) {
+            inventory.setItem(slot, std::move(edited_item));
+        }
+        return;
+    }
+
+    const auto meta_changed = !item_factory.equals(e.getNewBookMeta().get().get(), new_book_meta.get().get());
+
+    handle();
+
+    if (!meta_changed) {
+        return;
+    }
+    auto edited_item = inventory.getItem(slot);
+    if (edited_item && edited_item->setItemMeta(e.getNewBookMeta().get().get())) {
+        inventory.setItem(slot, std::move(edited_item));
+    }
 }
 
 template <>
@@ -424,6 +550,11 @@ std::shared_ptr<Packet> MinecraftPackets::createPacket(MinecraftPacketIds id)
     switch (id) {
     case MinecraftPacketIds::PlayerEquipment: {
         using Dispatcher = EndstonePacketHandlerDispatcher<MobEquipmentPacket>;
+        Dispatcher::set(&packet->handler_);
+        break;
+    }
+    case MinecraftPacketIds::BookEdit: {
+        using Dispatcher = EndstonePacketHandlerDispatcher<BookEditPacket>;
         Dispatcher::set(&packet->handler_);
         break;
     }
