@@ -151,7 +151,7 @@ std::vector<NotNull<Actor>> EndstoneDimension::getActors() const
 {
     std::vector<NotNull<Actor>> result;
     for (const auto &actor : level_.getActors()) {
-        if (actor->getDimension() != getSelf()) {
+        if (actor->getDimension() != self()) {
             continue;
         }
         result.push_back(actor);
@@ -190,7 +190,7 @@ std::vector<NotNull<Player>> EndstoneDimension::getPlayers() const
     return *handle;
 }
 
-NotNull<EndstoneDimension> EndstoneDimension::getSelf() const
+NotNull<EndstoneDimension> EndstoneDimension::self() const
 {
     return const_cast<EndstoneDimension *>(this)->shared_from_this();
 }

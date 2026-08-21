@@ -247,7 +247,7 @@ public:
         return *ptr;
     }
 
-    [[nodiscard]] NotNull<Interface> getSelf() const
+    [[nodiscard]] NotNull<Interface> self() const
     {
         return std::static_pointer_cast<Interface>(const_cast<EndstoneActorBase *>(this)->shared_from_this());
     }
