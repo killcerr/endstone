@@ -91,6 +91,7 @@ __all__ = [
     "PlayerPickupItemEvent",
     "PlayerPortalEvent",
     "PlayerQuitEvent",
+    "PlayerRecipeBookClickEvent",
     "PlayerRecipeBookSettingsChangeEvent",
     "PlayerRespawnEvent",
     "PlayerRiptideEvent",
@@ -1164,6 +1165,27 @@ class PlayerQuitEvent(PlayerEvent):
 
     @quit_message.setter
     def quit_message(self, arg1: str | Translatable | None) -> None: ...
+
+class PlayerRecipeBookClickEvent(PlayerEvent, Cancellable):
+    """
+    Called when a player clicks a recipe in the recipe book.
+
+    If the event is cancelled the recipe will not be crafted and no ingredients will be consumed.
+    """
+    @property
+    def recipe(self) -> str:
+        """
+        The identifier of the recipe clicked by the player.
+        """
+
+    @property
+    def amount(self) -> int:
+        """
+        The number of times the recipe is being crafted.
+        """
+
+    @amount.setter
+    def amount(self, arg1: int) -> None: ...
 
 class PlayerRecipeBookSettingsChangeEvent(PlayerEvent):
     """
