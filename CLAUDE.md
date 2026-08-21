@@ -11,7 +11,8 @@ Endstone is a plugin API for Minecraft Bedrock Dedicated Servers (BDS), supporti
 ### Prerequisites
 - Windows: clang-cl + lld-link (LLVM 18+, e.g. the "C++ Clang tools for Windows" component of Visual Studio 2022), plus the MSVC toolchain for the Windows SDK and STL headers, and CMake 3.29+
 - Linux: Clang 18+ with libc++
-- CMake, Ninja, Conan 2.0+
+- CMake 3.29+ and Conan 2.0+ on PATH. CMake is yours to install — the profile deliberately does not
+  `tool_requires` it. Ninja does come from Conan.
 
 > LLVM 18+ is the hard minimum: the public API headers use `std::format`, which is only complete in libc++ from LLVM 18.
 
