@@ -25,6 +25,9 @@ conan install . --build=missing
 
 > Windows: run from a Visual Studio Developer prompt with clang-cl/lld-link on PATH.
 
+Do not pass `-of` — the default `cmake_layout` output folder is what the preset and the docs below
+assume. In particular never aim it at the wheel's tree (`-of build/conan_out`); see [Build trees](#build-trees).
+
 ### Activate Conan build environment (only for the manual CMake path)
 The profile pins `&:build_type=RelWithDebInfo` for endstone itself (dependencies stay `Release`), so the build tree is `build/RelWithDebInfo`:
 
@@ -49,18 +52,36 @@ cmake --build --preset conan-relwithdebinfo
 The PEP 517 backend (`conan-py-build`) runs Conan internally, so no separate `conan install` step is required:
 
 ```shell
-pip install -U .
-# or with uv:
 uv pip install -U .
-```
-
-To keep the C++ build tree persistent across reinstalls (much faster after the first build), pass a build dir via `config_settings`:
-
-```shell
+# or with pip:
 pip install -U . -C build-dir=./build
 ```
 
+The build dir is what keeps the C++ build tree persistent across reinstalls (much faster after the
+first build). `[tool.uv] config-settings` in `pyproject.toml` supplies it for uv; pip has no
+equivalent, so pass `-C build-dir=./build` by hand there. Without it the backend builds in a
+tempdir and throws the whole tree away.
+
 `build/package` is the wheel staging tree and is never pruned, so a module deleted from `endstone/` keeps being packaged, and an old `*.dist-info` makes pip reject the build with a version mismatch. After deleting or renaming anything under `endstone/`, `rm -rf build/package` before reinstalling.
+
+### Build trees
+
+Local development and the wheel build own **separate** trees under `build/`. Keep them separate:
+
+| Flow | Tree | Driven by |
+| --- | --- | --- |
+| Local development | `build/RelWithDebInfo` | `conan install .` then `cmake --preset conan-relwithdebinfo` |
+| Wheel | `build/conan_out/build/RelWithDebInfo` | `uv pip install -U .` |
+
+Only the local tree is meant to be driven by hand — it is also the only one that builds the GTest
+suite, since the wheel configures with `BUILD_TESTING=OFF`.
+
+Never reconfigure the wheel's tree with `cmake --preset`. `conan-py-build` pins `Python_EXECUTABLE`
+to the PEP 517 build environment — an ephemeral venv under `AppData/Local/uv/cache/builds-v0/` that
+is deleted as soon as the wheel finishes — via `tools.cmake.cmaketoolchain:extra_variables`. A later
+configure over that tree inherits the dead interpreter and fails in pybind11's `find_package(Python)`.
+If the two trees ever get crossed (a stale `CMakeUserPresets.json` pointing into `build/conan_out`),
+delete `CMakeUserPresets.json` and re-run `conan install .` to regenerate it.
 
 ## Testing
 
