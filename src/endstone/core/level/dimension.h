@@ -51,7 +51,7 @@ public:
     [[nodiscard]] std::vector<NotNull<Player>> getPlayers() const override;
 
     [[nodiscard]] ::Dimension &getHandle() const;
-    [[nodiscard]] NotNull<EndstoneDimension> getSelf() const;
+    [[nodiscard]] NotNull<EndstoneDimension> self() const;
 
 private:
     WeakRef<::Dimension> dimension_;

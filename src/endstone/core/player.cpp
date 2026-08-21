@@ -273,7 +273,7 @@ void EndstonePlayer::kick(std::string message) const
 
 bool EndstonePlayer::performCommand(std::string command) const
 {
-    return server_.dispatchCommand(getSelf(), command);
+    return server_.dispatchCommand(self(), command);
 }
 
 bool EndstonePlayer::isSneaking() const
@@ -427,12 +427,12 @@ void EndstonePlayer::setWalkSpeed(float value) const
 
 NotNull<Scoreboard> EndstonePlayer::getScoreboard() const
 {
-    return server_.getPlayerBoard(getSelf().cast<EndstonePlayer>());
+    return server_.getPlayerBoard(self().cast<EndstonePlayer>());
 }
 
 void EndstonePlayer::setScoreboard(NotNull<Scoreboard> scoreboard)
 {
-    server_.setPlayerBoard(getSelf().cast<EndstonePlayer>(), std::move(scoreboard));
+    server_.setPlayerBoard(self().cast<EndstonePlayer>(), std::move(scoreboard));
 }
 
 void EndstonePlayer::sendActionBar(std::string message) const
@@ -569,7 +569,7 @@ void EndstonePlayer::updateCommands() const
     for (auto it = packet.payload.commands.begin(); it != packet.payload.commands.end();) {
         const auto &name = it->name;
         const auto command = command_map.getCommand(name);
-        if (command && command->isRegistered() && command->testPermissionSilently(getSelf())) {
+        if (command && command->isRegistered() && command->testPermissionSilently(self())) {
             if (auto symbol = registry.findEnumValue(name); symbol.value() != 0) {
                 auto symbol_index = static_cast<std::uint32_t>(symbol.toIndex());
                 if (it->permission_level >= CommandPermissionLevel::Host) {
@@ -699,7 +699,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
         if (from_slot == to_slot) {
             return true;
         }
-        PlayerItemHeldEvent e(getSelf(), from_slot, to_slot);
+        PlayerItemHeldEvent e(self(), from_slot, to_slot);
         getServer().getPluginManager().callEvent(e);
         if (e.isCancelled()) {
             this->inventory_->setHeldItemSlot(from_slot);
@@ -719,7 +719,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
                 bed = getDimension()->getBlockAt(getLocation());
             }
 
-            PlayerBedLeaveEvent e(getSelf(), *bed);
+            PlayerBedLeaveEvent e(self(), *bed);
             getServer().getPluginManager().callEvent(e);
         }
         return true;
@@ -732,7 +732,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
                 ColorFormat::Yellow + (pk.payload.skin.getIsPersona() ? "%multiplayer.player.changeToPersona"
                                                                       : "%multiplayer.player.changeToSkin"),
                 {getName()});
-            PlayerSkinChangeEvent e{getSelf(), EndstoneSkin::fromMinecraft(pk.payload.skin), skin_change_message};
+            PlayerSkinChangeEvent e{self(), EndstoneSkin::fromMinecraft(pk.payload.skin), skin_change_message};
             getServer().getPluginManager().callEvent(e);
             if (e.isCancelled()) {
                 auto new_packet = MinecraftPackets::createPacket(MinecraftPacketIds::PlayerSkin);
@@ -763,7 +763,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
         if (pk.isServerSide()) {
             return true;
         }
-        PlayerEmoteEvent e(getSelf(), pk.payload.piece_id, pk.isEmoteChatMuted());
+        PlayerEmoteEvent e(self(), pk.payload.piece_id, pk.isEmoteChatMuted());
         getServer().getPluginManager().callEvent(e);
         if (e.isCancelled()) {
             return false;
@@ -796,7 +796,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
                              options.layout_craft == InventoryLayout::RecipeBookOnly;
 
         PlayerRecipeBookSettingsChangeEvent e{
-            getSelf(),
+            self(),
             PlayerRecipeBookSettingsChangeEvent::RecipeBookType::Crafting,
             is_open,
             options.filtering,
@@ -819,24 +819,24 @@ bool EndstonePlayer::handlePacket(Packet &packet)
         last_input_ = player_input;
 
         if (pk.getInput(PlayerAuthInputPacket::InputData::StartSprinting) && !getHandle().isSprinting()) {
-            PlayerToggleSprintEvent e(getSelf(), true);
+            PlayerToggleSprintEvent e(self(), true);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StopSprinting) && getHandle().isSprinting()) {
-            PlayerToggleSprintEvent e(getSelf(), false);
+            PlayerToggleSprintEvent e(self(), false);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StartSneaking) && !getHandle().isSneaking()) {
-            PlayerToggleSneakEvent e(getSelf(), true);
+            PlayerToggleSneakEvent e(self(), true);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StopSneaking) && getHandle().isSneaking()) {
-            PlayerToggleSneakEvent e(getSelf(), false);
+            PlayerToggleSneakEvent e(self(), false);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::MissedSwing)) {
             PlayerInteractEvent e{
-                getSelf(),
+                self(),
                 PlayerInteractEvent::Action::LeftClickAir,
                 getInventory().getItemInMainHand(),
                 nullptr,
@@ -849,39 +849,39 @@ bool EndstonePlayer::handlePacket(Packet &packet)
             }
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StartSwimming) && !getHandle().isSwimming()) {
-            ActorToggleSwimEvent e(getSelf(), true);
+            ActorToggleSwimEvent e(self(), true);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StopSwimming) && getHandle().isSwimming()) {
-            ActorToggleSwimEvent e(getSelf(), false);
+            ActorToggleSwimEvent e(self(), false);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StartGliding) && !getHandle().isGliding()) {
-            ActorToggleGlideEvent e(getSelf(), true);
+            ActorToggleGlideEvent e(self(), true);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StopGliding) && getHandle().isGliding()) {
-            ActorToggleGlideEvent e(getSelf(), false);
+            ActorToggleGlideEvent e(self(), false);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StartCrawling) && !getHandle().isCrawling()) {
-            PlayerToggleCrawlEvent e(getSelf(), true);
+            PlayerToggleCrawlEvent e(self(), true);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StopCrawling) && getHandle().isCrawling()) {
-            PlayerToggleCrawlEvent e(getSelf(), false);
+            PlayerToggleCrawlEvent e(self(), false);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StartFlying) && getAllowFlight() && !getHandle().isFlying()) {
-            PlayerToggleFlightEvent e(getSelf(), true);
+            PlayerToggleFlightEvent e(self(), true);
             getServer().getPluginManager().callEvent(e);
         }
         if (pk.getInput(PlayerAuthInputPacket::InputData::StopFlying) && getAllowFlight() && getHandle().isFlying()) {
-            PlayerToggleFlightEvent e(getSelf(), false);
+            PlayerToggleFlightEvent e(self(), false);
             getServer().getPluginManager().callEvent(e);
         }
         if (input_changed) {
-            PlayerInputEvent e(getSelf(), player_input);
+            PlayerInputEvent e(self(), player_input);
             getServer().getPluginManager().callEvent(e);
         }
 
@@ -892,7 +892,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
                 const auto item = getInventory().getItemInMainHand();
                 const auto block = getDimension()->getBlockAt(action.pos.x, action.pos.y, action.pos.z);
                 PlayerInteractEvent e{
-                    getSelf(),
+                    self(),
                     PlayerInteractEvent::Action::LeftClickBlock,
                     item,
                     block,
@@ -926,7 +926,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
                           input.rot.y};
 
         if (pk.getInput(PlayerAuthInputPacket::InputData::Jumping) && on_ground && delta.y > 0.0F) {
-            PlayerJumpEvent e{getSelf(), from, to};
+            PlayerJumpEvent e{self(), from, to};
             getServer().getPluginManager().callEvent(e);
             if (e.isCancelled()) {
                 actor.addOrRemoveComponent<InternalTeleportFlagComponent>(true);
@@ -937,7 +937,7 @@ bool EndstonePlayer::handlePacket(Packet &packet)
 
         // Prevent intensive event calls on tiny movement using the thresholds from Spigot
         if (delta.lengthSquared() > 1.0F / 256 || delta_angle.lengthSquared() > 10.0F) {
-            PlayerMoveEvent e{getSelf(), from, to};
+            PlayerMoveEvent e{self(), from, to};
             getServer().getPluginManager().callEvent(e);
             if (e.isCancelled()) {
                 if (delta_angle.lengthSquared() > 0.0F) {
@@ -987,7 +987,7 @@ void EndstonePlayer::onFormClose(std::uint32_t form_id, PlayerFormCloseReason /*
             std::visit(overloaded{[this](auto &&form) {
                            auto callback = form.getOnClose();
                            if (callback) {
-                               callback(getSelf());
+                               callback(self());
                            }
                        }},
                        form_variant);
@@ -1013,20 +1013,20 @@ void EndstonePlayer::onFormResponse(std::uint32_t form_id, const nlohmann::json 
             std::visit(overloaded{
                            [&](const MessageForm &form) {
                                if (const auto callback = form.getOnSubmit()) {
-                                   callback(getSelf(), json.get<bool>() ? 0 : 1);
+                                   callback(self(), json.get<bool>() ? 0 : 1);
                                }
                            },
                            [&](const ActionForm &form) {
                                const int selection = json.get<int>();
                                if (const auto callback = form.getOnSubmit()) {
-                                   callback(getSelf(), selection);
+                                   callback(self(), selection);
                                }
                                int index = 0;
                                for (const auto &controls = form.getControls(); const auto &control : controls) {
                                    if (std::holds_alternative<Button>(control)) {
                                        if (index == selection) {
                                            if (const auto on_click = std::get<Button>(control).getOnClick()) {
-                                               on_click(getSelf());
+                                               on_click(self());
                                            }
                                            break;
                                        }
@@ -1036,7 +1036,7 @@ void EndstonePlayer::onFormResponse(std::uint32_t form_id, const nlohmann::json 
                            },
                            [&](const ModalForm &form) {
                                if (auto callback = form.getOnSubmit()) {
-                                   callback(getSelf(), json.dump());
+                                   callback(self(), json.dump());
                                }
                            },
                        },
@@ -1057,7 +1057,7 @@ void EndstonePlayer::doFirstSpawn()
 
     const auto &server = static_cast<EndstoneServer &>(getServer());
     Message join_message = Translatable(ColorFormat::Yellow + "%multiplayer.player.joined", {getName()});
-    PlayerJoinEvent e{getSelf(), join_message};
+    PlayerJoinEvent e{self(), join_message};
     server.getPluginManager().callEvent(e);
     join_message = e.getJoinMessage().value_or("");
     if (server.isServerTextEnabled(ServerTextEvent::PlayerConnection) &&
@@ -1135,7 +1135,7 @@ void EndstonePlayer::initFromConnectionRequest(std::variant<std::reference_wrapp
 
 void EndstonePlayer::disconnect()
 {
-    server_.removePlayerBoard(getSelf().cast<EndstonePlayer>());
+    server_.removePlayerBoard(self().cast<EndstonePlayer>());
     forms_.clear();  // a form callback may hold the last reference back to this player
     perm_->clearPermissions();
 }

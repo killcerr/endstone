@@ -45,7 +45,7 @@ public:
     [[nodiscard]] const ::ScoreboardId &getScoreboardId(ScoreEntry entry) const;
     const ::ScoreboardId &getOrCreateScoreboardId(ScoreEntry entry);
     [[nodiscard]] ::Scoreboard &getHandle() const;
-    [[nodiscard]] NotNull<EndstoneScoreboard> getSelf() const;
+    [[nodiscard]] NotNull<EndstoneScoreboard> self() const;
 
     static std::string getCriteriaName(Criteria::Type type);
     static std::string toMinecraftSlot(DisplaySlot slot);

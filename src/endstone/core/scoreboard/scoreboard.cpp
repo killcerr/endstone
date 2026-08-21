@@ -55,7 +55,7 @@ void EndstoneScoreboard::init()
 {
     auto &server = EndstoneServer::getInstance();
     const auto *level = server.getEndstoneLevel();
-    packet_sender_ = std::make_unique<ScoreboardPacketSender>(server, getSelf(), *level->getHandle().getPacketSender());
+    packet_sender_ = std::make_unique<ScoreboardPacketSender>(server, self(), *level->getHandle().getPacketSender());
     board_.setPacketSender(packet_sender_.get());
 }
 
@@ -76,13 +76,13 @@ NotNull<Objective> EndstoneScoreboard::addObjective(std::string name, Criteria::
     Preconditions::checkState(cr != nullptr, "Criteria does not exist.");
     auto *objective = board_.addObjective(name, display_name, *cr);
     Preconditions::checkState(objective != nullptr, "Objective {} already exists.", name);
-    return std::make_shared<EndstoneObjective>(getSelf(), *objective);
+    return std::make_shared<EndstoneObjective>(self(), *objective);
 }
 
 Nullable<Objective> EndstoneScoreboard::getObjective(std::string name) const
 {
     if (auto *objective = board_.getObjective(name); objective) {
-        return std::make_shared<EndstoneObjective>(getSelf(), *objective);
+        return std::make_shared<EndstoneObjective>(self(), *objective);
     }
     return nullptr;
 }
@@ -93,14 +93,14 @@ Nullable<Objective> EndstoneScoreboard::getObjective(DisplaySlot slot) const
     if (!display_objective) {
         return nullptr;
     }
-    return std::make_shared<EndstoneObjective>(getSelf(), const_cast<::Objective &>(display_objective->getObjective()));
+    return std::make_shared<EndstoneObjective>(self(), const_cast<::Objective &>(display_objective->getObjective()));
 }
 
 std::vector<NotNull<Objective>> EndstoneScoreboard::getObjectives() const
 {
     std::vector<NotNull<Objective>> result;
     board_.forEachObjective(
-        [&](auto &objective) { result.push_back(std::make_shared<EndstoneObjective>(getSelf(), objective)); });
+        [&](auto &objective) { result.push_back(std::make_shared<EndstoneObjective>(self(), objective)); });
     return result;
 }
 
@@ -109,7 +109,7 @@ std::vector<NotNull<Objective>> EndstoneScoreboard::getObjectivesByCriteria(Crit
     std::vector<NotNull<Objective>> result;
     board_.forEachObjective([&](auto &objective) {
         if (objective.getCriteria().getName() == getCriteriaName(criteria)) {
-            result.push_back(std::make_shared<EndstoneObjective>(getSelf(), objective));
+            result.push_back(std::make_shared<EndstoneObjective>(self(), objective));
         }
     });
     return result;
@@ -119,7 +119,7 @@ std::vector<NotNull<Score>> EndstoneScoreboard::getScores(ScoreEntry entry) cons
 {
     std::vector<NotNull<Score>> result;
     board_.forEachObjective([&](auto &objective) {
-        auto obj = std::make_shared<EndstoneObjective>(getSelf(), objective);
+        auto obj = std::make_shared<EndstoneObjective>(self(), objective);
         result.push_back(std::make_shared<EndstoneScore>(std::move(obj), entry));
     });
     return result;
@@ -245,7 +245,7 @@ const ::ScoreboardId &EndstoneScoreboard::getOrCreateScoreboardId(ScoreEntry ent
     return board_;
 }
 
-NotNull<EndstoneScoreboard> EndstoneScoreboard::getSelf() const
+NotNull<EndstoneScoreboard> EndstoneScoreboard::self() const
 {
     return const_cast<EndstoneScoreboard *>(this)->shared_from_this();
 }

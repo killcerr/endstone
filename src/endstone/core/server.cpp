@@ -815,7 +815,7 @@ void EndstoneServer::setPlayerBoard(const NotNull<EndstonePlayer> &player, NotNu
     }
 
     // remove player from the old board
-    getPlayerBoard(player)->resetScores(player->getSelf());
+    getPlayerBoard(player)->resetScores(player->self());
 
     // add player to the new board
     new_board.onPlayerJoined(player->getHandle());
