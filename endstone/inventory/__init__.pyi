@@ -22,8 +22,16 @@ __all__ = [
     "ItemStack",
     "ItemType",
     "MapMeta",
+    "MultiRecipe",
     "PlayerInventory",
     "PotionMeta",
+    "Recipe",
+    "RecipeIngredient",
+    "RecipeIngredientKind",
+    "RecipeType",
+    "ShapedRecipe",
+    "ShapelessRecipe",
+    "SmithingRecipe",
     "WritableBookMeta",
 ]
 
@@ -118,6 +126,106 @@ class EquipmentSlot(enum.Enum):
     """
     Only for certain entities such as horses and wolves.
     """
+
+class RecipeIngredientKind(enum.Enum):
+    EMPTY = 0
+    ITEM = 1
+    ITEM_TAG = 2
+    UNSUPPORTED = 3
+
+class RecipeType(enum.Enum):
+    SHAPED = 0
+    SHAPELESS = 1
+    SMITHING = 2
+    MULTI = 3
+
+class RecipeIngredient:
+    """
+    Describes one immutable ingredient captured from a recipe.
+    """
+    def __init__(self) -> None: ...
+    @property
+    def kind(self) -> RecipeIngredientKind: ...
+    @property
+    def identifier(self) -> str: ...
+    @property
+    def item_id(self) -> str: ...
+    @property
+    def tag(self) -> str: ...
+    @property
+    def count(self) -> int: ...
+    @property
+    def data(self) -> int | None: ...
+    @property
+    def aux_value(self) -> int: ...
+    @property
+    def is_empty(self) -> bool: ...
+    @property
+    def is_item_tag(self) -> bool: ...
+    @property
+    def is_wildcard_data(self) -> bool: ...
+    @property
+    def is_supported(self) -> bool: ...
+
+class Recipe:
+    """
+    Represents a crafting recipe.
+    """
+    @property
+    def type(self) -> RecipeType: ...
+    @property
+    def result(self) -> ItemStack: ...
+    @property
+    def ingredients(self) -> list[RecipeIngredient]: ...
+    @property
+    def is_shapeless(self) -> bool:
+        """
+        Whether this recipe can be crafted with its ingredients in any order.
+        """
+
+    @property
+    def recipe_id(self) -> str:
+        """
+        The string identifier assigned to this recipe.
+        """
+
+    @property
+    def tag(self) -> str:
+        """
+        The crafting tag assigned to this recipe.
+        """
+
+class ShapedRecipe(Recipe):
+    """
+    Represents a shaped crafting recipe.
+    """
+    @property
+    def width(self) -> int: ...
+    @property
+    def height(self) -> int: ...
+    @property
+    def assume_symmetry(self) -> bool: ...
+
+class ShapelessRecipe(Recipe):
+    """
+    Represents a shapeless crafting recipe.
+    """
+
+class MultiRecipe(Recipe):
+    """
+    Represents a recipe whose result is determined from the crafting inputs.
+    """
+
+class SmithingRecipe(Recipe):
+    """
+    Represents a smithing recipe, including transform and trim recipes.
+    """
+    @property
+    def template_ingredient(self) -> RecipeIngredient: ...
+    @property
+    def base_ingredient(self) -> RecipeIngredient: ...
+    @property
+    def addition_ingredient(self) -> RecipeIngredient: ...
 
 class ItemType:
     """

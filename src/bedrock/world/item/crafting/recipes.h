@@ -19,6 +19,7 @@
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include "bedrock/core/string/string_hash.h"
 #include "bedrock/resources/resource_pack_manager.h"
@@ -34,22 +35,28 @@ private:
 class ILevel;
 class Recipes {
 public:
-    static constexpr int RECIPE_MAXIMUM_WIDTH = 3;
-    static constexpr int RECIPE_MAXIMUM_HEIGHT = 3;
-    static constexpr int RECIPE_TOP_PRIORITY = 0;
-    static constexpr int DEFAULT_PRIORITY = 50;
-
     Recipes();
     Recipes(ILevel *);
     [[nodiscard]] ItemInstance getFurnaceRecipeResult(const ItemStackBase &, const HashedString &) const;
+    [[nodiscard]] const auto &getRecipeMap() const { return recipes_; }
 
-    [[nodiscard]] const Recipe *getRecipeByNetId(const RecipeNetId &net_id) const
+    [[nodiscard]] std::shared_ptr<const Recipe> getRecipeByNetId(const RecipeNetId &net_id) const
     {
         if (net_id.raw_id == 0) {
             return nullptr;
         }
         const auto it = recipes_by_net_id_.find(net_id);
-        return it != recipes_by_net_id_.end() ? it->second : nullptr;
+        if (it == recipes_by_net_id_.end()) {
+            return nullptr;
+        }
+        for (const auto &by_tag : recipes_) {
+            for (const auto &by_id : by_tag.second) {
+                if (by_id.second.get() == it->second) {
+                    return by_id.second;
+                }
+            }
+        }
+        return nullptr;
     }
 
 private:

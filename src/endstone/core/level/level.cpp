@@ -14,6 +14,8 @@
 
 #include "endstone/core/level/level.h"
 
+#include "endstone/core/inventory/recipe.h"
+
 #include <cstdlib>
 #include <ranges>
 #include <stdexcept>
@@ -101,6 +103,11 @@ std::vector<NotNull<Dimension>> EndstoneLevel::getDimensions() const
         dimensions.emplace_back(val);
     }
     return dimensions;
+}
+
+std::vector<std::unique_ptr<Recipe>> EndstoneLevel::getRecipes() const
+{
+    return makeRecipes(level_.getRecipes());
 }
 
 Nullable<Dimension> EndstoneLevel::getDimension(DimensionId id) const

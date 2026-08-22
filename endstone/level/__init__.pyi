@@ -46,6 +46,12 @@ class Level:
         A list of all dimensions within this level.
         """
 
+    @property
+    def recipes(self) -> list:
+        """
+        A snapshot of the crafting recipes currently registered by the level.
+        """
+
     def get_dimension(self, id: Identifier[Dimension] | str) -> Dimension | None:
         """
         Gets the dimension with the given id.

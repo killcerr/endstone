@@ -14,21 +14,36 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "endstone/inventory/item_stack.h"
+#include "endstone/inventory/recipe_ingredient.h"
 
 namespace endstone {
-/**
- * Represents some type of crafting recipe.
- */
+/** Identifies the concrete kind of a crafting recipe. */
+enum class RecipeType {
+    Shaped,
+    Shapeless,
+    Smithing,
+    Multi,
+};
+
+/** Represents some type of crafting recipe. */
 class Recipe {
 public:
     virtual ~Recipe() = default;
-
-    /**
-     * Get the result of this recipe.
-     *
-     * @return The result stack
-     */
+    /** Gets the concrete kind of this recipe. */
+    [[nodiscard]] virtual RecipeType getType() const noexcept = 0;
+    /** Gets the result of this recipe. */
     [[nodiscard]] virtual ItemStack getResult() const = 0;
+    /** Gets the ingredients used by this recipe. */
+    [[nodiscard]] virtual const std::vector<RecipeIngredient> &getIngredients() const = 0;
+    /** Checks whether this recipe can be crafted with its ingredients in any order. */
+    [[nodiscard]] virtual bool isShapeless() const = 0;
+    /** Gets the string identifier assigned to this recipe. */
+    [[nodiscard]] virtual const std::string &getRecipeId() const = 0;
+    /** Gets the crafting tag assigned to this recipe. */
+    [[nodiscard]] virtual const std::string &getTag() const = 0;
 };
 }  // namespace endstone

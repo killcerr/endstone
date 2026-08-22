@@ -18,8 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PlayerArmorStandManipulateEvent`, reporting `armor_stand_item`, `player_item` and `slot`.
 - `PlayerBucketActorEvent` and `PlayerShearActorEvent`, reporting the `actor`, the `original_bucket` or `item` used and the `hand`.
 - `PlayerRecipeBookSettingsChangeEvent`, reporting `recipe_book_type`, `is_open` and `is_filtering`.
-- `PlayerCraftItemEvent` for crafting from a grid or the recipe book, reporting the crafted `item`, the `recipe_id` and the `amount` of crafts.
-- `PlayerRecipeBookClickEvent` for crafting straight from the recipe book, reporting the `recipe` identifier and a writable `amount`. Cancelling it suppresses the following `PlayerCraftItemEvent` too.
+- `PlayerCraftItemEvent` for crafting from a grid or the recipe book, reporting the crafted `item`, its `recipe` and the `amount` of crafts.
+- `PlayerRecipeBookClickEvent` for crafting straight from the recipe book, reporting the clicked `recipe` and a writable `amount`. Cancelling it suppresses the following `PlayerCraftItemEvent` too.
 - `PlayerEditBookEvent` for editing a page of a book and quill or signing it, reporting the book metadata before and after the edit, the inventory `slot`, and whether the book is being signed. `new_book_meta` and `is_signing` are writable.
 - `PlayerSetSpawnEvent` for a player's respawn point being set, reporting the `cause` (`BED`, `RESPAWN_ANCHOR`, `COMMAND`, `PLUGIN` or `UNKNOWN`) and a writable `location`. Cancelling leaves the respawn point untouched, though `/spawnpoint` still reports success and a respawn anchor still plays its sound. It does not fire when Bedrock clears a respawn point, so `/clearspawnpoint` and breaking the bed are both silent.
 - `PlayerToggleSneakEvent`, `PlayerToggleSprintEvent`, `PlayerToggleFlightEvent` and `PlayerToggleCrawlEvent`, carrying the new state in `is_sneaking`, `is_sprinting`, `is_flying` and `is_crawling`.
@@ -63,6 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Level.create_dimension()` for registering an empty (void) dimension from -64 to 320 at runtime. The registration does not survive a restart, so call it again on every startup.
 - `Dimension.mobs` and `Dimension.players`, both narrowing `Dimension.actors`.
 - Chunk loading API: `Dimension.load_chunk()`, `Dimension.unload_chunk()` and `Dimension.is_chunk_loaded()`.
+- `Level.recipes`, exposing snapshots of shaped, shapeless and smithing crafting recipes, including transform and trim recipes, their results when available, immutable ingredient descriptors, IDs, crafting tags and shapelessness.
+- `MultiRecipe` snapshots for recipes whose result is determined from crafting inputs, including recipe events and `Level.recipes`.
 
 #### Commands and permissions
 
@@ -84,6 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Healthcheck in the Docker image, so `docker ps` and Docker Compose report whether the server is online.
 - `PUID`/`PGID` environment variables in the Docker image.
 - A `docker-compose.yml` for running the server with Docker Compose.
+***
 
 ### Changed
 

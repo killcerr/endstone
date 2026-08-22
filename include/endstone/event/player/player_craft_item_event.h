@@ -14,12 +14,13 @@
 
 #pragma once
 
-#include <string>
+#include <memory>
 #include <utility>
 
 #include "endstone/event/cancellable.h"
 #include "endstone/event/player/player_event.h"
 #include "endstone/inventory/item_stack.h"
+#include "endstone/inventory/recipe.h"
 
 namespace endstone {
 
@@ -32,8 +33,8 @@ class PlayerCraftItemEvent final : public Cancellable<PlayerEvent> {
 public:
     ENDSTONE_EVENT(PlayerCraftItemEvent);
 
-    PlayerCraftItemEvent(const NotNull<Player> &player, ItemStack item, std::string recipe_id, int amount)
-        : Cancellable(player), item_(std::move(item)), recipe_id_(std::move(recipe_id)), amount_(amount)
+    PlayerCraftItemEvent(const NotNull<Player> &player, ItemStack item, std::unique_ptr<Recipe> recipe, int amount)
+        : Cancellable(player), item_(std::move(item)), recipe_(std::move(recipe)), amount_(amount)
     {
     }
 
@@ -45,11 +46,11 @@ public:
     [[nodiscard]] const ItemStack &getItem() const { return item_; }
 
     /**
-     * Gets the identifier of the recipe being used.
+     * Gets the recipe being crafted.
      *
-     * @return the recipe identifier
+     * @return the recipe
      */
-    [[nodiscard]] const std::string &getRecipeId() const { return recipe_id_; }
+    [[nodiscard]] const Recipe &getRecipe() const { return *recipe_; }
 
     /**
      * Gets the number of times the recipe is being crafted.
@@ -60,7 +61,7 @@ public:
 
 private:
     ItemStack item_;
-    std::string recipe_id_;
+    std::unique_ptr<Recipe> recipe_;
     int amount_;
 };
 

@@ -21,10 +21,16 @@
 
 #include "endstone/actor/actor.h"
 #include "endstone/game_rule.h"
+#include "endstone/inventory/recipe.h"
 #include "endstone/level/dimension.h"
 #include "endstone/level/dimension_creator.h"
 
 namespace endstone {
+
+class Recipe;
+class ShapedRecipe;
+class ShapelessRecipe;
+class SmithingRecipe;
 
 /**
  * Represents a level, which may contain actors, chunks and blocks.
@@ -67,6 +73,9 @@ public:
      * @return a list of dimensions
      */
     [[nodiscard]] virtual std::vector<NotNull<Dimension>> getDimensions() const = 0;
+
+    /** Gets a snapshot of the crafting recipes currently registered by the level. */
+    [[nodiscard]] virtual std::vector<std::unique_ptr<Recipe>> getRecipes() const = 0;
 
     /**
      * Gets the dimension with the given id.

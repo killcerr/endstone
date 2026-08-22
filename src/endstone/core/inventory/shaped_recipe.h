@@ -1,0 +1,43 @@
+// Copyright (c) 2024, The Endstone Project. (https://endstone.dev) All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#pragma once
+
+#include "bedrock/world/item/crafting/shaped_recipe.h"
+#include "endstone/core/inventory/recipe_data.h"
+#include "endstone/inventory/shaped_recipe.h"
+
+namespace endstone::core {
+
+class EndstoneShapedRecipe final : public endstone::ShapedRecipe, private EndstoneRecipeData {
+public:
+    explicit EndstoneShapedRecipe(std::shared_ptr<const ::Recipe> recipe) : EndstoneRecipeData(std::move(recipe)) {}
+    [[nodiscard]] endstone::RecipeType getType() const noexcept override { return endstone::RecipeType::Shaped; }
+    [[nodiscard]] endstone::ItemStack getResult() const override { return EndstoneRecipeData::getResult(); }
+    [[nodiscard]] const std::vector<endstone::RecipeIngredient> &getIngredients() const override
+    {
+        return EndstoneRecipeData::getIngredients();
+    }
+    [[nodiscard]] bool isShapeless() const override { return EndstoneRecipeData::isShapeless(); }
+    [[nodiscard]] const std::string &getRecipeId() const override { return EndstoneRecipeData::getRecipeId(); }
+    [[nodiscard]] const std::string &getTag() const override { return EndstoneRecipeData::getTag(); }
+    [[nodiscard]] int getWidth() const noexcept override { return getHandle().getWidth(); }
+    [[nodiscard]] int getHeight() const noexcept override { return getHandle().getHeight(); }
+    [[nodiscard]] bool getAssumeSymmetry() const noexcept override
+    {
+        return static_cast<const ::ShapedRecipe *>(&getHandle())->assumeSymmetry();
+    }
+};
+
+}  // namespace endstone::core

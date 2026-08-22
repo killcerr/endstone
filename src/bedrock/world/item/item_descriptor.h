@@ -48,7 +48,6 @@ public:
     [[nodiscard]] std::int16_t getId() const;
     [[nodiscard]] std::int16_t getAuxValue() const;
     [[nodiscard]] std::string getFullName() const;
-
     struct ItemEntry {
         const Item *item;
         std::int16_t aux_value;
@@ -64,6 +63,7 @@ public:
         Deferred = 4,
         ComplexAlias = 5,
     };
+    [[nodiscard]] InternalType getType() const;
 
     class BaseDescriptor {
     public:

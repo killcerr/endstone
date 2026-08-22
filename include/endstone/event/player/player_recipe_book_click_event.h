@@ -14,11 +14,12 @@
 
 #pragma once
 
-#include <string>
+#include <memory>
 #include <utility>
 
 #include "endstone/event/cancellable.h"
 #include "endstone/event/player/player_event.h"
+#include "endstone/inventory/recipe.h"
 
 namespace endstone {
 
@@ -31,17 +32,17 @@ class PlayerRecipeBookClickEvent final : public Cancellable<PlayerEvent> {
 public:
     ENDSTONE_EVENT(PlayerRecipeBookClickEvent);
 
-    PlayerRecipeBookClickEvent(const NotNull<Player> &player, std::string recipe, int amount)
+    PlayerRecipeBookClickEvent(const NotNull<Player> &player, std::unique_ptr<Recipe> recipe, int amount)
         : Cancellable(player), recipe_(std::move(recipe)), amount_(amount)
     {
     }
 
     /**
-     * Gets the identifier of the recipe clicked by the player.
+     * Gets the recipe clicked by the player.
      *
-     * @return the recipe identifier
+     * @return the recipe
      */
-    [[nodiscard]] const std::string &getRecipe() const { return recipe_; }
+    [[nodiscard]] const Recipe &getRecipe() const { return *recipe_; }
 
     /**
      * Gets the number of times the recipe is being crafted.
@@ -60,7 +61,7 @@ public:
     void setAmount(int amount) { amount_ = amount; }
 
 private:
-    std::string recipe_;
+    std::unique_ptr<Recipe> recipe_;
     int amount_;
 };
 
