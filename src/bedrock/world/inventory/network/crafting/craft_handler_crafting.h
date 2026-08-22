@@ -36,4 +36,4 @@ private:
     std::uint8_t deferred_craft_count_;
     std::vector<ItemStack> consumed_items_;
 };
-BEDROCK_STATIC_ASSERT_SIZE(CraftHandlerCrafting, 152, 152);
+BEDROCK_STATIC_ASSERT_SIZE(CraftHandlerCrafting, 152, 144);
