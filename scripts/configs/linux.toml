@@ -1023,3 +1023,39 @@ extra = 0
 # prologue through the `cvtsi2ss xmm2, ebp` / `movss xmm1, [rax+7Ch]` EXPERIENCE read that opens the
 # body; the wildcarded operands absorb the Player::EXPERIENCE lea displacement and the getAttribute call
 pattern = "55 41 57 41 56 41 54 53 48 81 EC C0 01 00 00 89 F5 48 89 FB 48 8D 35 ? ? ? ? E8 ? ? ? ? F3 0F 2A D5 F3 0F 10 48 7C"
+
+[[signatures]]
+name = "_ZN19TickingAreasManager22addTransientScopedAreaE13DimensionTypeRKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEEmN3mce4UUIDERK6Bounds"
+relative = false
+extra = 0
+# 1. the ELF carries no symtab, so anchor on RTTI: find the type name string that starts
+#    "N9Scripting10Reflection14MemberFunctionIXadL_ZN21ScriptModuleMinecraft24ScriptTickingAreaManager"
+#    "17createTickingArea" - it is unique and names the MemberFunction instantiation bound to that script API
+# 2. the pointers are relocated, not absolute, so walk .rela.dyn: the relocation whose addend is that
+#    string's address stores type_info::__name, so the type_info starts 8 bytes earlier; the relocation
+#    whose addend is the type_info address is the vtable's typeinfo slot
+# 3. vtable slots follow that slot - [0] and [1] are the complete and deleting destructors, so [2] is the
+#    virtual call thunk. The TARGET is the only function it calls that has exactly one caller in the image
+# 4. confirm identity from the body: it returns a 96-byte ScopedContext by sret, _Try_emplace-s the
+#    mPendingAreas map at this+24, walks the mActiveAreas tree keyed on the DimensionType argument, and
+#    takes an early-out that stores mce::UUID::EMPTY into the sret buffer and zeroes the rest when that
+#    dimension has no active list. The PendingArea it appends is 120 bytes with mEntityId = -1 and the
+#    scope byte set to 1
+# 5. cross-check: removeScopedAreas (below) sits 0x310 further on in the same TickingAreasManager cluster
+# the E8 rel32 is wildcarded; the rest is byte-identical across 1.26.40 and 1.26.44
+pattern = "55 41 57 41 56 41 55 41 54 53 48 81 EC 98 00 00 00 4D 89 CC 4C 89 44 24 10 48 89 4C 24 18 41 89 D5 49 89 F7 48 89 FB 89 54 24 0C 48 8D 7E 18 48 8D 54 24 0C 44 89 EE E8 ? ? ? ? 48 89 C5 49 8B 47 08"
+
+[[signatures]]
+name = "_ZN19TickingAreasManager17removeScopedAreasERKNSt3__16vectorIN3mce4UUIDENS0_9allocatorIS3_EEEE"
+relative = false
+extra = 0
+# 1. same RTTI walk as above, but starting from the MemberFunction type name that ends
+#    "24ScriptTickingAreaManager21removeAllTickingAreas"; its vtable slot [2] is that binding's call thunk
+# 2. that thunk calls ScriptTickingAreaManager::_removeTickingAreas - identify it as the callee with
+#    exactly two callers, the other being the removeTickingArea binding's call thunk
+# 3. _removeTickingAreas calls the TARGET, which is the callee with exactly two callers: _removeTickingAreas
+#    itself and ~ScriptTickingAreaManager
+# 4. confirm identity from the body: it walks the caller's vector<mce::UUID> (mce::UUID is 16 bytes, so the
+#    stride is 16) and drops every pending and active area whose scope byte is set and whose id matches
+# 5. cross-check: it sits 0x310 past addTransientScopedArea in the same TickingAreasManager cluster
+pattern = "55 41 57 41 56 41 55 41 54 53 48 83 EC 48 48 89 7C 24 08 0F 57 C0 0F 29 44 24 20 0F 29 44 24 10 C7 44 24 30 00 00 80 3F 4C 8B 36 48 8B 5E 08 49 39 DE 74 23"
