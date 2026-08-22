@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ActorChangeBlockEvent` for blocks changed by mob behaviour, such as creeper explosions, endermen, ravagers and door-breaking zombies.
 - `PlayerRespawnEvent.respawn_reason` (`RespawnReason.DEATH` / `RespawnReason.END_PORTAL`).
 - `ActorExplodeEvent::setBlockList()` and `BlockExplodeEvent::setBlockList()`, with the `BlockList` alias made public.
+- `InventoryEvent`, a base class for inventory-related events, reporting the primary `inventory` involved, and the cancellable `InventoryInteractEvent` under it, which adds the `who_clicked` player.
 - Support for custom Python events with optional cancellation.
 
 #### Actors and players

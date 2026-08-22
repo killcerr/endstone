@@ -93,6 +93,8 @@ __getattr__, __dir__, __all__ = lazy.attach(
             "DimensionEvent",
             "Event",
             "EventResult",
+            "InventoryEvent",
+            "InventoryInteractEvent",
             "LeavesDecayEvent",
             "LevelEvent",
             "MapInitializeEvent",

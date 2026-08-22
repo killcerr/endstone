@@ -545,6 +545,17 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
         .def_property_readonly("item", &PlayerPickupItemEvent::getItem,
                                "The Item picked up by the entity.");
 
+    // Inventory events
+    py::class_<InventoryEvent, Event>(m, "InventoryEvent", "Represents a player related inventory event.")
+        .def_property_readonly("inventory", &InventoryEvent::getInventory, py::return_value_policy::reference,
+                               "The primary `Inventory` involved in this transaction.");
+    py::class_<InventoryInteractEvent, InventoryEvent, ICancellable>(m, "InventoryInteractEvent", R"doc(
+    An abstract base class for events that describe an interaction between a `Player` and the contents of an
+    `Inventory`.
+)doc")
+        .def_property_readonly("who_clicked", &InventoryInteractEvent::getWhoClicked,
+                               "The player who performed the click.");
+
     // Server events
     py::class_<ServerEvent, Event>(m, "ServerEvent", "Represents a Server-related event.");
     py::class_<BroadcastMessageEvent, ServerEvent, ICancellable>(m, "BroadcastMessageEvent", R"doc(

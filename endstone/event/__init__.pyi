@@ -10,7 +10,7 @@ from endstone.actor import Actor, Item, Mob
 from endstone.block import Block, BlockFace, BlockState
 from endstone.command import CommandSender
 from endstone.damage import DamageSource
-from endstone.inventory import BookMeta, EquipmentSlot, ItemStack
+from endstone.inventory import BookMeta, EquipmentSlot, Inventory, ItemStack
 from endstone.lang import Translatable
 from endstone.level import Chunk, Dimension, Level, Location
 from endstone.map import MapView
@@ -54,6 +54,8 @@ __all__ = [
     "Event",
     "EventPriority",
     "EventResult",
+    "InventoryEvent",
+    "InventoryInteractEvent",
     "LeavesDecayEvent",
     "LevelEvent",
     "MapInitializeEvent",
@@ -1384,6 +1386,27 @@ class PlayerPickupItemEvent(PlayerEvent, Cancellable):
     def item(self) -> Item:
         """
         The Item picked up by the entity.
+        """
+
+class InventoryEvent(Event):
+    """
+    Represents a player related inventory event.
+    """
+    @property
+    def inventory(self) -> Inventory:
+        """
+        The primary `Inventory` involved in this transaction.
+        """
+
+class InventoryInteractEvent(InventoryEvent, Cancellable):
+    """
+    An abstract base class for events that describe an interaction between a `Player` and the contents of an
+    `Inventory`.
+    """
+    @property
+    def who_clicked(self) -> Player:
+        """
+        The player who performed the click.
         """
 
 class ServerEvent(Event):
