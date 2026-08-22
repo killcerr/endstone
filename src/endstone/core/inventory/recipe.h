@@ -21,7 +21,7 @@
 #include "endstone/inventory/recipe.h"
 namespace endstone::core {
 
-[[nodiscard]] std::unique_ptr<endstone::Recipe> makeRecipe(std::shared_ptr<const ::Recipe> recipe);
-[[nodiscard]] std::vector<std::unique_ptr<endstone::Recipe>> makeRecipes(const ::Recipes &recipes);
+[[nodiscard]] NotNull<endstone::Recipe> makeRecipe(std::shared_ptr<const ::Recipe> recipe);
+[[nodiscard]] std::vector<NotNull<endstone::Recipe>> makeRecipes(const ::Recipes &recipes);
 
 }  // namespace endstone::core

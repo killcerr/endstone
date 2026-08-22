@@ -14,7 +14,6 @@
 
 #pragma once
 
-#include <memory>
 #include <utility>
 
 #include "endstone/event/cancellable.h"
@@ -32,8 +31,8 @@ class PlayerRecipeBookClickEvent final : public Cancellable<PlayerEvent> {
 public:
     ENDSTONE_EVENT(PlayerRecipeBookClickEvent);
 
-    PlayerRecipeBookClickEvent(const NotNull<Player> &player, std::unique_ptr<Recipe> recipe, int amount)
-        : Cancellable(player), recipe_(std::move(recipe)), amount_(amount)
+    PlayerRecipeBookClickEvent(const NotNull<Player> &player, const NotNull<Recipe> &recipe, int amount)
+        : Cancellable(player), recipe_(recipe), amount_(amount)
     {
     }
 
@@ -61,7 +60,7 @@ public:
     void setAmount(int amount) { amount_ = amount; }
 
 private:
-    std::unique_ptr<Recipe> recipe_;
+    NotNull<Recipe> recipe_;
     int amount_;
 };
 

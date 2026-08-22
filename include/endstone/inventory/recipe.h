@@ -39,8 +39,6 @@ public:
     [[nodiscard]] virtual ItemStack getResult() const = 0;
     /** Gets the ingredients used by this recipe. */
     [[nodiscard]] virtual const std::vector<RecipeIngredient> &getIngredients() const = 0;
-    /** Checks whether this recipe can be crafted with its ingredients in any order. */
-    [[nodiscard]] virtual bool isShapeless() const = 0;
     /** Gets the string identifier assigned to this recipe. */
     [[nodiscard]] virtual const std::string &getRecipeId() const = 0;
     /** Gets the crafting tag assigned to this recipe. */

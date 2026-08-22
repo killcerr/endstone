@@ -28,7 +28,6 @@ public:
     {
         return EndstoneRecipeData::getIngredients();
     }
-    [[nodiscard]] bool isShapeless() const override { return EndstoneRecipeData::isShapeless(); }
     [[nodiscard]] const std::string &getRecipeId() const override { return EndstoneRecipeData::getRecipeId(); }
     [[nodiscard]] const std::string &getTag() const override { return EndstoneRecipeData::getTag(); }
 };

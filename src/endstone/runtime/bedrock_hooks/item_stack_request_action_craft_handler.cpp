@@ -52,7 +52,7 @@ ItemStackNetResult ItemStackRequestActionCraftHandler::handleCraftAction(
         if (call_recipe_book_click) {
             auto event_recipe = endstone::core::makeRecipe(recipe);
             endstone::PlayerRecipeBookClickEvent e{player_.getEndstoneActor<endstone::core::EndstonePlayer>(),
-                                                   std::move(event_recipe), request_action.getNumCrafts()};
+                                                   event_recipe, request_action.getNumCrafts()};
             server.getPluginManager().callEvent(e);
             if (e.isCancelled()) {
                 return ItemStackNetResult::ActionRequestNotAllowed;
@@ -64,8 +64,8 @@ ItemStackNetResult ItemStackRequestActionCraftHandler::handleCraftAction(
             auto event_recipe = endstone::core::makeRecipe(recipe);
             const auto result = ItemStack(recipe->getResultItems().front());
             endstone::PlayerCraftItemEvent e{player_.getEndstoneActor<endstone::core::EndstonePlayer>(),
-                                             endstone::core::EndstoneItemStack::fromMinecraft(result),
-                                             std::move(event_recipe), request_action.getNumCrafts()};
+                                             endstone::core::EndstoneItemStack::fromMinecraft(result), event_recipe,
+                                             request_action.getNumCrafts()};
             server.getPluginManager().callEvent(e);
             if (e.isCancelled()) {
                 return ItemStackNetResult::ActionRequestNotAllowed;

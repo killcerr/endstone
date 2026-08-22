@@ -62,8 +62,6 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def_property_readonly("type", &Recipe::getType)
         .def_property_readonly("result", &Recipe::getResult)
         .def_property_readonly("ingredients", &Recipe::getIngredients)
-        .def_property_readonly("is_shapeless", &Recipe::isShapeless,
-                               "Whether this recipe can be crafted with its ingredients in any order.")
         .def_property_readonly("recipe_id", &Recipe::getRecipeId, "The string identifier assigned to this recipe.")
         .def_property_readonly("tag", &Recipe::getTag, "The crafting tag assigned to this recipe.");
     py::classh<ShapedRecipe, Recipe>(m, "ShapedRecipe", "Represents a shaped crafting recipe.")

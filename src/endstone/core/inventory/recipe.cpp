@@ -21,29 +21,28 @@
 
 namespace endstone::core {
 
-std::unique_ptr<endstone::Recipe> makeRecipe(std::shared_ptr<const ::Recipe> recipe)
+NotNull<endstone::Recipe> makeRecipe(std::shared_ptr<const ::Recipe> recipe)
 {
-    if (!recipe) {
-        return nullptr;
-    }
     if (recipe->isMultiRecipe()) {
-        return std::make_unique<EndstoneMultiRecipe>(std::move(recipe));
+        return std::make_shared<EndstoneMultiRecipe>(std::move(recipe));
     }
     if (recipe->getTag().getString() == "smithing_table") {
-        return std::make_unique<EndstoneSmithingRecipe>(std::move(recipe));
+        return std::make_shared<EndstoneSmithingRecipe>(std::move(recipe));
     }
     if (recipe->isShapeless()) {
-        return std::make_unique<EndstoneShapelessRecipe>(std::move(recipe));
+        return std::make_shared<EndstoneShapelessRecipe>(std::move(recipe));
     }
-    return std::make_unique<EndstoneShapedRecipe>(std::move(recipe));
+    return std::make_shared<EndstoneShapedRecipe>(std::move(recipe));
 }
 
-std::vector<std::unique_ptr<endstone::Recipe>> makeRecipes(const ::Recipes &recipes)
+std::vector<NotNull<endstone::Recipe>> makeRecipes(const ::Recipes &recipes)
 {
-    std::vector<std::unique_ptr<endstone::Recipe>> result;
+    std::vector<NotNull<endstone::Recipe>> result;
     for (const auto &by_tag : recipes.getRecipeMap()) {
         for (const auto &by_id : by_tag.second) {
-            result.push_back(makeRecipe(by_id.second));
+            if (by_id.second) {
+                result.push_back(makeRecipe(by_id.second));
+            }
         }
     }
     return result;

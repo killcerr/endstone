@@ -30,7 +30,6 @@ public:
     [[nodiscard]] endstone::ItemStack getResult() const;
     [[nodiscard]] const std::vector<endstone::RecipeIngredient> &getIngredients() const;
     [[nodiscard]] const ::Recipe &getHandle() const { return *recipe; }
-    [[nodiscard]] bool isShapeless() const { return recipe->isShapeless(); }
     [[nodiscard]] const std::string &getRecipeId() const { return recipe->getRecipeId(); }
     [[nodiscard]] const std::string &getTag() const { return recipe->getTag().getString(); }
 

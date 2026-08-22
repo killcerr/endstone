@@ -178,12 +178,6 @@ class Recipe:
     @property
     def ingredients(self) -> list[RecipeIngredient]: ...
     @property
-    def is_shapeless(self) -> bool:
-        """
-        Whether this recipe can be crafted with its ingredients in any order.
-        """
-
-    @property
     def recipe_id(self) -> str:
         """
         The string identifier assigned to this recipe.

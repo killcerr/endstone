@@ -26,19 +26,19 @@ Location create_location(const Nullable<Dimension> &dimension, float x, float y,
 py::list get_recipes(Level &level)
 {
     py::list result;
-    for (auto &recipe : level.getRecipes()) {
+    for (const auto &recipe : level.getRecipes()) {
         switch (recipe->getType()) {
         case RecipeType::Smithing:
-            result.append(py::cast(std::unique_ptr<SmithingRecipe>(static_cast<SmithingRecipe *>(recipe.release()))));
+            result.append(py::cast(recipe.cast<SmithingRecipe>()));
             break;
         case RecipeType::Shaped:
-            result.append(py::cast(std::unique_ptr<ShapedRecipe>(static_cast<ShapedRecipe *>(recipe.release()))));
+            result.append(py::cast(recipe.cast<ShapedRecipe>()));
             break;
         case RecipeType::Shapeless:
-            result.append(py::cast(std::unique_ptr<ShapelessRecipe>(static_cast<ShapelessRecipe *>(recipe.release()))));
+            result.append(py::cast(recipe.cast<ShapelessRecipe>()));
             break;
         case RecipeType::Multi:
-            result.append(py::cast(std::unique_ptr<MultiRecipe>(static_cast<MultiRecipe *>(recipe.release()))));
+            result.append(py::cast(recipe.cast<MultiRecipe>()));
             break;
         }
     }
