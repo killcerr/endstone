@@ -161,6 +161,8 @@ public:
     PlayerInventory &getSupplies();
     [[nodiscard]] const Container &getInventory() const;
     Container &getInventory();
+    PlayerUIContainer &getPlayerUIContainer() { return player_ui_container_; }
+    [[nodiscard]] const PlayerUIContainer &getPlayerUIContainer() const { return player_ui_container_; }
     EnderChestContainer *getEnderChestContainer();
     [[nodiscard]] const EnderChestContainer *getEnderChestContainer() const;
     [[nodiscard]] int getSelectedItemSlot() const;

@@ -53,6 +53,8 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 77> symbol
     {"_ZNK15CommandRegistry26serializeAvailableCommandsEv", 160039360},
     // CommandUtils
     {"_ZN12CommandUtils12getActorNameERK5Actor", 159774800},
+    // CraftHandlerCrafting
+    {"_ZN20CraftHandlerCrafting18_handleCraftActionERK31ItemStackRequestActionCraftBase", 197828768},
     // CraftingDataPacketPayload
     {"_ZN25CraftingDataPacketPayload11fromRecipesERK7Recipesb", 134785984},
     // DedicatedServer
@@ -79,8 +81,6 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 77> symbol
     // ItemStackBase
     {"_ZN13ItemStackBase34_loadBlocksForCanPlaceOnCanDestroyERNSt3__16vectorIPK9BlockTypeNS0_9allocatorIS4_EEEERKNS0_12basic_stringIcNS0_11char_traitsIcEENS5_IcEEEE", 196858752},
     {"_ZN13ItemStackBase8_setItemEib", 196818048},
-    // ItemStackRequestActionCraftHandler
-    {"_ZN34ItemStackRequestActionCraftHandler17handleCraftActionERK31ItemStackRequestActionCraftBase", 197886512},
     // LeavesBlock
     {"_ZN11LeavesBlock10randomTickERN11BlockEvents20BlockRandomTickEventE", 199008832},
     // Level

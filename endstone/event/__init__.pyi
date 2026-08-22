@@ -765,30 +765,6 @@ class PlayerCommandEvent(PlayerEvent, Cancellable):
     @command.setter
     def command(self, arg1: str) -> None: ...
 
-class PlayerCraftItemEvent(PlayerEvent, Cancellable):
-    """
-    Called when a player crafts an item.
-
-    If the event is cancelled the item will not be crafted and the ingredients will not be consumed.
-    """
-    @property
-    def item(self) -> ItemStack:
-        """
-        An `ItemStack` for the item being crafted.
-        """
-
-    @property
-    def recipe_id(self) -> str:
-        """
-        The identifier of the recipe used.
-        """
-
-    @property
-    def amount(self) -> int:
-        """
-        The number of times the recipe is being crafted.
-        """
-
 class PlayerDimensionChangeEvent(PlayerEvent):
     """
     Called when a player switches to another dimension.
@@ -804,6 +780,45 @@ class PlayerDimensionChangeEvent(PlayerEvent):
         """
         The player's new dimension.
         """
+
+class PlayerCraftItemEvent(PlayerEvent, Cancellable):
+    """
+    Called when a player crafts an item, either inside a crafting grid or straight from the recipe book.
+
+    If the event is cancelled the item will not be crafted and the ingredients will not be consumed.
+    """
+    @property
+    def ingredients(self) -> list[ItemStack]:
+        """
+        The ingredients a single craft consumes.
+
+        These are the items in the crafting grid where the player used one. Crafting from the recipe book never fills
+        the grid, so the ingredients then come from the recipe instead, and an ingredient that accepts several items
+        reports the one the recipe names rather than the one the player supplied.
+        """
+
+    @property
+    def results(self) -> list[ItemStack]:
+        """
+        The items a single craft produces.
+
+        A recipe usually produces one item, but may produce several, and an ingredient that leaves a remainder behind
+        contributes one too. Results are replaced one for one, so any beyond the number the recipe produces are ignored;
+        cancel the event to stop the craft instead.
+        """
+
+    @results.setter
+    def results(self, arg1: list[ItemStack]) -> None: ...
+    @property
+    def repetitions(self) -> int:
+        """
+        The number of times the recipe is being crafted.
+
+        This is usually 1, but is higher when a batch is crafted at once, such as a shift click in the recipe book.
+        """
+
+    @repetitions.setter
+    def repetitions(self, arg1: int) -> None: ...
 
 class PlayerDropItemEvent(PlayerEvent, Cancellable):
     """

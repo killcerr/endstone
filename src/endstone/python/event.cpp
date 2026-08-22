@@ -301,20 +301,36 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
                                                               "Called whenever a player runs a command.")
         .def_property("command", &PlayerCommandEvent::getCommand, &PlayerCommandEvent::setCommand,
                       "The command that the player is attempting to send.");
-    py::class_<PlayerCraftItemEvent, PlayerEvent, ICancellable>(m, "PlayerCraftItemEvent", R"doc(
-    Called when a player crafts an item.
-
-    If the event is cancelled the item will not be crafted and the ingredients will not be consumed.
-    )doc")
-        .def_property_readonly("item", &PlayerCraftItemEvent::getItem, "An `ItemStack` for the item being crafted.")
-        .def_property_readonly("recipe_id", &PlayerCraftItemEvent::getRecipeId, "The identifier of the recipe used.")
-        .def_property_readonly("amount", &PlayerCraftItemEvent::getAmount,
-                               "The number of times the recipe is being crafted.");
     py::class_<PlayerDimensionChangeEvent, PlayerEvent>(m, "PlayerDimensionChangeEvent",
                                                         "Called when a player switches to another dimension.")
         .def_property_readonly("from_dimension", &PlayerDimensionChangeEvent::getFrom,
                                "The player's previous dimension.")
         .def_property_readonly("to_dimension", &PlayerDimensionChangeEvent::getTo, "The player's new dimension.");
+    py::class_<PlayerCraftItemEvent, PlayerEvent, ICancellable>(m, "PlayerCraftItemEvent", R"doc(
+    Called when a player crafts an item, either inside a crafting grid or straight from the recipe book.
+
+    If the event is cancelled the item will not be crafted and the ingredients will not be consumed.
+)doc")
+        .def_property_readonly("ingredients", &PlayerCraftItemEvent::getIngredients, R"doc(
+    The ingredients a single craft consumes.
+
+    These are the items in the crafting grid where the player used one. Crafting from the recipe book never fills
+    the grid, so the ingredients then come from the recipe instead, and an ingredient that accepts several items
+    reports the one the recipe names rather than the one the player supplied.
+)doc")
+        .def_property("results", &PlayerCraftItemEvent::getResults, &PlayerCraftItemEvent::setResults, R"doc(
+    The items a single craft produces.
+
+    A recipe usually produces one item, but may produce several, and an ingredient that leaves a remainder behind
+    contributes one too. Results are replaced one for one, so any beyond the number the recipe produces are ignored;
+    cancel the event to stop the craft instead.
+)doc")
+        .def_property("repetitions", &PlayerCraftItemEvent::getRepetitions, &PlayerCraftItemEvent::setRepetitions,
+                      R"doc(
+    The number of times the recipe is being crafted.
+
+    This is usually 1, but is higher when a batch is crafted at once, such as a shift click in the recipe book.
+)doc");
     py::class_<PlayerDropItemEvent, PlayerEvent, ICancellable>(
         m, "PlayerDropItemEvent", "Called when a player drops an item from their inventory.")
         .def_property_readonly("item", &PlayerDropItemEvent::getItem, py::return_value_policy::reference,
