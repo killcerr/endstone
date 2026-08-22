@@ -15,30 +15,33 @@
 #pragma once
 
 #include <memory>
-#include <utility>
 
-#include <pybind11/pybind11.h>
+namespace endstone {
 
-#include "endstone/metrics/base.h"
+class CustomChart;
 
-namespace endstone::core {
-
-/** A metrics reporter backed by a Python class, named by the module it lives in. */
-class Metrics final : public MetricsBase {
+/**
+ * Collects and submits the data behind a Metrics instance.
+ *
+ * Plugins hold a Metrics rather than implementing this interface.
+ */
+class MetricsBase {
 public:
-    template <typename... Args>
-    Metrics(const char *module, const char *name, Args &&...args)
-    {
-        pybind11::gil_scoped_acquire gil{};
-        obj_ = pybind11::module_::import(module).attr(name)(std::forward<Args>(args)...);
-    }
+    MetricsBase() = default;
+    MetricsBase(const MetricsBase &) = delete;
+    MetricsBase &operator=(const MetricsBase &) = delete;
+    virtual ~MetricsBase() = default;
 
-    ~Metrics() override;
-    void addCustomChart(std::unique_ptr<CustomChart> chart) override;
-    void shutdown() noexcept override;
+    /**
+     * Adds a custom chart.
+     *
+     * @param chart the chart to add
+     */
+    virtual void addCustomChart(std::unique_ptr<CustomChart> chart) = 0;
 
-private:
-    pybind11::object obj_;
+    /**
+     * Stops collecting and submitting data.
+     */
+    virtual void shutdown() noexcept = 0;
 };
-
-}  // namespace endstone::core
+}  // namespace endstone

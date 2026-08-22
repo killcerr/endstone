@@ -14,31 +14,35 @@
 
 #pragma once
 
-#include <memory>
+#include <functional>
+#include <optional>
+#include <string>
 #include <utility>
 
-#include <pybind11/pybind11.h>
+#include "endstone/metrics/custom_chart.h"
 
-#include "endstone/metrics/base.h"
+namespace endstone {
 
-namespace endstone::core {
-
-/** A metrics reporter backed by a Python class, named by the module it lives in. */
-class Metrics final : public MetricsBase {
+/** A bStats line chart with a single line. */
+class SingleLineChart : public CustomChart {
 public:
-    template <typename... Args>
-    Metrics(const char *module, const char *name, Args &&...args)
+    using Callback = std::function<int()>;
+
+    SingleLineChart(std::string chart_id, Callback get_value)
+        : CustomChart(std::move(chart_id)), get_value_(std::move(get_value))
     {
-        pybind11::gil_scoped_acquire gil{};
-        obj_ = pybind11::module_::import(module).attr(name)(std::forward<Args>(args)...);
     }
 
-    ~Metrics() override;
-    void addCustomChart(std::unique_ptr<CustomChart> chart) override;
-    void shutdown() noexcept override;
+    [[nodiscard]] std::optional<JsonObject> getChartData() override
+    {
+        const auto value = get_value_();
+        if (value == 0) {
+            return std::nullopt;
+        }
+        return JsonObject{{"value", value}};
+    }
 
 private:
-    pybind11::object obj_;
+    Callback get_value_;
 };
-
-}  // namespace endstone::core
+}  // namespace endstone

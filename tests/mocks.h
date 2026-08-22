@@ -16,6 +16,7 @@
 
 #include <gmock/gmock.h>
 
+#include "endstone/metrics/base.h"
 #include "endstone/server.h"
 
 class MockServer : public endstone::Server {
@@ -34,6 +35,7 @@ public:
                 (const, override));
     MOCK_METHOD(endstone::Scheduler &, getScheduler, (), (const, override));
     MOCK_METHOD(endstone::ServiceManager &, getServiceManager, (), (const, override));
+    MOCK_METHOD(endstone::NotNull<endstone::MetricsBase>, createMetrics, (endstone::Plugin &, int), (override));
     MOCK_METHOD(endstone::IRegistry *, _getRegistry, (const std::type_info &), (const, override));
     MOCK_METHOD(endstone::MapView *, getMap, (std::int64_t), (const, override));
     MOCK_METHOD(endstone::MapView &, createMap, (const endstone::NotNull<endstone::Dimension> &), (const, override));
