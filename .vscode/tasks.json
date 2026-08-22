@@ -39,7 +39,10 @@
         {
             "label": "Project: Install",
             "type": "shell",
-            "command": "uv pip install -U . --verbose",
+            "command": "rm -rf build/package && uv pip install -U . --verbose",
+            "windows": {
+                "command": "Remove-Item -Recurse -Force build/package; uv pip install -U . --verbose"
+            },
             "options": {
                 "cwd": "${workspaceFolder}"
             },
