@@ -11,7 +11,7 @@
 
 namespace endstone::runtime {
 
-static constexpr std::array<std::pair<std::string_view, std::size_t>, 75> symbols = {{
+static constexpr std::array<std::pair<std::string_view, std::size_t>, 77> symbols = {{
     {"BlockState::StateListNode::mHead", 211294960},
     {"Enchant::mEnchants", 211141912},
     {"MobEffect::mMobEffects", 211424880},
@@ -129,6 +129,9 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 75> symbol
     {"?changeDimension@ServerPlayer@@UEAAXUDimensionType@@@Z", 6907440},
     // ServerScoreboard
     {"??0ServerScoreboard@@QEAA@VCommandSoftEnumRegistry@@PEAVLevelStorage@@V?$not_null@V?$NonOwnerPointer@VGameplayUserManager@@@Bedrock@@@gsl@@@Z", 1277104},
+    // TickingAreasManager
+    {"?addTransientScopedArea@TickingAreasManager@@QEAA?AUScopedContext@1@UDimensionType@@AEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_KVUUID@mce@@AEBUBounds@@@Z", 72964528},
+    {"?removeScopedAreas@TickingAreasManager@@QEAAXAEBV?$vector@VUUID@mce@@V?$allocator@VUUID@mce@@@std@@@std@@@Z", 72965824},
     // TridentItem
     {"?releaseUsing@TridentItem@@UEBAXAEAVItemStack@@PEAVPlayer@@H@Z", 53278064},
     // WeatherManager

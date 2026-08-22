@@ -217,11 +217,11 @@ PYBIND11_MODULE(_python, m)  // NOLINT(*-use-anonymous-namespace)
     // init_actor first: it registers ActorType, which CreatureSpawner's signatures refer to
     init_actor(m_actor, actor, mob);
     init_block(m_block, block);
+    init_command(m_command, command_sender);
+    init_plugin(m_plugin);
     init_level(m_level, level, dimension, location);
     init_player(m, player);
     init_boss(m_boss);
-    init_command(m_command, command_sender);
-    init_plugin(m_plugin);
     init_scheduler(m_scheduler);
     init_permissions(m_permissions, permissible, permission);
     init_registry(m);
