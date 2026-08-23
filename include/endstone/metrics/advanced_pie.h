@@ -17,6 +17,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 #include "endstone/metrics/custom_chart.h"
@@ -26,7 +27,7 @@ namespace endstone {
 /** A bStats pie chart with named values. */
 class AdvancedPie : public CustomChart {
 public:
-    using Callback = std::function<std::optional<StringValues>()>;
+    using Callback = std::function<std::optional<std::unordered_map<std::string, int>>()>;
 
     AdvancedPie(std::string chart_id, Callback get_values)
         : CustomChart(std::move(chart_id)), get_values_(std::move(get_values))
