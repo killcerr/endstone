@@ -582,6 +582,15 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 )doc")
         .def_property_readonly("who_clicked", &InventoryInteractEvent::getWhoClicked,
                                "The player who performed the click.");
+    py::class_<InventoryOpenEvent, InventoryEvent, ICancellable>(m, "InventoryOpenEvent", R"doc(
+    Called when a player opens an inventory.
+
+    If this event is cancelled, the inventory will not be opened and the player will not see the container screen.
+)doc")
+        .def_property_readonly("player", &InventoryOpenEvent::getPlayer, "The player who is opening the inventory.");
+    py::class_<InventoryCloseEvent, InventoryEvent>(m, "InventoryCloseEvent",
+                                                    "Called when a player closes an inventory.")
+        .def_property_readonly("player", &InventoryCloseEvent::getPlayer, "The player who is closing the inventory.");
 
     // Server events
     py::class_<ServerEvent, Event>(m, "ServerEvent", "Represents a Server-related event.");

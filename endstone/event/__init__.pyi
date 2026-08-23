@@ -55,8 +55,10 @@ __all__ = [
     "Event",
     "EventPriority",
     "EventResult",
+    "InventoryCloseEvent",
     "InventoryEvent",
     "InventoryInteractEvent",
+    "InventoryOpenEvent",
     "LeavesDecayEvent",
     "LevelEvent",
     "MapInitializeEvent",
@@ -1446,6 +1448,28 @@ class InventoryInteractEvent(InventoryEvent, Cancellable):
     def who_clicked(self) -> Player:
         """
         The player who performed the click.
+        """
+
+class InventoryOpenEvent(InventoryEvent, Cancellable):
+    """
+    Called when a player opens an inventory.
+
+    If this event is cancelled, the inventory will not be opened and the player will not see the container screen.
+    """
+    @property
+    def player(self) -> Player:
+        """
+        The player who is opening the inventory.
+        """
+
+class InventoryCloseEvent(InventoryEvent):
+    """
+    Called when a player closes an inventory.
+    """
+    @property
+    def player(self) -> Player:
+        """
+        The player who is closing the inventory.
         """
 
 class ServerEvent(Event):

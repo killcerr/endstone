@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PlayerRespawnEvent.respawn_reason` (`RespawnReason.DEATH` / `RespawnReason.END_PORTAL`).
 - `ActorExplodeEvent::setBlockList()` and `BlockExplodeEvent::setBlockList()`, with the `BlockList` alias made public.
 - `InventoryEvent`, a base class for inventory-related events, reporting the primary `inventory` involved, and the cancellable `InventoryInteractEvent` under it, which adds the `who_clicked` player.
+- `InventoryOpenEvent` and `InventoryCloseEvent`, both reporting the `inventory` and the `player`. Cancelling an open stops the container screen from appearing at all. These cover block containers such as chests, barrels, furnaces and brewing stands; a container carried by an entity, like a chest minecart or a horse, does not fire them yet.
 - `DimensionLoadEvent` for a dimension being loaded.
 - Support for custom Python events with optional cancellation.
 
