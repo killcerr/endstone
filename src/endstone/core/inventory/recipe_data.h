@@ -15,27 +15,56 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <typeinfo>
+#include <utility>
 #include <vector>
 
 #include "bedrock/world/item/crafting/recipe.h"
+#include "endstone/core/type.h"
 #include "endstone/inventory/item_stack.h"
+#include "endstone/inventory/recipe.h"
 #include "endstone/inventory/recipe_ingredient.h"
 
 namespace endstone::core {
 
 class EndstoneRecipeData {
 public:
-    explicit EndstoneRecipeData(std::shared_ptr<const ::Recipe> recipe) : recipe(std::move(recipe)) {}
+    explicit EndstoneRecipeData(std::shared_ptr<const ::Recipe> recipe) : recipe_(std::move(recipe)) {}
 
     [[nodiscard]] endstone::ItemStack getResult() const;
     [[nodiscard]] const std::vector<endstone::RecipeIngredient> &getIngredients() const;
-    [[nodiscard]] const ::Recipe &getHandle() const { return *recipe; }
-    [[nodiscard]] const std::string &getRecipeId() const { return recipe->getRecipeId(); }
-    [[nodiscard]] const std::string &getTag() const { return recipe->getTag().getString(); }
+    [[nodiscard]] const ::Recipe &getHandle() const { return *recipe_; }
+    [[nodiscard]] const std::string &getRecipeId() const { return recipe_->getRecipeId(); }
+    [[nodiscard]] const std::string &getTag() const { return recipe_->getTag().getString(); }
 
 protected:
-    const std::shared_ptr<const ::Recipe> recipe;
+    const std::shared_ptr<const ::Recipe> recipe_;
     mutable std::vector<endstone::RecipeIngredient> ingredients_;
+};
+
+template <typename Interface>
+class EndstoneRecipeBase : public Interface, protected EndstoneRecipeData {
+public:
+    explicit EndstoneRecipeBase(std::shared_ptr<const ::Recipe> recipe) : EndstoneRecipeData(std::move(recipe)) {}
+
+    [[nodiscard]] const std::type_info &getClassTypeId() const override { return typeid(Interface); }
+
+    [[nodiscard]] bool isInstanceOf(const std::type_info &target) const override
+    {
+        return core::isInstanceOf(*this, target);
+    }
+
+    [[nodiscard]] endstone::ItemStack getResult() const override { return EndstoneRecipeData::getResult(); }
+
+    [[nodiscard]] const std::vector<endstone::RecipeIngredient> &getIngredients() const override
+    {
+        return EndstoneRecipeData::getIngredients();
+    }
+
+    [[nodiscard]] const std::string &getRecipeId() const override { return EndstoneRecipeData::getRecipeId(); }
+
+    [[nodiscard]] const std::string &getTag() const override { return EndstoneRecipeData::getTag(); }
 };
 
 }  // namespace endstone::core

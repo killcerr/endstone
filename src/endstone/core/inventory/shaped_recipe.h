@@ -20,17 +20,10 @@
 
 namespace endstone::core {
 
-class EndstoneShapedRecipe final : public endstone::ShapedRecipe, private EndstoneRecipeData {
+class EndstoneShapedRecipe final : public EndstoneRecipeBase<endstone::ShapedRecipe> {
 public:
-    explicit EndstoneShapedRecipe(std::shared_ptr<const ::Recipe> recipe) : EndstoneRecipeData(std::move(recipe)) {}
-    [[nodiscard]] endstone::RecipeType getType() const noexcept override { return endstone::RecipeType::Shaped; }
-    [[nodiscard]] endstone::ItemStack getResult() const override { return EndstoneRecipeData::getResult(); }
-    [[nodiscard]] const std::vector<endstone::RecipeIngredient> &getIngredients() const override
-    {
-        return EndstoneRecipeData::getIngredients();
-    }
-    [[nodiscard]] const std::string &getRecipeId() const override { return EndstoneRecipeData::getRecipeId(); }
-    [[nodiscard]] const std::string &getTag() const override { return EndstoneRecipeData::getTag(); }
+    using EndstoneRecipeBase::EndstoneRecipeBase;
+
     [[nodiscard]] int getWidth() const noexcept override { return getHandle().getWidth(); }
     [[nodiscard]] int getHeight() const noexcept override { return getHandle().getHeight(); }
     [[nodiscard]] bool getAssumeSymmetry() const noexcept override

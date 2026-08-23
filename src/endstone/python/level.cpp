@@ -22,28 +22,6 @@ Location create_location(const Nullable<Dimension> &dimension, float x, float y,
 {
     return {dimension, x, y, z, pitch, yaw};
 }
-
-py::list get_recipes(Level &level)
-{
-    py::list result;
-    for (const auto &recipe : level.getRecipes()) {
-        switch (recipe->getType()) {
-        case RecipeType::Smithing:
-            result.append(py::cast(recipe.cast<SmithingRecipe>()));
-            break;
-        case RecipeType::Shaped:
-            result.append(py::cast(recipe.cast<ShapedRecipe>()));
-            break;
-        case RecipeType::Shapeless:
-            result.append(py::cast(recipe.cast<ShapelessRecipe>()));
-            break;
-        case RecipeType::Multi:
-            result.append(py::cast(recipe.cast<MultiRecipe>()));
-            break;
-        }
-    }
-    return result;
-}
 }  // namespace
 
 void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> &dimension,
@@ -340,7 +318,7 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
         .def_property_readonly("actors", &Level::getActors, "A list of all actors currently residing in this level.")
         .def_property("time", &Level::getTime, &Level::setTime, "The relative in-game time of this level.")
         .def_property_readonly("dimensions", &Level::getDimensions, "A list of all dimensions within this level.")
-        .def_property_readonly("recipes", &get_recipes, R"doc(
+        .def_property_readonly("recipes", &Level::getRecipes, R"doc(
     A snapshot of the crafting recipes currently registered by the level.
 )doc")
         .def("get_dimension", &Level::getDimension, py::arg("id"), R"doc(

@@ -19,17 +19,9 @@
 
 namespace endstone::core {
 
-class EndstoneMultiRecipe final : public endstone::MultiRecipe, private EndstoneRecipeData {
+class EndstoneMultiRecipe final : public EndstoneRecipeBase<endstone::MultiRecipe> {
 public:
-    explicit EndstoneMultiRecipe(std::shared_ptr<const ::Recipe> recipe) : EndstoneRecipeData(std::move(recipe)) {}
-    [[nodiscard]] endstone::RecipeType getType() const noexcept override { return endstone::RecipeType::Multi; }
-    [[nodiscard]] endstone::ItemStack getResult() const override { return EndstoneRecipeData::getResult(); }
-    [[nodiscard]] const std::vector<endstone::RecipeIngredient> &getIngredients() const override
-    {
-        return EndstoneRecipeData::getIngredients();
-    }
-    [[nodiscard]] const std::string &getRecipeId() const override { return EndstoneRecipeData::getRecipeId(); }
-    [[nodiscard]] const std::string &getTag() const override { return EndstoneRecipeData::getTag(); }
+    using EndstoneRecipeBase::EndstoneRecipeBase;
 };
 
 }  // namespace endstone::core

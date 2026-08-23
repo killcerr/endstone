@@ -19,17 +19,9 @@
 
 namespace endstone::core {
 
-class EndstoneShapelessRecipe final : public endstone::ShapelessRecipe, private EndstoneRecipeData {
+class EndstoneShapelessRecipe final : public EndstoneRecipeBase<endstone::ShapelessRecipe> {
 public:
-    explicit EndstoneShapelessRecipe(std::shared_ptr<const ::Recipe> recipe) : EndstoneRecipeData(std::move(recipe)) {}
-    [[nodiscard]] endstone::RecipeType getType() const noexcept override { return endstone::RecipeType::Shapeless; }
-    [[nodiscard]] endstone::ItemStack getResult() const override { return EndstoneRecipeData::getResult(); }
-    [[nodiscard]] const std::vector<endstone::RecipeIngredient> &getIngredients() const override
-    {
-        return EndstoneRecipeData::getIngredients();
-    }
-    [[nodiscard]] const std::string &getRecipeId() const override { return EndstoneRecipeData::getRecipeId(); }
-    [[nodiscard]] const std::string &getTag() const override { return EndstoneRecipeData::getTag(); }
+    using EndstoneRecipeBase::EndstoneRecipeBase;
 };
 
 }  // namespace endstone::core

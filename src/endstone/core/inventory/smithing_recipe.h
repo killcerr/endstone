@@ -14,22 +14,17 @@
 
 #pragma once
 
+#include <cstddef>
+
 #include "endstone/core/inventory/recipe_data.h"
 #include "endstone/inventory/smithing_recipe.h"
 
 namespace endstone::core {
 
-class EndstoneSmithingRecipe final : public endstone::SmithingRecipe, private EndstoneRecipeData {
+class EndstoneSmithingRecipe final : public EndstoneRecipeBase<endstone::SmithingRecipe> {
 public:
-    explicit EndstoneSmithingRecipe(std::shared_ptr<const ::Recipe> recipe) : EndstoneRecipeData(std::move(recipe)) {}
-    [[nodiscard]] endstone::RecipeType getType() const noexcept override { return endstone::RecipeType::Smithing; }
-    [[nodiscard]] endstone::ItemStack getResult() const override { return EndstoneRecipeData::getResult(); }
-    [[nodiscard]] const std::vector<endstone::RecipeIngredient> &getIngredients() const override
-    {
-        return EndstoneRecipeData::getIngredients();
-    }
-    [[nodiscard]] const std::string &getRecipeId() const override { return EndstoneRecipeData::getRecipeId(); }
-    [[nodiscard]] const std::string &getTag() const override { return EndstoneRecipeData::getTag(); }
+    using EndstoneRecipeBase::EndstoneRecipeBase;
+
     [[nodiscard]] endstone::RecipeIngredient getTemplateIngredient() const override { return getIngredient(0); }
     [[nodiscard]] endstone::RecipeIngredient getBaseIngredient() const override { return getIngredient(1); }
     [[nodiscard]] endstone::RecipeIngredient getAdditionIngredient() const override { return getIngredient(2); }

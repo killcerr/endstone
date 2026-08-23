@@ -19,22 +19,13 @@
 
 #include "endstone/inventory/item_stack.h"
 #include "endstone/inventory/recipe_ingredient.h"
+#include "endstone/object.h"
 
 namespace endstone {
-/** Identifies the concrete kind of a crafting recipe. */
-enum class RecipeType {
-    Shaped,
-    Shapeless,
-    Smithing,
-    Multi,
-};
-
 /** Represents some type of crafting recipe. */
-class Recipe {
+class Recipe : public Object {
 public:
-    virtual ~Recipe() = default;
-    /** Gets the concrete kind of this recipe. */
-    [[nodiscard]] virtual RecipeType getType() const noexcept = 0;
+    ~Recipe() override = default;
     /** Gets the result of this recipe. */
     [[nodiscard]] virtual ItemStack getResult() const = 0;
     /** Gets the ingredients used by this recipe. */

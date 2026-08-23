@@ -58,15 +58,15 @@ std::vector<endstone::RecipeIngredient> convertIngredients(const std::vector<::R
 
 endstone::ItemStack EndstoneRecipeData::getResult() const
 {
-    const auto &results = recipe->getResultItems();
+    const auto &results = recipe_->getResultItems();
     return results.empty() ? endstone::ItemType::get(endstone::ItemType::Air)->createItemStack(0)
                            : EndstoneItemStack::fromMinecraft(results.front());
 }
 
 const std::vector<endstone::RecipeIngredient> &EndstoneRecipeData::getIngredients() const
 {
-    if (ingredients_.empty() && !recipe->getIngredients().empty()) {
-        ingredients_ = convertIngredients(recipe->getIngredients());
+    if (ingredients_.empty() && !recipe_->getIngredients().empty()) {
+        ingredients_ = convertIngredients(recipe_->getIngredients());
     }
     return ingredients_;
 }

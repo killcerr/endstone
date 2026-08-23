@@ -37,13 +37,6 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .value("UNSUPPORTED", RecipeIngredientKind::Unsupported)
         .finalize();
 
-    py::native_enum<RecipeType>(m, "RecipeType", "enum.Enum")
-        .value("SHAPED", RecipeType::Shaped)
-        .value("SHAPELESS", RecipeType::Shapeless)
-        .value("SMITHING", RecipeType::Smithing)
-        .value("MULTI", RecipeType::Multi)
-        .finalize();
-
     py::class_<RecipeIngredient>(m, "RecipeIngredient", "Describes one immutable ingredient captured from a recipe.")
         .def(py::init<>())
         .def_property_readonly("kind", &RecipeIngredient::getKind)
@@ -55,7 +48,6 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def_property_readonly("aux_value", &RecipeIngredient::getAuxValue);
 
     py::classh<Recipe>(m, "Recipe", "Represents a crafting recipe.")
-        .def_property_readonly("type", &Recipe::getType)
         .def_property_readonly("result", &Recipe::getResult)
         .def_property_readonly("ingredients", &Recipe::getIngredients)
         .def_property_readonly("recipe_id", &Recipe::getRecipeId, "The string identifier assigned to this recipe.")

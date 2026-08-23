@@ -41,6 +41,11 @@
 #include "endstone/inventory/meta/map_meta.h"
 #include "endstone/inventory/meta/potion_meta.h"
 #include "endstone/inventory/meta/writable_book_meta.h"
+#include "endstone/inventory/multi_recipe.h"
+#include "endstone/inventory/recipe.h"
+#include "endstone/inventory/shaped_recipe.h"
+#include "endstone/inventory/shapeless_recipe.h"
+#include "endstone/inventory/smithing_recipe.h"
 #include "endstone/permissions/permissible.h"
 #include "endstone/player.h"
 
@@ -88,6 +93,13 @@ void registerTypes()
     registerType<CreatureSpawner>().base<BlockState>();
     registerType<ItemFrame>().base<BlockState>();
     registerType<Sign>().base<BlockState>();
+
+    // Recipe hierarchy
+    registerType<Recipe>();
+    registerType<MultiRecipe>().base<Recipe>();
+    registerType<ShapedRecipe>().base<Recipe>();
+    registerType<ShapelessRecipe>().base<Recipe>();
+    registerType<SmithingRecipe>().base<Recipe>();
 }
 
 bool isTypeInstanceOf(const std::type_info &from, const std::type_info &target)
