@@ -100,7 +100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Networking
 
-- Packet compression now uses libdeflate instead of the vanilla zlib compressor. The wire format is unchanged standard raw deflate, so clients need no update and Snappy connections are untouched. Measured on 39.7 MB of live gameplay traffic, batches compress 4.6x faster for 0.4% more bytes on the wire. The saving shows up most on servers broadcasting to many players, since every player's batch is compressed separately.
+- Packet compression now uses libdeflate instead of zlib, which should improve performance on busy servers.
 
 #### JSON payloads
 
