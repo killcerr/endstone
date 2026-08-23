@@ -329,6 +329,8 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
 
     If the event is cancelled the item will not be crafted and the ingredients will not be consumed.
 )doc")
+        .def_property_readonly("recipe", &PlayerCraftItemEvent::getRecipe,
+                               "A copy of the current recipe on the crafting matrix.")
         .def_property_readonly("ingredients", &PlayerCraftItemEvent::getIngredients, R"doc(
     The ingredients a single craft consumes.
 

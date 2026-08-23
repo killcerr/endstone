@@ -3,7 +3,7 @@ import typing
 from endstone import GameRule, Identifier, Player
 from endstone.actor import Actor, ActorType, Item, Mob
 from endstone.block import Block
-from endstone.inventory import ItemStack
+from endstone.inventory import ItemStack, Recipe
 from endstone.plugin import Plugin
 from endstone.util import Vector
 
@@ -45,6 +45,12 @@ class Level:
     def dimensions(self) -> list[Dimension]:
         """
         A list of all dimensions within this level.
+        """
+
+    @property
+    def recipes(self) -> list[Recipe]:
+        """
+        The list of crafting recipes.
         """
 
     def get_dimension(self, id: Identifier[Dimension] | str) -> Dimension | None:

@@ -26,6 +26,7 @@
 #include "bedrock/world/item/crafting/recipes.h"
 #include "bedrock/world/level/level.h"
 #include "endstone/core/inventory/item_stack.h"
+#include "endstone/core/inventory/recipe_data.h"
 #include "endstone/core/player.h"
 #include "endstone/core/server.h"
 #include "endstone/event/player/player_craft_item_event.h"
@@ -89,14 +90,20 @@ ItemStackNetResult CraftHandlerCrafting::_handleCraftAction(const ItemStackReque
         return ENDSTONE_HOOK_CALL_ORIGINAL(&CraftHandlerCrafting::_handleCraftAction, this, request_action);
     }
 
+    auto crafted = endstone::core::EndstoneRecipeData::fromMinecraft(player_.getLevel().getRecipes(), *recipe);
+    if (crafted == nullptr) {
+        return ENDSTONE_HOOK_CALL_ORIGINAL(&CraftHandlerCrafting::_handleCraftAction, this, request_action);
+    }
+
     std::vector<endstone::ItemStack> results;
     results.reserve(recipe->getResultItems().size());
     for (const auto &result : recipe->getResultItems()) {
         results.push_back(endstone::core::EndstoneItemStack::fromMinecraft(ItemStack(result)));
     }
 
-    endstone::PlayerCraftItemEvent e{player_.getEndstoneActor<endstone::core::EndstonePlayer>(), std::move(ingredients),
-                                     results, request_action.getNumCrafts()};
+    endstone::PlayerCraftItemEvent e{player_.getEndstoneActor<endstone::core::EndstonePlayer>(),
+                                     std::move(crafted), std::move(ingredients), results,
+                                     request_action.getNumCrafts()};
     server.getPluginManager().callEvent(e);
     if (e.isCancelled()) {
         return ItemStackNetResult::ActionRequestNotAllowed;

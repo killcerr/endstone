@@ -20,6 +20,7 @@
 #include "endstone/event/cancellable.h"
 #include "endstone/event/player/player_event.h"
 #include "endstone/inventory/item_stack.h"
+#include "endstone/inventory/recipe.h"
 
 namespace endstone {
 
@@ -32,13 +33,17 @@ class PlayerCraftItemEvent final : public Cancellable<PlayerEvent> {
 public:
     ENDSTONE_EVENT(PlayerCraftItemEvent);
 
-    // TODO(recipe): add getRecipe() once the Recipe API lands
-    PlayerCraftItemEvent(const NotNull<Player> &player, std::vector<ItemStack> ingredients,
+    PlayerCraftItemEvent(const NotNull<Player> &player, NotNull<Recipe> recipe, std::vector<ItemStack> ingredients,
                          std::vector<ItemStack> results, int repetitions)
-        : Cancellable(player), ingredients_(std::move(ingredients)), results_(std::move(results)),
-          repetitions_(repetitions)
+        : Cancellable(player), recipe_(std::move(recipe)), ingredients_(std::move(ingredients)),
+          results_(std::move(results)), repetitions_(repetitions)
     {
     }
+
+    /**
+     * @return A copy of the current recipe on the crafting matrix.
+     */
+    [[nodiscard]] NotNull<Recipe> getRecipe() const { return recipe_; }
 
     /**
      * Gets the ingredients a single craft consumes.
@@ -90,6 +95,7 @@ public:
     void setRepetitions(int repetitions) { repetitions_ = repetitions; }
 
 private:
+    NotNull<Recipe> recipe_;
     std::vector<ItemStack> ingredients_;
     std::vector<ItemStack> results_;
     int repetitions_;

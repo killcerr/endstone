@@ -14,37 +14,22 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-
-#include "endstone/inventory/item_stack.h"
+#include "endstone/inventory/item_type.h"
 #include "endstone/inventory/recipe_ingredient.h"
-#include "endstone/object.h"
 
 namespace endstone {
 /**
- * Represents some type of crafting recipe.
+ * Represents an ingredient that matches an item type, whatever its data value.
  */
-class Recipe : public Object {
+class ItemTypeIngredient : public RecipeIngredient {
 public:
-    ~Recipe() override = default;
+    ~ItemTypeIngredient() override = default;
 
     /**
-     * Get the result of this recipe.
+     * Gets the item type that this ingredient will match.
      *
-     * @return The result stack
+     * @return the item type
      */
-    [[nodiscard]] virtual ItemStack getResult() const = 0;
-
-    [[nodiscard]] virtual const std::vector<Nullable<RecipeIngredient>> &getIngredients() const = 0;
-
-    [[nodiscard]] virtual const std::string &getRecipeId() const = 0;
-
-    /**
-     * Get the crafting station this recipe belongs to, such as `crafting_table` or `smithing_table`.
-     *
-     * @return the crafting tag
-     */
-    [[nodiscard]] virtual const std::string &getTag() const = 0;
+    [[nodiscard]] virtual const ItemType &getItemType() const = 0;
 };
 }  // namespace endstone

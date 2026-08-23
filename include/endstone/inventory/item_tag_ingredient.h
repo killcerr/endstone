@@ -15,36 +15,24 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
-#include "endstone/inventory/item_stack.h"
 #include "endstone/inventory/recipe_ingredient.h"
-#include "endstone/object.h"
 
 namespace endstone {
 /**
- * Represents some type of crafting recipe.
+ * Represents an ingredient that matches any item carrying a tag.
  */
-class Recipe : public Object {
+class ItemTagIngredient : public RecipeIngredient {
 public:
-    ~Recipe() override = default;
+    ~ItemTagIngredient() override = default;
 
     /**
-     * Get the result of this recipe.
+     * Gets the item tag that this ingredient will match.
      *
-     * @return The result stack
-     */
-    [[nodiscard]] virtual ItemStack getResult() const = 0;
-
-    [[nodiscard]] virtual const std::vector<Nullable<RecipeIngredient>> &getIngredients() const = 0;
-
-    [[nodiscard]] virtual const std::string &getRecipeId() const = 0;
-
-    /**
-     * Get the crafting station this recipe belongs to, such as `crafting_table` or `smithing_table`.
+     * Bedrock keeps item tags server-side, so the tag is reported rather than the item types in it.
      *
-     * @return the crafting tag
+     * @return the item tag
      */
-    [[nodiscard]] virtual const std::string &getTag() const = 0;
+    [[nodiscard]] virtual const std::string &getItemTag() const = 0;
 };
 }  // namespace endstone

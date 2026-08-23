@@ -15,36 +15,25 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
-#include "endstone/inventory/item_stack.h"
 #include "endstone/inventory/recipe_ingredient.h"
-#include "endstone/object.h"
 
 namespace endstone {
 /**
- * Represents some type of crafting recipe.
+ * Represents an ingredient that matches any item an id stands for.
  */
-class Recipe : public Object {
+class ComplexAliasIngredient : public RecipeIngredient {
 public:
-    ~Recipe() override = default;
+    ~ComplexAliasIngredient() override = default;
 
     /**
-     * Get the result of this recipe.
+     * Gets the alias that this ingredient will match.
      *
-     * @return The result stack
-     */
-    [[nodiscard]] virtual ItemStack getResult() const = 0;
-
-    [[nodiscard]] virtual const std::vector<Nullable<RecipeIngredient>> &getIngredients() const = 0;
-
-    [[nodiscard]] virtual const std::string &getRecipeId() const = 0;
-
-    /**
-     * Get the crafting station this recipe belongs to, such as `crafting_table` or `smithing_table`.
+     * The id predates the item flattening, such as `minecraft:planks`, and stands for every item it was split into.
+     * It is not an item tag, and the items are not reported.
      *
-     * @return the crafting tag
+     * @return the alias
      */
-    [[nodiscard]] virtual const std::string &getTag() const = 0;
+    [[nodiscard]] virtual const std::string &getAlias() const = 0;
 };
 }  // namespace endstone

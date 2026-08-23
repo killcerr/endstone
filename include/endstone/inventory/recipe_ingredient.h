@@ -14,37 +14,27 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-
 #include "endstone/inventory/item_stack.h"
-#include "endstone/inventory/recipe_ingredient.h"
 #include "endstone/object.h"
 
 namespace endstone {
 /**
- * Represents some type of crafting recipe.
+ * Represents a potential item match within a recipe. All choices within a recipe must be satisfied for it to be
+ * craftable.
  */
-class Recipe : public Object {
+class RecipeIngredient : public Object {
 public:
-    ~Recipe() override = default;
+    ~RecipeIngredient() override = default;
+
+    [[nodiscard]] virtual bool test(const ItemStack &item) const = 0;
 
     /**
-     * Get the result of this recipe.
+     * Get how many items this ingredient consumes.
      *
-     * @return The result stack
-     */
-    [[nodiscard]] virtual ItemStack getResult() const = 0;
-
-    [[nodiscard]] virtual const std::vector<Nullable<RecipeIngredient>> &getIngredients() const = 0;
-
-    [[nodiscard]] virtual const std::string &getRecipeId() const = 0;
-
-    /**
-     * Get the crafting station this recipe belongs to, such as `crafting_table` or `smithing_table`.
+     * Bedrock records a count on each ingredient where Java repeats the ingredient instead.
      *
-     * @return the crafting tag
+     * @return the number of items consumed
      */
-    [[nodiscard]] virtual const std::string &getTag() const = 0;
+    [[nodiscard]] virtual int getCount() const = 0;
 };
 }  // namespace endstone
