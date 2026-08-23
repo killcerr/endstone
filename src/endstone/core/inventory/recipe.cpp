@@ -38,7 +38,7 @@ NotNull<endstone::Recipe> makeRecipe(std::shared_ptr<const ::Recipe> recipe)
 std::vector<NotNull<endstone::Recipe>> makeRecipes(const ::Recipes &recipes)
 {
     std::vector<NotNull<endstone::Recipe>> result;
-    for (const auto &by_tag : recipes.getRecipeMap()) {
+    for (const auto &by_tag : recipes.getRecipesAllTags()) {
         for (const auto &by_id : by_tag.second) {
             if (by_id.second) {
                 result.push_back(makeRecipe(by_id.second));
