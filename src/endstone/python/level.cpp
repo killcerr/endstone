@@ -298,7 +298,8 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
 )doc")
         .def_property_readonly("actors", &Dimension::getActors,
                                "A list of all actors currently residing in this dimension.")
-        .def_property_readonly("mobs", &Dimension::getMobs, "A list of all mobs currently residing in this dimension.")
+        .def_property_readonly("mobs", &Dimension::getMobs,
+                               "A list of all mobs currently residing in this dimension.")
         .def_property_readonly("players", &Dimension::getPlayers,
                                "A list of all players currently residing in this dimension.");
 
@@ -318,9 +319,7 @@ void init_level(py::module_ &m, py::classh<Level> &level, py::classh<Dimension> 
         .def_property_readonly("actors", &Level::getActors, "A list of all actors currently residing in this level.")
         .def_property("time", &Level::getTime, &Level::setTime, "The relative in-game time of this level.")
         .def_property_readonly("dimensions", &Level::getDimensions, "A list of all dimensions within this level.")
-        .def_property_readonly("recipes", &Level::getRecipes, R"doc(
-    A snapshot of the crafting recipes currently registered by the level.
-)doc")
+        .def_property_readonly("recipes", &Level::getRecipes, "The list of crafting recipes.")
         .def("get_dimension", &Level::getDimension, py::arg("id"), R"doc(
     Gets the dimension with the given id.
 

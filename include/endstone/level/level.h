@@ -15,6 +15,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -25,6 +26,7 @@
 #include "endstone/level/dimension_creator.h"
 
 namespace endstone {
+
 /**
  * Represents a level, which may contain actors, chunks and blocks.
  */
@@ -66,9 +68,6 @@ public:
      * @return a list of dimensions
      */
     [[nodiscard]] virtual std::vector<NotNull<Dimension>> getDimensions() const = 0;
-
-    /** Gets all crafting recipes currently registered in this level. */
-    [[nodiscard]] virtual std::vector<NotNull<Recipe>> getRecipes() const = 0;
 
     /**
      * Gets the dimension with the given id.
@@ -167,6 +166,13 @@ public:
     {
         return _setGameRule(rule, value);
     }
+
+    /**
+     * Get the list of crafting recipes.
+     *
+     * @return a list of recipes
+     */
+    [[nodiscard]] virtual std::vector<NotNull<Recipe>> getRecipes() const = 0;
 };
 
 }  // namespace endstone

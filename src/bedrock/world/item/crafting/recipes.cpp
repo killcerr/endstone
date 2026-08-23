@@ -19,12 +19,12 @@
 ItemInstance Recipes::getFurnaceRecipeResult(const ItemStackBase &item, const HashedString &tag) const
 {
     if (!item) {
-        return {};
+        return ItemInstance();
     }
 
     const auto outer = furnace_results_.find(static_cast<int>(tag.getHash()));
     if (outer == furnace_results_.end()) {
-        return {};
+        return ItemInstance();
     }
     const auto &results = outer->second;
 
@@ -38,5 +38,5 @@ ItemInstance Recipes::getFurnaceRecipeResult(const ItemStackBase &item, const Ha
         return any->second;
     }
 
-    return {};
+    return ItemInstance();
 }
