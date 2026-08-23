@@ -690,9 +690,17 @@ class PlayerEvent(Event):
         The `Player` who is involved in this event.
         """
 
-class PlayerArmSwingEvent(PlayerEvent):
+class PlayerArmSwingEvent(PlayerEvent, Cancellable):
     """
     Called when a player swings their arm.
+
+    Cancelling stops the server acting on the swing at all. The swing is neither recorded nor shown to the other
+    players in the dimension.
+
+    Note:
+        The swinging player still sees their own arm move, because their client plays the animation without waiting
+        for the server. The event covers swings the player starts. Swings the server drives itself, such as dropping
+        an item, do not fire it.
     """
     @property
     def item(self) -> ItemStack | None:

@@ -273,7 +273,17 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
     py::class_<PlayerEvent, Event>(m, "PlayerEvent", "Represents a player related event.")
         .def_property_readonly("player", &PlayerEvent::getPlayer,
                                "The `Player` who is involved in this event.");
-    py::class_<PlayerArmSwingEvent, PlayerEvent>(m, "PlayerArmSwingEvent", "Called when a player swings their arm.")
+    py::class_<PlayerArmSwingEvent, PlayerEvent, ICancellable>(m, "PlayerArmSwingEvent", R"doc(
+    Called when a player swings their arm.
+
+    Cancelling stops the server acting on the swing at all. The swing is neither recorded nor shown to the other
+    players in the dimension.
+
+    Note:
+        The swinging player still sees their own arm move, because their client plays the animation without waiting
+        for the server. The event covers swings the player starts. Swings the server drives itself, such as dropping
+        an item, do not fire it.
+)doc")
         .def_property_readonly("item", &PlayerArmSwingEvent::getItem,
                                "The item the player was holding when they swung their arm.");
     auto player_bed_enter_event = py::class_<PlayerBedEnterEvent, PlayerEvent, ICancellable>(
