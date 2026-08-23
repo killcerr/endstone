@@ -29,7 +29,7 @@
 #include "bedrock/world/level/storage/game_rules.h"
 #include "endstone/core/actor/actor.h"
 #include "endstone/core/game_rule.h"
-#include "endstone/core/inventory/recipe.h"
+#include "endstone/core/inventory/recipe_data.h"
 #include "endstone/core/level/dimension.h"
 #include "endstone/level/dimension.h"
 
@@ -106,7 +106,15 @@ std::vector<NotNull<Dimension>> EndstoneLevel::getDimensions() const
 
 std::vector<NotNull<Recipe>> EndstoneLevel::getRecipes() const
 {
-    return makeRecipes(level_.getRecipes());
+    std::vector<NotNull<Recipe>> recipes;
+    for (const auto &by_tag : level_.getRecipes().getRecipesAllTags()) {
+        for (const auto &by_id : by_tag.second) {
+            if (by_id.second) {
+                recipes.push_back(EndstoneRecipeData::fromMinecraft(by_id.second));
+            }
+        }
+    }
+    return recipes;
 }
 
 Nullable<Dimension> EndstoneLevel::getDimension(DimensionId id) const

@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "bedrock/world/item/crafting/recipe.h"
+#include "bedrock/world/item/crafting/recipes.h"
 #include "endstone/core/type.h"
 #include "endstone/inventory/item_stack.h"
 #include "endstone/inventory/recipe.h"
@@ -32,6 +33,9 @@ namespace endstone::core {
 class EndstoneRecipeData {
 public:
     explicit EndstoneRecipeData(std::shared_ptr<const ::Recipe> recipe) : recipe_(std::move(recipe)) {}
+
+    static NotNull<endstone::Recipe> fromMinecraft(std::shared_ptr<const ::Recipe> recipe);
+    static Nullable<endstone::Recipe> fromMinecraft(const ::Recipes &recipes, const ::Recipe &recipe);
 
     [[nodiscard]] endstone::ItemStack getResult() const;
     [[nodiscard]] const std::vector<Nullable<endstone::RecipeIngredient>> &getIngredients() const;

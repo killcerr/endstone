@@ -128,7 +128,4 @@ private:
     std::string alias_;
 };
 
-[[nodiscard]] Nullable<endstone::RecipeIngredient> makeIngredient(std::shared_ptr<const ::Recipe> recipe,
-                                                                  const ::RecipeIngredient &ingredient);
-
 }  // namespace endstone::core
