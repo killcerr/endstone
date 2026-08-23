@@ -167,6 +167,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed the type stubs so a type checker no longer reports errors on them: `__eq__`/`__ne__` take `object`, in-place operators such as `Vector.__iadd__` accept everything their binary counterpart does and return `Self`, an optional callback is typed `Callable[...] | None`, a skin image is a `numpy.typing.NDArray`, and `Plugin.config` is a `dict[str, Any]`.
 - Fixed the NBT bindings hiding what their containers hold: `ByteArrayTag(iterable)` and `IntArrayTag(iterable)` take an `Iterable[int]`, `ListTag(iterable)` an `Iterable[Tag]`, `CompoundTag(mapping)` a `dict[str, Tag]`, and `to_list()`/`to_dict()` return `list[Any]`/`dict[str, Any]`.
 
+### Security
+
+- Rate-limited the network ping packet (`NetworkStackLatencyPacket`, id 115). Bedrock accepts it from a connection that has not logged in yet, and the shipped `packetlimitconfig.json` left it unbounded, so a single connection could flood it to exhaust the server. On startup Endstone now adds a limit for it to `packetlimitconfig.json` when one is not already present, leaving any entry you have set yourself untouched.
+
 ## [0.11.9] - 2026-08-17
 
 ### Added
