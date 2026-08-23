@@ -272,7 +272,11 @@ class Recipe:
     @property
     def ingredients(self) -> list[RecipeIngredient | None]: ...
     @property
-    def recipe_id(self) -> str: ...
+    def id(self) -> str:
+        """
+        The identifier of this recipe, such as `minecraft:crafting_table`.
+        """
+
     @property
     def tag(self) -> str:
         """

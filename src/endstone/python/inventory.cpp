@@ -107,7 +107,8 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
     py::classh<Recipe>(m, "Recipe", "Represents some type of crafting recipe.")
         .def_property_readonly("result", &Recipe::getResult, "The result of this recipe.")
         .def_property_readonly("ingredients", &Recipe::getIngredients)
-        .def_property_readonly("recipe_id", &Recipe::getRecipeId)
+        .def_property_readonly("id", &Recipe::getId,
+                               "The identifier of this recipe, such as `minecraft:crafting_table`.")
         .def_property_readonly("tag", &Recipe::getTag,
                                "The crafting station this recipe belongs to, such as `crafting_table`.");
 
