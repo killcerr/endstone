@@ -489,6 +489,7 @@ void init_server(py::classh<Server> &server)
 )doc")
         .def_property_readonly("level", &Server::getLevel, py::return_value_policy::reference_internal,
                                "The server level.")
+        .def_property_readonly("recipes", &Server::getRecipes, "The list of crafting recipes.")
         .def_property_readonly("online_players", &Server::getOnlinePlayers, "A list of all currently online players.")
         .def_property("max_players", &Server::getMaxPlayers, &Server::setMaxPlayers,
                       "The maximum amount of players which can login to this server.")

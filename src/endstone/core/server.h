@@ -78,6 +78,7 @@ public:
     [[nodiscard]] NotNull<MetricsBase> createMetrics(Plugin &plugin, int service_id) override;
 
     [[nodiscard]] Level &getLevel() const override;
+    [[nodiscard]] std::vector<NotNull<Recipe>> getRecipes() const override;
     [[nodiscard]] EndstoneLevel *getEndstoneLevel() const;
 
     [[nodiscard]] std::vector<NotNull<Player>> getOnlinePlayers() const override;

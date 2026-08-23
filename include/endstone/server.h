@@ -51,6 +51,7 @@ class ItemType;
 class IRegistry;
 class Level;
 class MetricsBase;
+class Recipe;
 class Scheduler;
 class Player;
 class Plugin;
@@ -477,6 +478,13 @@ public:
      * @return the metrics backend
      */
     [[nodiscard]] virtual NotNull<MetricsBase> createMetrics(Plugin &plugin, int service_id) = 0;
+
+    /**
+     * Get the list of crafting recipes.
+     *
+     * @return a list of recipes
+     */
+    [[nodiscard]] virtual std::vector<NotNull<Recipe>> getRecipes() const = 0;
 
     /**
      * Used for all administrative messages, such as an operator using a command.

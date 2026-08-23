@@ -531,6 +531,11 @@ Level &EndstoneServer::getLevel() const
     return *level_;
 }
 
+std::vector<NotNull<Recipe>> EndstoneServer::getRecipes() const
+{
+    return getLevel().getRecipes();
+}
+
 EndstoneLevel *EndstoneServer::getEndstoneLevel() const
 {
     return level_.get();

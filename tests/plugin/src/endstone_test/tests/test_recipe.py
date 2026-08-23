@@ -22,6 +22,13 @@ def test_level_recipes_are_snapshots(server: Server) -> None:
     assert all(isinstance(recipe.ingredients, list) for recipe in recipes)
 
 
+def test_server_recipes_match_the_level(server: Server) -> None:
+    """Verify Server.recipes reaches the same recipes as Level.recipes."""
+    assert [recipe.recipe_id for recipe in server.recipes] == [
+        recipe.recipe_id for recipe in server.level.recipes
+    ]
+
+
 def test_level_recipes_use_matching_specialized_types(server: Server) -> None:
     """Verify recipe snapshots are narrowed to shaped, shapeless, smithing and multi types."""
     recipes = server.level.recipes
