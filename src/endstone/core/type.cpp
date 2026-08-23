@@ -37,6 +37,7 @@
 #include "endstone/command/proxied_command_sender.h"
 #include "endstone/inventory/complex_recipe.h"
 #include "endstone/inventory/exact_ingredient.h"
+#include "endstone/inventory/item_complex_alias_ingredient.h"
 #include "endstone/inventory/item_tag_ingredient.h"
 #include "endstone/inventory/item_type_ingredient.h"
 #include "endstone/inventory/meta/book_meta.h"
@@ -113,6 +114,7 @@ void registerTypes()
     // RecipeIngredient hierarchy
     registerType<RecipeIngredient>();
     registerType<ExactIngredient>().base<RecipeIngredient>();
+    registerType<ItemComplexAliasIngredient>().base<RecipeIngredient>();
     registerType<ItemTagIngredient>().base<RecipeIngredient>();
     registerType<ItemTypeIngredient>().base<RecipeIngredient>();
     registerType<UnknownIngredient>().base<RecipeIngredient>();

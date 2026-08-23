@@ -23,6 +23,7 @@
 #include "endstone/core/inventory/item_stack.h"
 #include "endstone/core/type.h"
 #include "endstone/inventory/exact_ingredient.h"
+#include "endstone/inventory/item_complex_alias_ingredient.h"
 #include "endstone/inventory/item_tag_ingredient.h"
 #include "endstone/inventory/item_type_ingredient.h"
 #include "endstone/inventory/unknown_ingredient.h"
@@ -97,6 +98,20 @@ public:
 
 private:
     std::string tag_name_;
+};
+
+class EndstoneItemComplexAliasIngredient final : public EndstoneIngredientBase<endstone::ItemComplexAliasIngredient> {
+public:
+    EndstoneItemComplexAliasIngredient(std::shared_ptr<const ::Recipe> recipe, const ::RecipeIngredient &ingredient,
+                                       std::string alias_name)
+        : EndstoneIngredientBase(std::move(recipe), ingredient), alias_name_(std::move(alias_name))
+    {
+    }
+
+    [[nodiscard]] const std::string &getAliasName() const override { return alias_name_; }
+
+private:
+    std::string alias_name_;
 };
 
 class EndstoneUnknownIngredient final : public EndstoneIngredientBase<endstone::UnknownIngredient> {

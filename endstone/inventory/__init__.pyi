@@ -19,6 +19,7 @@ __all__ = [
     "EquipmentSlot",
     "ExactIngredient",
     "Inventory",
+    "ItemComplexAliasIngredient",
     "ItemFactory",
     "ItemMeta",
     "ItemStack",
@@ -233,6 +234,19 @@ class ItemTagIngredient(RecipeIngredient):
         The name of the tag that this ingredient will match.
 
         Bedrock keeps item tags server-side, so the tag is reported rather than the item types in it.
+        """
+
+class ItemComplexAliasIngredient(RecipeIngredient):
+    """
+    Represents an ingredient that matches any item an id stands for.
+    """
+    @property
+    def alias_name(self) -> str:
+        """
+        The id that this ingredient will match.
+
+        The id predates the item flattening, such as `minecraft:planks`, and stands for every item it was split into. It is
+        not an item tag, and the items are not reported.
         """
 
 class UnknownIngredient(RecipeIngredient):

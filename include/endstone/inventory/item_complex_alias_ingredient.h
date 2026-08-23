@@ -20,19 +20,20 @@
 
 namespace endstone {
 /**
- * Represents an ingredient that matches any item carrying a tag.
+ * Represents an ingredient that matches any item an id stands for.
  */
-class ItemTagIngredient : public RecipeIngredient {
+class ItemComplexAliasIngredient : public RecipeIngredient {
 public:
-    ~ItemTagIngredient() override = default;
+    ~ItemComplexAliasIngredient() override = default;
 
     /**
-     * Gets the name of the tag that this ingredient will match.
+     * Gets the id that this ingredient will match.
      *
-     * Bedrock keeps item tags server-side, so the tag is reported rather than the item types in it.
+     * The id predates the item flattening, such as `minecraft:planks`, and stands for every item it was split into.
+     * It is not an item tag, and the items are not reported.
      *
-     * @return the tag name
+     * @return the id
      */
-    [[nodiscard]] virtual const std::string &getTagName() const = 0;
+    [[nodiscard]] virtual const std::string &getAliasName() const = 0;
 };
 }  // namespace endstone

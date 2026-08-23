@@ -90,6 +90,15 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
     Bedrock keeps item tags server-side, so the tag is reported rather than the item types in it.
 )doc");
 
+    py::classh<ItemComplexAliasIngredient, RecipeIngredient>(
+        m, "ItemComplexAliasIngredient", "Represents an ingredient that matches any item an id stands for.")
+        .def_property_readonly("alias_name", &ItemComplexAliasIngredient::getAliasName, R"doc(
+    The id that this ingredient will match.
+
+    The id predates the item flattening, such as `minecraft:planks`, and stands for every item it was split into. It is
+    not an item tag, and the items are not reported.
+)doc");
+
     py::classh<UnknownIngredient, RecipeIngredient>(m, "UnknownIngredient", R"doc(
     Represents an ingredient Endstone cannot describe, such as one resolved by a Molang expression.
 

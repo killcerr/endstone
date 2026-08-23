@@ -11,6 +11,7 @@ __getattr__, __dir__, __all__ = lazy.attach(
             "EquipmentSlot",
             "ExactIngredient",
             "Inventory",
+            "ItemComplexAliasIngredient",
             "ItemFactory",
             "ItemMeta",
             "ItemStack",
