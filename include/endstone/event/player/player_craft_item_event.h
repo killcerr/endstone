@@ -15,6 +15,7 @@
 #pragma once
 
 #include <utility>
+#include <vector>
 
 #include "endstone/event/cancellable.h"
 #include "endstone/event/player/player_event.h"
@@ -24,7 +25,7 @@
 namespace endstone {
 
 /**
- * Called when a player crafts an item.
+ * Called when a player crafts an item, either inside a crafting grid or straight from the recipe book.
  *
  * @note If the event is cancelled the item will not be crafted and the ingredients will not be consumed.
  */
@@ -32,36 +33,67 @@ class PlayerCraftItemEvent final : public Cancellable<PlayerEvent> {
 public:
     ENDSTONE_EVENT(PlayerCraftItemEvent);
 
-    PlayerCraftItemEvent(const NotNull<Player> &player, ItemStack item, const NotNull<Recipe> &recipe, int amount)
-        : Cancellable(player), item_(std::move(item)), recipe_(recipe), amount_(amount)
+    // TODO(recipe): add getRecipe() once the Recipe API lands
+    PlayerCraftItemEvent(const NotNull<Player> &player, std::vector<ItemStack> ingredients,
+                         std::vector<ItemStack> results, int repetitions)
+        : Cancellable(player), ingredients_(std::move(ingredients)), results_(std::move(results)),
+          repetitions_(repetitions)
     {
     }
 
     /**
-     * Gets the item that is being crafted.
+     * Gets the ingredients a single craft consumes.
      *
-     * @return an ItemStack for the item being crafted
+     * @note These are the items in the crafting grid where the player used one. Crafting from the recipe book never
+     * fills the grid, so the ingredients then come from the recipe instead, and an ingredient that accepts several
+     * items reports the one the recipe names rather than the one the player supplied.
+     *
+     * @return the ingredients the craft consumes
      */
-    [[nodiscard]] const ItemStack &getItem() const { return item_; }
+    [[nodiscard]] const std::vector<ItemStack> &getIngredients() const { return ingredients_; }
 
     /**
-     * Gets the recipe being crafted.
+     * Gets the items a single craft produces.
      *
-     * @return the recipe
+     * A recipe usually produces one item, but may produce several, and an ingredient that leaves a remainder behind
+     * contributes one too.
+     *
+     * @return the items the craft produces
      */
-    [[nodiscard]] const Recipe &getRecipe() const { return *recipe_; }
+    [[nodiscard]] const std::vector<ItemStack> &getResults() const { return results_; }
+
+    /**
+     * Sets the items a single craft produces.
+     *
+     * @note Results are replaced one for one, so any beyond the number the recipe produces are ignored. Cancel the
+     * event to stop the craft instead.
+     *
+     * @param results the items the craft should produce
+     */
+    void setResults(std::vector<ItemStack> results) { results_ = std::move(results); }
 
     /**
      * Gets the number of times the recipe is being crafted.
      *
-     * @return the number of crafts
+     * This is usually 1, but is higher when a batch is crafted at once, such as a shift click in the recipe book.
+     *
+     * @return the number of times the recipe is being crafted
      */
-    [[nodiscard]] int getAmount() const { return amount_; }
+    [[nodiscard]] int getRepetitions() const { return repetitions_; }
+
+    /**
+     * Sets the number of times the recipe is being crafted.
+     *
+     * @note Values are clamped to the 0-255 range the server accepts.
+     *
+     * @param repetitions the number of times the recipe is being crafted
+     */
+    void setRepetitions(int repetitions) { repetitions_ = repetitions; }
 
 private:
-    ItemStack item_;
-    NotNull<Recipe> recipe_;
-    int amount_;
+    std::vector<ItemStack> ingredients_;
+    std::vector<ItemStack> results_;
+    int repetitions_;
 };
 
 }  // namespace endstone

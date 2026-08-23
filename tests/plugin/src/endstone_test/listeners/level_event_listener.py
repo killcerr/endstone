@@ -9,6 +9,7 @@ class LevelEventListener(EventListener):
         self.record(
             event,
             f"{event.chunk} is loaded",
+            always_log=True,
             chunk_xz=(event.chunk.x, event.chunk.z),
             dimension=str(event.dimension.id),
         )
@@ -18,6 +19,7 @@ class LevelEventListener(EventListener):
         self.record(
             event,
             f"{event.chunk} is unloaded",
+            always_log=True,
             chunk_xz=(event.chunk.x, event.chunk.z),
             dimension=str(event.dimension.id),
         )

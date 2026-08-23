@@ -10,7 +10,7 @@ from endstone.actor import Actor, Item, Mob
 from endstone.block import Block, BlockFace, BlockState
 from endstone.command import CommandSender
 from endstone.damage import DamageSource
-from endstone.inventory import BookMeta, EquipmentSlot, ItemStack, Recipe
+from endstone.inventory import BookMeta, EquipmentSlot, Inventory, ItemStack
 from endstone.lang import Translatable
 from endstone.level import Chunk, Dimension, Level, Location
 from endstone.map import MapView
@@ -54,6 +54,8 @@ __all__ = [
     "Event",
     "EventPriority",
     "EventResult",
+    "InventoryEvent",
+    "InventoryInteractEvent",
     "LeavesDecayEvent",
     "LevelEvent",
     "MapInitializeEvent",
@@ -92,7 +94,6 @@ __all__ = [
     "PlayerPickupItemEvent",
     "PlayerPortalEvent",
     "PlayerQuitEvent",
-    "PlayerRecipeBookClickEvent",
     "PlayerRecipeBookSettingsChangeEvent",
     "PlayerRespawnEvent",
     "PlayerRiptideEvent",
@@ -764,29 +765,6 @@ class PlayerCommandEvent(PlayerEvent, Cancellable):
     @command.setter
     def command(self, arg1: str) -> None: ...
 
-class PlayerCraftItemEvent(PlayerEvent, Cancellable):
-    """
-    Called when a player crafts an item.
-
-    If the event is cancelled the item will not be crafted and the ingredients will not be consumed.
-    """
-    @property
-    def item(self) -> ItemStack:
-        """
-        An `ItemStack` for the item being crafted.
-        """
-
-    @property
-    def recipe(self) -> Recipe:
-        """
-        The recipe being crafted.
-        """
-
-    @property
-    def amount(self) -> int:
-        """
-        The number of times the recipe is being crafted.
-        """
 
 class PlayerDimensionChangeEvent(PlayerEvent):
     """
@@ -803,6 +781,45 @@ class PlayerDimensionChangeEvent(PlayerEvent):
         """
         The player's new dimension.
         """
+
+class PlayerCraftItemEvent(PlayerEvent, Cancellable):
+    """
+    Called when a player crafts an item, either inside a crafting grid or straight from the recipe book.
+
+    If the event is cancelled the item will not be crafted and the ingredients will not be consumed.
+    """
+    @property
+    def ingredients(self) -> list[ItemStack]:
+        """
+        The ingredients a single craft consumes.
+
+        These are the items in the crafting grid where the player used one. Crafting from the recipe book never fills
+        the grid, so the ingredients then come from the recipe instead, and an ingredient that accepts several items
+        reports the one the recipe names rather than the one the player supplied.
+        """
+
+    @property
+    def results(self) -> list[ItemStack]:
+        """
+        The items a single craft produces.
+
+        A recipe usually produces one item, but may produce several, and an ingredient that leaves a remainder behind
+        contributes one too. Results are replaced one for one, so any beyond the number the recipe produces are ignored;
+        cancel the event to stop the craft instead.
+        """
+
+    @results.setter
+    def results(self, arg1: list[ItemStack]) -> None: ...
+    @property
+    def repetitions(self) -> int:
+        """
+        The number of times the recipe is being crafted.
+
+        This is usually 1, but is higher when a batch is crafted at once, such as a shift click in the recipe book.
+        """
+
+    @repetitions.setter
+    def repetitions(self, arg1: int) -> None: ...
 
 class PlayerDropItemEvent(PlayerEvent, Cancellable):
     """
@@ -1168,26 +1185,6 @@ class PlayerQuitEvent(PlayerEvent):
     @quit_message.setter
     def quit_message(self, arg1: str | Translatable | None) -> None: ...
 
-class PlayerRecipeBookClickEvent(PlayerEvent, Cancellable):
-    """
-    Called when a player clicks a recipe in the recipe book.
-
-    If the event is cancelled the recipe will not be crafted and no ingredients will be consumed.
-    """
-    @property
-    def recipe(self) -> Recipe:
-        """
-        The recipe clicked by the player.
-        """
-
-    @property
-    def amount(self) -> int:
-        """
-        The number of times the recipe is being crafted.
-        """
-
-    @amount.setter
-    def amount(self, arg1: int) -> None: ...
 
 class PlayerRecipeBookSettingsChangeEvent(PlayerEvent):
     """
@@ -1384,6 +1381,27 @@ class PlayerPickupItemEvent(PlayerEvent, Cancellable):
     def item(self) -> Item:
         """
         The Item picked up by the entity.
+        """
+
+class InventoryEvent(Event):
+    """
+    Represents a player related inventory event.
+    """
+    @property
+    def inventory(self) -> Inventory:
+        """
+        The primary `Inventory` involved in this transaction.
+        """
+
+class InventoryInteractEvent(InventoryEvent, Cancellable):
+    """
+    An abstract base class for events that describe an interaction between a `Player` and the contents of an
+    `Inventory`.
+    """
+    @property
+    def who_clicked(self) -> Player:
+        """
+        The player who performed the click.
         """
 
 class ServerEvent(Event):

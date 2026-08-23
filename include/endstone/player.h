@@ -26,6 +26,7 @@
 #include "endstone/form/modal_form.h"
 #include "endstone/game_mode.h"
 #include "endstone/inventory/player_inventory.h"
+#include "endstone/json.h"
 #include "endstone/level/location.h"
 #include "endstone/map/map_view.h"
 #include "endstone/scoreboard/scoreboard.h"
@@ -395,10 +396,10 @@ public:
      *
      * @param name the name of the particle effect to spawn
      * @param location the location to spawn at
-     * @param molang_variables_json the customizable molang variables that can be adjusted for this particle, in json
+     * @param molang_variables the customizable molang variables that can be adjusted for this particle
      */
     virtual void spawnParticle(std::string name, Location location,
-                               std::optional<std::string> molang_variables_json) const = 0;
+                               std::optional<JsonObject> molang_variables) const = 0;
 
     /**
      * Spawns the particle at the target location.
@@ -407,10 +408,10 @@ public:
      * @param x the position on the x axis to spawn at
      * @param y the position on the y axis to spawn at
      * @param z the position on the z axis to spawn at
-     * @param molang_variables_json the customizable molang variables that can be adjusted for this particle, in json
+     * @param molang_variables the customizable molang variables that can be adjusted for this particle
      */
     virtual void spawnParticle(std::string name, float x, float y, float z,
-                               std::optional<std::string> molang_variables_json) const = 0;
+                               std::optional<JsonObject> molang_variables) const = 0;
 
     // TODO: getClientViewDistance
 

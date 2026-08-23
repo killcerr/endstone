@@ -43,7 +43,7 @@ class ServerInstance;
 namespace endstone::core {
 class EndstoneConsoleCommandSender;
 class EndstoneIpBanList;
-class EndstoneMetrics;
+class Metrics;
 class EndstonePlayer;
 class EndstonePlayerBanList;
 class EndstoneServer : public Server {
@@ -75,6 +75,7 @@ public:
 
     [[nodiscard]] Scheduler &getScheduler() const override;
     [[nodiscard]] EndstoneScheduler &getEndstoneScheduler() const;
+    [[nodiscard]] NotNull<MetricsBase> createMetrics(Plugin &plugin, int service_id) override;
 
     [[nodiscard]] Level &getLevel() const override;
     [[nodiscard]] EndstoneLevel *getEndstoneLevel() const;
@@ -162,7 +163,8 @@ private:
     std::unique_ptr<EndstoneLevel> level_;
     std::unordered_map<std::type_index, std::unique_ptr<IRegistry>> registries_;
     Nullable<EndstoneScoreboard> scoreboard_;
-    std::unique_ptr<EndstoneMetrics> metrics_;
+    std::unique_ptr<Metrics> metrics_;
+    std::unordered_map<int, NotNull<MetricsBase>> plugin_metrics_;
     std::unordered_map<UUID, NotNull<EndstoneScoreboard>> player_boards_;
     std::chrono::system_clock::time_point start_time_;
     IResourcePackRepository *resource_pack_repository_ = nullptr;

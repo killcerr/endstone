@@ -11,7 +11,7 @@ from typing import Any, Callable, Dict, Set, final
 import aiohttp
 
 import endstone.asyncio
-from endstone.metrics.charts.custom_chart import CustomChart
+from endstone._python.metrics import CustomChart
 
 
 class MetricsBase(ABC):
@@ -171,15 +171,16 @@ class MetricsBase(ABC):
         chart_data = []
         for chart in self._custom_charts:
             try:
-                chart_json = chart._get_request_json_object()  # noqa
-                if chart_json is not None:
-                    chart_data.append(chart_json)
+                data = chart.get_chart_data()
             except Exception as e:
                 if self._log_errors:
                     self.log_error(
                         f"Failed to get data for custom chart with id {chart.chart_id}",
                         e,
                     )
+                continue
+            if data:
+                chart_data.append({"chartId": chart.chart_id, "data": data})
 
         service_data["id"] = self._service_id
         service_data["customCharts"] = chart_data

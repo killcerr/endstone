@@ -50,8 +50,10 @@ class ItemFactory;
 class ItemType;
 class IRegistry;
 class Level;
+class MetricsBase;
 class Scheduler;
 class Player;
+class Plugin;
 class PluginCommand;
 class PluginManager;
 
@@ -463,6 +465,18 @@ public:
      * @return a newly created map view
      */
     [[nodiscard]] virtual MapView &createMap(const NotNull<Dimension> &dimension) const = 0;
+
+    /**
+     * Creates the backend for a plugin's metrics.
+     *
+     * Plugins construct an `endstone::Metrics` instead of calling this. The server keeps the backend alive until it
+     * reloads or shuts down, and returns the one it already has for a service id.
+     *
+     * @param plugin the plugin the metrics belong to
+     * @param service_id the id of the service, found at https://bstats.org/what-is-my-plugin-id
+     * @return the metrics backend
+     */
+    [[nodiscard]] virtual NotNull<MetricsBase> createMetrics(Plugin &plugin, int service_id) = 0;
 
     /**
      * Used for all administrative messages, such as an operator using a command.

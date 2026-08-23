@@ -11,7 +11,7 @@
 
 namespace endstone::runtime {
 
-static constexpr std::array<std::pair<std::string_view, std::size_t>, 75> symbols = {{
+static constexpr std::array<std::pair<std::string_view, std::size_t>, 77> symbols = {{
     {"BlockState::StateListNode::mHead", 245468000},
     {"Enchant::mEnchants", 245294016},
     {"MobEffect::mMobEffects", 245274360},
@@ -53,6 +53,8 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 75> symbol
     {"_ZNK15CommandRegistry26serializeAvailableCommandsEv", 160039360},
     // CommandUtils
     {"_ZN12CommandUtils12getActorNameERK5Actor", 159774800},
+    // CraftHandlerCrafting
+    {"_ZN20CraftHandlerCrafting18_handleCraftActionERK31ItemStackRequestActionCraftBase", 197828768},
     // CraftingDataPacketPayload
     {"_ZN25CraftingDataPacketPayload11fromRecipesERK7Recipesb", 134785984},
     // DedicatedServer
@@ -79,8 +81,6 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 75> symbol
     // ItemStackBase
     {"_ZN13ItemStackBase34_loadBlocksForCanPlaceOnCanDestroyERNSt3__16vectorIPK9BlockTypeNS0_9allocatorIS4_EEEERKNS0_12basic_stringIcNS0_11char_traitsIcEENS5_IcEEEE", 196858752},
     {"_ZN13ItemStackBase8_setItemEib", 196818048},
-    // ItemStackRequestActionCraftHandler
-    {"_ZN34ItemStackRequestActionCraftHandler17handleCraftActionERK31ItemStackRequestActionCraftBase", 197886512},
     // LeavesBlock
     {"_ZN11LeavesBlock10randomTickERN11BlockEvents20BlockRandomTickEventE", 199008832},
     // Level
@@ -130,6 +130,9 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 75> symbol
     {"_ZN12ServerPlayer15changeDimensionE13DimensionType", 160365232},
     // ServerScoreboard
     {"_ZN16ServerScoreboardC2E23CommandSoftEnumRegistryP12LevelStorageN3gsl8not_nullIN7Bedrock15NonOwnerPointerI19GameplayUserManagerEEEE", 209066992},
+    // TickingAreasManager
+    {"_ZN19TickingAreasManager17removeScopedAreasERKNSt3__16vectorIN3mce4UUIDENS0_9allocatorIS3_EEEE", 209958064},
+    {"_ZN19TickingAreasManager22addTransientScopedAreaE13DimensionTypeRKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEEmN3mce4UUIDERK6Bounds", 209957280},
     // TridentItem
     {"_ZNK11TridentItem12releaseUsingER9ItemStackP6Playeri", 195973728},
     // WeatherManager

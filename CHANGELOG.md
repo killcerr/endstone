@@ -18,8 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PlayerArmorStandManipulateEvent`, reporting `armor_stand_item`, `player_item` and `slot`.
 - `PlayerBucketActorEvent` and `PlayerShearActorEvent`, reporting the `actor`, the `original_bucket` or `item` used and the `hand`.
 - `PlayerRecipeBookSettingsChangeEvent`, reporting `recipe_book_type`, `is_open` and `is_filtering`.
-- `PlayerCraftItemEvent` for crafting from a grid or the recipe book, reporting the crafted `item`, its `recipe` and the `amount` of crafts.
-- `PlayerRecipeBookClickEvent` for crafting straight from the recipe book, reporting the clicked `recipe` and a writable `amount`. Cancelling it suppresses the following `PlayerCraftItemEvent` too.
+- `PlayerCraftItemEvent` for crafting in a crafting grid or straight from the recipe book, reporting the `ingredients` a craft consumes plus writable `results` and `repetitions`. Ingredients are the items in the crafting grid, or the recipe's own when crafting from the recipe book, which never fills the grid. Setting `results` changes what the craft produces; cancelling blocks the craft and leaves the ingredients untouched.
 - `PlayerEditBookEvent` for editing a page of a book and quill or signing it, reporting the book metadata before and after the edit, the inventory `slot`, and whether the book is being signed. `new_book_meta` and `is_signing` are writable.
 - `PlayerSetSpawnEvent` for a player's respawn point being set, reporting the `cause` (`BED`, `RESPAWN_ANCHOR`, `COMMAND`, `PLUGIN` or `UNKNOWN`) and a writable `location`. Cancelling leaves the respawn point untouched, though `/spawnpoint` still reports success and a respawn anchor still plays its sound. It does not fire when Bedrock clears a respawn point, so `/clearspawnpoint` and breaking the bed are both silent.
 - `PlayerToggleSneakEvent`, `PlayerToggleSprintEvent`, `PlayerToggleFlightEvent` and `PlayerToggleCrawlEvent`, carrying the new state in `is_sneaking`, `is_sprinting`, `is_flying` and `is_crawling`.
@@ -31,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ActorChangeBlockEvent` for blocks changed by mob behaviour, such as creeper explosions, endermen, ravagers and door-breaking zombies.
 - `PlayerRespawnEvent.respawn_reason` (`RespawnReason.DEATH` / `RespawnReason.END_PORTAL`).
 - `ActorExplodeEvent::setBlockList()` and `BlockExplodeEvent::setBlockList()`, with the `BlockList` alias made public.
+- `InventoryEvent`, a base class for inventory-related events, reporting the primary `inventory` involved, and the cancellable `InventoryInteractEvent` under it, which adds the `who_clicked` player.
 - Support for custom Python events with optional cancellation.
 
 #### Actors and players
@@ -62,9 +62,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Level.create_dimension()` for registering an empty (void) dimension from -64 to 320 at runtime. The registration does not survive a restart, so call it again on every startup.
 - `Dimension.mobs` and `Dimension.players`, both narrowing `Dimension.actors`.
-- Chunk loading API: `Dimension.load_chunk()`, `Dimension.unload_chunk()` and `Dimension.is_chunk_loaded()`.
-- `Level.recipes`, exposing snapshots of shaped, shapeless and smithing crafting recipes, including transform and trim recipes, their results when available, immutable ingredient descriptors, IDs, crafting tags and shapelessness.
-- `MultiRecipe` snapshots for recipes whose result is determined from crafting inputs, including recipe events and `Level.recipes`.
+- Chunk loading API: `Dimension.load_chunk()`, `Dimension.unload_chunk()`, `Dimension.unload_chunk_request()`, `Dimension.is_chunk_loaded()` and `Dimension.is_chunk_generated()`, plus `Chunk.load()`, `Chunk.unload()` and `Chunk.is_loaded()`. Bedrock has no synchronous chunk load, so `load_chunk()` keeps the chunk resident from a later tick onwards and does not make it tick. `unload_chunk()` reports whether the chunk actually went away, while `unload_chunk_request()` only releases the hold.
+- Plugin chunk tickets: `Dimension.add_plugin_chunk_ticket()`, `remove_plugin_chunk_ticket()`, `remove_plugin_chunk_tickets()`, `get_plugin_chunk_tickets()` and `plugin_chunk_tickets`, with the same methods on `Chunk`. A ticket keeps a chunk loaded until it is removed or the owning plugin is disabled, and `unload_chunk()` leaves it alone.
 
 #### Commands and permissions
 
@@ -75,10 +74,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### API and types
 
+- `endstone::Metrics` for C++ plugins, mirroring bStats' `Metrics(plugin, service_id)` and carrying all seven chart types plus `CustomChart`. The server owns what it creates and retires it on reload, so a plugin can add its charts in `onEnable` and forget the handle. One service id gets one Metrics, however many times it is asked for.
+- `endstone.metrics` chart classes are now the C++ ones, so a chart behaves identically whichever language declares it. Python plugins keep the same `SimplePie("id", callback)` usage and can still subclass `CustomChart`, whose `get_chart_data()` returns JSON.
+- nlohmann/json is part of the public C++ API, with `endstone::JsonValue`, `JsonObject` and `JsonArray` naming the three shapes (and `endstone.JsonValue` / `JsonObject` / `JsonArray` in Python). `endstone_add_plugin()` links it for you.
 - Unified `Object.as<T>()`/`is<T>()` casting API. `NotNull<T>` and `Nullable<T>` carry the same pair, so `event.getActor().as<Player>()` returns a `Nullable<Player>` sharing ownership with the original.
 - `endstone.Identifier` for namespaced ids, splitting `dim.id.namespace` from `dim.id.key` and distinguishing `Identifier[Dimension]` from `Identifier[ActorType]`. Plain strings are still accepted.
 - `ActorType`, `EffectType` and `PotionType` in the registry API, each entry carrying a `translation_key`, plus the missing `ActorType.SULFUR_CUBE` constant.
 - Binary NBT serialization (`dump`/`load`) with support for multiple formats.
+- The logger handles ANSI escape codes alongside `§` colour codes, so a plugin can log text that is already coloured. Colour sequences reach the console as written, and every escape sequence is stripped from the log file, which previously kept them verbatim.
 
 #### Server and Docker
 
@@ -89,6 +92,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ***
 
 ### Changed
+
+#### JSON payloads
+
+- **BREAKING**: `ModalForm`'s submit callback receives the parsed response instead of a JSON string: a `JsonArray` in C++, a `JsonArray` (`list`) in Python. A Python handler doing `json.loads(data)` must drop the call, and a C++ one must stop parsing the string itself.
+- **BREAKING**: `Player.spawn_particle()` takes the molang variables as a `JsonObject` (a `dict` in Python), and the parameter is renamed `molang_variables_json` -> `molang_variables`. Both the rename and the type change make an old call fail rather than send the wrong payload.
 
 #### Smart handles
 

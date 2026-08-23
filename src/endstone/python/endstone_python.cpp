@@ -45,6 +45,7 @@ void init_level(py::module_ &, py::classh<Level> &level, py::classh<Dimension> &
                 py::class_<Location> &location);
 void init_logger(py::module_ &);
 void init_map(py::module_ &);
+void init_metrics(py::module_ &);
 void init_nbt(py::module_ &);
 void init_permissions(py::module_ &, py_class<Permissible> &permissible, py::classh<Permission> &permission);
 void init_player(py::module_ &, py_class<Player> &player);
@@ -119,6 +120,7 @@ PYBIND11_MODULE(_python, m)  // NOLINT(*-use-anonymous-namespace)
     auto m_lang = m.def_submodule("lang");
     auto m_level = m.def_submodule("level");
     auto m_map = m.def_submodule("map", "Classes relating to plugin handling of map displays.");
+    auto m_metrics = m.def_submodule("metrics", "Classes relating to the bStats metrics charts.");
     auto m_nbt = m.def_submodule("nbt", "Classes relating to the NBT data format.");
     auto m_permissions = m.def_submodule("permissions", "Classes relating to permissions of players.");
     auto m_plugin = m.def_submodule("plugin", "Classes relating to loading and managing plugins.");
@@ -208,6 +210,7 @@ PYBIND11_MODULE(_python, m)  // NOLINT(*-use-anonymous-namespace)
     init_form(m_form);
     init_enchantments(m_enchantments);
     init_map(m_map);
+    init_metrics(m_metrics);
     init_nbt(m_nbt);
     init_potion(m_potion);
     init_inventory(m_inventory, item_stack);
@@ -217,11 +220,11 @@ PYBIND11_MODULE(_python, m)  // NOLINT(*-use-anonymous-namespace)
     // init_actor first: it registers ActorType, which CreatureSpawner's signatures refer to
     init_actor(m_actor, actor, mob);
     init_block(m_block, block);
+    init_command(m_command, command_sender);
+    init_plugin(m_plugin);
     init_level(m_level, level, dimension, location);
     init_player(m, player);
     init_boss(m_boss);
-    init_command(m_command, command_sender);
-    init_plugin(m_plugin);
     init_scheduler(m_scheduler);
     init_permissions(m_permissions, permissible, permission);
     init_registry(m);
@@ -772,19 +775,19 @@ void init_player(py::module_ &m, py_class<Player> &player)
     This will clear the displayed title / subtitle and reset timings to their default values.
 )doc")
         .def("spawn_particle",
-             py::overload_cast<std::string, Location, std::optional<std::string>>(&Player::spawnParticle, py::const_),
-             py::arg("name"), py::arg("location").noconvert(), py::arg("molang_variables_json") = std::nullopt, R"doc(
+             py::overload_cast<std::string, Location, std::optional<JsonObject>>(&Player::spawnParticle, py::const_),
+             py::arg("name"), py::arg("location").noconvert(), py::arg("molang_variables") = std::nullopt, R"doc(
     Spawns the particle at the target location.
 
     Args:
         name: The name of the particle effect to spawn.
         location: The location to spawn at.
-        molang_variables_json: The customizable molang variables that can be adjusted for this particle, in json.
+        molang_variables: The customizable molang variables that can be adjusted for this particle.
 )doc")
         .def("spawn_particle",
-             py::overload_cast<std::string, float, float, float, std::optional<std::string>>(&Player::spawnParticle,
-                                                                                             py::const_),
-             py::arg("name"), py::arg("x"), py::arg("y"), py::arg("z"), py::arg("molang_variables_json") = std::nullopt,
+             py::overload_cast<std::string, float, float, float, std::optional<JsonObject>>(&Player::spawnParticle,
+                                                                                            py::const_),
+             py::arg("name"), py::arg("x"), py::arg("y"), py::arg("z"), py::arg("molang_variables") = std::nullopt,
              R"doc(
     Spawns the particle at the target location.
 
@@ -793,7 +796,7 @@ void init_player(py::module_ &m, py_class<Player> &player)
         x: The position on the x axis to spawn at.
         y: The position on the y axis to spawn at.
         z: The position on the z axis to spawn at.
-        molang_variables_json: The customizable molang variables that can be adjusted for this particle, in json.
+        molang_variables: The customizable molang variables that can be adjusted for this particle.
 )doc")
         .def_property_readonly(
             "ping", [](const Player &self) { return self.getPing().count(); },
