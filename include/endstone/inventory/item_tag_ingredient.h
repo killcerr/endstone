@@ -29,7 +29,9 @@ public:
     /**
      * Gets the name of the tag that this ingredient will match.
      *
-     * Bedrock keeps item tags server-side, so the tag is reported rather than the item types in it.
+     * Bedrock keeps item tags server-side, so the tag is reported rather than the item types in it. A recipe naming an
+     * id that predates the item flattening, such as `minecraft:planks`, also arrives here: the id stands for the set it
+     * was split into.
      *
      * @return the tag name
      */

@@ -27,6 +27,7 @@ Nullable<endstone::RecipeIngredient> makeIngredient(std::shared_ptr<const ::Reci
     case ItemDescriptor::InternalType::Invalid:
         return nullptr;
     case ItemDescriptor::InternalType::ItemTag:
+    case ItemDescriptor::InternalType::ComplexAlias:
         return std::make_shared<EndstoneItemTagIngredient>(std::move(recipe), ingredient, descriptor.getFullName());
     case ItemDescriptor::InternalType::Default: {
         const auto *type = endstone::ItemType::get(descriptor.getFullName());
