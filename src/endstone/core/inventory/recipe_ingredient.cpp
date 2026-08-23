@@ -31,8 +31,8 @@ Nullable<endstone::RecipeIngredient> makeIngredient(std::shared_ptr<const ::Reci
     case ItemDescriptor::InternalType::Molang:
         return std::make_shared<EndstoneMolangIngredient>(std::move(recipe), ingredient, descriptor.getFullName());
     case ItemDescriptor::InternalType::ComplexAlias:
-        return std::make_shared<EndstoneItemComplexAliasIngredient>(std::move(recipe), ingredient,
-                                                                    descriptor.getFullName());
+        return std::make_shared<EndstoneComplexAliasIngredient>(std::move(recipe), ingredient,
+                                                                descriptor.getFullName());
     case ItemDescriptor::InternalType::Default: {
         const auto *type = endstone::ItemType::get(descriptor.getFullName());
         if (descriptor.getItem() == nullptr || type == nullptr) {
@@ -47,7 +47,7 @@ Nullable<endstone::RecipeIngredient> makeIngredient(std::shared_ptr<const ::Reci
         return std::make_shared<EndstoneExactIngredient>(std::move(recipe), ingredient, std::move(item));
     }
     default:
-        return std::make_shared<EndstoneUnknownIngredient>(std::move(recipe), ingredient);
+        return nullptr;
     }
 }
 

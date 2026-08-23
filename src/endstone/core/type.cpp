@@ -35,9 +35,9 @@
 #include "endstone/command/command_sender.h"
 #include "endstone/command/console_command_sender.h"
 #include "endstone/command/proxied_command_sender.h"
+#include "endstone/inventory/complex_alias_ingredient.h"
 #include "endstone/inventory/complex_recipe.h"
 #include "endstone/inventory/exact_ingredient.h"
-#include "endstone/inventory/item_complex_alias_ingredient.h"
 #include "endstone/inventory/item_tag_ingredient.h"
 #include "endstone/inventory/item_type_ingredient.h"
 #include "endstone/inventory/meta/book_meta.h"
@@ -54,7 +54,6 @@
 #include "endstone/inventory/smithing_recipe.h"
 #include "endstone/inventory/smithing_transform_recipe.h"
 #include "endstone/inventory/smithing_trim_recipe.h"
-#include "endstone/inventory/unknown_ingredient.h"
 #include "endstone/permissions/permissible.h"
 #include "endstone/player.h"
 
@@ -115,11 +114,10 @@ void registerTypes()
     // RecipeIngredient hierarchy
     registerType<RecipeIngredient>();
     registerType<ExactIngredient>().base<RecipeIngredient>();
-    registerType<ItemComplexAliasIngredient>().base<RecipeIngredient>();
+    registerType<ComplexAliasIngredient>().base<RecipeIngredient>();
     registerType<ItemTagIngredient>().base<RecipeIngredient>();
     registerType<ItemTypeIngredient>().base<RecipeIngredient>();
     registerType<MolangIngredient>().base<RecipeIngredient>();
-    registerType<UnknownIngredient>().base<RecipeIngredient>();
 }
 
 bool isTypeInstanceOf(const std::type_info &from, const std::type_info &target)

@@ -22,12 +22,11 @@
 #include "bedrock/world/item/crafting/recipe.h"
 #include "endstone/core/inventory/item_stack.h"
 #include "endstone/core/type.h"
+#include "endstone/inventory/complex_alias_ingredient.h"
 #include "endstone/inventory/exact_ingredient.h"
-#include "endstone/inventory/item_complex_alias_ingredient.h"
 #include "endstone/inventory/item_tag_ingredient.h"
 #include "endstone/inventory/item_type_ingredient.h"
 #include "endstone/inventory/molang_ingredient.h"
-#include "endstone/inventory/unknown_ingredient.h"
 #include "endstone/util/pointers.h"
 
 namespace endstone::core {
@@ -90,15 +89,15 @@ private:
 class EndstoneItemTagIngredient final : public EndstoneIngredientBase<endstone::ItemTagIngredient> {
 public:
     EndstoneItemTagIngredient(std::shared_ptr<const ::Recipe> recipe, const ::RecipeIngredient &ingredient,
-                              std::string tag_name)
-        : EndstoneIngredientBase(std::move(recipe), ingredient), tag_name_(std::move(tag_name))
+                              std::string item_tag)
+        : EndstoneIngredientBase(std::move(recipe), ingredient), item_tag_(std::move(item_tag))
     {
     }
 
-    [[nodiscard]] const std::string &getTagName() const override { return tag_name_; }
+    [[nodiscard]] const std::string &getItemTag() const override { return item_tag_; }
 
 private:
-    std::string tag_name_;
+    std::string item_tag_;
 };
 
 class EndstoneMolangIngredient final : public EndstoneIngredientBase<endstone::MolangIngredient> {
@@ -115,23 +114,18 @@ private:
     std::string expression_;
 };
 
-class EndstoneItemComplexAliasIngredient final : public EndstoneIngredientBase<endstone::ItemComplexAliasIngredient> {
+class EndstoneComplexAliasIngredient final : public EndstoneIngredientBase<endstone::ComplexAliasIngredient> {
 public:
-    EndstoneItemComplexAliasIngredient(std::shared_ptr<const ::Recipe> recipe, const ::RecipeIngredient &ingredient,
-                                       std::string alias_name)
-        : EndstoneIngredientBase(std::move(recipe), ingredient), alias_name_(std::move(alias_name))
+    EndstoneComplexAliasIngredient(std::shared_ptr<const ::Recipe> recipe, const ::RecipeIngredient &ingredient,
+                                   std::string alias)
+        : EndstoneIngredientBase(std::move(recipe), ingredient), alias_(std::move(alias))
     {
     }
 
-    [[nodiscard]] const std::string &getAliasName() const override { return alias_name_; }
+    [[nodiscard]] const std::string &getAlias() const override { return alias_; }
 
 private:
-    std::string alias_name_;
-};
-
-class EndstoneUnknownIngredient final : public EndstoneIngredientBase<endstone::UnknownIngredient> {
-public:
-    using EndstoneIngredientBase::EndstoneIngredientBase;
+    std::string alias_;
 };
 
 [[nodiscard]] Nullable<endstone::RecipeIngredient> makeIngredient(std::shared_ptr<const ::Recipe> recipe,

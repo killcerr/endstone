@@ -14,16 +14,26 @@
 
 #pragma once
 
+#include <string>
+
 #include "endstone/inventory/recipe_ingredient.h"
 
 namespace endstone {
 /**
- * Represents an ingredient Endstone cannot describe, such as one resolved by a Molang expression.
- *
- * The slot is occupied, but nothing can be reported about what it matches.
+ * Represents an ingredient that matches any item an id stands for.
  */
-class UnknownIngredient : public RecipeIngredient {
+class ComplexAliasIngredient : public RecipeIngredient {
 public:
-    ~UnknownIngredient() override = default;
+    ~ComplexAliasIngredient() override = default;
+
+    /**
+     * Gets the alias that this ingredient will match.
+     *
+     * The id predates the item flattening, such as `minecraft:planks`, and stands for every item it was split into.
+     * It is not an item tag, and the items are not reported.
+     *
+     * @return the alias
+     */
+    [[nodiscard]] virtual const std::string &getAlias() const = 0;
 };
 }  // namespace endstone

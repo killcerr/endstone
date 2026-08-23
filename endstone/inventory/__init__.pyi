@@ -14,12 +14,12 @@ from endstone.potion import PotionType
 __all__ = [
     "BookMeta",
     "BookMetaGeneration",
+    "ComplexAliasIngredient",
     "ComplexRecipe",
     "CrossbowMeta",
     "EquipmentSlot",
     "ExactIngredient",
     "Inventory",
-    "ItemComplexAliasIngredient",
     "ItemFactory",
     "ItemMeta",
     "ItemStack",
@@ -37,7 +37,6 @@ __all__ = [
     "SmithingRecipe",
     "SmithingTransformRecipe",
     "SmithingTrimRecipe",
-    "UnknownIngredient",
     "WritableBookMeta",
 ]
 
@@ -230,9 +229,9 @@ class ItemTagIngredient(RecipeIngredient):
     Represents an ingredient that matches any item carrying a tag.
     """
     @property
-    def tag_name(self) -> str:
+    def item_tag(self) -> str:
         """
-        The name of the tag that this ingredient will match.
+        The item tag that this ingredient will match.
 
         Bedrock keeps item tags server-side, so the tag is reported rather than the item types in it.
         """
@@ -247,25 +246,18 @@ class MolangIngredient(RecipeIngredient):
         The Molang expression that this ingredient will match.
         """
 
-class ItemComplexAliasIngredient(RecipeIngredient):
+class ComplexAliasIngredient(RecipeIngredient):
     """
     Represents an ingredient that matches any item an id stands for.
     """
     @property
-    def alias_name(self) -> str:
+    def alias(self) -> str:
         """
-        The id that this ingredient will match.
+        The alias that this ingredient will match.
 
         The id predates the item flattening, such as `minecraft:planks`, and stands for every item it was split into. It is
         not an item tag, and the items are not reported.
         """
-
-class UnknownIngredient(RecipeIngredient):
-    """
-    Represents an ingredient Endstone cannot describe, such as one resolved by a Molang expression.
-
-    The slot is occupied, but nothing can be reported about what it matches.
-    """
 
 class Recipe:
     """

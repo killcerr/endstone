@@ -84,8 +84,8 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
 
     py::classh<ItemTagIngredient, RecipeIngredient>(m, "ItemTagIngredient",
                                                     "Represents an ingredient that matches any item carrying a tag.")
-        .def_property_readonly("tag_name", &ItemTagIngredient::getTagName, R"doc(
-    The name of the tag that this ingredient will match.
+        .def_property_readonly("item_tag", &ItemTagIngredient::getItemTag, R"doc(
+    The item tag that this ingredient will match.
 
     Bedrock keeps item tags server-side, so the tag is reported rather than the item types in it.
 )doc");
@@ -95,19 +95,13 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def_property_readonly("expression", &MolangIngredient::getExpression,
                                "The Molang expression that this ingredient will match.");
 
-    py::classh<ItemComplexAliasIngredient, RecipeIngredient>(
-        m, "ItemComplexAliasIngredient", "Represents an ingredient that matches any item an id stands for.")
-        .def_property_readonly("alias_name", &ItemComplexAliasIngredient::getAliasName, R"doc(
-    The id that this ingredient will match.
+    py::classh<ComplexAliasIngredient, RecipeIngredient>(
+        m, "ComplexAliasIngredient", "Represents an ingredient that matches any item an id stands for.")
+        .def_property_readonly("alias", &ComplexAliasIngredient::getAlias, R"doc(
+    The alias that this ingredient will match.
 
     The id predates the item flattening, such as `minecraft:planks`, and stands for every item it was split into. It is
     not an item tag, and the items are not reported.
-)doc");
-
-    py::classh<UnknownIngredient, RecipeIngredient>(m, "UnknownIngredient", R"doc(
-    Represents an ingredient Endstone cannot describe, such as one resolved by a Molang expression.
-
-    The slot is occupied, but nothing can be reported about what it matches.
 )doc");
 
     py::classh<Recipe>(m, "Recipe", "Represents some type of crafting recipe.")

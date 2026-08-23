@@ -27,12 +27,12 @@ public:
     ~ItemTagIngredient() override = default;
 
     /**
-     * Gets the name of the tag that this ingredient will match.
+     * Gets the item tag that this ingredient will match.
      *
      * Bedrock keeps item tags server-side, so the tag is reported rather than the item types in it.
      *
-     * @return the tag name
+     * @return the item tag
      */
-    [[nodiscard]] virtual const std::string &getTagName() const = 0;
+    [[nodiscard]] virtual const std::string &getItemTag() const = 0;
 };
 }  // namespace endstone
