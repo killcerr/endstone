@@ -107,6 +107,7 @@ static_assert(_ITERATOR_DEBUG_LEVEL == 0,
 #include "event/inventory/inventory_event.h"
 #include "event/inventory/inventory_interact_event.h"
 #include "event/level/dimension_event.h"
+#include "event/level/dimension_load_event.h"
 #include "event/level/level_event.h"
 #include "event/player/player_arm_swing_event.h"
 #include "event/player/player_armor_stand_manipulate_event.h"

@@ -209,6 +209,7 @@ void EndstoneServer::setLevel(::Level &level)
         throw std::runtime_error("Level already initialized.");
     }
     level_ = std::make_unique<EndstoneLevel>(level);
+    level_->loadDimensions();
     scoreboard_ = EndstoneScoreboard::create(level.getScoreboard());
     command_map_ = std::make_unique<EndstoneCommandMap>(*this);
     metrics_ = std::make_unique<Metrics>(*this, "endstone._metrics", "EndstoneMetrics", std::ref<Server>(*this));
