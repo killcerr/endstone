@@ -62,14 +62,6 @@ public:
     [[nodiscard]] std::optional<int> getData() const noexcept { return data_; }
     /** Gets the auxiliary data constraint using Bedrock's wildcard sentinel. */
     [[nodiscard]] int getAuxValue() const noexcept { return data_.value_or(AnyData); }
-    /** Checks whether this ingredient occupies an empty shaped-recipe slot. */
-    [[nodiscard]] bool isEmpty() const noexcept { return kind_ == Kind::Empty; }
-    /** Checks whether this ingredient matches an item tag. */
-    [[nodiscard]] bool isItemTag() const noexcept { return kind_ == Kind::ItemTag; }
-    /** Checks whether any auxiliary data is accepted. */
-    [[nodiscard]] bool isWildcardData() const noexcept { return !data_.has_value(); }
-    /** Checks whether the descriptor kind is supported. */
-    [[nodiscard]] bool isSupported() const noexcept { return kind_ != Kind::Unsupported; }
 
 private:
     Kind kind_{Kind::Empty};

@@ -89,7 +89,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Healthcheck in the Docker image, so `docker ps` and Docker Compose report whether the server is online.
 - `PUID`/`PGID` environment variables in the Docker image.
 - A `docker-compose.yml` for running the server with Docker Compose.
-***
 
 ### Changed
 
@@ -365,14 +364,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   cursors (24 types including Player, Mansion, Monument, and TrialChambers), control scale and center position, and
   listen for `MapInitializeEvent` when a new map is created.
 - **New events**:
-    - `BlockFromToEvent`: fires on liquid flow teleportation. Cancellable.
-    - `PlayerPortalEvent`: fires when a player enters a portal, with access to source and destination locations.
-      Cancellable.
-    - `PlayerDimensionChangeEvent`: fires when a player moves between dimensions (Overworld, Nether, The End).
+  - `BlockFromToEvent`: fires on liquid flow teleportation. Cancellable.
+  - `PlayerPortalEvent`: fires when a player enters a portal, with access to source and destination locations.
+    Cancellable.
+  - `PlayerDimensionChangeEvent`: fires when a player moves between dimensions (Overworld, Nether, The End).
 - **New ItemMeta types**:
-    - `BookMeta`: read and write signed book title, author, generation, and pages.
-    - `WritableBookMeta`: manage book-and-quill pages.
-    - `CrossbowMeta`: inspect and modify loaded crossbow projectiles.
+  - `BookMeta`: read and write signed book title, author, generation, and pages.
+  - `WritableBookMeta`: manage book-and-quill pages.
+  - `CrossbowMeta`: inspect and modify loaded crossbow projectiles.
 - **Command system**: Commands can now accept entity type arguments with tab completion via the new `entity_type`
   parameter type.
 - **Dimension API**: `Dimension.spawn_actor()` creates an entity at a given location. `Dimension.drop_item()` drops an
@@ -694,8 +693,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **BREAKING**: Renamed various fields in the `Skin` class:
-    - `Skin::getSkinImage` -> `Skin::getImage`
-    - `Skin::getSkinId` -> `Skin::getId`
+  - `Skin::getSkinImage` -> `Skin::getImage`
+  - `Skin::getSkinId` -> `Skin::getId`
 - **BREAKING**: `ItemStack::getType` now returns `ItemType` instead of `std::string`. You can still compare an
   `ItemType` with a string.
 - **BREAKING**: `PacketSendEvent` and `PacketReceiveEvent` now fire for both pre-login and post-login packets.

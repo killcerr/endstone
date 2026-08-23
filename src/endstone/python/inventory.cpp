@@ -52,11 +52,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def_property_readonly("tag", &RecipeIngredient::getTag)
         .def_property_readonly("count", &RecipeIngredient::getCount)
         .def_property_readonly("data", &RecipeIngredient::getData)
-        .def_property_readonly("aux_value", &RecipeIngredient::getAuxValue)
-        .def_property_readonly("is_empty", &RecipeIngredient::isEmpty)
-        .def_property_readonly("is_item_tag", &RecipeIngredient::isItemTag)
-        .def_property_readonly("is_wildcard_data", &RecipeIngredient::isWildcardData)
-        .def_property_readonly("is_supported", &RecipeIngredient::isSupported);
+        .def_property_readonly("aux_value", &RecipeIngredient::getAuxValue);
 
     py::classh<Recipe>(m, "Recipe", "Represents a crafting recipe.")
         .def_property_readonly("type", &Recipe::getType)

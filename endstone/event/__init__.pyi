@@ -765,7 +765,6 @@ class PlayerCommandEvent(PlayerEvent, Cancellable):
     @command.setter
     def command(self, arg1: str) -> None: ...
 
-
 class PlayerDimensionChangeEvent(PlayerEvent):
     """
     Called when a player switches to another dimension.
@@ -1184,7 +1183,6 @@ class PlayerQuitEvent(PlayerEvent):
 
     @quit_message.setter
     def quit_message(self, arg1: str | Translatable | None) -> None: ...
-
 
 class PlayerRecipeBookSettingsChangeEvent(PlayerEvent):
     """
