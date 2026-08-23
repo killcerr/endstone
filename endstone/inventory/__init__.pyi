@@ -14,24 +14,28 @@ from endstone.potion import PotionType
 __all__ = [
     "BookMeta",
     "BookMetaGeneration",
+    "ComplexRecipe",
     "CrossbowMeta",
     "EquipmentSlot",
+    "ExactIngredient",
     "Inventory",
     "ItemFactory",
     "ItemMeta",
     "ItemStack",
+    "ItemTagIngredient",
     "ItemType",
+    "ItemTypeIngredient",
     "MapMeta",
-    "MultiRecipe",
     "PlayerInventory",
     "PotionMeta",
     "Recipe",
     "RecipeIngredient",
-    "RecipeIngredientKind",
-    "RecipeType",
     "ShapedRecipe",
     "ShapelessRecipe",
     "SmithingRecipe",
+    "SmithingTransformRecipe",
+    "SmithingTrimRecipe",
+    "UnknownIngredient",
     "WritableBookMeta",
 ]
 
@@ -127,92 +131,6 @@ class EquipmentSlot(enum.Enum):
     Only for certain entities such as horses and wolves.
     """
 
-class RecipeIngredientKind(enum.Enum):
-    EMPTY = 0
-    ITEM = 1
-    ITEM_TAG = 2
-    UNSUPPORTED = 3
-
-class RecipeType(enum.Enum):
-    SHAPED = 0
-    SHAPELESS = 1
-    SMITHING = 2
-    MULTI = 3
-
-class RecipeIngredient:
-    """
-    Describes one immutable ingredient captured from a recipe.
-    """
-    def __init__(self) -> None: ...
-    @property
-    def kind(self) -> RecipeIngredientKind: ...
-    @property
-    def identifier(self) -> str: ...
-    @property
-    def item_id(self) -> str: ...
-    @property
-    def tag(self) -> str: ...
-    @property
-    def count(self) -> int: ...
-    @property
-    def data(self) -> int | None: ...
-    @property
-    def aux_value(self) -> int: ...
-
-class Recipe:
-    """
-    Represents a crafting recipe.
-    """
-    @property
-    def type(self) -> RecipeType: ...
-    @property
-    def result(self) -> ItemStack: ...
-    @property
-    def ingredients(self) -> list[RecipeIngredient]: ...
-    @property
-    def recipe_id(self) -> str:
-        """
-        The string identifier assigned to this recipe.
-        """
-
-    @property
-    def tag(self) -> str:
-        """
-        The crafting tag assigned to this recipe.
-        """
-
-class ShapedRecipe(Recipe):
-    """
-    Represents a shaped crafting recipe.
-    """
-    @property
-    def width(self) -> int: ...
-    @property
-    def height(self) -> int: ...
-    @property
-    def assume_symmetry(self) -> bool: ...
-
-class ShapelessRecipe(Recipe):
-    """
-    Represents a shapeless crafting recipe.
-    """
-
-class MultiRecipe(Recipe):
-    """
-    Represents a recipe whose result is determined from the crafting inputs.
-    """
-
-class SmithingRecipe(Recipe):
-    """
-    Represents a smithing recipe, including transform and trim recipes.
-    """
-    @property
-    def template_ingredient(self) -> RecipeIngredient: ...
-    @property
-    def base_ingredient(self) -> RecipeIngredient: ...
-    @property
-    def addition_ingredient(self) -> RecipeIngredient: ...
-
 class ItemType:
     """
     Represents an item type.
@@ -272,6 +190,131 @@ class ItemType:
     def get(name: Identifier[ItemType] | str) -> ItemType:
         """
         Attempts to get the `ItemType` with the given name.
+        """
+
+class RecipeIngredient:
+    """
+    Represents a potential item match within a recipe. All choices within a recipe must be satisfied for it to be
+    craftable.
+    """
+    def test(self, item: ItemStack) -> bool: ...
+    @property
+    def count(self) -> int:
+        """
+        How many items this ingredient consumes.
+
+        Bedrock records a count on each ingredient where Java repeats the ingredient instead.
+        """
+
+class ExactIngredient(RecipeIngredient):
+    """
+    Represents an ingredient that matches one item with one exact data value.
+    """
+    @property
+    def item_stack(self) -> ItemStack: ...
+
+class ItemTypeIngredient(RecipeIngredient):
+    """
+    Represents an ingredient that matches an item type, whatever its data value.
+    """
+    @property
+    def item_type(self) -> ItemType:
+        """
+        The item type that this ingredient will match.
+        """
+
+class ItemTagIngredient(RecipeIngredient):
+    """
+    Represents an ingredient that matches any item carrying a tag.
+    """
+    @property
+    def tag_name(self) -> str:
+        """
+        The name of the tag that this ingredient will match.
+
+        Bedrock keeps item tags server-side, so the tag is reported rather than the item types in it.
+        """
+
+class UnknownIngredient(RecipeIngredient):
+    """
+    Represents an ingredient Endstone cannot describe, such as one resolved by a Molang expression.
+
+    The slot is occupied, but nothing can be reported about what it matches.
+    """
+
+class Recipe:
+    """
+    Represents some type of crafting recipe.
+    """
+    @property
+    def result(self) -> ItemStack:
+        """
+        The result of this recipe.
+        """
+
+    @property
+    def ingredients(self) -> list[RecipeIngredient | None]: ...
+    @property
+    def recipe_id(self) -> str: ...
+    @property
+    def tag(self) -> str:
+        """
+        The crafting station this recipe belongs to, such as `crafting_table`.
+        """
+
+class ShapedRecipe(Recipe):
+    """
+    Represents a shaped (ie normal) crafting recipe.
+    """
+    @property
+    def width(self) -> int: ...
+    @property
+    def height(self) -> int: ...
+
+class ShapelessRecipe(Recipe):
+    """
+    Represents a shapeless recipe, where the arrangement of the ingredients on the crafting grid does not matter.
+    """
+
+class ComplexRecipe(Recipe):
+    """
+    Represents a complex recipe which has imperative server-defined behavior, eg armor dyeing.
+    """
+
+class SmithingRecipe(Recipe):
+    """
+    Represents a smithing recipe.
+    """
+    @property
+    def base(self) -> RecipeIngredient | None:
+        """
+        The base recipe item.
+        """
+
+    @property
+    def addition(self) -> RecipeIngredient | None:
+        """
+        The addition recipe item.
+        """
+
+class SmithingTransformRecipe(SmithingRecipe):
+    """
+    Represents a smithing transform recipe.
+    """
+    @property
+    def template(self) -> RecipeIngredient | None:
+        """
+        The template recipe item.
+        """
+
+class SmithingTrimRecipe(SmithingRecipe):
+    """
+    Represents a smithing trim recipe.
+    """
+    @property
+    def template(self) -> RecipeIngredient | None:
+        """
+        The template recipe item.
         """
 
 class ItemMeta:

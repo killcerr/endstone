@@ -13,7 +13,7 @@ from endstone.block import BlockData, BlockType
 from endstone.boss import BarColor, BarFlag, BarStyle, BossBar
 from endstone.command import CommandMap, CommandSender, ConsoleCommandSender
 from endstone.form import ActionForm, MessageForm, ModalForm
-from endstone.inventory import Inventory, ItemFactory, PlayerInventory
+from endstone.inventory import Inventory, ItemFactory, PlayerInventory, Recipe
 from endstone.lang import Language, Translatable
 from endstone.level import Dimension, Level, Location
 from endstone.map import MapView
@@ -221,6 +221,12 @@ class Server:
     def level(self) -> Level:
         """
         The server level.
+        """
+
+    @property
+    def recipes(self) -> list[Recipe]:
+        """
+        The list of crafting recipes.
         """
 
     @property
