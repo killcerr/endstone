@@ -35,17 +35,24 @@
 #include "endstone/command/command_sender.h"
 #include "endstone/command/console_command_sender.h"
 #include "endstone/command/proxied_command_sender.h"
+#include "endstone/inventory/complex_recipe.h"
+#include "endstone/inventory/exact_ingredient.h"
+#include "endstone/inventory/item_tag_ingredient.h"
+#include "endstone/inventory/item_type_ingredient.h"
 #include "endstone/inventory/meta/book_meta.h"
 #include "endstone/inventory/meta/crossbow_meta.h"
 #include "endstone/inventory/meta/item_meta.h"
 #include "endstone/inventory/meta/map_meta.h"
 #include "endstone/inventory/meta/potion_meta.h"
 #include "endstone/inventory/meta/writable_book_meta.h"
-#include "endstone/inventory/multi_recipe.h"
 #include "endstone/inventory/recipe.h"
+#include "endstone/inventory/recipe_ingredient.h"
 #include "endstone/inventory/shaped_recipe.h"
 #include "endstone/inventory/shapeless_recipe.h"
 #include "endstone/inventory/smithing_recipe.h"
+#include "endstone/inventory/smithing_transform_recipe.h"
+#include "endstone/inventory/smithing_trim_recipe.h"
+#include "endstone/inventory/unknown_ingredient.h"
 #include "endstone/permissions/permissible.h"
 #include "endstone/player.h"
 
@@ -96,10 +103,19 @@ void registerTypes()
 
     // Recipe hierarchy
     registerType<Recipe>();
-    registerType<MultiRecipe>().base<Recipe>();
+    registerType<ComplexRecipe>().base<Recipe>();
     registerType<ShapedRecipe>().base<Recipe>();
     registerType<ShapelessRecipe>().base<Recipe>();
     registerType<SmithingRecipe>().base<Recipe>();
+    registerType<SmithingTransformRecipe>().base<SmithingRecipe>();
+    registerType<SmithingTrimRecipe>().base<SmithingRecipe>();
+
+    // RecipeIngredient hierarchy
+    registerType<RecipeIngredient>();
+    registerType<ExactIngredient>().base<RecipeIngredient>();
+    registerType<ItemTagIngredient>().base<RecipeIngredient>();
+    registerType<ItemTypeIngredient>().base<RecipeIngredient>();
+    registerType<UnknownIngredient>().base<RecipeIngredient>();
 }
 
 bool isTypeInstanceOf(const std::type_info &from, const std::type_info &target)

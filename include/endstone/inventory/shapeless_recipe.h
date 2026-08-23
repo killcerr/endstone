@@ -17,7 +17,9 @@
 #include "endstone/inventory/recipe.h"
 
 namespace endstone {
-/** Represents a shapeless recipe snapshot. */
+/**
+ * Represents a shapeless recipe, where the arrangement of the ingredients on the crafting grid does not matter.
+ */
 class ShapelessRecipe : public Recipe {
 public:
     ~ShapelessRecipe() override = default;

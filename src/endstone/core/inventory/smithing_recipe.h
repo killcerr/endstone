@@ -14,27 +14,41 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include "endstone/core/inventory/recipe_data.h"
-#include "endstone/inventory/smithing_recipe.h"
+#include "endstone/inventory/smithing_transform_recipe.h"
+#include "endstone/inventory/smithing_trim_recipe.h"
 
 namespace endstone::core {
 
-class EndstoneSmithingRecipe final : public EndstoneRecipeBase<endstone::SmithingRecipe> {
+template <typename Interface>
+class EndstoneSmithingRecipeBase : public EndstoneRecipeBase<Interface> {
 public:
-    using EndstoneRecipeBase::EndstoneRecipeBase;
+    using EndstoneRecipeBase<Interface>::EndstoneRecipeBase;
 
-    [[nodiscard]] endstone::RecipeIngredient getTemplateIngredient() const override { return getIngredient(0); }
-    [[nodiscard]] endstone::RecipeIngredient getBaseIngredient() const override { return getIngredient(1); }
-    [[nodiscard]] endstone::RecipeIngredient getAdditionIngredient() const override { return getIngredient(2); }
-
-private:
-    [[nodiscard]] endstone::RecipeIngredient getIngredient(std::size_t index) const
+    [[nodiscard]] Nullable<endstone::RecipeIngredient> getTemplate() const override
     {
-        const auto &ingredients = EndstoneRecipeData::getIngredients();
-        return index < ingredients.size() ? ingredients[index] : endstone::RecipeIngredient{};
+        return EndstoneRecipeData::getIngredient(0);
     }
+
+    [[nodiscard]] Nullable<endstone::RecipeIngredient> getBase() const override
+    {
+        return EndstoneRecipeData::getIngredient(1);
+    }
+
+    [[nodiscard]] Nullable<endstone::RecipeIngredient> getAddition() const override
+    {
+        return EndstoneRecipeData::getIngredient(2);
+    }
+};
+
+class EndstoneSmithingTransformRecipe final : public EndstoneSmithingRecipeBase<endstone::SmithingTransformRecipe> {
+public:
+    using EndstoneSmithingRecipeBase::EndstoneSmithingRecipeBase;
+};
+
+class EndstoneSmithingTrimRecipe final : public EndstoneSmithingRecipeBase<endstone::SmithingTrimRecipe> {
+public:
+    using EndstoneSmithingRecipeBase::EndstoneSmithingRecipeBase;
 };
 
 }  // namespace endstone::core

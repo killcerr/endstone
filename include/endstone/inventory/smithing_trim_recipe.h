@@ -14,17 +14,21 @@
 
 #pragma once
 
-#include "endstone/core/inventory/recipe_data.h"
-#include "endstone/inventory/shaped_recipe.h"
+#include "endstone/inventory/smithing_recipe.h"
 
-namespace endstone::core {
-
-class EndstoneShapedRecipe final : public EndstoneRecipeBase<endstone::ShapedRecipe> {
+namespace endstone {
+/**
+ * Represents a smithing trim recipe.
+ */
+class SmithingTrimRecipe : public SmithingRecipe {
 public:
-    using EndstoneRecipeBase::EndstoneRecipeBase;
+    ~SmithingTrimRecipe() override = default;
 
-    [[nodiscard]] int getWidth() const override { return getHandle().getWidth(); }
-    [[nodiscard]] int getHeight() const override { return getHandle().getHeight(); }
+    /**
+     * Get the template recipe item.
+     *
+     * @return template choice
+     */
+    [[nodiscard]] virtual Nullable<RecipeIngredient> getTemplate() const = 0;
 };
-
-}  // namespace endstone::core
+}  // namespace endstone

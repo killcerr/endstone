@@ -15,15 +15,27 @@
 #pragma once
 
 #include "endstone/inventory/recipe.h"
-#include "endstone/inventory/recipe_ingredient.h"
 
 namespace endstone {
-/** Represents a smithing recipe snapshot, including transform and trim recipes. */
+/**
+ * Represents a smithing recipe.
+ */
 class SmithingRecipe : public Recipe {
 public:
     ~SmithingRecipe() override = default;
-    [[nodiscard]] virtual RecipeIngredient getTemplateIngredient() const = 0;
-    [[nodiscard]] virtual RecipeIngredient getBaseIngredient() const = 0;
-    [[nodiscard]] virtual RecipeIngredient getAdditionIngredient() const = 0;
+
+    /**
+     * Get the base recipe item.
+     *
+     * @return base choice
+     */
+    [[nodiscard]] virtual Nullable<RecipeIngredient> getBase() const = 0;
+
+    /**
+     * Get the addition recipe item.
+     *
+     * @return addition choice
+     */
+    [[nodiscard]] virtual Nullable<RecipeIngredient> getAddition() const = 0;
 };
 }  // namespace endstone

@@ -14,12 +14,21 @@
 
 #pragma once
 
-#include "endstone/inventory/recipe.h"
+#include "endstone/inventory/smithing_recipe.h"
 
 namespace endstone {
-/** Represents a recipe whose result is determined from the crafting inputs. */
-class MultiRecipe : public Recipe {
+/**
+ * Represents a smithing transform recipe.
+ */
+class SmithingTransformRecipe : public SmithingRecipe {
 public:
-    ~MultiRecipe() override = default;
+    ~SmithingTransformRecipe() override = default;
+
+    /**
+     * Get the template recipe item.
+     *
+     * @return template choice
+     */
+    [[nodiscard]] virtual Nullable<RecipeIngredient> getTemplate() const = 0;
 };
 }  // namespace endstone

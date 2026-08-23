@@ -30,41 +30,6 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .value("BODY", EquipmentSlot::Body, "Only for certain entities such as horses and wolves.")
         .finalize();
 
-    py::native_enum<RecipeIngredientKind>(m, "RecipeIngredientKind", "enum.Enum")
-        .value("EMPTY", RecipeIngredientKind::Empty)
-        .value("ITEM", RecipeIngredientKind::Item)
-        .value("ITEM_TAG", RecipeIngredientKind::ItemTag)
-        .value("UNSUPPORTED", RecipeIngredientKind::Unsupported)
-        .finalize();
-
-    py::class_<RecipeIngredient>(m, "RecipeIngredient", "Describes one immutable ingredient captured from a recipe.")
-        .def(py::init<>())
-        .def_property_readonly("kind", &RecipeIngredient::getKind)
-        .def_property_readonly("identifier", &RecipeIngredient::getIdentifier)
-        .def_property_readonly("item_id", &RecipeIngredient::getItemId)
-        .def_property_readonly("tag", &RecipeIngredient::getTag)
-        .def_property_readonly("count", &RecipeIngredient::getCount)
-        .def_property_readonly("data", &RecipeIngredient::getData)
-        .def_property_readonly("aux_value", &RecipeIngredient::getAuxValue);
-
-    py::classh<Recipe>(m, "Recipe", "Represents a crafting recipe.")
-        .def_property_readonly("result", &Recipe::getResult)
-        .def_property_readonly("ingredients", &Recipe::getIngredients)
-        .def_property_readonly("recipe_id", &Recipe::getRecipeId, "The string identifier assigned to this recipe.")
-        .def_property_readonly("tag", &Recipe::getTag, "The crafting tag assigned to this recipe.");
-    py::classh<ShapedRecipe, Recipe>(m, "ShapedRecipe", "Represents a shaped crafting recipe.")
-        .def_property_readonly("width", &ShapedRecipe::getWidth)
-        .def_property_readonly("height", &ShapedRecipe::getHeight)
-        .def_property_readonly("assume_symmetry", &ShapedRecipe::getAssumeSymmetry);
-    py::classh<ShapelessRecipe, Recipe>(m, "ShapelessRecipe", "Represents a shapeless crafting recipe.");
-    py::classh<MultiRecipe, Recipe>(m, "MultiRecipe",
-                                    "Represents a recipe whose result is determined from the crafting inputs.");
-    py::classh<SmithingRecipe, Recipe>(m, "SmithingRecipe",
-                                       "Represents a smithing recipe, including transform and trim recipes.")
-        .def_property_readonly("template_ingredient", &SmithingRecipe::getTemplateIngredient)
-        .def_property_readonly("base_ingredient", &SmithingRecipe::getBaseIngredient)
-        .def_property_readonly("addition_ingredient", &SmithingRecipe::getAdditionIngredient);
-
     def_registry_type(py::class_<ItemType>(m, "ItemType", "Represents an item type."))
         .def_property_readonly_static("AIR", id(ItemType::Air), "The identifier of the air item type.")
         .def_property_readonly("id", &ItemType::getId, "The identifier of this item type.")
@@ -97,6 +62,70 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def_static("get", &ItemType::get, py::arg("name"), "Attempts to get the `ItemType` with the given name.",
                     py::return_value_policy::reference);
 
+    py::classh<RecipeIngredient>(m, "RecipeIngredient", R"doc(
+    Represents a potential item match within a recipe. All choices within a recipe must be satisfied for it to be
+    craftable.
+)doc")
+        .def("test", &RecipeIngredient::test, py::arg("item"))
+        .def_property_readonly("count", &RecipeIngredient::getCount, R"doc(
+    How many items this ingredient consumes.
+
+    Bedrock records a count on each ingredient where Java repeats the ingredient instead.
+)doc");
+
+    py::classh<ExactIngredient, RecipeIngredient>(
+        m, "ExactIngredient", "Represents an ingredient that matches one item with one exact data value.")
+        .def_property_readonly("item_stack", &ExactIngredient::getItemStack);
+
+    py::classh<ItemTypeIngredient, RecipeIngredient>(
+        m, "ItemTypeIngredient", "Represents an ingredient that matches an item type, whatever its data value.")
+        .def_property_readonly("item_type", &ItemTypeIngredient::getItemType, py::return_value_policy::reference,
+                               "The item type that this ingredient will match.");
+
+    py::classh<ItemTagIngredient, RecipeIngredient>(m, "ItemTagIngredient",
+                                                    "Represents an ingredient that matches any item carrying a tag.")
+        .def_property_readonly("tag_name", &ItemTagIngredient::getTagName, R"doc(
+    The name of the tag that this ingredient will match.
+
+    Bedrock keeps item tags server-side, so the tag is reported rather than the item types in it.
+)doc");
+
+    py::classh<UnknownIngredient, RecipeIngredient>(m, "UnknownIngredient", R"doc(
+    Represents an ingredient Endstone cannot describe, such as one resolved by a Molang expression.
+
+    The slot is occupied, but nothing can be reported about what it matches.
+)doc");
+
+    py::classh<Recipe>(m, "Recipe", "Represents some type of crafting recipe.")
+        .def_property_readonly("result", &Recipe::getResult, "The result of this recipe.")
+        .def_property_readonly("ingredients", &Recipe::getIngredients)
+        .def_property_readonly("recipe_id", &Recipe::getRecipeId)
+        .def_property_readonly("tag", &Recipe::getTag,
+                               "The crafting station this recipe belongs to, such as `crafting_table`.");
+
+    py::classh<ShapedRecipe, Recipe>(m, "ShapedRecipe", "Represents a shaped (ie normal) crafting recipe.")
+        .def_property_readonly("width", &ShapedRecipe::getWidth)
+        .def_property_readonly("height", &ShapedRecipe::getHeight);
+
+    py::classh<ShapelessRecipe, Recipe>(m, "ShapelessRecipe", R"doc(
+    Represents a shapeless recipe, where the arrangement of the ingredients on the crafting grid does not matter.
+)doc");
+
+    py::classh<ComplexRecipe, Recipe>(
+        m, "ComplexRecipe",
+        "Represents a complex recipe which has imperative server-defined behavior, eg armor dyeing.");
+
+    py::classh<SmithingRecipe, Recipe>(m, "SmithingRecipe", "Represents a smithing recipe.")
+        .def_property_readonly("base", &SmithingRecipe::getBase, "The base recipe item.")
+        .def_property_readonly("addition", &SmithingRecipe::getAddition, "The addition recipe item.");
+
+    py::classh<SmithingTransformRecipe, SmithingRecipe>(m, "SmithingTransformRecipe",
+                                                        "Represents a smithing transform recipe.")
+        .def_property_readonly("template", &SmithingTransformRecipe::getTemplate, "The template recipe item.");
+
+    py::classh<SmithingTrimRecipe, SmithingRecipe>(m, "SmithingTrimRecipe", "Represents a smithing trim recipe.")
+        .def_property_readonly("template", &SmithingTrimRecipe::getTemplate, "The template recipe item.");
+
     py::classh<ItemMeta>(m, "ItemMeta", "Represents the metadata of a generic item.")
         .def("clone", &ItemMeta::clone, R"doc(
     Creates a clone of the current metadata.
@@ -111,8 +140,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def_property("lore", &ItemMeta::getLore, &ItemMeta::setLore, "The lore for this item.")
         .def_property_readonly("has_damage", &ItemMeta::hasDamage, "Whether this item has damage.")
         .def_property("damage", &ItemMeta::getDamage, &ItemMeta::setDamage, "The damage.")
-        .def_property_readonly("has_enchants", &ItemMeta::hasEnchants,
-                               "Whether an enchantment exists on this meta.")
+        .def_property_readonly("has_enchants", &ItemMeta::hasEnchants, "Whether an enchantment exists on this meta.")
         .def("has_enchant", &ItemMeta::hasEnchant, py::arg("id"), R"doc(
     Checks for existence of the specified enchantment.
 
@@ -157,8 +185,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         `True` if the item meta changed as a result of this call, `False` otherwise.
 )doc")
         .def("remove_enchants", &ItemMeta::removeEnchants, "Removes all enchantments from this item meta.")
-        .def_property_readonly("has_repair_cost", &ItemMeta::hasRepairCost,
-                               "Whether this item has a repair penalty.")
+        .def_property_readonly("has_repair_cost", &ItemMeta::hasRepairCost, "Whether this item has a repair penalty.")
         .def_property("repair_cost", &ItemMeta::getRepairCost, &ItemMeta::setRepairCost, "The repair penalty.")
         .def_property("is_unbreakable", &ItemMeta::isUnbreakable, &ItemMeta::setUnbreakable,
                       "The unbreakable tag. An unbreakable item will not lose durability.");
@@ -171,7 +198,8 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def_property("map_view", &MapMeta::getMapView, &MapMeta::setMapView, py::return_value_policy::reference,
                       "The map view associated with this map item.");
 
-    py::classh<WritableBookMeta, ItemMeta>(m, "WritableBookMeta", "Represents the meta for a writable book that can have pages.")
+    py::classh<WritableBookMeta, ItemMeta>(m, "WritableBookMeta",
+                                           "Represents the meta for a writable book that can have pages.")
         .def_property_readonly("has_pages", &WritableBookMeta::hasPages, "Whether the book has pages.")
         .def("get_page", &WritableBookMeta::getPage, py::arg("page"), R"doc(
     Gets the specified page in the book. The given page must exist.
@@ -228,8 +256,8 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .value("COPY_OF_COPY", BookMeta::Generation::CopyOfCopy)
         .finalize();
 
-    py::classh<BookMeta, WritableBookMeta>(m, "BookMeta",
-                                            "Represents the meta for a written book that can have a title, an author, and pages.")
+    py::classh<BookMeta, WritableBookMeta>(
+        m, "BookMeta", "Represents the meta for a written book that can have a title, an author, and pages.")
         .def_property_readonly("has_title", &BookMeta::hasTitle, "Whether the book has a title.")
         .def_property("title", &BookMeta::getTitle, &BookMeta::setTitle, "The title of the book.")
         .def_property_readonly("has_author", &BookMeta::hasAuthor, "Whether the book has an author.")
@@ -238,7 +266,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def_property("generation", &BookMeta::getGeneration, &BookMeta::setGeneration, "The generation of the book.");
 
     py::classh<CrossbowMeta, ItemMeta>(m, "CrossbowMeta",
-                                        "Represents the meta for a crossbow that can have a charged projectile.")
+                                       "Represents the meta for a crossbow that can have a charged projectile.")
         .def_property_readonly("has_charged_projectile", &CrossbowMeta::hasChargedProjectile,
                                "Whether the crossbow has a charged projectile.")
         .def_property("charged_projectile", &CrossbowMeta::getChargedProjectile, &CrossbowMeta::setChargedProjectile,
@@ -316,10 +344,8 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
                       "The type of this item.")
         .def_property("amount", &ItemStack::getAmount, &ItemStack::setAmount, "The amount of items in this stack.")
         .def_property("data", &ItemStack::getData, &ItemStack::setData, "The data for this stack of items.")
-        .def_property_readonly("translation_key", &ItemStack::getTranslationKey,
-                               "The translation key for this item.")
-        .def_property_readonly("max_stack_size", &ItemStack::getMaxStackSize,
-                               "The maximum stack size for this item.")
+        .def_property_readonly("translation_key", &ItemStack::getTranslationKey, "The translation key for this item.")
+        .def_property_readonly("max_stack_size", &ItemStack::getMaxStackSize, "The maximum stack size for this item.")
         .def("is_similar", &ItemStack::isSimilar, py::arg("other"), R"doc(
     Checks if the two stacks are equal, but does not consider stack size (amount).
 
@@ -412,8 +438,8 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
 )doc")
         .def_property("contents", &Inventory::getContents, &Inventory::setContents,
                       "All `ItemStack` objects from the inventory. Empty slots are represented as `None`.")
-        .def("contains", py::overload_cast<const ItemStack &, int>(&Inventory::contains, py::const_),
-             py::arg("item"), py::arg("amount"), R"doc(
+        .def("contains", py::overload_cast<const ItemStack &, int>(&Inventory::contains, py::const_), py::arg("item"),
+             py::arg("amount"), R"doc(
     Checks if the inventory contains at least the minimum amount specified of exactly matching `ItemStack` objects.
 
     Note:

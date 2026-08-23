@@ -14,7 +14,7 @@
 
 #include "endstone/core/inventory/recipe.h"
 
-#include "endstone/core/inventory/multi_recipe.h"
+#include "endstone/core/inventory/complex_recipe.h"
 #include "endstone/core/inventory/shaped_recipe.h"
 #include "endstone/core/inventory/shapeless_recipe.h"
 #include "endstone/core/inventory/smithing_recipe.h"
@@ -24,10 +24,13 @@ namespace endstone::core {
 NotNull<endstone::Recipe> makeRecipe(std::shared_ptr<const ::Recipe> recipe)
 {
     if (recipe->isMultiRecipe()) {
-        return std::make_shared<EndstoneMultiRecipe>(std::move(recipe));
+        return std::make_shared<EndstoneComplexRecipe>(std::move(recipe));
     }
     if (recipe->getTag().getString() == "smithing_table") {
-        return std::make_shared<EndstoneSmithingRecipe>(std::move(recipe));
+        if (recipe->hasDataDrivenResult()) {
+            return std::make_shared<EndstoneSmithingTransformRecipe>(std::move(recipe));
+        }
+        return std::make_shared<EndstoneSmithingTrimRecipe>(std::move(recipe));
     }
     if (recipe->isShapeless()) {
         return std::make_shared<EndstoneShapelessRecipe>(std::move(recipe));

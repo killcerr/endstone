@@ -14,14 +14,14 @@
 
 #pragma once
 
-#include "bedrock/bedrock.h"
-#include "bedrock/world/item/crafting/recipe.h"
+#include "endstone/core/inventory/recipe_data.h"
+#include "endstone/inventory/complex_recipe.h"
 
-class ShapedRecipe : public Recipe {
-    bool assume_symmetry_;
+namespace endstone::core {
 
+class EndstoneComplexRecipe final : public EndstoneRecipeBase<endstone::ComplexRecipe> {
 public:
-    [[nodiscard]] bool assumeSymmetry() const noexcept { return assume_symmetry_; }
+    using EndstoneRecipeBase::EndstoneRecipeBase;
 };
 
-BEDROCK_STATIC_ASSERT_SIZE(ShapedRecipe, 0x108, 0xF8);
+}  // namespace endstone::core

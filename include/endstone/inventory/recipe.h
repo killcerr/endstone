@@ -22,17 +22,29 @@
 #include "endstone/object.h"
 
 namespace endstone {
-/** Represents some type of crafting recipe. */
+/**
+ * Represents some type of crafting recipe.
+ */
 class Recipe : public Object {
 public:
     ~Recipe() override = default;
-    /** Gets the result of this recipe. */
+
+    /**
+     * Get the result of this recipe.
+     *
+     * @return The result stack
+     */
     [[nodiscard]] virtual ItemStack getResult() const = 0;
-    /** Gets the ingredients used by this recipe. */
-    [[nodiscard]] virtual const std::vector<RecipeIngredient> &getIngredients() const = 0;
-    /** Gets the string identifier assigned to this recipe. */
+
+    [[nodiscard]] virtual const std::vector<Nullable<RecipeIngredient>> &getIngredients() const = 0;
+
     [[nodiscard]] virtual const std::string &getRecipeId() const = 0;
-    /** Gets the crafting tag assigned to this recipe. */
+
+    /**
+     * Get the crafting station this recipe belongs to, such as `crafting_table` or `smithing_table`.
+     *
+     * @return the crafting tag
+     */
     [[nodiscard]] virtual const std::string &getTag() const = 0;
 };
 }  // namespace endstone

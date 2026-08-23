@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <typeinfo>
@@ -33,14 +34,16 @@ public:
     explicit EndstoneRecipeData(std::shared_ptr<const ::Recipe> recipe) : recipe_(std::move(recipe)) {}
 
     [[nodiscard]] endstone::ItemStack getResult() const;
-    [[nodiscard]] const std::vector<endstone::RecipeIngredient> &getIngredients() const;
+    [[nodiscard]] const std::vector<Nullable<endstone::RecipeIngredient>> &getIngredients() const;
+    [[nodiscard]] Nullable<endstone::RecipeIngredient> getIngredient(std::size_t index) const;
     [[nodiscard]] const ::Recipe &getHandle() const { return *recipe_; }
     [[nodiscard]] const std::string &getRecipeId() const { return recipe_->getRecipeId(); }
     [[nodiscard]] const std::string &getTag() const { return recipe_->getTag().getString(); }
 
 protected:
     const std::shared_ptr<const ::Recipe> recipe_;
-    mutable std::vector<endstone::RecipeIngredient> ingredients_;
+    mutable std::vector<Nullable<endstone::RecipeIngredient>> ingredients_;
+    mutable bool ingredients_built_ = false;
 };
 
 template <typename Interface>
@@ -57,7 +60,7 @@ public:
 
     [[nodiscard]] endstone::ItemStack getResult() const override { return EndstoneRecipeData::getResult(); }
 
-    [[nodiscard]] const std::vector<endstone::RecipeIngredient> &getIngredients() const override
+    [[nodiscard]] const std::vector<Nullable<endstone::RecipeIngredient>> &getIngredients() const override
     {
         return EndstoneRecipeData::getIngredients();
     }

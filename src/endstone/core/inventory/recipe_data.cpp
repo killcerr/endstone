@@ -14,44 +14,11 @@
 
 #include "endstone/core/inventory/recipe_data.h"
 
-#include "bedrock/world/item/item_descriptor.h"
 #include "endstone/core/inventory/item_stack.h"
+#include "endstone/core/inventory/recipe_ingredient.h"
+#include "endstone/inventory/item_type.h"
 
 namespace endstone::core {
-namespace {
-
-endstone::RecipeIngredient convertIngredient(const ::RecipeIngredient &ingredient)
-{
-    const auto &descriptor = static_cast<const ::ItemDescriptor &>(ingredient);
-    const auto count = static_cast<int>(ingredient.getStackSize());
-    switch (descriptor.getType()) {
-    case ItemDescriptor::InternalType::Default: {
-        if (descriptor.getItem() == nullptr) {
-            return {endstone::RecipeIngredientKind::Empty, {}, count, std::nullopt};
-        }
-        const auto aux_value = descriptor.getAuxValue();
-        return {endstone::RecipeIngredientKind::Item, descriptor.getFullName(), count,
-                aux_value == ItemDescriptor::ANY_AUX_VALUE ? std::nullopt : std::optional<int>(aux_value)};
-    }
-    case ItemDescriptor::InternalType::ItemTag:
-        return {endstone::RecipeIngredientKind::ItemTag, descriptor.getFullName(), count, std::nullopt};
-    case ItemDescriptor::InternalType::Invalid:
-        return {endstone::RecipeIngredientKind::Empty, {}, count, std::nullopt};
-    default:
-        return {endstone::RecipeIngredientKind::Unsupported, descriptor.getFullName(), count, std::nullopt};
-    }
-}
-std::vector<endstone::RecipeIngredient> convertIngredients(const std::vector<::RecipeIngredient> &ingredients)
-{
-    std::vector<endstone::RecipeIngredient> result;
-    result.reserve(ingredients.size());
-    for (const auto &ingredient : ingredients) {
-        result.push_back(convertIngredient(ingredient));
-    }
-    return result;
-}
-
-}  // namespace
 
 endstone::ItemStack EndstoneRecipeData::getResult() const
 {
@@ -60,12 +27,23 @@ endstone::ItemStack EndstoneRecipeData::getResult() const
                            : EndstoneItemStack::fromMinecraft(results.front());
 }
 
-const std::vector<endstone::RecipeIngredient> &EndstoneRecipeData::getIngredients() const
+const std::vector<Nullable<endstone::RecipeIngredient>> &EndstoneRecipeData::getIngredients() const
 {
-    if (ingredients_.empty() && !recipe_->getIngredients().empty()) {
-        ingredients_ = convertIngredients(recipe_->getIngredients());
+    if (!ingredients_built_) {
+        const auto &ingredients = recipe_->getIngredients();
+        ingredients_.reserve(ingredients.size());
+        for (const auto &ingredient : ingredients) {
+            ingredients_.push_back(makeIngredient(recipe_, ingredient));
+        }
+        ingredients_built_ = true;
     }
     return ingredients_;
+}
+
+Nullable<endstone::RecipeIngredient> EndstoneRecipeData::getIngredient(const std::size_t index) const
+{
+    const auto &ingredients = getIngredients();
+    return index < ingredients.size() ? ingredients[index] : nullptr;
 }
 
 }  // namespace endstone::core

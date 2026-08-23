@@ -14,17 +14,14 @@
 
 #pragma once
 
-#include "endstone/core/inventory/recipe_data.h"
-#include "endstone/inventory/shaped_recipe.h"
+#include "endstone/inventory/recipe.h"
 
-namespace endstone::core {
-
-class EndstoneShapedRecipe final : public EndstoneRecipeBase<endstone::ShapedRecipe> {
+namespace endstone {
+/**
+ * Represents a complex recipe which has imperative server-defined behavior, eg armor dyeing.
+ */
+class ComplexRecipe : public Recipe {
 public:
-    using EndstoneRecipeBase::EndstoneRecipeBase;
-
-    [[nodiscard]] int getWidth() const override { return getHandle().getWidth(); }
-    [[nodiscard]] int getHeight() const override { return getHandle().getHeight(); }
+    ~ComplexRecipe() override = default;
 };
-
-}  // namespace endstone::core
+}  // namespace endstone

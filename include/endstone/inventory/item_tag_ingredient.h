@@ -14,17 +14,25 @@
 
 #pragma once
 
-#include "endstone/core/inventory/recipe_data.h"
-#include "endstone/inventory/shaped_recipe.h"
+#include <string>
 
-namespace endstone::core {
+#include "endstone/inventory/recipe_ingredient.h"
 
-class EndstoneShapedRecipe final : public EndstoneRecipeBase<endstone::ShapedRecipe> {
+namespace endstone {
+/**
+ * Represents an ingredient that matches any item carrying a tag.
+ */
+class ItemTagIngredient : public RecipeIngredient {
 public:
-    using EndstoneRecipeBase::EndstoneRecipeBase;
+    ~ItemTagIngredient() override = default;
 
-    [[nodiscard]] int getWidth() const override { return getHandle().getWidth(); }
-    [[nodiscard]] int getHeight() const override { return getHandle().getHeight(); }
+    /**
+     * Gets the name of the tag that this ingredient will match.
+     *
+     * Bedrock keeps item tags server-side, so the tag is reported rather than the item types in it.
+     *
+     * @return the tag name
+     */
+    [[nodiscard]] virtual const std::string &getTagName() const = 0;
 };
-
-}  // namespace endstone::core
+}  // namespace endstone

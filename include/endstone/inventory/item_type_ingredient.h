@@ -14,17 +14,22 @@
 
 #pragma once
 
-#include "endstone/core/inventory/recipe_data.h"
-#include "endstone/inventory/shaped_recipe.h"
+#include "endstone/inventory/item_type.h"
+#include "endstone/inventory/recipe_ingredient.h"
 
-namespace endstone::core {
-
-class EndstoneShapedRecipe final : public EndstoneRecipeBase<endstone::ShapedRecipe> {
+namespace endstone {
+/**
+ * Represents an ingredient that matches an item type, whatever its data value.
+ */
+class ItemTypeIngredient : public RecipeIngredient {
 public:
-    using EndstoneRecipeBase::EndstoneRecipeBase;
+    ~ItemTypeIngredient() override = default;
 
-    [[nodiscard]] int getWidth() const override { return getHandle().getWidth(); }
-    [[nodiscard]] int getHeight() const override { return getHandle().getHeight(); }
+    /**
+     * Gets the item type that this ingredient will match.
+     *
+     * @return the item type
+     */
+    [[nodiscard]] virtual const ItemType &getItemType() const = 0;
 };
-
-}  // namespace endstone::core
+}  // namespace endstone

@@ -14,14 +14,17 @@
 
 #pragma once
 
-#include "endstone/core/inventory/recipe_data.h"
-#include "endstone/inventory/multi_recipe.h"
+#include "endstone/inventory/item_stack.h"
+#include "endstone/inventory/recipe_ingredient.h"
 
-namespace endstone::core {
-
-class EndstoneMultiRecipe final : public EndstoneRecipeBase<endstone::MultiRecipe> {
+namespace endstone {
+/**
+ * Represents an ingredient that matches one item with one exact data value.
+ */
+class ExactIngredient : public RecipeIngredient {
 public:
-    using EndstoneRecipeBase::EndstoneRecipeBase;
-};
+    ~ExactIngredient() override = default;
 
-}  // namespace endstone::core
+    [[nodiscard]] virtual ItemStack getItemStack() const = 0;
+};
+}  // namespace endstone

@@ -14,60 +14,27 @@
 
 #pragma once
 
-#include <optional>
-#include <string>
-#include <utility>
+#include "endstone/inventory/item_stack.h"
+#include "endstone/object.h"
 
 namespace endstone {
-
-/** Identifies the descriptor represented by a recipe ingredient. */
-enum class RecipeIngredientKind {
-    Empty,
-    Item,
-    ItemTag,
-    Unsupported,
-};
-
-/** Describes one immutable ingredient captured from a server recipe. */
-class RecipeIngredient {
+/**
+ * Represents a potential item match within a recipe. All choices within a recipe must be satisfied for it to be
+ * craftable.
+ */
+class RecipeIngredient : public Object {
 public:
-    using Kind = RecipeIngredientKind;
-    static constexpr int AnyData = 0x7fff;
+    ~RecipeIngredient() override = default;
 
-    RecipeIngredient() = default;
-    RecipeIngredient(Kind kind, std::string identifier, int count = 1,
-                     std::optional<int> data = std::nullopt)
-        : kind_(kind), identifier_(std::move(identifier)), count_(count), data_(data)
-    {
-    }
+    [[nodiscard]] virtual bool test(const ItemStack &item) const = 0;
 
-    /** Gets the descriptor kind. */
-    [[nodiscard]] Kind getKind() const noexcept { return kind_; }
-    /** Gets the item identifier, item tag, or opaque descriptor name. */
-    [[nodiscard]] const std::string &getIdentifier() const noexcept { return identifier_; }
-    [[nodiscard]] const std::string &getItemId() const noexcept
-    {
-        static const std::string empty;
-        return kind_ == Kind::Item ? identifier_ : empty;
-    }
-    /** Gets the item tag, or an empty string for another kind. */
-    [[nodiscard]] const std::string &getTag() const noexcept
-    {
-        static const std::string empty;
-        return kind_ == Kind::ItemTag ? identifier_ : empty;
-    }
-    /** Gets the required ingredient count. */
-    [[nodiscard]] int getCount() const noexcept { return count_; }
-    /** Gets the exact auxiliary data constraint, or no value for a wildcard. */
-    [[nodiscard]] std::optional<int> getData() const noexcept { return data_; }
-    /** Gets the auxiliary data constraint using Bedrock's wildcard sentinel. */
-    [[nodiscard]] int getAuxValue() const noexcept { return data_.value_or(AnyData); }
-
-private:
-    Kind kind_{Kind::Empty};
-    std::string identifier_;
-    int count_{0};
-    std::optional<int> data_;
+    /**
+     * Get how many items this ingredient consumes.
+     *
+     * Bedrock records a count on each ingredient where Java repeats the ingredient instead.
+     *
+     * @return the number of items consumed
+     */
+    [[nodiscard]] virtual int getCount() const = 0;
 };
-
 }  // namespace endstone

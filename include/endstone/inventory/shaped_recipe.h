@@ -17,12 +17,15 @@
 #include "endstone/inventory/recipe.h"
 
 namespace endstone {
-/** Represents a shaped recipe snapshot. */
+/**
+ * Represents a shaped (ie normal) crafting recipe.
+ */
 class ShapedRecipe : public Recipe {
 public:
     ~ShapedRecipe() override = default;
-    [[nodiscard]] virtual int getWidth() const noexcept = 0;
-    [[nodiscard]] virtual int getHeight() const noexcept = 0;
-    [[nodiscard]] virtual bool getAssumeSymmetry() const noexcept = 0;
+
+    [[nodiscard]] virtual int getWidth() const = 0;
+
+    [[nodiscard]] virtual int getHeight() const = 0;
 };
 }  // namespace endstone

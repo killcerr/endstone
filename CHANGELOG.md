@@ -55,8 +55,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Items
 
-- `Level.recipes`, a snapshot of the crafting recipes the server has loaded, also reachable as `Server.recipes`. Each entry is a `ShapedRecipe`, `ShapelessRecipe`, `SmithingRecipe` or `MultiRecipe`, and reports its `recipe_id`, crafting `tag`, `result` and `ingredients`. Shaped recipes add `width`, `height` and `assume_symmetry`; smithing recipes add `template_ingredient`, `base_ingredient` and `addition_ingredient`.
-- `RecipeIngredient`, describing one ingredient slot: an item (`kind` of `ITEM`, with an `identifier` and optional `data`), an item tag (`ITEM_TAG`), an empty slot (`EMPTY`), or a form Endstone cannot yet describe (`UNSUPPORTED`).
+- `Level.recipes`, a snapshot of the crafting recipes the server has loaded, also reachable as `Server.recipes`. Each entry is a `ShapedRecipe`, `ShapelessRecipe`, `SmithingTransformRecipe`, `SmithingTrimRecipe` or `ComplexRecipe`, and reports its `recipe_id`, crafting `tag`, `result` and `ingredients`. Shaped recipes add `width` and `height`; smithing recipes add `template`, `base` and `addition`.
+- `RecipeIngredient`, describing what one ingredient slot accepts, with `test()` to check an item against it and a Bedrock-specific `count`. An ingredient is an `ExactIngredient` (one item and one data value), an `ItemTypeIngredient` (an item type, any data value), an `ItemTagIngredient` (anything carrying a tag) or an `UnknownIngredient` (occupied but not describable). A slot the recipe leaves empty is `None`.
 - `WritableBookMeta`, `BookMeta` and `CrossbowMeta` item meta types.
 - `PotionMeta` for potions, splash potions and lingering potions, with `meta.base_potion_type`.
 

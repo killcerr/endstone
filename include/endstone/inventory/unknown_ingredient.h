@@ -14,17 +14,16 @@
 
 #pragma once
 
-#include "endstone/core/inventory/recipe_data.h"
-#include "endstone/inventory/shaped_recipe.h"
+#include "endstone/inventory/recipe_ingredient.h"
 
-namespace endstone::core {
-
-class EndstoneShapedRecipe final : public EndstoneRecipeBase<endstone::ShapedRecipe> {
+namespace endstone {
+/**
+ * Represents an ingredient Endstone cannot describe, such as one resolved by a Molang expression.
+ *
+ * The slot is occupied, but nothing can be reported about what it matches.
+ */
+class UnknownIngredient : public RecipeIngredient {
 public:
-    using EndstoneRecipeBase::EndstoneRecipeBase;
-
-    [[nodiscard]] int getWidth() const override { return getHandle().getWidth(); }
-    [[nodiscard]] int getHeight() const override { return getHandle().getHeight(); }
+    ~UnknownIngredient() override = default;
 };
-
-}  // namespace endstone::core
+}  // namespace endstone
