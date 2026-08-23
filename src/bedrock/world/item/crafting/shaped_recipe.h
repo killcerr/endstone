@@ -24,4 +24,4 @@ public:
     [[nodiscard]] bool assumeSymmetry() const noexcept { return assume_symmetry_; }
 };
 
-BEDROCK_STATIC_ASSERT_SIZE(ShapedRecipe, 0x108, 0x108);
+BEDROCK_STATIC_ASSERT_SIZE(ShapedRecipe, 0x108, 0xF8);

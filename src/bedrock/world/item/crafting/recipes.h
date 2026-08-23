@@ -40,6 +40,7 @@ public:
     [[nodiscard]] ItemInstance getFurnaceRecipeResult(const ItemStackBase &, const HashedString &) const;
     [[nodiscard]] const auto &getRecipeMap() const { return recipes_; }
 
+    // Endstone: shared_ptr, as the original function returns a const Recipe * and the returned object is owned by recipes_.
     [[nodiscard]] std::shared_ptr<const Recipe> getRecipeByNetId(const RecipeNetId &net_id) const
     {
         if (net_id.raw_id == 0) {

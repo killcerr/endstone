@@ -39,7 +39,7 @@ ItemStackNetResult CraftHandlerCrafting::_handleCraftAction(const ItemStackReque
     }
 
     std::vector<endstone::ItemStack> ingredients;
-    const Recipe *recipe = nullptr;
+    std::shared_ptr<const Recipe> recipe;
 
     switch (request_action.getActionType()) {
     case ItemStackRequestActionType::CraftRecipe: {
