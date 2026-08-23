@@ -17,9 +17,9 @@
 #include "bedrock/bedrock.h"
 #include "bedrock/world/item/crafting/recipe.h"
 
-/** BDS shaped crafting recipe. */
 class ShapedRecipe : public Recipe {
-    bool assume_symmetry_;  // +0x100
+    bool assume_symmetry_;
+
 public:
     [[nodiscard]] bool assumeSymmetry() const noexcept { return assume_symmetry_; }
 };
