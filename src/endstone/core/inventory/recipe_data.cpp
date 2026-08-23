@@ -24,25 +24,22 @@ endstone::RecipeIngredient convertIngredient(const ::RecipeIngredient &ingredien
 {
     const auto &descriptor = static_cast<const ::ItemDescriptor &>(ingredient);
     const auto count = static_cast<int>(ingredient.getStackSize());
-    if (descriptor.getItem() == nullptr) {
+    switch (descriptor.getType()) {
+    case ItemDescriptor::InternalType::Default: {
+        if (descriptor.getItem() == nullptr) {
+            return {endstone::RecipeIngredientKind::Empty, {}, count, std::nullopt};
+        }
+        const auto aux_value = descriptor.getAuxValue();
+        return {endstone::RecipeIngredientKind::Item, descriptor.getFullName(), count,
+                aux_value == ItemDescriptor::ANY_AUX_VALUE ? std::nullopt : std::optional<int>(aux_value)};
+    }
+    case ItemDescriptor::InternalType::ItemTag:
+        return {endstone::RecipeIngredientKind::ItemTag, descriptor.getFullName(), count, std::nullopt};
+    case ItemDescriptor::InternalType::Invalid:
         return {endstone::RecipeIngredientKind::Empty, {}, count, std::nullopt};
+    default:
+        return {endstone::RecipeIngredientKind::Unsupported, descriptor.getFullName(), count, std::nullopt};
     }
-    const auto identifier = descriptor.getFullName();
-    const auto data = descriptor.getAuxValue();
-    if (identifier.empty()) {
-        return {endstone::RecipeIngredientKind::Unsupported,
-                {},
-                count,
-                data == ItemDescriptor::ANY_AUX_VALUE ? std::nullopt : std::optional<int>(data)};
-    }
-    const auto type = descriptor.getType();
-    if (type != ItemDescriptor::InternalType::Default && type != ItemDescriptor::InternalType::ItemTag) {
-        return {endstone::RecipeIngredientKind::Unsupported, identifier, count,
-                data == ItemDescriptor::ANY_AUX_VALUE ? std::nullopt : std::optional<int>(data)};
-    }
-    const auto kind = type == ItemDescriptor::InternalType::ItemTag ? endstone::RecipeIngredientKind::ItemTag
-                                                                    : endstone::RecipeIngredientKind::Item;
-    return {kind, identifier, count, data == ItemDescriptor::ANY_AUX_VALUE ? std::nullopt : std::optional<int>(data)};
 }
 std::vector<endstone::RecipeIngredient> convertIngredients(const std::vector<::RecipeIngredient> &ingredients)
 {
