@@ -51,6 +51,7 @@ __all__ = [
     "ChunkLoadEvent",
     "ChunkUnloadEvent",
     "DimensionEvent",
+    "DimensionLoadEvent",
     "Event",
     "EventPriority",
     "EventResult",
@@ -113,6 +114,7 @@ __all__ = [
     "ServerListPingEvent",
     "ServerLoadEvent",
     "ThunderChangeEvent",
+    "UnknownCommandEvent",
     "WeatherChangeEvent",
     "WeatherEvent",
     "event_handler",
@@ -634,6 +636,11 @@ class DimensionEvent(LevelEvent):
         The `Dimension` primarily involved with this event.
         """
 
+class DimensionLoadEvent(DimensionEvent):
+    """
+    Called when a dimension is loaded.
+    """
+
 class ChunkEvent(DimensionEvent):
     """
     Represents a `Chunk` related event.
@@ -654,6 +661,31 @@ class ChunkUnloadEvent(ChunkEvent):
     Called when a chunk is unloaded.
     """
 
+class UnknownCommandEvent(Event):
+    """
+    Called when a command sender executes a command that is not defined.
+    """
+    @property
+    def sender(self) -> CommandSender:
+        """
+        The command sender.
+        """
+
+    @property
+    def command_line(self) -> str:
+        """
+        The command that was sent.
+        """
+
+    @property
+    def message(self) -> str | Translatable | None:
+        """
+        The message that will be returned, or `None` if no message will be sent.
+        """
+
+    @message.setter
+    def message(self, arg1: str | Translatable | None) -> None: ...
+
 class PlayerEvent(Event):
     """
     Represents a player related event.
@@ -664,9 +696,17 @@ class PlayerEvent(Event):
         The `Player` who is involved in this event.
         """
 
-class PlayerArmSwingEvent(PlayerEvent):
+class PlayerArmSwingEvent(PlayerEvent, Cancellable):
     """
     Called when a player swings their arm.
+
+    Cancelling stops the server acting on the swing at all. The swing is neither recorded nor shown to the other
+    players in the dimension.
+
+    Note:
+        The swinging player still sees their own arm move, because their client plays the animation without waiting
+        for the server. The event covers swings the player starts. Swings the server drives itself, such as dropping
+        an item, do not fire it.
     """
     @property
     def item(self) -> ItemStack | None:

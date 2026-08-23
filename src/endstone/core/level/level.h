@@ -48,6 +48,7 @@ public:
 
     [[nodiscard]] EndstoneServer &getServer() const;
     [[nodiscard]] ::Level &getHandle() const;
+    void loadDimensions();
 
 private:
     void addDimension(::Dimension &dimension);

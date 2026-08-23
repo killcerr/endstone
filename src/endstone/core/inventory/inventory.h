@@ -15,6 +15,7 @@
 #pragma once
 
 #include <functional>
+
 #include <unordered_map>
 
 #include "bedrock/world/container.h"
@@ -362,7 +363,10 @@ public:
     explicit EndstoneInventory(Provider provider) : provider_(std::move(provider)) {}
 
 private:
-    [[nodiscard]] ::Container &getContainer() const override { return provider_(); }
+    [[nodiscard]] ::Container &getContainer() const override
+    {
+        return provider_();
+    }
 
     Provider provider_;
 };

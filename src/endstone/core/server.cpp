@@ -209,14 +209,10 @@ void EndstoneServer::setLevel(::Level &level)
         throw std::runtime_error("Level already initialized.");
     }
     level_ = std::make_unique<EndstoneLevel>(level);
+    level_->loadDimensions();
     scoreboard_ = EndstoneScoreboard::create(level.getScoreboard());
     command_map_ = std::make_unique<EndstoneCommandMap>(*this);
-    try {
-        metrics_ = std::make_unique<Metrics>("endstone._metrics", "EndstoneMetrics", std::ref(*this));
-    }
-    catch (std::exception &e) {
-        getLogger().warning("Unable to start metrics: {}", e.what());
-    }
+    metrics_ = std::make_unique<Metrics>(*this, "endstone._metrics", "EndstoneMetrics", std::ref<Server>(*this));
     loadResourcePacks();
     initRegistries();
 
@@ -513,7 +509,7 @@ NotNull<MetricsBase> EndstoneServer::createMetrics(Plugin &plugin, int service_i
     auto it = plugin_metrics_.find(service_id);
     if (it == plugin_metrics_.end()) {
         plugin_metrics_.emplace(service_id,
-                                std::make_shared<Metrics>("endstone.metrics", "Metrics", &plugin, service_id));
+                                std::make_shared<Metrics>(*this, "endstone.metrics", "Metrics", &plugin, service_id));
     }
     return plugin_metrics_.at(service_id);
 }

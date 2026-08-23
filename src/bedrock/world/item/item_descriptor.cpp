@@ -213,9 +213,6 @@ bool ItemDescriptor::isNull() const
     if (impl_ && impl_->shouldResolve()) {
         impl_ = std::move(impl_->resolve());
     }
-    if (impl_ && impl_->shouldResolve()) {
-        impl_ = std::move(impl_->resolve());
-    }
     if (!impl_) {
         return true;
     }

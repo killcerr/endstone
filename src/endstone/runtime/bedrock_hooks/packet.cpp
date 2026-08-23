@@ -21,6 +21,7 @@
 #include "bedrock/entity/components/user_entity_identifier_component.h"
 #include "bedrock/network/net_event_callback.h"
 #include "bedrock/network/network_identifier.h"
+#include "bedrock/network/packet/animate_packet.h"
 #include "bedrock/network/packet/book_edit_packet.h"
 #include "bedrock/network/packet/correct_player_move_prediction_packet.h"
 #include "bedrock/network/packet/emote_packet.h"
@@ -32,6 +33,7 @@
 #include "bedrock/network/packet/set_player_inventory_options_packet.h"
 #include "bedrock/network/server_network_handler.h"
 #include "bedrock/world/actor/provider/actor_offset.h"
+#include "bedrock/world/level/dimension/dimension.h"
 #include "endstone/block/block.h"
 #include "endstone/color_format.h"
 #include "endstone/core/entity/components/flag_components.h"
@@ -41,6 +43,7 @@
 #include "endstone/core/skin.h"
 #include "endstone/event/actor/actor_toggle_glide_event.h"
 #include "endstone/event/actor/actor_toggle_swim_event.h"
+#include "endstone/event/player/player_arm_swing_event.h"
 #include "endstone/event/player/player_edit_book_event.h"
 #include "endstone/event/player/player_emote_event.h"
 #include "endstone/event/player/player_input_event.h"
@@ -90,6 +93,27 @@ private:
     std::shared_ptr<Packet> &packet_;
     ServerPlayer *player_ = nullptr;
 };
+
+template <>
+void EndstonePacketHandler::handle(AnimatePacket &packet)
+{
+    auto *player = getPlayer();
+    if (player == nullptr) {
+        return;
+    }
+    if (packet.payload.action != AnimatePacketPayload::Action::Swing ||
+        packet.payload.runtime_id.raw_id != player->getRuntimeID().raw_id) {
+        return;
+    }
+    const auto endstone_player = player->getEndstoneActor<EndstonePlayer>();
+    PlayerArmSwingEvent e{endstone_player, endstone_player->getInventory().getItemInMainHand()};
+    endstone_player->getServer().getPluginManager().callEvent(e);
+    if (e.isCancelled()) {
+        return;
+    }
+    player->swing(packet.payload.swing_source.value_or(ActorSwingSource::None));
+    player->getDimension().sendPacketForEntity(*player, packet, player);
+}
 
 template <>
 void EndstonePacketHandler::handle(MobEquipmentPacket &packet)
@@ -550,6 +574,11 @@ std::shared_ptr<Packet> MinecraftPackets::createPacket(MinecraftPacketIds id)
     switch (id) {
     case MinecraftPacketIds::PlayerEquipment: {
         using Dispatcher = EndstonePacketHandlerDispatcher<MobEquipmentPacket>;
+        Dispatcher::set(&packet->handler_);
+        break;
+    }
+    case MinecraftPacketIds::Animate: {
+        using Dispatcher = EndstonePacketHandlerDispatcher<AnimatePacket>;
         Dispatcher::set(&packet->handler_);
         break;
     }

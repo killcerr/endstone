@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `PlayerLevelChangeEvent` (`old_level`, `new_level`), `PlayerExpChangeEvent` (`amount` gained) and `PlayerPickupExperienceEvent` (`amount` the orb is worth).
 - `PlayerPickupArrowEvent` for picking up an arrow or thrown trident.
-- `PlayerArmSwingEvent` and `PlayerRiptideEvent`, both reporting the `item` in hand.
+- `PlayerArmSwingEvent` and `PlayerRiptideEvent`, both reporting the `item` in hand. Cancelling an arm swing stops the server acting on it at all, so it is neither recorded nor shown to the other players. The swinging player still sees their own arm move, because their client plays the animation without waiting for the server.
 - `PlayerInputEvent` for movement input changes, carrying the new `Input` type (`is_forward`, `is_backward`, `is_left`, `is_right`, `is_jump`, `is_sneak`, `is_sprint`).
 - `PlayerArmorStandManipulateEvent`, reporting `armor_stand_item`, `player_item` and `slot`.
 - `PlayerBucketActorEvent` and `PlayerShearActorEvent`, reporting the `actor`, the `original_bucket` or `item` used and the `hand`.
@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PlayerRespawnEvent.respawn_reason` (`RespawnReason.DEATH` / `RespawnReason.END_PORTAL`).
 - `ActorExplodeEvent::setBlockList()` and `BlockExplodeEvent::setBlockList()`, with the `BlockList` alias made public.
 - `InventoryEvent`, a base class for inventory-related events, reporting the primary `inventory` involved, and the cancellable `InventoryInteractEvent` under it, which adds the `who_clicked` player.
+- `DimensionLoadEvent` for a dimension being loaded.
 - Support for custom Python events with optional cancellation.
 
 #### Actors and players
@@ -69,6 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Commands and permissions
 
+- `UnknownCommandEvent` for undefined commands, reporting the `sender`, `command_line` and mutable `message`. Setting `message` to `None` suppresses the unknown-command response.
 - `Server.command_map`, exposing `CommandMap` to Python with `register_command()`, `dispatch()`, `clear_commands()` and `get_command()`.
 - `Command` can now be subclassed in Python to override `execute()`.
 - `/restart` command (console-only) for gracefully restarting the server.

@@ -14,12 +14,15 @@
 
 #pragma once
 
+#include <exception>
 #include <memory>
 #include <utility>
 
 #include <pybind11/pybind11.h>
 
+#include "endstone/logger.h"
 #include "endstone/metrics/base.h"
+#include "endstone/server.h"
 
 namespace endstone::core {
 
@@ -27,10 +30,15 @@ namespace endstone::core {
 class Metrics final : public MetricsBase {
 public:
     template <typename... Args>
-    Metrics(const char *module, const char *name, Args &&...args)
+    Metrics(Server &server, const char *module, const char *name, Args &&...args)
     {
         pybind11::gil_scoped_acquire gil{};
-        obj_ = pybind11::module_::import(module).attr(name)(std::forward<Args>(args)...);
+        try {
+            obj_ = pybind11::module_::import(module).attr(name)(std::forward<Args>(args)...);
+        }
+        catch (std::exception &e) {
+            server.getLogger().warning("Unable to start metrics: {}", e.what());
+        }
     }
 
     ~Metrics() override;
