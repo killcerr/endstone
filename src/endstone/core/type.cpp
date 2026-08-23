@@ -46,6 +46,7 @@
 #include "endstone/inventory/meta/map_meta.h"
 #include "endstone/inventory/meta/potion_meta.h"
 #include "endstone/inventory/meta/writable_book_meta.h"
+#include "endstone/inventory/molang_ingredient.h"
 #include "endstone/inventory/recipe.h"
 #include "endstone/inventory/recipe_ingredient.h"
 #include "endstone/inventory/shaped_recipe.h"
@@ -117,6 +118,7 @@ void registerTypes()
     registerType<ItemComplexAliasIngredient>().base<RecipeIngredient>();
     registerType<ItemTagIngredient>().base<RecipeIngredient>();
     registerType<ItemTypeIngredient>().base<RecipeIngredient>();
+    registerType<MolangIngredient>().base<RecipeIngredient>();
     registerType<UnknownIngredient>().base<RecipeIngredient>();
 }
 

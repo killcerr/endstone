@@ -90,6 +90,11 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
     Bedrock keeps item tags server-side, so the tag is reported rather than the item types in it.
 )doc");
 
+    py::classh<MolangIngredient, RecipeIngredient>(
+        m, "MolangIngredient", "Represents an ingredient that matches the items a Molang expression selects.")
+        .def_property_readonly("expression", &MolangIngredient::getExpression,
+                               "The Molang expression that this ingredient will match.");
+
     py::classh<ItemComplexAliasIngredient, RecipeIngredient>(
         m, "ItemComplexAliasIngredient", "Represents an ingredient that matches any item an id stands for.")
         .def_property_readonly("alias_name", &ItemComplexAliasIngredient::getAliasName, R"doc(

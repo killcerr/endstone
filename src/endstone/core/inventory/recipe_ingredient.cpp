@@ -28,6 +28,8 @@ Nullable<endstone::RecipeIngredient> makeIngredient(std::shared_ptr<const ::Reci
         return nullptr;
     case ItemDescriptor::InternalType::ItemTag:
         return std::make_shared<EndstoneItemTagIngredient>(std::move(recipe), ingredient, descriptor.getFullName());
+    case ItemDescriptor::InternalType::Molang:
+        return std::make_shared<EndstoneMolangIngredient>(std::move(recipe), ingredient, descriptor.getFullName());
     case ItemDescriptor::InternalType::ComplexAlias:
         return std::make_shared<EndstoneItemComplexAliasIngredient>(std::move(recipe), ingredient,
                                                                     descriptor.getFullName());

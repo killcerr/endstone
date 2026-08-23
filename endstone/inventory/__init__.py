@@ -19,6 +19,7 @@ __getattr__, __dir__, __all__ = lazy.attach(
             "ItemType",
             "ItemTypeIngredient",
             "MapMeta",
+            "MolangIngredient",
             "PlayerInventory",
             "PotionMeta",
             "Recipe",

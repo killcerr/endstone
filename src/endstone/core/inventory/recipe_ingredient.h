@@ -26,6 +26,7 @@
 #include "endstone/inventory/item_complex_alias_ingredient.h"
 #include "endstone/inventory/item_tag_ingredient.h"
 #include "endstone/inventory/item_type_ingredient.h"
+#include "endstone/inventory/molang_ingredient.h"
 #include "endstone/inventory/unknown_ingredient.h"
 #include "endstone/util/pointers.h"
 
@@ -98,6 +99,20 @@ public:
 
 private:
     std::string tag_name_;
+};
+
+class EndstoneMolangIngredient final : public EndstoneIngredientBase<endstone::MolangIngredient> {
+public:
+    EndstoneMolangIngredient(std::shared_ptr<const ::Recipe> recipe, const ::RecipeIngredient &ingredient,
+                             std::string expression)
+        : EndstoneIngredientBase(std::move(recipe), ingredient), expression_(std::move(expression))
+    {
+    }
+
+    [[nodiscard]] const std::string &getExpression() const override { return expression_; }
+
+private:
+    std::string expression_;
 };
 
 class EndstoneItemComplexAliasIngredient final : public EndstoneIngredientBase<endstone::ItemComplexAliasIngredient> {

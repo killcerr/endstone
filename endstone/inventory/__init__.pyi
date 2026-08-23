@@ -27,6 +27,7 @@ __all__ = [
     "ItemType",
     "ItemTypeIngredient",
     "MapMeta",
+    "MolangIngredient",
     "PlayerInventory",
     "PotionMeta",
     "Recipe",
@@ -234,6 +235,16 @@ class ItemTagIngredient(RecipeIngredient):
         The name of the tag that this ingredient will match.
 
         Bedrock keeps item tags server-side, so the tag is reported rather than the item types in it.
+        """
+
+class MolangIngredient(RecipeIngredient):
+    """
+    Represents an ingredient that matches the items a Molang expression selects.
+    """
+    @property
+    def expression(self) -> str:
+        """
+        The Molang expression that this ingredient will match.
         """
 
 class ItemComplexAliasIngredient(RecipeIngredient):
