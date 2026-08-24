@@ -341,6 +341,25 @@ rip_relative = true
 rip_offset = 1
 
 [[signatures]]
+name = "_ZN18ConsoleInputReader3runEPv"
+relative = false
+extra = 0
+# BDS has no symbol for this - it is the anonymous libc++ __thread_proxy for the lambda that
+# ConsoleInputReader's constructor hands to pthread_create. The name is Endstone's own, and only has to
+# match the detour exported by libendstone_runtime.so.
+# 1. find bytes "53 74 61 72 74 69 6E 67 20 53 65 72 76 65 72 00" = "Starting Server\0" (unique); its lone
+#    data xref is a `lea` inside DedicatedServer::start (see that entry)
+# 2. the reader is constructed a few hundred bytes below, right after the Version/Branch/Commit ID banner
+#    and before server.properties is read; scan down for the only `call pthread_create` in the function
+# 3. the `lea rdx, <fn>` feeding that call is the thread entry - cut the pattern there, not on the
+#    prologue, which is the generic libc++ thread-proxy shape shared with every other std::thread lambda
+# 4. confirm the body: it tests the read-console flag at +0x50, getlines into std::cin, enqueues into the
+#    SPSCQueue at +0x40 (`cmp <reg>, 200h` = its 512-element blocks) and breaks on a 4-char "stop"
+pattern = "48 8D 15 ? ? ? ? 48 8D BC 24 ? ? ? ? 31 F6 48 89 D9 E8"
+rip_relative = true
+rip_offset = 3
+
+[[signatures]]
 name = "_ZN25CraftingDataPacketPayload11fromRecipesERK7Recipesb"
 relative = false
 extra = 0

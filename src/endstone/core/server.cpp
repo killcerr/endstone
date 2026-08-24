@@ -276,11 +276,6 @@ void EndstoneServer::setLevel(::Level &level)
     enablePlugins(PluginLoadOrder::PostWorld);
     ServerLoadEvent event{ServerLoadEvent::LoadType::Startup};
     getPluginManager().callEvent(event);
-
-    // start accepting input
-    runtime::stdin_restore();
-    auto *server = entt::locator<DedicatedServer *>::value();
-    server->console_input_reader_->startEndstone();
 }
 
 void EndstoneServer::initRegistries()

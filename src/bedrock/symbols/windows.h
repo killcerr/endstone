@@ -11,7 +11,7 @@
 
 namespace endstone::runtime {
 
-static constexpr std::array<std::pair<std::string_view, std::size_t>, 78> symbols = {{
+static constexpr std::array<std::pair<std::string_view, std::size_t>, 79> symbols = {{
     {"BlockState::StateListNode::mHead", 211294960},
     {"Enchant::mEnchants", 211141912},
     {"MobEffect::mMobEffects", 211424880},
@@ -52,6 +52,8 @@ static constexpr std::array<std::pair<std::string_view, std::size_t>, 78> symbol
     {"?symbolToString@CommandRegistry@@AEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@VSymbol@1@@Z", 3423632},
     // CommandUtils
     {"?getActorName@CommandUtils@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBVActor@@@Z", 3711424},
+    // ConsoleInputReader
+    {"?run@ConsoleInputReader@@SAPEAXPEAX@Z", 997392},
     // CraftHandlerCrafting
     {"?_handleCraftAction@CraftHandlerCrafting@@MEAA?AW4ItemStackNetResult@@AEBVItemStackRequestActionCraftBase@@@Z", 150353088},
     // CraftingDataPacketPayload

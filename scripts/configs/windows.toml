@@ -375,6 +375,27 @@ extra = 0
 pattern = "55 41 57 41 56 41 54 56 57 53 48 81 EC ? ? ? ? 48 8D AC 24 ? ? ? ? 48 C7 45 ? ? ? ? ? 48 89 D3 48 89 CE 48 89 D1 BA ? ? ? ? E8"
 
 [[signatures]]
+name = "?run@ConsoleInputReader@@SAPEAXPEAX@Z"
+relative = false
+extra = 0
+# BDS has no name for this in the PDB either - it is the std::thread::_Invoke instantiation for the lambda
+# ConsoleInputReader's constructor hands to _beginthreadex, and its decorated name embeds the source line
+# (ConsoleInputReader.cpp:30:46), so it must be cut as a pattern rather than looked up. The name is
+# Endstone's own and only has to match the detour exported by endstone_runtime.dll.
+# 1. find bytes "53 74 61 72 74 69 6E 67 20 53 65 72 76 65 72 00" = "Starting Server\0" (unique); its lone
+#    data xref is a `lea` inside DedicatedServer::start (see that entry)
+# 2. the reader is constructed a few hundred bytes below, right after the Version/Branch/Commit ID banner
+#    and before server.properties is read; scan down for the `call [__imp__beginthreadex]`
+# 3. the `lea r8, <fn>` feeding that call is the thread entry - three call sites share the bare
+#    `lea r8 / xor ecx / xor edx / mov r9, rbx / call` shape, so the pattern carries the two argument
+#    stores above it; do NOT cut the prologue, which 741 other thread proxies share byte for byte
+# 4. confirm the body: it reads the reader out of `[rcx]`, calls GetStdHandle(-10) then GetConsoleMode,
+#    and getlines into std::wcin
+pattern = "48 8D 85 ? ? ? ? 48 89 44 24 ? C7 44 24 ? ? ? ? ? 4C 8D 05 ? ? ? ? 31 C9 31 D2 49 89 D9 FF 15"
+rip_relative = true
+rip_offset = 23
+
+[[signatures]]
 name = "?fromRecipes@CraftingDataPacketPayload@@SA?AU1@AEBVRecipes@@_N@Z"
 relative = false
 extra = 0
