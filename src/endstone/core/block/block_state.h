@@ -53,7 +53,7 @@ public:
 
     [[nodiscard]] ClassInfo getClassInfo() const override
     {
-        return ClassInfo::of<Interface>();
+        return typeid(Interface);
     }
 
     [[nodiscard]] bool isInstanceOf(ClassInfo target) const override

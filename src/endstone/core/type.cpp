@@ -65,7 +65,7 @@ template <typename T>
 entt::meta_factory<T> registerType()
 {
     auto factory = entt::meta_factory<T>{};
-    MetaLookup[ClassInfo::of<T>()] = entt::resolve<T>();
+    MetaLookup[typeid(T)] = entt::resolve<T>();
     return factory;
 }
 }  // namespace

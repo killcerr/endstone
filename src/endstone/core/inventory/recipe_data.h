@@ -55,7 +55,7 @@ class EndstoneRecipeBase : public Interface, protected EndstoneRecipeData {
 public:
     explicit EndstoneRecipeBase(std::shared_ptr<const ::Recipe> recipe) : EndstoneRecipeData(std::move(recipe)) {}
 
-    [[nodiscard]] ClassInfo getClassInfo() const override { return ClassInfo::of<Interface>(); }
+    [[nodiscard]] ClassInfo getClassInfo() const override { return typeid(Interface); }
 
     [[nodiscard]] bool isInstanceOf(ClassInfo target) const override
     {

@@ -31,16 +31,7 @@ namespace endstone {
  */
 class ClassInfo {
 public:
-    explicit ClassInfo(const std::type_info &info) noexcept : info_(&info) {}
-
-    /**
-     * The identity of T.
-     */
-    template <typename T>
-    static ClassInfo of() noexcept
-    {
-        return ClassInfo{typeid(T)};
-    }
+    ClassInfo(const std::type_info &info) noexcept : info_(&info) {}  // NOLINT(*-explicit-constructor)
 
     /**
      * The mangled name of the type.
@@ -89,7 +80,7 @@ public:
         requires std::is_base_of_v<Object, T>
     [[nodiscard]] bool isInstanceOf() const
     {
-        return isInstanceOf(ClassInfo::of<T>());
+        return isInstanceOf(typeid(T));
     }
 
     /**

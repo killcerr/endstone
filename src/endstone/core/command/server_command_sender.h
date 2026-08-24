@@ -71,7 +71,7 @@ public:
         return perm_->getEffectivePermissions();
     }
 
-    [[nodiscard]] ClassInfo getClassInfo() const override { return ClassInfo::of<Interface>(); }
+    [[nodiscard]] ClassInfo getClassInfo() const override { return typeid(Interface); }
 
     [[nodiscard]] bool isInstanceOf(ClassInfo target) const override
     {

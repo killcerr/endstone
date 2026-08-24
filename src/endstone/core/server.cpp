@@ -285,15 +285,15 @@ void EndstoneServer::setLevel(::Level &level)
 
 void EndstoneServer::initRegistries()
 {
-    registries_[ClassInfo::of<Ability>()] = EndstoneRegistry<Ability, std::string>::create();
-    registries_[ClassInfo::of<ActorType>()] = EndstoneRegistry<ActorType, std::string>::create();
-    registries_[ClassInfo::of<Biome>()] = EndstoneRegistry<Biome, ::Biome>::create();
-    registries_[ClassInfo::of<BlockType>()] = EndstoneRegistry<BlockType, ::BlockType>::create();
-    registries_[ClassInfo::of<EffectType>()] = EndstoneRegistry<EffectType, ::MobEffect>::create();
-    registries_[ClassInfo::of<Enchantment>()] = EndstoneRegistry<Enchantment, ::Enchant>::create();
-    registries_[ClassInfo::of<GameRule>()] = EndstoneRegistry<GameRule, ::GameRule>::create();
-    registries_[ClassInfo::of<ItemType>()] = EndstoneRegistry<ItemType, ::Item>::create();
-    registries_[ClassInfo::of<PotionType>()] = EndstoneRegistry<PotionType, ::Potion>::create();
+    registries_[typeid(Ability)] = EndstoneRegistry<Ability, std::string>::create();
+    registries_[typeid(ActorType)] = EndstoneRegistry<ActorType, std::string>::create();
+    registries_[typeid(Biome)] = EndstoneRegistry<Biome, ::Biome>::create();
+    registries_[typeid(BlockType)] = EndstoneRegistry<BlockType, ::BlockType>::create();
+    registries_[typeid(EffectType)] = EndstoneRegistry<EffectType, ::MobEffect>::create();
+    registries_[typeid(Enchantment)] = EndstoneRegistry<Enchantment, ::Enchant>::create();
+    registries_[typeid(GameRule)] = EndstoneRegistry<GameRule, ::GameRule>::create();
+    registries_[typeid(ItemType)] = EndstoneRegistry<ItemType, ::Item>::create();
+    registries_[typeid(PotionType)] = EndstoneRegistry<PotionType, ::Potion>::create();
     BlockStateRegistry::get().unregisterBlockStates();
     ::BlockState::forEachState([](const auto &state) {
         BlockStateRegistry::get().registerBlockState(state);

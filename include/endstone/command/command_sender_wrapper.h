@@ -82,11 +82,11 @@ public:
         return sender_->getEffectivePermissions();
     }
 
-    [[nodiscard]] ClassInfo getClassInfo() const override { return ClassInfo::of<CommandSenderWrapper>(); }
+    [[nodiscard]] ClassInfo getClassInfo() const override { return typeid(CommandSenderWrapper); }
     [[nodiscard]] bool isInstanceOf(ClassInfo target) const override
     {
-        return target == ClassInfo::of<CommandSenderWrapper>() || target == ClassInfo::of<CommandSender>() ||
-               target == ClassInfo::of<Permissible>() || target == ClassInfo::of<Object>();
+        return target == typeid(CommandSenderWrapper) || target == typeid(CommandSender) ||
+               target == typeid(Permissible) || target == typeid(Object);
     }
 
     /**
