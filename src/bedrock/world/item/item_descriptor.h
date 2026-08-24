@@ -82,7 +82,8 @@ public:
         [[nodiscard]] virtual std::string getFullName() const;
         [[nodiscard]] virtual std::string toString() const;
         [[nodiscard]] virtual ItemEntry getItem() const = 0;
-        [[nodiscard]] virtual bool forEachItemUntil(std::function<bool(Item const &, std::int16_t)> func) const;
+        [[nodiscard]] virtual bool forEachItemUntil(
+            brstd::function_ref<bool(const Item &, std::int16_t), bool(const Item &, std::int16_t)> func) const;
         [[nodiscard]] virtual std::map<std::string, std::string> toMap() const = 0;
         [[nodiscard]] virtual std::optional<CompoundTag> save() const = 0;
         virtual void serialize(Json::Value &val) const;

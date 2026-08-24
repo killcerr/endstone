@@ -66,7 +66,8 @@ struct ItemTagDescriptor : ItemDescriptor::BaseDescriptor {
         return ItemDescriptor::InternalType::ItemTag;
     }
     [[nodiscard]] size_t getHash() const override { return item_tag_.getHash(); }
-    [[nodiscard]] bool forEachItemUntil(std::function<bool(Item const &, std::int16_t)> func) const override
+    [[nodiscard]] bool forEachItemUntil(
+        brstd::function_ref<bool(const Item &, std::int16_t), bool(const Item &, std::int16_t)> func) const override
     {
         (void)func;
         return false;
@@ -89,7 +90,10 @@ std::unique_ptr<ItemDescriptor::BaseDescriptor> InternalItemDescriptor::clone() 
 
 bool InternalItemDescriptor::sameItem(const ItemDescriptor::ItemEntry &other, bool compare_aux) const
 {
-    if (item_entry_.item != other.item) {
+    if (item_entry_.item == nullptr || other.item == nullptr) {
+        return false;
+    }
+    if (item_entry_.item->getId() != other.item->getId()) {
         return false;
     }
 
@@ -186,9 +190,6 @@ ItemDescriptor::ItemDescriptor(const Item &item, int aux_value)
     const auto registry_ref = ItemRegistryManager::getItemRegistry();
     if (auto item_ptr = registry_ref.getItem(item.getId()); !item_ptr.isNull()) {
         impl_ = std::make_unique<InternalItemDescriptor>(std::move(item_ptr), aux_value > 0 ? aux_value : 0);
-    }
-    else {
-        impl_ = std::make_unique<InternalItemDescriptor>(nullptr, aux_value > 0 ? aux_value : 0);
     }
 }
 
@@ -363,9 +364,9 @@ const Block *ItemDescriptor::ItemEntry::getBlock() const
     return block_type->tryGetStateFromLegacyData(aux_value);
 }
 
-bool ItemDescriptor::BaseDescriptor::sameItems(BaseDescriptor const &, bool flag) const
+bool ItemDescriptor::BaseDescriptor::sameItems(BaseDescriptor const &other, bool flag) const
 {
-    if (const auto item = getItem(); item.item) {
+    if (const auto item = other.getItem(); item.item) {
         return sameItem(item, flag);
     }
     return false;
@@ -381,7 +382,8 @@ std::string ItemDescriptor::BaseDescriptor::toString() const
     return getFullName();
 }
 
-bool ItemDescriptor::BaseDescriptor::forEachItemUntil(std::function<bool(Item const &, std::int16_t)> func) const
+bool ItemDescriptor::BaseDescriptor::forEachItemUntil(
+    brstd::function_ref<bool(const Item &, std::int16_t), bool(const Item &, std::int16_t)> func) const
 {
     if (const auto item = getItem(); item.item) {
         return func(*item.item, item.aux_value);

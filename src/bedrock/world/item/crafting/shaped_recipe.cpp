@@ -89,12 +89,12 @@ bool ShapedRecipe::matches(const CraftingContainer &craft_slots, int x_offs, int
         for (int x = 0; x < 3; ++x) {
             const auto &ingredient = getIngredient(x_flip ? width_ - 1 - (x - x_offs) : x - x_offs, y - y_offs);
             const ItemStack *slot = &ItemStack::EMPTY_ITEM;
-            if (y < craft_slots.getWidth()) {
-                slot = &craft_slots.getItem(y + x * craft_slots.getWidth());
+            if (x < craft_slots.getWidth()) {
+                slot = &craft_slots.getItem(x + y * craft_slots.getWidth());
             }
             const auto descriptor = slot->getDescriptor();
             const bool occupied = static_cast<bool>(*slot);
-            const bool has_ingredient = !ingredient.isEmpty();
+            const bool has_ingredient = !ingredient.isNull();
             if (occupied != has_ingredient) {
                 return false;
             }
