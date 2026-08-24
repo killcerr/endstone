@@ -1,0 +1,52 @@
+name: Manylinux Image
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - '.github/docker/Dockerfile.manylinux'
+      - '.github/workflows/manylinux.yml'
+
+permissions: read-all
+
+concurrency:
+  group: manylinux-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Build & Push (GHCR)
+    if: github.repository == 'EndstoneMC/endstone'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v7
+        with:
+          context: .github/docker
+          file: .github/docker/Dockerfile.manylinux
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/endstonemc/manylinux_2_31_x86_64_clang20:latest
+            ghcr.io/endstonemc/manylinux_2_31_x86_64_clang20:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=min
