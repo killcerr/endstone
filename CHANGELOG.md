@@ -147,6 +147,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The console prompt now appears as soon as the server starts, right after the version banner, instead of only once the world has finished loading. Commands typed while the server is still starting are queued and run once it is ready, as they already were. Endstone no longer redirects the server's stdin during startup, so anything else reading it sees the real terminal throughout.
 - Dropped Python 3.10 support (end-of-life). Minimum version is now Python 3.11.
 
+### Removed
+
+#### Networking
+
+- **BREAKING**: `Server.port_v6` and `ServerListPingEvent.local_port_v6`. A server advertises one game port; the separate IPv6 port was rarely set and has no counterpart under NetherNet, which shares a single port across both families. Use `Server.port` and `ServerListPingEvent.local_port`. The IPv6 port field in the LAN advertisement is now passed through untouched rather than being rewritten from the event.
+
 ### Fixed
 
 #### Crashes and memory

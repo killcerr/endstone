@@ -1689,14 +1689,6 @@ class ServerListPingEvent(ServerEvent, Cancellable):
     @local_port.setter
     def local_port(self, arg1: int) -> None: ...
     @property
-    def local_port_v6(self) -> int:
-        """
-        The local port of the server for IPv6 support.
-        """
-
-    @local_port_v6.setter
-    def local_port_v6(self, arg1: int) -> None: ...
-    @property
     def motd(self) -> str:
         """
         The message of the day.

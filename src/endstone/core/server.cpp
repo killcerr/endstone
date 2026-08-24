@@ -581,11 +581,6 @@ int EndstoneServer::getPort() const
     return getRemoteConnector().getIPv4Port();
 }
 
-int EndstoneServer::getPortV6() const
-{
-    return getRemoteConnector().getIPv6Port();
-}
-
 bool EndstoneServer::getOnlineMode() const
 {
     return getServer().getMinecraft()->getServerNetworkHandler()->network_server_config_.require_trusted_authentication;

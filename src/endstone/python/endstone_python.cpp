@@ -517,7 +517,6 @@ void init_server(py::classh<Server> &server)
 )doc")
         .def_property_readonly("online_mode", &Server::getOnlineMode, "Whether the Server is in online mode or not.")
         .def_property_readonly("port", &Server::getPort, "The game port that the server runs on.")
-        .def_property_readonly("port_v6", &Server::getPortV6, "The game port (IPv6) that the server runs on.")
         .def("shutdown", &Server::shutdown, "Shutdowns the server, stopping everything.")
         .def("reload", &Server::reload, "Reloads the server configuration, functions, scripts and plugins.")
         .def("reload_data", &Server::reloadData, R"doc(

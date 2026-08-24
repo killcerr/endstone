@@ -47,7 +47,6 @@ public:
     MOCK_METHOD(endstone::Nullable<endstone::Player>, getPlayer, (endstone::UUID), (const, override));
     MOCK_METHOD(endstone::Nullable<endstone::Player>, getPlayer, (std::string), (const, override));
     MOCK_METHOD(int, getPort, (), (const, override));
-    MOCK_METHOD(int, getPortV6, (), (const, override));
     MOCK_METHOD(bool, getOnlineMode, (), (const, override));
     MOCK_METHOD(void, shutdown, (), (override));
     MOCK_METHOD(void, reload, (), (override));

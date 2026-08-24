@@ -693,8 +693,6 @@ void init_event(py::module_ &m, py::class_<Event, PyEvent> &event)
                       "The unique identifier of the server.")
         .def_property("local_port", &ServerListPingEvent::getLocalPort, &ServerListPingEvent::setLocalPort,
                       "The local port of the server.")
-        .def_property("local_port_v6", &ServerListPingEvent::getLocalPortV6, &ServerListPingEvent::setLocalPortV6,
-                      "The local port of the server for IPv6 support.")
         .def_property("motd", &ServerListPingEvent::getMotd, &ServerListPingEvent::setMotd,
                       "The message of the day.")
         .def_property_readonly("network_protocol_version", &ServerListPingEvent::getNetworkProtocolVersion,
