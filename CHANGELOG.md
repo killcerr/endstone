@@ -140,6 +140,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING**: `ActorDeathEvent` is now called for player deaths as well as every other mob. A listener that assumed it only saw non-player mobs should check `actor.type` or listen for `PlayerDeathEvent`.
 - `Block.set_type`, `BlockState.type`, `Server.create_block_data` and `Inventory.contains`/`contains_at_least`/`all`/`first`/`remove` take an `Identifier` (e.g. `BlockType.AIR`). Plain `"namespace:key"` strings are still accepted.
 - `str()` on `BlockType`, `Enchantment` and `ItemType` returns a plain `"namespace:key"` string instead of the underlying `Identifier` repr.
+- **BREAKING**: `Server::createBossBar()` is no longer `const`, since the server now keeps track of the boss bars it hands out. C++ plugins holding a `const Server &` need a non-const one; Python call sites are unchanged.
 
 #### Platform
 
@@ -173,6 +174,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed writing book metadata wiping the photo attached to a page and the filtered text the server keeps beside it. Pages you did not change now keep both.
 - Fixed `Enchantment.FORTUNE` missing from Python.
 - Fixed `ServerLoadEvent` missing its `ServerEvent` base in Python, and `LoadType.RELOAD` never being exposed.
+- Fixed a boss bar vanishing for a player who travelled to another dimension. The Bedrock client drops every boss bar it is showing once it rebuilds the world, so the bars a player is in are now sent again after the dimension change finishes.
 - Fixed `Plugin.default_permission` rejecting a string or a bool (`"operator"`, `"not op"`, `True`), which individual entries in `Plugin.permissions` already accepted.
 
 #### Type annotations

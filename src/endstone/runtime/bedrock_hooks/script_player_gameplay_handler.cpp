@@ -198,13 +198,15 @@ bool handleEvent(const ::PlayerRespawnEvent &event)
 bool handleEvent(const PlayerDimensionChangeAfterEvent &event)
 {
     if (const auto *player = WeakEntityRef(event.player).tryUnwrap<::Player>(); player) {
-        const auto &server = endstone::core::EndstoneServer::getInstance();
+        auto &server = endstone::core::EndstoneServer::getInstance();
+        const auto endstone_player = player->getEndstoneActor<endstone::core::EndstonePlayer>();
         endstone::PlayerDimensionChangeEvent e{
-            player->getEndstoneActor<endstone::core::EndstonePlayer>(),
+            endstone_player,
             server.getEndstoneLevel()->getDimension(event.from_dimension),
             server.getEndstoneLevel()->getDimension(event.to_dimension),
         };
         server.getPluginManager().callEvent(e);
+        server.updateBossBars(endstone_player);
     }
     return true;
 }

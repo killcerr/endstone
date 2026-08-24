@@ -65,10 +65,9 @@ public:
     MOCK_METHOD(float, getAverageTickUsage, (), (override));
     MOCK_METHOD(std::chrono::system_clock::time_point, getStartTime, (), (override));
     MOCK_METHOD(endstone::NotNull<endstone::BossBar>, createBossBar,
-                (std::string, endstone::BarColor, endstone::BarStyle), (const, override));
+                (std::string, endstone::BarColor, endstone::BarStyle), (override));
     MOCK_METHOD(endstone::NotNull<endstone::BossBar>, createBossBar,
-                (std::string, endstone::BarColor, endstone::BarStyle, std::vector<endstone::BarFlag>),
-                (const, override));
+                (std::string, endstone::BarColor, endstone::BarStyle, std::vector<endstone::BarFlag>), (override));
     MOCK_METHOD(endstone::NotNull<endstone::BlockData>, createBlockData, (endstone::BlockTypeId), (const, override));
     MOCK_METHOD(endstone::NotNull<endstone::BlockData>, createBlockData, (endstone::BlockTypeId, endstone::BlockStates),
                 (const, override));

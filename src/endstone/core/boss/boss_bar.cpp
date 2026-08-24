@@ -152,6 +152,13 @@ std::vector<NotNull<Player>> EndstoneBossBar::getPlayers() const
     return players;
 }
 
+void EndstoneBossBar::update(const NotNull<Player> &player)
+{
+    if (visible_ && players_.contains(player.get())) {
+        send(BossEventUpdateType::Add, player);
+    }
+}
+
 void EndstoneBossBar::send(BossEventUpdateType event_type, const NotNull<Player> &player)
 {
     const auto *handle = player.cast<EndstonePlayer>()->tryGetHandle();

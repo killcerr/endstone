@@ -366,7 +366,7 @@ public:
      * @param style the style of the boss bar
      * @return the created boss bar
      */
-    [[nodiscard]] virtual NotNull<BossBar> createBossBar(std::string title, BarColor color, BarStyle style) const = 0;
+    [[nodiscard]] virtual NotNull<BossBar> createBossBar(std::string title, BarColor color, BarStyle style) = 0;
 
     /**
      * Creates a boss bar instance to display to players. The progress defaults to 1.0.
@@ -378,7 +378,7 @@ public:
      * @return the created boss bar
      */
     [[nodiscard]] virtual NotNull<BossBar> createBossBar(std::string title, BarColor color, BarStyle style,
-                                                         std::vector<BarFlag> flags) const = 0;
+                                                         std::vector<BarFlag> flags) = 0;
 
     /**
      * Creates a new BlockData instance for the specified block type, with all properties initialized to

@@ -568,7 +568,7 @@ void init_server(py::classh<Server> &server)
         .def_property_readonly("start_time", &Server::getStartTime, "The start time of the server.")
         .def(
             "create_boss_bar",
-            [](const Server &self, std::string title, BarColor color, BarStyle style,
+            [](Server &self, std::string title, BarColor color, BarStyle style,
                const std::optional<std::vector<BarFlag>> &flags) {
                 return self.createBossBar(std::move(title), color, style, flags.value_or(std::vector<BarFlag>()));
             },
