@@ -54,10 +54,10 @@ public:
         return {};
     }
 
-    [[nodiscard]] const std::type_info &getClassTypeId() const override { return typeid(Permissible); }
-    [[nodiscard]] bool isInstanceOf(const std::type_info &target) const override
+    [[nodiscard]] endstone::ClassInfo getClassInfo() const override { return endstone::ClassInfo::of<Permissible>(); }
+    [[nodiscard]] bool isInstanceOf(endstone::ClassInfo target) const override
     {
-        return target == typeid(Permissible);
+        return target == endstone::ClassInfo::of<Permissible>();
     }
 
     int recalculated = 0;

@@ -37,6 +37,7 @@
 #include "endstone/map/map_view.h"
 #include "endstone/message.h"
 #include "endstone/plugin/service_manager.h"
+#include "endstone/object.h"
 #include "endstone/scoreboard/scoreboard.h"
 #include "endstone/util/pointers.h"
 #include "endstone/util/uuid.h"
@@ -435,18 +436,23 @@ public:
      *
      * @return the corresponding registry, or nullptr if not present
      */
-    [[nodiscard]] virtual IRegistry *_getRegistry(const std::type_info &type) const = 0;
+    [[nodiscard]] virtual IRegistry *_getRegistry(ClassInfo type) const = 0;
 
     /**
      * Returns the registry for the given element type.
      *
      * @tparam T The element type whose registry to retrieve.
      * @return the corresponding registry.
+     * @throws std::out_of_range if no registry is present for T.
      */
     template <typename T>
     [[nodiscard]] const Registry<T> &getRegistry() const
     {
-        return *static_cast<Registry<T> *>(_getRegistry(typeid(T)));
+        auto *registry = _getRegistry(ClassInfo::of<T>());
+        if (!registry) {
+            throw std::out_of_range{std::format("No registry is present for type: {}", ClassInfo::of<T>().name())};
+        }
+        return *static_cast<Registry<T> *>(registry);
     }
 
     /**

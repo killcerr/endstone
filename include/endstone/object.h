@@ -14,16 +14,58 @@
 
 #pragma once
 
+#include <cstddef>
+#include <cstring>
+#include <functional>
 #include <type_traits>
 #include <typeinfo>
 
 namespace endstone {
 
 /**
+ * A type identity that stays comparable across shared library boundaries.
+ *
+ * libc++ compares `std::type_info` by address, and a type named from more than one shared library has one typeinfo
+ * per module once those modules are built with hidden visibility, as endstone and its plugins are. Comparing the
+ * mangled name instead lets a type named in a plugin match the same type named in the runtime.
+ */
+class ClassInfo {
+public:
+    explicit ClassInfo(const std::type_info &info) noexcept : info_(&info) {}
+
+    /**
+     * The identity of T.
+     */
+    template <typename T>
+    static ClassInfo of() noexcept
+    {
+        return ClassInfo{typeid(T)};
+    }
+
+    /**
+     * The mangled name of the type.
+     */
+    [[nodiscard]] const char *name() const noexcept { return info_->name(); }
+
+    /**
+     * The underlying `std::type_info`.
+     */
+    [[nodiscard]] const std::type_info &info() const noexcept { return *info_; }
+
+    bool operator==(const ClassInfo &other) const noexcept
+    {
+        return info_ == other.info_ || std::strcmp(name(), other.name()) == 0;
+    }
+
+private:
+    const std::type_info *info_;
+};
+
+/**
  * Base class providing runtime type identification and safe casting.
  *
  * All endstone types that support runtime type narrowing (e.g., Permissible, ItemMeta)
- * inherit from Object. Subclasses implement getClassTypeId() and isInstanceOf(),
+ * inherit from Object. Subclasses implement getClassInfo() and isInstanceOf(),
  * and the type hierarchy is registered with entt::meta at startup.
  */
 class Object {
@@ -33,12 +75,12 @@ public:
     /**
      * @internal For internal use only. Prefer is<T>() and as<T>() instead.
      */
-    [[nodiscard]] virtual const std::type_info &getClassTypeId() const = 0;
+    [[nodiscard]] virtual ClassInfo getClassInfo() const = 0;
 
     /**
      * @internal For internal use only. Prefer is<T>() and as<T>() instead.
      */
-    [[nodiscard]] virtual bool isInstanceOf(const std::type_info &target) const = 0;
+    [[nodiscard]] virtual bool isInstanceOf(ClassInfo target) const = 0;
 
     /**
      * Attempts to cast this object to the given type T.
@@ -52,7 +94,7 @@ public:
         requires std::is_base_of_v<Object, T>
     T *as()
     {
-        if (isInstanceOf(typeid(T))) {
+        if (isInstanceOf(ClassInfo::of<T>())) {
             return static_cast<T *>(this);
         }
         return nullptr;
@@ -65,7 +107,7 @@ public:
         requires std::is_base_of_v<Object, T>
     const T *as() const
     {
-        if (isInstanceOf(typeid(T))) {
+        if (isInstanceOf(ClassInfo::of<T>())) {
             return static_cast<const T *>(this);
         }
         return nullptr;
@@ -81,8 +123,20 @@ public:
         requires std::is_base_of_v<Object, T>
     [[nodiscard]] bool is() const
     {
-        return isInstanceOf(typeid(T));
+        return isInstanceOf(ClassInfo::of<T>());
     }
 };
 
 }  // namespace endstone
+
+template <>
+struct std::hash<endstone::ClassInfo> {
+    std::size_t operator()(const endstone::ClassInfo &info) const noexcept
+    {
+        std::size_t hash = 5381;
+        for (const auto *ptr = info.name(); *ptr != '\0'; ++ptr) {
+            hash = hash * 33 ^ static_cast<unsigned char>(*ptr);
+        }
+        return hash;
+    }
+};

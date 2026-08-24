@@ -38,24 +38,24 @@ struct Tagged {
 };
 
 struct Shape : endstone::Object {
-    [[nodiscard]] const std::type_info &getClassTypeId() const override { return typeid(Shape); }
-    [[nodiscard]] bool isInstanceOf(const std::type_info &target) const override { return target == typeid(Shape); }
+    [[nodiscard]] endstone::ClassInfo getClassInfo() const override { return endstone::ClassInfo::of<Shape>(); }
+    [[nodiscard]] bool isInstanceOf(endstone::ClassInfo target) const override { return target == endstone::ClassInfo::of<Shape>(); }
 };
 
 // Tagged comes first so the Object subobject sits at a non-zero offset within Circle.
 struct Circle : Tagged, Shape {
-    [[nodiscard]] const std::type_info &getClassTypeId() const override { return typeid(Circle); }
-    [[nodiscard]] bool isInstanceOf(const std::type_info &target) const override
+    [[nodiscard]] endstone::ClassInfo getClassInfo() const override { return endstone::ClassInfo::of<Circle>(); }
+    [[nodiscard]] bool isInstanceOf(endstone::ClassInfo target) const override
     {
-        return target == typeid(Circle) || Shape::isInstanceOf(target);
+        return target == endstone::ClassInfo::of<Circle>() || Shape::isInstanceOf(target);
     }
 };
 
 struct Square : Shape {
-    [[nodiscard]] const std::type_info &getClassTypeId() const override { return typeid(Square); }
-    [[nodiscard]] bool isInstanceOf(const std::type_info &target) const override
+    [[nodiscard]] endstone::ClassInfo getClassInfo() const override { return endstone::ClassInfo::of<Square>(); }
+    [[nodiscard]] bool isInstanceOf(endstone::ClassInfo target) const override
     {
-        return target == typeid(Square) || Shape::isInstanceOf(target);
+        return target == endstone::ClassInfo::of<Square>() || Shape::isInstanceOf(target);
     }
 };
 

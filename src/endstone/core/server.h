@@ -34,6 +34,7 @@
 #include "endstone/core/scheduler/scheduler.h"
 #include "endstone/core/scoreboard/scoreboard.h"
 #include "endstone/core/signal_handler.h"
+#include "endstone/core/type.h"
 #include "endstone/server.h"
 
 class RakNetConnector;
@@ -117,7 +118,7 @@ public:
     [[nodiscard]] PlayerBanList &getBanList() const override;
     [[nodiscard]] IpBanList &getIpBanList() const override;
     [[nodiscard]] ServiceManager &getServiceManager() const override;
-    [[nodiscard]] IRegistry *_getRegistry(const std::type_info &type) const override;
+    [[nodiscard]] IRegistry *_getRegistry(ClassInfo type) const override;
     [[nodiscard]] MapView *getMap(std::int64_t id) const override;
     [[nodiscard]] MapView &createMap(const NotNull<Dimension> &dimension) const override;
 
@@ -162,7 +163,7 @@ private:
     std::unique_ptr<EndstoneScheduler> scheduler_;
     std::unique_ptr<EndstoneCommandMap> command_map_;
     std::unique_ptr<EndstoneLevel> level_;
-    std::unordered_map<std::type_index, std::unique_ptr<IRegistry>> registries_;
+    std::unordered_map<ClassInfo, std::unique_ptr<IRegistry>> registries_;
     Nullable<EndstoneScoreboard> scoreboard_;
     std::unique_ptr<Metrics> metrics_;
     std::unordered_map<int, NotNull<MetricsBase>> plugin_metrics_;

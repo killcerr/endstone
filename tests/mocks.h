@@ -36,7 +36,7 @@ public:
     MOCK_METHOD(endstone::Scheduler &, getScheduler, (), (const, override));
     MOCK_METHOD(endstone::ServiceManager &, getServiceManager, (), (const, override));
     MOCK_METHOD(endstone::NotNull<endstone::MetricsBase>, createMetrics, (endstone::Plugin &, int), (override));
-    MOCK_METHOD(endstone::IRegistry *, _getRegistry, (const std::type_info &), (const, override));
+    MOCK_METHOD(endstone::IRegistry *, _getRegistry, (endstone::ClassInfo), (const, override));
     MOCK_METHOD(endstone::MapView *, getMap, (std::int64_t), (const, override));
     MOCK_METHOD(endstone::MapView &, createMap, (const endstone::NotNull<endstone::Dimension> &), (const, override));
     MOCK_METHOD(endstone::Level &, getLevel, (), (const, override));

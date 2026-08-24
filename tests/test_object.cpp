@@ -44,126 +44,126 @@ protected:
 
 TEST_F(ObjectTypeTest, PlayerIsPlayer)
 {
-    EXPECT_TRUE(core::isTypeInstanceOf(typeid(Player), typeid(Player)));
+    EXPECT_TRUE(core::isTypeInstanceOf(ClassInfo::of<Player>(), ClassInfo::of<Player>()));
 }
 
 TEST_F(ObjectTypeTest, PlayerIsMob)
 {
-    EXPECT_TRUE(core::isTypeInstanceOf(typeid(Player), typeid(Mob)));
+    EXPECT_TRUE(core::isTypeInstanceOf(ClassInfo::of<Player>(), ClassInfo::of<Mob>()));
 }
 
 TEST_F(ObjectTypeTest, PlayerIsActor)
 {
-    EXPECT_TRUE(core::isTypeInstanceOf(typeid(Player), typeid(Actor)));
+    EXPECT_TRUE(core::isTypeInstanceOf(ClassInfo::of<Player>(), ClassInfo::of<Actor>()));
 }
 
 TEST_F(ObjectTypeTest, PlayerIsCommandSender)
 {
-    EXPECT_TRUE(core::isTypeInstanceOf(typeid(Player), typeid(CommandSender)));
+    EXPECT_TRUE(core::isTypeInstanceOf(ClassInfo::of<Player>(), ClassInfo::of<CommandSender>()));
 }
 
 TEST_F(ObjectTypeTest, PlayerIsPermissible)
 {
-    EXPECT_TRUE(core::isTypeInstanceOf(typeid(Player), typeid(Permissible)));
+    EXPECT_TRUE(core::isTypeInstanceOf(ClassInfo::of<Player>(), ClassInfo::of<Permissible>()));
 }
 
 TEST_F(ObjectTypeTest, MobIsNotPlayer)
 {
-    EXPECT_FALSE(core::isTypeInstanceOf(typeid(Mob), typeid(Player)));
+    EXPECT_FALSE(core::isTypeInstanceOf(ClassInfo::of<Mob>(), ClassInfo::of<Player>()));
 }
 
 TEST_F(ObjectTypeTest, PlayerIsNotItem)
 {
-    EXPECT_FALSE(core::isTypeInstanceOf(typeid(Player), typeid(Item)));
+    EXPECT_FALSE(core::isTypeInstanceOf(ClassInfo::of<Player>(), ClassInfo::of<Item>()));
 }
 
 TEST_F(ObjectTypeTest, ItemIsActor)
 {
-    EXPECT_TRUE(core::isTypeInstanceOf(typeid(Item), typeid(Actor)));
+    EXPECT_TRUE(core::isTypeInstanceOf(ClassInfo::of<Item>(), ClassInfo::of<Actor>()));
 }
 
 TEST_F(ObjectTypeTest, ItemIsNotMob)
 {
-    EXPECT_FALSE(core::isTypeInstanceOf(typeid(Item), typeid(Mob)));
+    EXPECT_FALSE(core::isTypeInstanceOf(ClassInfo::of<Item>(), ClassInfo::of<Mob>()));
 }
 
 TEST_F(ObjectTypeTest, ConsoleIsCommandSender)
 {
-    EXPECT_TRUE(core::isTypeInstanceOf(typeid(ConsoleCommandSender), typeid(CommandSender)));
+    EXPECT_TRUE(core::isTypeInstanceOf(ClassInfo::of<ConsoleCommandSender>(), ClassInfo::of<CommandSender>()));
 }
 
 TEST_F(ObjectTypeTest, ConsoleIsNotActor)
 {
-    EXPECT_FALSE(core::isTypeInstanceOf(typeid(ConsoleCommandSender), typeid(Actor)));
+    EXPECT_FALSE(core::isTypeInstanceOf(ClassInfo::of<ConsoleCommandSender>(), ClassInfo::of<Actor>()));
 }
 
 TEST_F(ObjectTypeTest, BlockSenderIsNotConsole)
 {
-    EXPECT_FALSE(core::isTypeInstanceOf(typeid(BlockCommandSender), typeid(ConsoleCommandSender)));
+    EXPECT_FALSE(core::isTypeInstanceOf(ClassInfo::of<BlockCommandSender>(), ClassInfo::of<ConsoleCommandSender>()));
 }
 
 TEST_F(ObjectTypeTest, ActorIsNotConsole)
 {
-    EXPECT_FALSE(core::isTypeInstanceOf(typeid(Actor), typeid(ConsoleCommandSender)));
+    EXPECT_FALSE(core::isTypeInstanceOf(ClassInfo::of<Actor>(), ClassInfo::of<ConsoleCommandSender>()));
 }
 
 // --- ItemMeta hierarchy ---
 
 TEST_F(ObjectTypeTest, BookMetaIsWritableBookMeta)
 {
-    EXPECT_TRUE(core::isTypeInstanceOf(typeid(BookMeta), typeid(WritableBookMeta)));
+    EXPECT_TRUE(core::isTypeInstanceOf(ClassInfo::of<BookMeta>(), ClassInfo::of<WritableBookMeta>()));
 }
 
 TEST_F(ObjectTypeTest, BookMetaIsItemMeta)
 {
-    EXPECT_TRUE(core::isTypeInstanceOf(typeid(BookMeta), typeid(ItemMeta)));
+    EXPECT_TRUE(core::isTypeInstanceOf(ClassInfo::of<BookMeta>(), ClassInfo::of<ItemMeta>()));
 }
 
 TEST_F(ObjectTypeTest, WritableBookMetaIsItemMeta)
 {
-    EXPECT_TRUE(core::isTypeInstanceOf(typeid(WritableBookMeta), typeid(ItemMeta)));
+    EXPECT_TRUE(core::isTypeInstanceOf(ClassInfo::of<WritableBookMeta>(), ClassInfo::of<ItemMeta>()));
 }
 
 TEST_F(ObjectTypeTest, WritableBookMetaIsNotBookMeta)
 {
-    EXPECT_FALSE(core::isTypeInstanceOf(typeid(WritableBookMeta), typeid(BookMeta)));
+    EXPECT_FALSE(core::isTypeInstanceOf(ClassInfo::of<WritableBookMeta>(), ClassInfo::of<BookMeta>()));
 }
 
 TEST_F(ObjectTypeTest, MapMetaIsItemMeta)
 {
-    EXPECT_TRUE(core::isTypeInstanceOf(typeid(MapMeta), typeid(ItemMeta)));
+    EXPECT_TRUE(core::isTypeInstanceOf(ClassInfo::of<MapMeta>(), ClassInfo::of<ItemMeta>()));
 }
 
 TEST_F(ObjectTypeTest, MapMetaIsNotWritableBookMeta)
 {
-    EXPECT_FALSE(core::isTypeInstanceOf(typeid(MapMeta), typeid(WritableBookMeta)));
+    EXPECT_FALSE(core::isTypeInstanceOf(ClassInfo::of<MapMeta>(), ClassInfo::of<WritableBookMeta>()));
 }
 
 TEST_F(ObjectTypeTest, CrossbowMetaIsItemMeta)
 {
-    EXPECT_TRUE(core::isTypeInstanceOf(typeid(CrossbowMeta), typeid(ItemMeta)));
+    EXPECT_TRUE(core::isTypeInstanceOf(ClassInfo::of<CrossbowMeta>(), ClassInfo::of<ItemMeta>()));
 }
 
 TEST_F(ObjectTypeTest, PotionMetaIsItemMeta)
 {
-    EXPECT_TRUE(core::isTypeInstanceOf(typeid(PotionMeta), typeid(ItemMeta)));
+    EXPECT_TRUE(core::isTypeInstanceOf(ClassInfo::of<PotionMeta>(), ClassInfo::of<ItemMeta>()));
 }
 
 // --- Cross-hierarchy rejection ---
 
 TEST_F(ObjectTypeTest, PlayerIsNotItemMeta)
 {
-    EXPECT_FALSE(core::isTypeInstanceOf(typeid(Player), typeid(ItemMeta)));
+    EXPECT_FALSE(core::isTypeInstanceOf(ClassInfo::of<Player>(), ClassInfo::of<ItemMeta>()));
 }
 
 TEST_F(ObjectTypeTest, ItemMetaIsNotPermissible)
 {
-    EXPECT_FALSE(core::isTypeInstanceOf(typeid(ItemMeta), typeid(Permissible)));
+    EXPECT_FALSE(core::isTypeInstanceOf(ClassInfo::of<ItemMeta>(), ClassInfo::of<Permissible>()));
 }
 
 TEST_F(ObjectTypeTest, UnregisteredTypeReturnsFalse)
 {
     struct Unknown : Object {};
-    EXPECT_FALSE(core::isTypeInstanceOf(typeid(Unknown), typeid(Permissible)));
-    EXPECT_FALSE(core::isTypeInstanceOf(typeid(Player), typeid(Unknown)));
+    EXPECT_FALSE(core::isTypeInstanceOf(ClassInfo::of<Unknown>(), ClassInfo::of<Permissible>()));
+    EXPECT_FALSE(core::isTypeInstanceOf(ClassInfo::of<Player>(), ClassInfo::of<Unknown>()));
 }

@@ -472,7 +472,7 @@ void init_server(py::classh<Server> &server)
                 if (!type_info) {
                     return py::none();
                 }
-                auto *registry = self._getRegistry(*type_info->cpptype);
+                auto *registry = self._getRegistry(ClassInfo(*type_info->cpptype));
                 if (!registry) {
                     return py::none();
                 }
