@@ -163,6 +163,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed every vanilla command failing when dispatched through a `CommandSenderWrapper`, which did not report its own type.
 - Fixed `str()` on a `Translatable` giving an object repr instead of its text.
 - Fixed `Mob.has_attribute()` raising for a name that is not an attribute instead of answering `False`.
+- Fixed writing book metadata wiping the photo attached to a page and the filtered text the server keeps beside it. Pages you did not change now keep both.
 - Fixed `Enchantment.FORTUNE` missing from Python.
 - Fixed `ServerLoadEvent` missing its `ServerEvent` base in Python, and `LoadType.RELOAD` never being exposed.
 - Fixed `Plugin.default_permission` rejecting a string or a bool (`"operator"`, `"not op"`, `True`), which individual entries in `Plugin.permissions` already accepted.
