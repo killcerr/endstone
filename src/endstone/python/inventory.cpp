@@ -226,7 +226,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
     Sets the specified page in the book. Pages of the book must be contiguous.
 
     Note:
-        The data can be up to 1024 characters in length, additional characters are truncated.
+        The data can be up to 256 characters in length, additional characters are truncated.
 
     Pages are 1-indexed.
 
