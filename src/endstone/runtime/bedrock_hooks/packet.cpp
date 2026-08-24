@@ -23,6 +23,7 @@
 #include "bedrock/network/network_identifier.h"
 #include "bedrock/network/packet/animate_packet.h"
 #include "bedrock/network/packet/book_edit_packet.h"
+#include "bedrock/network/packet/boss_event_packet.h"
 #include "bedrock/network/packet/correct_player_move_prediction_packet.h"
 #include "bedrock/network/packet/emote_packet.h"
 #include "bedrock/network/packet/mob_equipment_packet.h"
@@ -344,6 +345,17 @@ void EndstonePacketHandler::handle(EmotePacket &packet)
 }
 
 template <>
+void EndstonePacketHandler::handle(BossEventPacket &packet)
+{
+    auto *player = getPlayer();
+    if (player != nullptr && packet.payload.event_type == BossEventUpdateType::Query &&
+        packet.payload.boss_id == player->getOrCreateUniqueID()) {
+        EndstoneServer::getInstance().updateBossBars(player->getEndstoneActor<EndstonePlayer>());
+    }
+    handle();
+}
+
+template <>
 void EndstonePacketHandler::handle(SetPlayerInventoryOptionsPacket &packet)
 {
     const auto *player = getPlayer();
@@ -597,6 +609,11 @@ std::shared_ptr<Packet> MinecraftPackets::createPacket(MinecraftPacketIds id)
     }
     case MinecraftPacketIds::BookEdit: {
         using Dispatcher = EndstonePacketHandlerDispatcher<BookEditPacket>;
+        Dispatcher::set(&packet->handler_);
+        break;
+    }
+    case MinecraftPacketIds::BossEvent: {
+        using Dispatcher = EndstonePacketHandlerDispatcher<BossEventPacket>;
         Dispatcher::set(&packet->handler_);
         break;
     }
