@@ -38,6 +38,45 @@ private:
 };
 BEDROCK_STATIC_ASSERT_SIZE(InternalItemDescriptor, 24, 24);
 
+struct ItemTagDescriptor : ItemDescriptor::BaseDescriptor {
+    explicit ItemTagDescriptor(ItemTag tag) : item_tag_(std::move(tag)) {}
+    [[nodiscard]] std::unique_ptr<BaseDescriptor> clone() const override
+    {
+        return std::make_unique<ItemTagDescriptor>(*this);
+    }
+    [[nodiscard]] bool sameItem(const ItemDescriptor::ItemEntry &other, bool) const override
+    {
+        return other.item != nullptr && other.item->hasTag(item_tag_);
+    }
+    [[nodiscard]] std::string getFullName() const override { return item_tag_.getString(); }
+    [[nodiscard]] ItemDescriptor::ItemEntry getItem() const override
+    {
+        return {nullptr, ItemDescriptor::ANY_AUX_VALUE};
+    }
+    [[nodiscard]] std::map<std::string, std::string> toMap() const override { return {{"tag", item_tag_.getString()}}; }
+    [[nodiscard]] std::optional<CompoundTag> save() const override
+    {
+        CompoundTag tag;
+        tag.putString("Tag", item_tag_.getString());
+        return tag;
+    }
+    void serialize(BinaryStream &stream) const override { stream.writeString(item_tag_.getString(), "Tag", nullptr); }
+    [[nodiscard]] ItemDescriptor::InternalType getType() const override
+    {
+        return ItemDescriptor::InternalType::ItemTag;
+    }
+    [[nodiscard]] size_t getHash() const override { return item_tag_.getHash(); }
+    [[nodiscard]] bool forEachItemUntil(std::function<bool(Item const &, std::int16_t)> func) const override
+    {
+        (void)func;
+        return false;
+    }
+
+private:
+    ItemTag item_tag_;  // +8
+};
+BEDROCK_STATIC_ASSERT_SIZE(ItemTagDescriptor, 56, 56);
+
 InternalItemDescriptor::InternalItemDescriptor(WeakPtr<Item> &&item, const std::int16_t aux_value)
     : item_entry_(item.get(), aux_value)
 {
@@ -153,11 +192,42 @@ ItemDescriptor::ItemDescriptor(const Item &item, int aux_value)
     }
 }
 
+ItemDescriptor::ItemDescriptor(const ItemTag &tag)
+{
+    impl_ = std::make_unique<ItemTagDescriptor>(tag);
+}
+
+ItemDescriptor::ItemDescriptor(std::string_view name, int aux_value)
+{
+    int ignored = 0;
+    auto item = ItemRegistryManager::getItemRegistry().lookupByName(ignored, name);
+    if (!item.isNull()) {
+        impl_ = std::make_unique<InternalItemDescriptor>(std::move(item),
+                                                         aux_value > 0 ? static_cast<std::int16_t>(aux_value) : 0);
+    }
+}
+
 ItemDescriptor::ItemDescriptor(const ItemDescriptor &other)
 {
     if (other.impl_) {
         impl_ = std::move(other.impl_->clone());
     }
+}
+
+ItemDescriptor &ItemDescriptor::operator=(const ItemDescriptor &other)
+{
+    if (this != &other) {
+        impl_ = other.impl_ ? other.impl_->clone() : nullptr;
+    }
+    return *this;
+}
+
+std::size_t ItemDescriptor::getHash() const
+{
+    if (impl_ && impl_->shouldResolve()) {
+        impl_ = std::move(impl_->resolve());
+    }
+    return impl_ ? impl_->getHash() : EMPTY_INGREDIENT_HASH;
 }
 
 void ItemDescriptor::serialize(Json::Value &json) const
@@ -218,6 +288,20 @@ bool ItemDescriptor::isNull() const
     }
     return !impl_->forEachItemUntil(
         [](const Item &item, std::int16_t) { return item.getFullNameHash() != BedrockBlockNames::Air; });
+}
+
+bool ItemDescriptor::sameItem(const ItemDescriptor &other, bool compare_aux) const
+{
+    if (impl_ && impl_->shouldResolve()) {
+        impl_ = std::move(impl_->resolve());
+    }
+    if (other.impl_ && other.impl_->shouldResolve()) {
+        other.impl_ = std::move(other.impl_->resolve());
+    }
+    if (!impl_ || !other.impl_) {
+        return false;
+    }
+    return impl_->sameItems(*other.impl_, compare_aux);
 }
 
 std::int16_t ItemDescriptor::getId() const

@@ -20,6 +20,7 @@
 #include "bedrock/core/utility/binary_stream.h"
 #include "bedrock/deps/json/value.h"
 #include "bedrock/nbt/compound_tag.h"
+#include "bedrock/world/item/vanilla_item_tag.h"
 #include "bedrock/world/level/block/block.h"
 #include "bedrock/world/level/block/block_type.h"
 
@@ -33,6 +34,8 @@ public:
     explicit ItemDescriptor(const Block &);
     explicit ItemDescriptor(const BlockType &);
     explicit ItemDescriptor(const Item &, int);
+    explicit ItemDescriptor(const ItemTag &);
+    ItemDescriptor(std::string_view name, int aux_value);
     ItemDescriptor(const ItemDescriptor &);
     ItemDescriptor(ItemDescriptor &&) = default;
 
@@ -40,11 +43,15 @@ public:
     virtual void serialize(Json::Value &) const;
     virtual void serialize(BinaryStream &) const;
 
+    ItemDescriptor &operator=(const ItemDescriptor &other);
     ItemDescriptor &operator=(ItemDescriptor &&) = default;
+    [[nodiscard]] std::size_t getHash() const;
     [[nodiscard]] const Item *getItem() const;
     [[nodiscard]] const Block *getBlock() const;
     [[nodiscard]] bool isValid(bool should_resolve) const;
     [[nodiscard]] bool isNull() const;
+    [[nodiscard]] bool sameItem(const ItemDescriptor &other, bool compare_aux) const;
+
     [[nodiscard]] std::int16_t getId() const;
     [[nodiscard]] std::int16_t getAuxValue() const;
     [[nodiscard]] std::string getFullName() const;

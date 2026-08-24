@@ -118,6 +118,55 @@ auto id(Identifier<T> value)
         return value;
     };
 }
+
+inline py::object wrap_recipe(const Recipe &recipe)
+{
+    if (auto shaped = recipe.as<ShapedRecipe>()) {
+        return py::cast(std::move(*shaped));
+    }
+    if (auto shapeless = recipe.as<ShapelessRecipe>()) {
+        return py::cast(std::move(*shapeless));
+    }
+    if (auto transform = recipe.as<SmithingTransformRecipe>()) {
+        return py::cast(std::move(*transform));
+    }
+    if (auto trim = recipe.as<SmithingTrimRecipe>()) {
+        return py::cast(std::move(*trim));
+    }
+    if (auto complex = recipe.as<ComplexRecipe>()) {
+        return py::cast(std::move(*complex));
+    }
+    return py::cast(recipe);
+}
+
+inline py::object wrap_ingredient(const RecipeIngredient &ingredient)
+{
+    if (auto exact = ingredient.as<ExactIngredient>()) {
+        return py::cast(std::move(*exact));
+    }
+    if (auto type = ingredient.as<ItemTypeIngredient>()) {
+        return py::cast(std::move(*type));
+    }
+    if (auto tag = ingredient.as<ItemTagIngredient>()) {
+        return py::cast(std::move(*tag));
+    }
+    if (auto molang = ingredient.as<MolangIngredient>()) {
+        return py::cast(std::move(*molang));
+    }
+    if (auto alias = ingredient.as<ComplexAliasIngredient>()) {
+        return py::cast(std::move(*alias));
+    }
+    return py::cast(ingredient);
+}
+
+inline py::list wrap_recipes(const std::vector<Recipe> &recipes)
+{
+    py::list out;
+    for (const auto &recipe : recipes) {
+        out.append(wrap_recipe(recipe));
+    }
+    return out;
+}
 }  // namespace endstone::python
 
 template <typename... Ts>
