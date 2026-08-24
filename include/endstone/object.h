@@ -83,6 +83,16 @@ public:
     [[nodiscard]] virtual bool isInstanceOf(ClassInfo target) const = 0;
 
     /**
+     * @internal For internal use only. Prefer is<T>() and as<T>() instead.
+     */
+    template <typename T>
+        requires std::is_base_of_v<Object, T>
+    [[nodiscard]] bool isInstanceOf() const
+    {
+        return isInstanceOf(ClassInfo::of<T>());
+    }
+
+    /**
      * Attempts to cast this object to the given type T.
      *
      * Returns nullptr if this object is not an instance of T (or a subclass of T).
@@ -94,7 +104,7 @@ public:
         requires std::is_base_of_v<Object, T>
     T *as()
     {
-        if (isInstanceOf(ClassInfo::of<T>())) {
+        if (isInstanceOf<T>()) {
             return static_cast<T *>(this);
         }
         return nullptr;
@@ -107,7 +117,7 @@ public:
         requires std::is_base_of_v<Object, T>
     const T *as() const
     {
-        if (isInstanceOf(ClassInfo::of<T>())) {
+        if (isInstanceOf<T>()) {
             return static_cast<const T *>(this);
         }
         return nullptr;
@@ -123,7 +133,7 @@ public:
         requires std::is_base_of_v<Object, T>
     [[nodiscard]] bool is() const
     {
-        return isInstanceOf(ClassInfo::of<T>());
+        return isInstanceOf<T>();
     }
 };
 
