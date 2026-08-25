@@ -298,7 +298,11 @@ class Recipe:
     @property
     def ingredients(self) -> list[RecipeIngredient | None]: ...
     @property
-    def recipe_id(self) -> str: ...
+    def id(self) -> str:
+        """
+        The identifier of this recipe, such as `minecraft:crafting_table`.
+        """
+
     @property
     def tag(self) -> str:
         """
@@ -627,7 +631,7 @@ class WritableBookMeta(ItemMeta):
         Sets the specified page in the book. Pages of the book must be contiguous.
 
         Note:
-            The data can be up to 1024 characters in length, additional characters are truncated.
+            The data can be up to 256 characters in length, additional characters are truncated.
 
         Pages are 1-indexed.
 
