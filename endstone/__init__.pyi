@@ -225,7 +225,7 @@ class Server:
         """
 
     @property
-    def recipes(self) -> list:
+    def recipes(self) -> list[Recipe]:
         """
         The list of crafting recipes.
         """

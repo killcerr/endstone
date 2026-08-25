@@ -129,9 +129,9 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def_property_readonly(
             "ingredients",
             [](const Recipe &self) {
-                py::list out;
+                py::typing::List<py::typing::Optional<RecipeIngredient>> out;
                 for (const auto &ingredient : self.getIngredients()) {
-                    out.append(ingredient ? py::object(wrap_ingredient(*ingredient)) : py::none());
+                    out.append(wrap_ingredient(ingredient));
                 }
                 return out;
             })
@@ -177,19 +177,10 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         "Represents a complex recipe which has imperative server-defined behavior, eg armor dyeing.");
 
     py::class_<SmithingRecipe, Recipe>(m, "SmithingRecipe", "Represents a smithing recipe.")
+        .def_property_readonly("base", [](const SmithingRecipe &self) { return wrap_ingredient(self.getBase()); },
+                               "The base recipe item.")
         .def_property_readonly(
-            "base",
-            [](const SmithingRecipe &self) {
-                auto ingredient = self.getBase();
-                return ingredient ? py::object(wrap_ingredient(*ingredient)) : py::none();
-            },
-            "The base recipe item.")
-        .def_property_readonly(
-            "addition",
-            [](const SmithingRecipe &self) {
-                auto ingredient = self.getAddition();
-                return ingredient ? py::object(wrap_ingredient(*ingredient)) : py::none();
-            },
+            "addition", [](const SmithingRecipe &self) { return wrap_ingredient(self.getAddition()); },
             "The addition recipe item.");
 
     py::class_<SmithingTransformRecipe, SmithingRecipe>(m, "SmithingTransformRecipe",
@@ -207,11 +198,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         result: The result of this recipe.
 )doc")
         .def_property_readonly(
-            "template",
-            [](const SmithingTransformRecipe &self) {
-                auto ingredient = self.getTemplate();
-                return ingredient ? py::object(wrap_ingredient(*ingredient)) : py::none();
-            },
+            "template", [](const SmithingTransformRecipe &self) { return wrap_ingredient(self.getTemplate()); },
             "The template recipe item.");
 
     py::class_<SmithingTrimRecipe, SmithingRecipe>(m, "SmithingTrimRecipe", "Represents a smithing trim recipe.")
@@ -227,11 +214,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         addition: The addition recipe item.
 )doc")
         .def_property_readonly(
-            "template",
-            [](const SmithingTrimRecipe &self) {
-                auto ingredient = self.getTemplate();
-                return ingredient ? py::object(wrap_ingredient(*ingredient)) : py::none();
-            },
+            "template", [](const SmithingTrimRecipe &self) { return wrap_ingredient(self.getTemplate()); },
             "The template recipe item.");
 
     py::classh<ItemMeta>(m, "ItemMeta", "Represents the metadata of a generic item.")

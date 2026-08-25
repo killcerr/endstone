@@ -23,6 +23,7 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
 #include <pybind11/stl_bind.h>
+#include <pybind11/typing.h>
 
 #include "endstone/endstone.hpp"
 #include "endstone/identifier.h"
@@ -119,7 +120,7 @@ auto id(Identifier<T> value)
     };
 }
 
-inline py::object wrap_recipe(const Recipe &recipe)
+inline py::typing::Union<Recipe> wrap_recipe(const Recipe &recipe)
 {
     if (auto shaped = recipe.as<ShapedRecipe>()) {
         return py::cast(std::move(*shaped));
@@ -139,29 +140,32 @@ inline py::object wrap_recipe(const Recipe &recipe)
     return py::cast(recipe);
 }
 
-inline py::object wrap_ingredient(const RecipeIngredient &ingredient)
+inline py::typing::Optional<RecipeIngredient> wrap_ingredient(const std::optional<RecipeIngredient> &ingredient)
 {
-    if (auto exact = ingredient.as<ExactIngredient>()) {
+    if (!ingredient) {
+        return py::none();
+    }
+    if (auto exact = ingredient->as<ExactIngredient>()) {
         return py::cast(std::move(*exact));
     }
-    if (auto type = ingredient.as<ItemTypeIngredient>()) {
+    if (auto type = ingredient->as<ItemTypeIngredient>()) {
         return py::cast(std::move(*type));
     }
-    if (auto tag = ingredient.as<ItemTagIngredient>()) {
+    if (auto tag = ingredient->as<ItemTagIngredient>()) {
         return py::cast(std::move(*tag));
     }
-    if (auto molang = ingredient.as<MolangIngredient>()) {
+    if (auto molang = ingredient->as<MolangIngredient>()) {
         return py::cast(std::move(*molang));
     }
-    if (auto alias = ingredient.as<ComplexAliasIngredient>()) {
+    if (auto alias = ingredient->as<ComplexAliasIngredient>()) {
         return py::cast(std::move(*alias));
     }
-    return py::cast(ingredient);
+    return py::cast(*ingredient);
 }
 
-inline py::list wrap_recipes(const std::vector<Recipe> &recipes)
+inline py::typing::List<Recipe> wrap_recipes(const std::vector<Recipe> &recipes)
 {
-    py::list out;
+    py::typing::List<Recipe> out;
     for (const auto &recipe : recipes) {
         out.append(wrap_recipe(recipe));
     }

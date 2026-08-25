@@ -296,7 +296,7 @@ class Recipe:
         """
 
     @property
-    def ingredients(self) -> list: ...
+    def ingredients(self) -> list[RecipeIngredient | None]: ...
     @property
     def recipe_id(self) -> str: ...
     @property
@@ -360,13 +360,13 @@ class SmithingRecipe(Recipe):
     Represents a smithing recipe.
     """
     @property
-    def base(self) -> object:
+    def base(self) -> RecipeIngredient | None:
         """
         The base recipe item.
         """
 
     @property
-    def addition(self) -> object:
+    def addition(self) -> RecipeIngredient | None:
         """
         The addition recipe item.
         """
@@ -395,7 +395,7 @@ class SmithingTransformRecipe(SmithingRecipe):
         """
 
     @property
-    def template(self) -> object:
+    def template(self) -> RecipeIngredient | None:
         """
         The template recipe item.
         """
@@ -418,7 +418,7 @@ class SmithingTrimRecipe(SmithingRecipe):
         """
 
     @property
-    def template(self) -> object:
+    def template(self) -> RecipeIngredient | None:
         """
         The template recipe item.
         """

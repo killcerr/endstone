@@ -88,9 +88,6 @@ def test_constructed_recipes(plugin: Plugin, server: Server) -> None:
     """Log one constructed recipe of each public constructible recipe type."""
     stick = ItemTypeIngredient(_item("minecraft:stick"))
     diamond = ItemTypeIngredient(_item("minecraft:diamond"))
-    netherite_ingot = ItemTypeIngredient(_item("minecraft:netherite_ingot"))
-    netherite_upgrade = ItemTypeIngredient(_item("minecraft:netherite_upgrade_smithing_template"))
-    sentry = ItemTypeIngredient(_item("minecraft:sentry_armor_trim_smithing_template"))
     constructed = [
         ShapedRecipe(
             "endstone_test:shaped_diamond_sword",
@@ -99,22 +96,22 @@ def test_constructed_recipes(plugin: Plugin, server: Server) -> None:
             ItemStack("minecraft:diamond_sword"),
         ),
         ShapelessRecipe(
-            "endstone_test:shapeless_planks",
-            [ItemTypeIngredient(_item("minecraft:oak_log"))],
-            ItemStack("minecraft:oak_planks", 4),
+            "endstone_test:shapeless_apple_from_dirt",
+            [ItemTypeIngredient(_item("minecraft:dirt"))],
+            ItemStack("minecraft:apple"),
         ),
         SmithingTransformRecipe(
-            "endstone_test:netherite_sword",
-            netherite_upgrade,
-            ItemTypeIngredient(_item("minecraft:diamond_sword")),
-            netherite_ingot,
-            ItemStack("minecraft:netherite_sword"),
+            "endstone_test:dirt_to_diamond",
+            ItemTypeIngredient(_item("minecraft:stick")),
+            ItemTypeIngredient(_item("minecraft:dirt")),
+            ItemTypeIngredient(_item("minecraft:cobblestone")),
+            ItemStack("minecraft:diamond"),
         ),
         SmithingTrimRecipe(
-            "endstone_test:sentry_trim",
-            sentry,
-            ItemTypeIngredient(_item("minecraft:iron_chestplate")),
-            diamond,
+            "endstone_test:dirt_trim",
+            ItemTypeIngredient(_item("minecraft:stick")),
+            ItemTypeIngredient(_item("minecraft:dirt")),
+            ItemTypeIngredient(_item("minecraft:cobblestone")),
         ),
     ]
     for recipe in constructed:

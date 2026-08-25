@@ -16,7 +16,7 @@
 
 #include "bedrock/world/item/item_stack.h"
 
-const mce::UUID SmithingTransformRecipe::ID{~0ULL, ~0ULL};
+const mce::UUID SmithingTransformRecipe::ID = mce::UUID::fromString("9d304ae7-8b66-4423-80a0-eea8d3abd2a5");
 
 SmithingTransformRecipe::SmithingTransformRecipe(const std::string &recipe_id,
                                                  const RecipeIngredient &template_ingredient,

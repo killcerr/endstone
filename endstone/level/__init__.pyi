@@ -3,7 +3,7 @@ import typing
 from endstone import GameRule, Identifier, Player
 from endstone.actor import Actor, ActorType, Item, Mob
 from endstone.block import Block
-from endstone.inventory import ItemStack
+from endstone.inventory import ItemStack, Recipe
 from endstone.plugin import Plugin
 from endstone.util import Vector
 
@@ -48,7 +48,7 @@ class Level:
         """
 
     @property
-    def recipes(self) -> list:
+    def recipes(self) -> list[Recipe]:
         """
         The list of crafting recipes.
         """

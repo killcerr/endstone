@@ -10,7 +10,7 @@ from endstone.actor import Actor, Item, Mob
 from endstone.block import Block, BlockFace, BlockState
 from endstone.command import CommandSender
 from endstone.damage import DamageSource
-from endstone.inventory import BookMeta, EquipmentSlot, Inventory, ItemStack
+from endstone.inventory import BookMeta, EquipmentSlot, Inventory, ItemStack, Recipe
 from endstone.lang import Translatable
 from endstone.level import Chunk, Dimension, Level, Location
 from endstone.map import MapView
@@ -830,7 +830,7 @@ class PlayerCraftItemEvent(PlayerEvent, Cancellable):
     If the event is cancelled the item will not be crafted and the ingredients will not be consumed.
     """
     @property
-    def recipe(self) -> object:
+    def recipe(self) -> Recipe:
         """
         A copy of the current recipe on the crafting matrix.
         """
