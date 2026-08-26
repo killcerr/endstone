@@ -19,6 +19,7 @@ __all__ = [
     "CrossbowMeta",
     "EquipmentSlot",
     "ExactIngredient",
+    "FurnaceRecipe",
     "Inventory",
     "ItemFactory",
     "ItemMeta",
@@ -298,11 +299,7 @@ class Recipe:
     @property
     def ingredients(self) -> list[RecipeIngredient | None]: ...
     @property
-    def id(self) -> str:
-        """
-        The identifier of this recipe, such as `minecraft:crafting_table`.
-        """
-
+    def recipe_id(self) -> str: ...
     @property
     def tag(self) -> str:
         """
@@ -352,6 +349,29 @@ class ShapelessRecipe(Recipe):
             ingredients: The ingredients this recipe consumes.
             result: The result of this recipe.
             tag: The crafting station this recipe belongs to, such as `crafting_table`.
+        """
+
+class FurnaceRecipe(Recipe):
+    """
+    Represents a furnace recipe.
+
+    The same type covers blast furnaces, smokers and campfires; the station is the crafting tag, such as `furnace`.
+    """
+    def __init__(self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "furnace") -> None:
+        """
+        Creates a furnace recipe.
+
+        Args:
+            recipe_id: The recipe id.
+            input: The input this recipe consumes.
+            result: The result of this recipe.
+            tag: The crafting station this recipe belongs to, such as `furnace`.
+        """
+
+    @property
+    def input(self) -> RecipeIngredient | None:
+        """
+        The input this recipe consumes.
         """
 
 class ComplexRecipe(Recipe):

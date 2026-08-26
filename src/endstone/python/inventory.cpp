@@ -172,6 +172,25 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         tag: The crafting station this recipe belongs to, such as `crafting_table`.
 )doc");
 
+    py::class_<FurnaceRecipe, Recipe>(m, "FurnaceRecipe", R"doc(
+    Represents a furnace recipe.
+
+    The same type covers blast furnaces, smokers and campfires; the station is the crafting tag, such as `furnace`.
+)doc")
+        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string>(), py::arg("recipe_id"), py::arg("input"),
+             py::arg("result"), py::arg("tag") = "furnace",
+             R"doc(
+    Creates a furnace recipe.
+
+    Args:
+        recipe_id: The recipe id.
+        input: The input this recipe consumes.
+        result: The result of this recipe.
+        tag: The crafting station this recipe belongs to, such as `furnace`.
+)doc")
+        .def_property_readonly("input", [](const FurnaceRecipe &self) { return wrap_ingredient(self.getInput()); },
+                               "The input this recipe consumes.");
+
     py::class_<ComplexRecipe, Recipe>(
         m, "ComplexRecipe",
         "Represents a complex recipe which has imperative server-defined behavior, eg armor dyeing.");
@@ -182,6 +201,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def_property_readonly(
             "addition", [](const SmithingRecipe &self) { return wrap_ingredient(self.getAddition()); },
             "The addition recipe item.");
+
 
     py::class_<SmithingTransformRecipe, SmithingRecipe>(m, "SmithingTransformRecipe",
                                                         "Represents a smithing transform recipe.")

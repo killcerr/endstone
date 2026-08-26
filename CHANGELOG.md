@@ -58,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Items
 
-- `Level.recipes`, a snapshot of the crafting recipes the server has loaded, also reachable as `Server.recipes`. Each entry is a `ShapedRecipe`, `ShapelessRecipe`, `SmithingTransformRecipe`, `SmithingTrimRecipe` or `ComplexRecipe`, and reports its `recipe_id`, crafting `tag`, `result` and `ingredients`. Shaped recipes add `width` and `height`; smithing recipes add `template`, `base` and `addition`.
+- `Level.recipes`, a snapshot of the crafting recipes the server has loaded, also reachable as `Server.recipes`. Each entry is a `ShapedRecipe`, `ShapelessRecipe`, `FurnaceRecipe`, `SmithingTransformRecipe`, `SmithingTrimRecipe` or `ComplexRecipe`, and reports its `recipe_id`, crafting `tag`, `result` and `ingredients`. Shaped recipes add `width` and `height`; furnace recipes add `input`; smithing recipes add `template`, `base` and `addition`.
 - `Server.register_recipe()` and `Server.unregister_recipe()` for adding and removing crafting recipes at runtime. A successful change resends the crafting data to every connected player. `Player.update_recipes()` resends that list to one player, the same way `Player.update_commands()` resends the command list.
 - `RecipeIngredient`, describing what one ingredient slot accepts, with `test()` to check an item against it and a Bedrock-specific `count`. An ingredient is an `ExactIngredient` (one item and one data value), an `ItemTypeIngredient` (an item type, any data value), an `ItemTagIngredient` (anything carrying a tag), a `MolangIngredient` (whatever a Molang expression selects), an `ComplexAliasIngredient` (anything an id that predates the item flattening stands for, such as `minecraft:planks`). A slot the recipe leaves empty is `None`.
 - `WritableBookMeta`, `BookMeta` and `CrossbowMeta` item meta types.
@@ -391,14 +391,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   cursors (24 types including Player, Mansion, Monument, and TrialChambers), control scale and center position, and
   listen for `MapInitializeEvent` when a new map is created.
 - **New events**:
-    - `BlockFromToEvent`: fires on liquid flow teleportation. Cancellable.
-    - `PlayerPortalEvent`: fires when a player enters a portal, with access to source and destination locations.
-      Cancellable.
-    - `PlayerDimensionChangeEvent`: fires when a player moves between dimensions (Overworld, Nether, The End).
+  - `BlockFromToEvent`: fires on liquid flow teleportation. Cancellable.
+  - `PlayerPortalEvent`: fires when a player enters a portal, with access to source and destination locations.
+    Cancellable.
+  - `PlayerDimensionChangeEvent`: fires when a player moves between dimensions (Overworld, Nether, The End).
 - **New ItemMeta types**:
-    - `BookMeta`: read and write signed book title, author, generation, and pages.
-    - `WritableBookMeta`: manage book-and-quill pages.
-    - `CrossbowMeta`: inspect and modify loaded crossbow projectiles.
+  - `BookMeta`: read and write signed book title, author, generation, and pages.
+  - `WritableBookMeta`: manage book-and-quill pages.
+  - `CrossbowMeta`: inspect and modify loaded crossbow projectiles.
 - **Command system**: Commands can now accept entity type arguments with tab completion via the new `entity_type`
   parameter type.
 - **Dimension API**: `Dimension.spawn_actor()` creates an entity at a given location. `Dimension.drop_item()` drops an
@@ -720,8 +720,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **BREAKING**: Renamed various fields in the `Skin` class:
-    - `Skin::getSkinImage` -> `Skin::getImage`
-    - `Skin::getSkinId` -> `Skin::getId`
+  - `Skin::getSkinImage` -> `Skin::getImage`
+  - `Skin::getSkinId` -> `Skin::getId`
 - **BREAKING**: `ItemStack::getType` now returns `ItemType` instead of `std::string`. You can still compare an
   `ItemType` with a string.
 - **BREAKING**: `PacketSendEvent` and `PacketReceiveEvent` now fire for both pre-login and post-login packets.

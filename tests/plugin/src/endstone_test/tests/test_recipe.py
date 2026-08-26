@@ -5,6 +5,7 @@ from endstone import Server
 from endstone.inventory import (
     ComplexRecipe,
     ExactIngredient,
+    FurnaceRecipe,
     ItemStack,
     ItemTagIngredient,
     ItemType,
@@ -15,11 +16,13 @@ from endstone.inventory import (
     SmithingTransformRecipe,
     SmithingTrimRecipe,
 )
+
 from endstone.plugin import Plugin
 
 RECIPE_TYPES = (
     ShapedRecipe,
     ShapelessRecipe,
+    FurnaceRecipe,
     ComplexRecipe,
     SmithingTransformRecipe,
     SmithingTrimRecipe,
@@ -59,13 +62,16 @@ def _format_recipe(recipe: Recipe) -> str:
     ]
     if isinstance(recipe, ShapedRecipe):
         parts.append(f"{recipe.width}x{recipe.height}")
-    if isinstance(recipe, (SmithingTransformRecipe, SmithingTrimRecipe)):
+    if isinstance(recipe, FurnaceRecipe):
+        parts.append(f"input={_format_ingredient(recipe.input)}")
+    elif isinstance(recipe, (SmithingTransformRecipe, SmithingTrimRecipe)):
         parts.append(f"template={_format_ingredient(recipe.template)}")
         parts.append(f"base={_format_ingredient(recipe.base)}")
         parts.append(f"addition={_format_ingredient(recipe.addition)}")
     else:
         ingredients = ", ".join(_format_ingredient(ingredient) for ingredient in recipe.ingredients)
         parts.append(f"ingredients=[{ingredients}]")
+
     return " ".join(parts)
 
 
@@ -100,6 +106,12 @@ def test_constructed_recipes(plugin: Plugin, server: Server) -> None:
             [ItemTypeIngredient(_item("minecraft:dirt"))],
             ItemStack("minecraft:apple"),
         ),
+        FurnaceRecipe(
+            "endstone_test:furnace_dirt_to_diamond",
+            ItemTypeIngredient(_item("minecraft:dirt")),
+            ItemStack("minecraft:diamond"),
+        ),
+
         SmithingTransformRecipe(
             "endstone_test:dirt_to_diamond",
             ItemTypeIngredient(_item("minecraft:stick")),

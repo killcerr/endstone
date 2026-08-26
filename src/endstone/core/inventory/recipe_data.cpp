@@ -19,6 +19,7 @@
 #include "bedrock/world/item/crafting/smithing_transform_recipe.h"
 #include "bedrock/world/item/crafting/smithing_trim_recipe.h"
 #include "bedrock/world/item/item_instance.h"
+#include "bedrock/world/level/block/furnace_types.h"
 #include "endstone/core/inventory/item_stack.h"
 #include "endstone/core/inventory/recipe_ingredient.h"
 #include "endstone/inventory/item_type.h"
@@ -37,6 +38,11 @@ endstone::Recipe EndstoneRecipe::fromMinecraft(std::shared_ptr<const ::Recipe> r
         return SmithingTrimRecipe(std::make_unique<EndstoneSmithingTrimRecipe>(std::move(recipe)));
     }
     if (recipe->isShapeless()) {
+        const auto &tag = recipe->getTag();
+        if (tag == FURNACE_TAG || tag == BLAST_FURNACE_TAG || tag == SMOKER_TAG || tag == CAMPFIRE_TAG ||
+            tag == SOUL_CAMPFIRE_TAG) {
+            return FurnaceRecipe(std::make_unique<EndstoneFurnaceRecipe>(std::move(recipe)));
+        }
         return ShapelessRecipe(std::make_unique<EndstoneShapelessRecipe>(std::move(recipe)));
     }
     return ShapedRecipe(std::make_unique<EndstoneShapedRecipe>(std::move(recipe)));
@@ -141,6 +147,16 @@ std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
             HashedString(trim->getTag()));
         handle->setUnlockingRequirement(alwaysUnlocked());
         return handle;
+    }
+
+    if (const auto furnace = recipe.as<FurnaceRecipe>()) {
+        ::Recipe::ConstructionContext context;
+        context.recipe_id = furnace->getRecipeId();
+        context.ingredients = toMinecraftIngredients(furnace->getIngredients());
+        context.results = toMinecraftResults(furnace->getResult());
+        context.tag = HashedString(furnace->getTag());
+        context.unlocking_requirement = alwaysUnlocked();
+        return std::make_unique<::ShapelessRecipe>(std::move(context));
     }
 
     if (const auto shapeless = recipe.as<ShapelessRecipe>()) {

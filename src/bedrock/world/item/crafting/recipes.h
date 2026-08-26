@@ -45,7 +45,10 @@ public:
     Recipes(ILevel *);
     [[nodiscard]] ItemInstance getFurnaceRecipeResult(const ItemStackBase &, const HashedString &) const;
     void _addItemRecipe(std::unique_ptr<Recipe> recipe);
+    void _addFurnaceRecipeResults(const Recipe &recipe);
+    // Endstone begins
     bool removeRecipe(const std::string &recipe_id);
+    // Endstone ends
 
     [[nodiscard]] const std::map<HashedString, RecipeMap> &getRecipesAllTags() const { return recipes_; }
     [[nodiscard]] const Recipe *getRecipeByNetId(const RecipeNetId &net_id) const

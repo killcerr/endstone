@@ -16,6 +16,7 @@
 
 #include "bedrock/world/item/crafting/shaped_recipe.h"
 #include "bedrock/world/item/item.h"
+#include "bedrock/world/level/block/furnace_types.h"
 
 ItemInstance Recipes::getFurnaceRecipeResult(const ItemStackBase &item, const HashedString &tag) const
 {
@@ -76,6 +77,8 @@ void Recipes::_addItemRecipe(std::unique_ptr<Recipe> recipe)
         unique_unlockable_recipe_ids_.emplace(handle->getRecipeId());
     }
 
+    _addFurnaceRecipeResults(*handle);
+
     if (handle->hasDataDrivenResult()) {
         for (const auto &result : handle->getResultItems()) {
             if (result.isNull() || result.getCount() == 0) {
@@ -125,6 +128,27 @@ void Recipes::_addItemRecipe(std::unique_ptr<Recipe> recipe)
     }
 }
 
+void Recipes::_addFurnaceRecipeResults(const Recipe &recipe)
+{
+    const auto &tag = recipe.getTag();
+    if (tag != FURNACE_TAG && tag != BLAST_FURNACE_TAG && tag != SMOKER_TAG && tag != CAMPFIRE_TAG &&
+        tag != SOUL_CAMPFIRE_TAG) {
+        return;
+    }
+
+    const auto &results = recipe.getResultItems();
+    if (results.empty() || recipe.getIngredients().empty()) {
+        return;
+    }
+
+    auto &by_input = furnace_results_[static_cast<int>(tag.getHash())];
+    const auto &output = results.front();
+    (void)recipe.getIngredients().front().forEachItemUntil([&](const Item &item, std::int16_t aux) {
+        by_input[item.buildIdAux(aux, nullptr)] = output;
+        return false;
+    });
+}
+
 bool Recipes::removeRecipe(const std::string &recipe_id)
 {
     ::Recipe *handle = nullptr;
@@ -144,6 +168,16 @@ bool Recipes::removeRecipe(const std::string &recipe_id)
             }
             else {
                 ++output;
+            }
+        }
+        if (auto furnace = furnace_results_.find(static_cast<int>(handle->getTag().getHash()));
+            furnace != furnace_results_.end() && !handle->getIngredients().empty()) {
+            (void)handle->getIngredients().front().forEachItemUntil([&](const Item &item, std::int16_t aux) {
+                furnace->second.erase(item.buildIdAux(aux, nullptr));
+                return false;
+            });
+            if (furnace->second.empty()) {
+                furnace_results_.erase(furnace);
             }
         }
         by_id.erase(it);

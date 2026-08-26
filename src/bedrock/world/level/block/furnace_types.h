@@ -16,5 +16,8 @@
 
 #include "bedrock/core/string/string_hash.h"
 
+static const HashedString FURNACE_TAG = "furnace";
+static const HashedString BLAST_FURNACE_TAG = "blast_furnace";
+static const HashedString SMOKER_TAG = "smoker";
 static const HashedString CAMPFIRE_TAG = "campfire";
 static const HashedString SOUL_CAMPFIRE_TAG = "soul_campfire";

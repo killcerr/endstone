@@ -26,11 +26,13 @@
 #include "bedrock/world/item/crafting/recipes.h"
 #include "endstone/core/type.h"
 #include "endstone/inventory/complex_recipe.h"
+#include "endstone/inventory/furnace_recipe.h"
 #include "endstone/inventory/item_stack.h"
 #include "endstone/inventory/recipe.h"
 #include "endstone/inventory/recipe_ingredient.h"
 #include "endstone/inventory/shaped_recipe.h"
 #include "endstone/inventory/shapeless_recipe.h"
+
 #include "endstone/inventory/smithing_transform_recipe.h"
 #include "endstone/inventory/smithing_trim_recipe.h"
 
@@ -90,6 +92,15 @@ public:
     [[nodiscard]] std::unique_ptr<Impl> clone() const override
     {
         return std::make_unique<EndstoneShapelessRecipe>(*this);
+    }
+};
+
+class EndstoneFurnaceRecipe final : public EndstoneRecipeBase<endstone::FurnaceRecipe> {
+public:
+    using EndstoneRecipeBase::EndstoneRecipeBase;
+    [[nodiscard]] std::unique_ptr<Impl> clone() const override
+    {
+        return std::make_unique<EndstoneFurnaceRecipe>(*this);
     }
 };
 

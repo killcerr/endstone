@@ -347,6 +347,18 @@ ItemDescriptor::InternalType ItemDescriptor::getType() const
     return impl_ ? impl_->getType() : InternalType::Invalid;
 }
 
+bool ItemDescriptor::forEachItemUntil(
+    brstd::function_ref<bool(const Item &, std::int16_t), bool(const Item &, std::int16_t)> func) const
+{
+    if (impl_ && impl_->shouldResolve()) {
+        impl_ = std::move(impl_->resolve());
+    }
+    if (!impl_) {
+        return false;
+    }
+    return impl_->forEachItemUntil(func);
+}
+
 ItemDescriptor::ItemEntry::ItemEntry(const Item *item, std::int16_t aux_value) : item(item), aux_value(aux_value) {}
 
 const Block *ItemDescriptor::ItemEntry::getBlock() const

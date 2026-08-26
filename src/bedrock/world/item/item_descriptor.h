@@ -55,6 +55,8 @@ public:
     [[nodiscard]] std::int16_t getId() const;
     [[nodiscard]] std::int16_t getAuxValue() const;
     [[nodiscard]] std::string getFullName() const;
+    [[nodiscard]] bool forEachItemUntil(
+        brstd::function_ref<bool(const Item &, std::int16_t), bool(const Item &, std::int16_t)> func) const;
 
     struct ItemEntry {
         const Item *item;

@@ -37,6 +37,7 @@
 #include "endstone/inventory/complex_alias_ingredient.h"
 #include "endstone/inventory/complex_recipe.h"
 #include "endstone/inventory/exact_ingredient.h"
+#include "endstone/inventory/furnace_recipe.h"
 #include "endstone/inventory/item_tag_ingredient.h"
 #include "endstone/inventory/item_type_ingredient.h"
 #include "endstone/inventory/meta/book_meta.h"
@@ -106,6 +107,7 @@ void registerTypes()
     registerType<ComplexRecipe>().base<Recipe>();
     registerType<ShapedRecipe>().base<Recipe>();
     registerType<ShapelessRecipe>().base<Recipe>();
+    registerType<FurnaceRecipe>().base<Recipe>();
     registerType<SmithingRecipe>().base<Recipe>();
     registerType<SmithingTransformRecipe>().base<SmithingRecipe>();
     registerType<SmithingTrimRecipe>().base<SmithingRecipe>();
