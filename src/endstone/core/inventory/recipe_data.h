@@ -32,7 +32,6 @@
 #include "endstone/inventory/recipe_ingredient.h"
 #include "endstone/inventory/shaped_recipe.h"
 #include "endstone/inventory/shapeless_recipe.h"
-
 #include "endstone/inventory/smithing_transform_recipe.h"
 #include "endstone/inventory/smithing_trim_recipe.h"
 
@@ -46,6 +45,7 @@ public:
     static std::optional<endstone::Recipe> fromMinecraft(const ::Recipes &recipes, const ::Recipe &recipe);
     static std::unique_ptr<::Recipe> toMinecraft(const Recipe &recipe);
 
+    [[nodiscard]] bool isEndstoneRecipe() const override { return true; }
     [[nodiscard]] endstone::ItemStack getResult() const override;
     [[nodiscard]] const std::vector<std::optional<endstone::RecipeIngredient>> &getIngredients() const override;
     [[nodiscard]] std::optional<endstone::RecipeIngredient> getSmithingIngredient(std::size_t index) const override;
@@ -75,7 +75,10 @@ public:
 class EndstoneComplexRecipe final : public EndstoneRecipeBase<endstone::ComplexRecipe> {
 public:
     using EndstoneRecipeBase::EndstoneRecipeBase;
-    [[nodiscard]] std::unique_ptr<Impl> clone() const override { return std::make_unique<EndstoneComplexRecipe>(*this); }
+    [[nodiscard]] std::unique_ptr<Impl> clone() const override
+    {
+        return std::make_unique<EndstoneComplexRecipe>(*this);
+    }
 };
 
 class EndstoneShapedRecipe final : public EndstoneRecipeBase<endstone::ShapedRecipe> {

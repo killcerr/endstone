@@ -94,6 +94,7 @@ protected:
     class Impl {
     public:
         virtual ~Impl() = default;
+        [[nodiscard]] virtual bool isEndstoneRecipe() const { return false; }
         [[nodiscard]] virtual std::unique_ptr<Impl> clone() const = 0;
         [[nodiscard]] virtual ClassInfo getClassInfo() const = 0;
         [[nodiscard]] virtual bool isInstanceOf(ClassInfo target) const = 0;

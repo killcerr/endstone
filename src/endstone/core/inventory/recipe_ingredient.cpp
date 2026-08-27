@@ -58,7 +58,8 @@ std::optional<endstone::RecipeIngredient> EndstoneIngredient::fromMinecraft(std:
         }
         auto item = type->createItemStack(static_cast<int>(ingredient.getStackSize()));
         item.setData(aux_value);
-        return ExactIngredient(std::make_unique<EndstoneExactIngredient>(std::move(recipe), ingredient, std::move(item)));
+        return ExactIngredient(
+            std::make_unique<EndstoneExactIngredient>(std::move(recipe), ingredient, std::move(item)));
     }
     default:
         return std::nullopt;
@@ -72,7 +73,7 @@ const ::RecipeIngredient &EndstoneIngredient::getHandle(const RecipeIngredient &
 
 ::RecipeIngredient EndstoneIngredient::toMinecraft(const RecipeIngredient &ingredient)
 {
-    if (dynamic_cast<const EndstoneIngredient *>(ingredient.impl_.get()) != nullptr) {
+    if (ingredient.impl_->isEndstoneIngredient()) {
         return getHandle(ingredient);
     }
     if (ingredient.is<ExactIngredient>()) {

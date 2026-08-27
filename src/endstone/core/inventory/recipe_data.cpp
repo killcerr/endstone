@@ -93,7 +93,7 @@ RecipeUnlockingRequirement alwaysUnlocked()
 
 std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
 {
-    if (dynamic_cast<const EndstoneRecipe *>(recipe.impl_.get()) != nullptr) {
+    if (recipe.impl_->isEndstoneRecipe()) {
         const auto &handle = static_cast<const EndstoneRecipe &>(*recipe.impl_).getHandle();
         auto context = handle.getConstructionContext();
         if (handle.getTag().getString() == "smithing_table") {

@@ -75,12 +75,16 @@ protected:
     class Impl {
     public:
         virtual ~Impl() = default;
+        [[nodiscard]] virtual bool isEndstoneIngredient() const { return false; }
         [[nodiscard]] virtual std::unique_ptr<Impl> clone() const = 0;
         [[nodiscard]] virtual ClassInfo getClassInfo() const = 0;
         [[nodiscard]] virtual bool isInstanceOf(ClassInfo target) const = 0;
         [[nodiscard]] virtual bool test(const ItemStack &item) const = 0;
         [[nodiscard]] virtual int getCount() const = 0;
-        [[nodiscard]] virtual ItemStack getItemStack() const { return ItemType::get(ItemType::Air)->createItemStack(0); }
+        [[nodiscard]] virtual ItemStack getItemStack() const
+        {
+            return ItemType::get(ItemType::Air)->createItemStack(0);
+        }
         [[nodiscard]] virtual const ItemType &getItemType() const { return *ItemType::get(ItemType::Air); }
         [[nodiscard]] virtual const std::string &getItemTag() const
         {

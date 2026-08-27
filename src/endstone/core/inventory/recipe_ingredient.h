@@ -38,10 +38,9 @@ public:
     {
     }
 
+    [[nodiscard]] bool isEndstoneIngredient() const override { return true; }
     [[nodiscard]] bool test(const endstone::ItemStack &item) const override;
-
     [[nodiscard]] int getCount() const override { return static_cast<int>(ingredient_.getStackSize()); }
-
     [[nodiscard]] const ::RecipeIngredient &getHandle() const { return ingredient_; }
 
     static std::optional<endstone::RecipeIngredient> fromMinecraft(std::shared_ptr<const ::Recipe> recipe,
@@ -75,7 +74,10 @@ public:
     {
     }
 
-    [[nodiscard]] std::unique_ptr<Impl> clone() const override { return std::make_unique<EndstoneExactIngredient>(*this); }
+    [[nodiscard]] std::unique_ptr<Impl> clone() const override
+    {
+        return std::make_unique<EndstoneExactIngredient>(*this);
+    }
 
     [[nodiscard]] endstone::ItemStack getItemStack() const override { return item_; }
 
