@@ -12,13 +12,16 @@ from endstone.nbt import CompoundTag
 from endstone.potion import PotionType
 
 __all__ = [
+    "BlastingRecipe",
     "BookMeta",
     "BookMetaGeneration",
     "BrewingContainerRecipe",
     "BrewingMixRecipe",
     "BrewingRecipe",
+    "CampfireRecipe",
     "ComplexAliasIngredient",
     "ComplexRecipe",
+    "CookingRecipe",
     "CrossbowMeta",
     "EquipmentSlot",
     "ExactIngredient",
@@ -41,6 +44,7 @@ __all__ = [
     "SmithingRecipe",
     "SmithingTransformRecipe",
     "SmithingTrimRecipe",
+    "SmokingRecipe",
     "WritableBookMeta",
 ]
 
@@ -354,11 +358,28 @@ class ShapelessRecipe(Recipe):
             tag: The crafting station this recipe belongs to, such as `crafting_table`.
         """
 
-class FurnaceRecipe(Recipe):
+class CookingRecipe(Recipe):
+    """
+    Represents a cooking recipe.
+
+    Bedrock records neither an experience reward nor a cooking time on the recipe itself, so neither is reported here.
+    The experience a smelt awards belongs to the input item, and the time a cook takes to the station.
+    """
+    @property
+    def input(self) -> RecipeIngredient | None:
+        """
+        The input this recipe consumes.
+        """
+
+    @property
+    def input_choice(self) -> RecipeIngredient | None:
+        """
+        The input this recipe consumes.
+        """
+
+class FurnaceRecipe(CookingRecipe):
     """
     Represents a furnace recipe.
-
-    The same type covers blast furnaces, smokers and campfires; the station is the crafting tag, such as `furnace`.
     """
     def __init__(self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "furnace") -> None:
         """
@@ -371,10 +392,49 @@ class FurnaceRecipe(Recipe):
             tag: The crafting station this recipe belongs to, such as `furnace`.
         """
 
-    @property
-    def input(self) -> RecipeIngredient | None:
+class BlastingRecipe(CookingRecipe):
+    """
+    Represents a blasting recipe.
+    """
+    def __init__(self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "blast_furnace") -> None:
         """
-        The input this recipe consumes.
+        Creates a blasting recipe.
+
+        Args:
+            recipe_id: The recipe id.
+            input: The input this recipe consumes.
+            result: The result of this recipe.
+            tag: The crafting station this recipe belongs to, such as `blast_furnace`.
+        """
+
+class SmokingRecipe(CookingRecipe):
+    """
+    Represents a smoking recipe.
+    """
+    def __init__(self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "smoker") -> None:
+        """
+        Creates a smoking recipe.
+
+        Args:
+            recipe_id: The recipe id.
+            input: The input this recipe consumes.
+            result: The result of this recipe.
+            tag: The crafting station this recipe belongs to, such as `smoker`.
+        """
+
+class CampfireRecipe(CookingRecipe):
+    """
+    Represents a campfire recipe.
+    """
+    def __init__(self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "campfire") -> None:
+        """
+        Creates a campfire recipe.
+
+        Args:
+            recipe_id: The recipe id.
+            input: The input this recipe consumes.
+            result: The result of this recipe.
+            tag: The crafting station this recipe belongs to, such as `campfire`.
         """
 
 class BrewingRecipe(Recipe):

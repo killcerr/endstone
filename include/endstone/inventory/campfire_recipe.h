@@ -22,26 +22,26 @@
 
 namespace endstone {
 /**
- * Represents a furnace recipe.
+ * Represents a campfire recipe.
  */
-class FurnaceRecipe : public CookingRecipe {
+class CampfireRecipe : public CookingRecipe {
 public:
-    FurnaceRecipe(std::string recipe_id, RecipeIngredient input, ItemStack result, std::string tag = "furnace")
+    CampfireRecipe(std::string recipe_id, RecipeIngredient input, ItemStack result, std::string tag = "campfire")
         : CookingRecipe(std::make_unique<SimpleImpl>(
-              std::initializer_list<ClassInfo>{typeid(FurnaceRecipe), typeid(CookingRecipe), typeid(Recipe)},
+              std::initializer_list<ClassInfo>{typeid(CampfireRecipe), typeid(CookingRecipe), typeid(Recipe)},
               std::move(recipe_id), std::move(tag), std::move(result),
               std::vector<std::optional<RecipeIngredient>>{std::move(input)}))
     {
     }
-    FurnaceRecipe(const FurnaceRecipe &other) = default;
-    FurnaceRecipe(FurnaceRecipe &&other) noexcept = default;
-    FurnaceRecipe &operator=(const FurnaceRecipe &other) = default;
-    FurnaceRecipe &operator=(FurnaceRecipe &&other) noexcept = default;
-    ~FurnaceRecipe() override = default;
+    CampfireRecipe(const CampfireRecipe &other) = default;
+    CampfireRecipe(CampfireRecipe &&other) noexcept = default;
+    CampfireRecipe &operator=(const CampfireRecipe &other) = default;
+    CampfireRecipe &operator=(CampfireRecipe &&other) noexcept = default;
+    ~CampfireRecipe() override = default;
 
 private:
     friend class Recipe;
     friend class core::EndstoneRecipe;
-    explicit FurnaceRecipe(std::unique_ptr<Impl> impl) : CookingRecipe(std::move(impl)) {}
+    explicit CampfireRecipe(std::unique_ptr<Impl> impl) : CookingRecipe(std::move(impl)) {}
 };
 }  // namespace endstone

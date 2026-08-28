@@ -47,12 +47,20 @@ endstone::Recipe EndstoneRecipe::fromMinecraft(std::shared_ptr<const ::Recipe> r
         }
         return SmithingTrimRecipe(std::make_unique<EndstoneSmithingTrimRecipe>(std::move(recipe)));
     }
+    const auto &tag = recipe->getTag();
+    if (tag == FURNACE_TAG) {
+        return FurnaceRecipe(std::make_unique<EndstoneFurnaceRecipe>(std::move(recipe)));
+    }
+    if (tag == BLAST_FURNACE_TAG) {
+        return BlastingRecipe(std::make_unique<EndstoneBlastingRecipe>(std::move(recipe)));
+    }
+    if (tag == SMOKER_TAG) {
+        return SmokingRecipe(std::make_unique<EndstoneSmokingRecipe>(std::move(recipe)));
+    }
+    if (tag == CAMPFIRE_TAG || tag == SOUL_CAMPFIRE_TAG) {
+        return CampfireRecipe(std::make_unique<EndstoneCampfireRecipe>(std::move(recipe)));
+    }
     if (recipe->isShapeless()) {
-        const auto &tag = recipe->getTag();
-        if (tag == FURNACE_TAG || tag == BLAST_FURNACE_TAG || tag == SMOKER_TAG || tag == CAMPFIRE_TAG ||
-            tag == SOUL_CAMPFIRE_TAG) {
-            return FurnaceRecipe(std::make_unique<EndstoneFurnaceRecipe>(std::move(recipe)));
-        }
         return ShapelessRecipe(std::make_unique<EndstoneShapelessRecipe>(std::move(recipe)));
     }
     return ShapedRecipe(std::make_unique<EndstoneShapedRecipe>(std::move(recipe)));
@@ -304,12 +312,12 @@ std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
         return handle;
     }
 
-    if (const auto furnace = recipe.as<FurnaceRecipe>()) {
+    if (const auto cooking = recipe.as<CookingRecipe>()) {
         ::Recipe::ConstructionContext context;
-        context.recipe_id = furnace->getRecipeId();
-        context.ingredients = toMinecraftIngredients(furnace->getIngredients());
-        context.results = toMinecraftResults(furnace->getResult());
-        context.tag = HashedString(furnace->getTag());
+        context.recipe_id = cooking->getRecipeId();
+        context.ingredients = toMinecraftIngredients(cooking->getIngredients());
+        context.results = toMinecraftResults(cooking->getResult());
+        context.tag = HashedString(cooking->getTag());
         context.unlocking_requirement = alwaysUnlocked();
         return std::make_unique<::ShapelessRecipe>(std::move(context));
     }

@@ -3,9 +3,12 @@ from collections.abc import Iterable
 import pytest
 from endstone import Server
 from endstone.inventory import (
+    BlastingRecipe,
     BrewingContainerRecipe,
     BrewingMixRecipe,
+    CampfireRecipe,
     ComplexRecipe,
+    CookingRecipe,
     ExactIngredient,
     FurnaceRecipe,
     ItemStack,
@@ -17,6 +20,7 @@ from endstone.inventory import (
     ShapelessRecipe,
     SmithingTransformRecipe,
     SmithingTrimRecipe,
+    SmokingRecipe,
 )
 
 from endstone.plugin import Plugin
@@ -25,6 +29,9 @@ RECIPE_TYPES = (
     ShapedRecipe,
     ShapelessRecipe,
     FurnaceRecipe,
+    BlastingRecipe,
+    SmokingRecipe,
+    CampfireRecipe,
     ComplexRecipe,
     SmithingTransformRecipe,
     SmithingTrimRecipe,
@@ -66,7 +73,7 @@ def _format_recipe(recipe: Recipe) -> str:
     ]
     if isinstance(recipe, ShapedRecipe):
         parts.append(f"{recipe.width}x{recipe.height}")
-    if isinstance(recipe, FurnaceRecipe):
+    if isinstance(recipe, CookingRecipe):
         parts.append(f"input={_format_ingredient(recipe.input)}")
     elif isinstance(recipe, (BrewingMixRecipe, BrewingContainerRecipe)):
         parts.append(f"input={_format_ingredient(recipe.input)}")
@@ -115,6 +122,21 @@ def test_constructed_recipes(plugin: Plugin, server: Server) -> None:
         ),
         FurnaceRecipe(
             "endstone_test:furnace_dirt_to_diamond",
+            ItemTypeIngredient(_item("minecraft:dirt")),
+            ItemStack("minecraft:diamond"),
+        ),
+        BlastingRecipe(
+            "endstone_test:blasting_dirt_to_diamond",
+            ItemTypeIngredient(_item("minecraft:dirt")),
+            ItemStack("minecraft:diamond"),
+        ),
+        SmokingRecipe(
+            "endstone_test:smoking_dirt_to_diamond",
+            ItemTypeIngredient(_item("minecraft:dirt")),
+            ItemStack("minecraft:diamond"),
+        ),
+        CampfireRecipe(
+            "endstone_test:campfire_dirt_to_diamond",
             ItemTypeIngredient(_item("minecraft:dirt")),
             ItemStack("minecraft:diamond"),
         ),

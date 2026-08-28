@@ -172,11 +172,19 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         tag: The crafting station this recipe belongs to, such as `crafting_table`.
 )doc");
 
-    py::class_<FurnaceRecipe, Recipe>(m, "FurnaceRecipe", R"doc(
-    Represents a furnace recipe.
+    py::class_<CookingRecipe, Recipe>(m, "CookingRecipe", R"doc(
+    Represents a cooking recipe.
 
-    The same type covers blast furnaces, smokers and campfires; the station is the crafting tag, such as `furnace`.
+    Bedrock records neither an experience reward nor a cooking time on the recipe itself, so neither is reported here.
+    The experience a smelt awards belongs to the input item, and the time a cook takes to the station.
 )doc")
+        .def_property_readonly("input", [](const CookingRecipe &self) { return wrap_ingredient(self.getInput()); },
+                               "The input this recipe consumes.")
+        .def_property_readonly(
+            "input_choice", [](const CookingRecipe &self) { return wrap_ingredient(self.getInputChoice()); },
+            "The input this recipe consumes.");
+
+    py::class_<FurnaceRecipe, CookingRecipe>(m, "FurnaceRecipe", "Represents a furnace recipe.")
         .def(py::init<std::string, RecipeIngredient, ItemStack, std::string>(), py::arg("recipe_id"), py::arg("input"),
              py::arg("result"), py::arg("tag") = "furnace",
              R"doc(
@@ -187,9 +195,46 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         input: The input this recipe consumes.
         result: The result of this recipe.
         tag: The crafting station this recipe belongs to, such as `furnace`.
-)doc")
-        .def_property_readonly("input", [](const FurnaceRecipe &self) { return wrap_ingredient(self.getInput()); },
-                               "The input this recipe consumes.");
+)doc");
+
+    py::class_<BlastingRecipe, CookingRecipe>(m, "BlastingRecipe", "Represents a blasting recipe.")
+        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string>(), py::arg("recipe_id"), py::arg("input"),
+             py::arg("result"), py::arg("tag") = "blast_furnace",
+             R"doc(
+    Creates a blasting recipe.
+
+    Args:
+        recipe_id: The recipe id.
+        input: The input this recipe consumes.
+        result: The result of this recipe.
+        tag: The crafting station this recipe belongs to, such as `blast_furnace`.
+)doc");
+
+    py::class_<SmokingRecipe, CookingRecipe>(m, "SmokingRecipe", "Represents a smoking recipe.")
+        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string>(), py::arg("recipe_id"), py::arg("input"),
+             py::arg("result"), py::arg("tag") = "smoker",
+             R"doc(
+    Creates a smoking recipe.
+
+    Args:
+        recipe_id: The recipe id.
+        input: The input this recipe consumes.
+        result: The result of this recipe.
+        tag: The crafting station this recipe belongs to, such as `smoker`.
+)doc");
+
+    py::class_<CampfireRecipe, CookingRecipe>(m, "CampfireRecipe", "Represents a campfire recipe.")
+        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string>(), py::arg("recipe_id"), py::arg("input"),
+             py::arg("result"), py::arg("tag") = "campfire",
+             R"doc(
+    Creates a campfire recipe.
+
+    Args:
+        recipe_id: The recipe id.
+        input: The input this recipe consumes.
+        result: The result of this recipe.
+        tag: The crafting station this recipe belongs to, such as `campfire`.
+)doc");
 
     py::class_<BrewingRecipe, Recipe>(m, "BrewingRecipe", R"doc(
     Represents a brewing-stand recipe.

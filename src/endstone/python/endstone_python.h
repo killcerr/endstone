@@ -128,8 +128,8 @@ inline py::typing::Union<Recipe> wrap_recipe(const Recipe &recipe)
     if (auto shapeless = recipe.as<ShapelessRecipe>()) {
         return py::cast(std::move(*shapeless));
     }
-    if (auto furnace = recipe.as<FurnaceRecipe>()) {
-        return py::cast(std::move(*furnace));
+    if (auto cooking = recipe.as<CookingRecipe>()) {
+        return py::cast(std::move(*cooking));
     }
     if (auto mix = recipe.as<BrewingMixRecipe>()) {
         return py::cast(std::move(*mix));

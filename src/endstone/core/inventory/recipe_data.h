@@ -25,10 +25,13 @@
 #include "bedrock/world/item/crafting/recipe.h"
 #include "bedrock/world/item/crafting/recipes.h"
 #include "endstone/core/type.h"
+#include "endstone/inventory/blasting_recipe.h"
 #include "endstone/inventory/brewing_container_recipe.h"
 #include "endstone/inventory/brewing_mix_recipe.h"
 #include "endstone/inventory/brewing_recipe.h"
+#include "endstone/inventory/campfire_recipe.h"
 #include "endstone/inventory/complex_recipe.h"
+#include "endstone/inventory/cooking_recipe.h"
 #include "endstone/inventory/furnace_recipe.h"
 #include "endstone/inventory/item_stack.h"
 #include "endstone/inventory/recipe.h"
@@ -37,6 +40,7 @@
 #include "endstone/inventory/shapeless_recipe.h"
 #include "endstone/inventory/smithing_transform_recipe.h"
 #include "endstone/inventory/smithing_trim_recipe.h"
+#include "endstone/inventory/smoking_recipe.h"
 
 namespace endstone::core {
 
@@ -110,6 +114,32 @@ public:
     [[nodiscard]] std::unique_ptr<Impl> clone() const override
     {
         return std::make_unique<EndstoneFurnaceRecipe>(*this);
+    }
+};
+class EndstoneBlastingRecipe final : public EndstoneRecipeBase<endstone::BlastingRecipe> {
+public:
+    using EndstoneRecipeBase::EndstoneRecipeBase;
+    [[nodiscard]] std::unique_ptr<Impl> clone() const override
+    {
+        return std::make_unique<EndstoneBlastingRecipe>(*this);
+    }
+};
+
+class EndstoneSmokingRecipe final : public EndstoneRecipeBase<endstone::SmokingRecipe> {
+public:
+    using EndstoneRecipeBase::EndstoneRecipeBase;
+    [[nodiscard]] std::unique_ptr<Impl> clone() const override
+    {
+        return std::make_unique<EndstoneSmokingRecipe>(*this);
+    }
+};
+
+class EndstoneCampfireRecipe final : public EndstoneRecipeBase<endstone::CampfireRecipe> {
+public:
+    using EndstoneRecipeBase::EndstoneRecipeBase;
+    [[nodiscard]] std::unique_ptr<Impl> clone() const override
+    {
+        return std::make_unique<EndstoneCampfireRecipe>(*this);
     }
 };
 
