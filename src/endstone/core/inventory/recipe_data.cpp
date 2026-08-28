@@ -201,25 +201,14 @@ std::unordered_map<std::string, PluginContainer> &pluginContainers()
     return mixes;
 }
 
-bool sameMix(const PotionBrewing::Mix<ItemDescriptor> &mix, const PluginMix &plugin)
-{
-    return mix.getFrom().sameItem(plugin.from, true) && mix.getIngredient() == plugin.reagent &&
-           mix.getTo().sameItem(plugin.to, true);
-}
-
-bool sameContainer(const PotionBrewing::Mix<const ::Item &> &mix, const PluginContainer &plugin)
-{
-    return mix.getFrom().getId() == plugin.from->getId() && mix.getIngredient() == plugin.reagent &&
-           mix.getTo().getId() == plugin.to->getId();
-}
-bool sameMixContent(const ItemDescriptor &from, const PotionBrewing::Ingredient &reagent, const ItemDescriptor &to,
-                    const PluginMix &plugin)
+bool sameMix(const ItemDescriptor &from, const PotionBrewing::Ingredient &reagent, const ItemDescriptor &to,
+             const PluginMix &plugin)
 {
     return from.sameItem(plugin.from, true) && reagent == plugin.reagent && to.sameItem(plugin.to, true);
 }
 
-bool sameContainerContent(const ::Item &from, const PotionBrewing::Ingredient &reagent, const ::Item &to,
-                          const PluginContainer &plugin)
+bool sameContainer(const ::Item &from, const PotionBrewing::Ingredient &reagent, const ::Item &to,
+                   const PluginContainer &plugin)
 {
     return from.getId() == plugin.from->getId() && reagent == plugin.reagent && to.getId() == plugin.to->getId();
 }
@@ -392,8 +381,9 @@ std::vector<endstone::Recipe> EndstoneRecipe::brewingRecipes()
             BrewingContainerRecipe(plugin_id, std::move(*input), std::move(*reagent), stackFrom(*plugin.to)));
     }
     for (const auto &mix : PotionBrewing::getPotionMixes()) {
-        const auto claimed = std::ranges::any_of(pluginMixes() | std::views::values,
-                                                 [&](const PluginMix &plugin) { return sameMix(mix, plugin); });
+        const auto claimed = std::ranges::any_of(pluginMixes() | std::views::values, [&](const PluginMix &plugin) {
+            return sameMix(mix.getFrom(), mix.getIngredient(), mix.getTo(), plugin);
+        });
         if (claimed) {
             continue;
         }
@@ -406,8 +396,9 @@ std::vector<endstone::Recipe> EndstoneRecipe::brewingRecipes()
     }
     for (const auto &mix : PotionBrewing::getContainerMixes()) {
         const auto claimed =
-            std::ranges::any_of(pluginContainers() | std::views::values,
-                                [&](const PluginContainer &plugin) { return sameContainer(mix, plugin); });
+            std::ranges::any_of(pluginContainers() | std::views::values, [&](const PluginContainer &plugin) {
+                return sameContainer(mix.getFrom(), mix.getIngredient(), mix.getTo(), plugin);
+            });
         if (claimed) {
             continue;
         }
@@ -442,7 +433,7 @@ bool EndstoneRecipe::registerBrewing(const Recipe &recipe)
         unregisterBrewing(recipe.getRecipeId());
         const auto key = mixContentKey(from, *reagent, to);
         const auto exists = std::ranges::any_of(PotionBrewing::getPotionMixes(), [&](const auto &mix) {
-            return sameMix(mix, PluginMix{from, *reagent, to});
+            return sameMix(mix.getFrom(), mix.getIngredient(), mix.getTo(), PluginMix{from, *reagent, to});
         });
         if (!exists) {
             PotionBrewing::addPotionMix(from, *reagent, to);
@@ -463,7 +454,7 @@ bool EndstoneRecipe::registerBrewing(const Recipe &recipe)
         unregisterBrewing(recipe.getRecipeId());
         const auto key = containerContentKey(*from, *reagent, *to);
         const auto exists = std::ranges::any_of(PotionBrewing::getContainerMixes(), [&](const auto &mix) {
-            return sameContainer(mix, PluginContainer{from, *reagent, to});
+            return sameContainer(mix.getFrom(), mix.getIngredient(), mix.getTo(), PluginContainer{from, *reagent, to});
         });
         if (!exists) {
             PotionBrewing::addContainerRecipe(*from, *reagent, *to);
@@ -483,7 +474,7 @@ bool EndstoneRecipe::unregisterBrewing(const std::string &recipe_id)
         const auto key = mixContentKey(plugin.from, plugin.reagent, plugin.to);
         pluginMixes().erase(it);
         const auto claimed = std::ranges::any_of(pluginMixes() | std::views::values, [&](const PluginMix &other) {
-            return sameMixContent(plugin.from, plugin.reagent, plugin.to, other);
+            return sameMix(plugin.from, plugin.reagent, plugin.to, other);
         });
         if (!claimed && pluginAddedMixKeys().contains(key)) {
             PotionBrewing::removePotionMix(plugin.from, plugin.reagent, plugin.to);
@@ -497,7 +488,7 @@ bool EndstoneRecipe::unregisterBrewing(const std::string &recipe_id)
         pluginContainers().erase(it);
         const auto claimed =
             std::ranges::any_of(pluginContainers() | std::views::values, [&](const PluginContainer &other) {
-                return sameContainerContent(*plugin.from, plugin.reagent, *plugin.to, other);
+                return sameContainer(*plugin.from, plugin.reagent, *plugin.to, other);
             });
         if (!claimed && pluginAddedContainerKeys().contains(key)) {
             PotionBrewing::removeContainerRecipe(*plugin.from, plugin.reagent, *plugin.to);
