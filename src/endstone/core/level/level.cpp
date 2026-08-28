@@ -117,6 +117,8 @@ std::vector<Recipe> EndstoneLevel::getRecipes() const
             }
         }
     }
+    auto brewing = EndstoneRecipe::brewingRecipes();
+    recipes.insert(recipes.end(), brewing.begin(), brewing.end());
     return recipes;
 }
 

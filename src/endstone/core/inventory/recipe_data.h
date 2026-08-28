@@ -25,6 +25,9 @@
 #include "bedrock/world/item/crafting/recipe.h"
 #include "bedrock/world/item/crafting/recipes.h"
 #include "endstone/core/type.h"
+#include "endstone/inventory/brewing_container_recipe.h"
+#include "endstone/inventory/brewing_mix_recipe.h"
+#include "endstone/inventory/brewing_recipe.h"
 #include "endstone/inventory/complex_recipe.h"
 #include "endstone/inventory/furnace_recipe.h"
 #include "endstone/inventory/item_stack.h"
@@ -44,6 +47,9 @@ public:
     static endstone::Recipe fromMinecraft(std::shared_ptr<const ::Recipe> recipe);
     static std::optional<endstone::Recipe> fromMinecraft(const ::Recipes &recipes, const ::Recipe &recipe);
     static std::unique_ptr<::Recipe> toMinecraft(const Recipe &recipe);
+    static std::vector<endstone::Recipe> brewingRecipes();
+    static bool registerBrewing(const Recipe &recipe);
+    static bool unregisterBrewing(const std::string &recipe_id);
 
     [[nodiscard]] bool isEndstoneRecipe() const override { return true; }
     [[nodiscard]] endstone::ItemStack getResult() const override;

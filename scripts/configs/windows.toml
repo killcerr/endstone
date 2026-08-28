@@ -101,6 +101,33 @@ rip_relative = true
 rip_offset = 14
 
 [[signatures]]
+name = "PotionBrewing::mPotionMixes"
+relative = false
+extra = 0
+# 1. PotionBrewing::addPotionMix copies its three args into rbx/rdi/rsi then loads the
+#    mPotionMixes vector's _Mylast and _Myfirst and cmps them (empty-check)
+# 2. the second rip-relative load is _Myfirst, the vector object itself
+# 3. unique at 31 bytes on 1.26.44; the sibling addContainerRecipe load is a different
+#    register shape and sits 0x18 later (one std::vector)
+# rip-relative load of mPotionMixes._Myfirst in addPotionMix
+pattern = "4C 89 C3 48 89 D7 48 89 CE 4C 8B 35 ? ? ? ? 4C 8B 3D ? ? ? ? 4D 39 F7"
+rip_relative = true
+rip_offset = 19
+
+[[signatures]]
+name = "PotionBrewing::mContainerMixes"
+relative = false
+extra = 0
+# 1. PotionBrewing::addContainerRecipe loads mContainerMixes._Mylast then _Myfirst,
+#    copies _Myfirst into r15, and cmps the two (empty-check)
+# 2. the second rip-relative load is _Myfirst, the vector object itself
+# 3. unique at 20 bytes on 1.26.44; mPotionMixes is the vector immediately before it
+# rip-relative load of mContainerMixes._Myfirst in addContainerRecipe
+pattern = "4C 8B 35 ? ? ? ? 48 8B 05 ? ? ? ? 49 89 C7 4C 39 F0"
+rip_relative = true
+rip_offset = 10
+
+[[signatures]]
 name = "?teleportTo@Actor@@UEAAXAEBVVec3@@_NHH1@Z"
 relative = false
 extra = 0

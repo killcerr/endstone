@@ -14,6 +14,9 @@ from endstone.potion import PotionType
 __all__ = [
     "BookMeta",
     "BookMetaGeneration",
+    "BrewingContainerRecipe",
+    "BrewingMixRecipe",
+    "BrewingRecipe",
     "ComplexAliasIngredient",
     "ComplexRecipe",
     "CrossbowMeta",
@@ -372,6 +375,75 @@ class FurnaceRecipe(Recipe):
     def input(self) -> RecipeIngredient | None:
         """
         The input this recipe consumes.
+        """
+
+class BrewingRecipe(Recipe):
+    """
+    Represents a brewing-stand recipe.
+
+    Mix recipes change the potion in the bottle. Container recipes change the bottle itself, such as a potion into a
+    splash potion.
+    """
+    @property
+    def input(self) -> RecipeIngredient | None:
+        """
+        The input this recipe consumes.
+        """
+
+    @property
+    def reagent(self) -> RecipeIngredient | None:
+        """
+        The reagent this recipe consumes.
+        """
+
+class BrewingMixRecipe(BrewingRecipe):
+    """
+    Represents a brewing mix recipe.
+
+    The bottle stays the same; the reagent changes the potion inside it.
+    """
+    def __init__(
+        self,
+        recipe_id: str,
+        input: RecipeIngredient,
+        reagent: RecipeIngredient,
+        result: ItemStack,
+        tag: str = "brewing_stand",
+    ) -> None:
+        """
+        Creates a brewing mix recipe.
+
+        Args:
+            recipe_id: The recipe id.
+            input: The input this recipe consumes.
+            reagent: The reagent this recipe consumes.
+            result: The result of this recipe.
+            tag: The crafting station this recipe belongs to, such as `brewing_stand`.
+        """
+
+class BrewingContainerRecipe(BrewingRecipe):
+    """
+    Represents a brewing container recipe.
+
+    The reagent changes the bottle, such as a potion into a splash potion, keeping the potion inside it.
+    """
+    def __init__(
+        self,
+        recipe_id: str,
+        input: RecipeIngredient,
+        reagent: RecipeIngredient,
+        result: ItemStack,
+        tag: str = "brewing_stand",
+    ) -> None:
+        """
+        Creates a brewing container recipe.
+
+        Args:
+            recipe_id: The recipe id.
+            input: The input this recipe consumes.
+            reagent: The reagent this recipe consumes.
+            result: The result of this recipe.
+            tag: The crafting station this recipe belongs to, such as `brewing_stand`.
         """
 
 class ComplexRecipe(Recipe):

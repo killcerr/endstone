@@ -3,6 +3,8 @@ from collections.abc import Iterable
 import pytest
 from endstone import Server
 from endstone.inventory import (
+    BrewingContainerRecipe,
+    BrewingMixRecipe,
     ComplexRecipe,
     ExactIngredient,
     FurnaceRecipe,
@@ -26,6 +28,8 @@ RECIPE_TYPES = (
     ComplexRecipe,
     SmithingTransformRecipe,
     SmithingTrimRecipe,
+    BrewingMixRecipe,
+    BrewingContainerRecipe,
 )
 
 
@@ -64,6 +68,9 @@ def _format_recipe(recipe: Recipe) -> str:
         parts.append(f"{recipe.width}x{recipe.height}")
     if isinstance(recipe, FurnaceRecipe):
         parts.append(f"input={_format_ingredient(recipe.input)}")
+    elif isinstance(recipe, (BrewingMixRecipe, BrewingContainerRecipe)):
+        parts.append(f"input={_format_ingredient(recipe.input)}")
+        parts.append(f"reagent={_format_ingredient(recipe.reagent)}")
     elif isinstance(recipe, (SmithingTransformRecipe, SmithingTrimRecipe)):
         parts.append(f"template={_format_ingredient(recipe.template)}")
         parts.append(f"base={_format_ingredient(recipe.base)}")
@@ -91,7 +98,7 @@ def test_vanilla_recipes(plugin: Plugin, server: Server, recipe_type: type[Recip
 
 
 def test_constructed_recipes(plugin: Plugin, server: Server) -> None:
-    """Log one constructed recipe of each public constructible recipe type."""
+    """Register and log one constructed recipe of each public type."""
     stick = ItemTypeIngredient(_item("minecraft:stick"))
     diamond = ItemTypeIngredient(_item("minecraft:diamond"))
     constructed = [
@@ -111,6 +118,18 @@ def test_constructed_recipes(plugin: Plugin, server: Server) -> None:
             ItemTypeIngredient(_item("minecraft:dirt")),
             ItemStack("minecraft:diamond"),
         ),
+        BrewingMixRecipe(
+            "endstone_test:dirt_potion_mix",
+            ExactIngredient(ItemStack("minecraft:dirt")),
+            ExactIngredient(ItemStack("minecraft:stick")),
+            ItemStack("minecraft:diamond"),
+        ),
+        BrewingContainerRecipe(
+            "endstone_test:dirt_potion_container",
+            ExactIngredient(ItemStack("minecraft:dirt")),
+            ExactIngredient(ItemStack("minecraft:cobblestone")),
+            ItemStack("minecraft:diamond"),
+        ),
 
         SmithingTransformRecipe(
             "endstone_test:dirt_to_diamond",
@@ -127,19 +146,35 @@ def test_constructed_recipes(plugin: Plugin, server: Server) -> None:
         ),
     ]
     for recipe in constructed:
-        server.register_recipe(recipe)
+        assert server.register_recipe(recipe)
         _log_recipes(plugin, [recipe], type(recipe), limit=1)
+        assert any(entry.recipe_id == recipe.recipe_id for entry in server.recipes)
 
 
 def test_register_and_unregister_recipe(plugin: Plugin, server: Server) -> None:
-    """Register a shapeless recipe, then remove it again."""
-    recipe_id = "endstone_test:registered_planks"
-    recipe = ShapelessRecipe(
-        recipe_id,
-        [ItemTypeIngredient(_item("minecraft:birch_log"))],
-        ItemStack("minecraft:birch_planks", 4),
-    )
-    assert server.register_recipe(recipe)
-    assert any(entry.recipe_id == recipe_id for entry in server.recipes)
-    assert server.unregister_recipe(recipe_id)
-    assert all(entry.recipe_id != recipe_id for entry in server.recipes)
+    """Register a shapeless recipe and brewing recipes, then remove them again."""
+    recipes = [
+        ShapelessRecipe(
+            "endstone_test:registered_planks",
+            [ItemTypeIngredient(_item("minecraft:birch_log"))],
+            ItemStack("minecraft:birch_planks", 4),
+        ),
+        BrewingMixRecipe(
+            "endstone_test:registered_mix",
+            ExactIngredient(ItemStack("minecraft:dirt")),
+            ExactIngredient(ItemStack("minecraft:stick")),
+            ItemStack("minecraft:diamond"),
+        ),
+        BrewingContainerRecipe(
+            "endstone_test:registered_container",
+            ExactIngredient(ItemStack("minecraft:dirt")),
+            ExactIngredient(ItemStack("minecraft:cobblestone")),
+            ItemStack("minecraft:diamond"),
+        ),
+    ]
+    for recipe in recipes:
+        recipe_id = recipe.recipe_id
+        assert server.register_recipe(recipe)
+        assert any(entry.recipe_id == recipe_id for entry in server.recipes)
+        assert server.unregister_recipe(recipe_id)
+        assert all(entry.recipe_id != recipe_id for entry in server.recipes)

@@ -99,6 +99,7 @@ add_library(bedrock STATIC
         world/item/vanilla_item_tags.cpp
         world/item/written_book_item.cpp
         world/item/alchemy/potion.cpp
+        world/item/alchemy/potion_brewing.cpp
         world/item/registry/armor_trim.cpp
         world/item/registry/trim_material_registry.cpp
         world/item/registry/trim_pattern_registry.cpp

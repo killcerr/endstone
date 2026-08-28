@@ -191,6 +191,54 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         .def_property_readonly("input", [](const FurnaceRecipe &self) { return wrap_ingredient(self.getInput()); },
                                "The input this recipe consumes.");
 
+    py::class_<BrewingRecipe, Recipe>(m, "BrewingRecipe", R"doc(
+    Represents a brewing-stand recipe.
+
+    Mix recipes change the potion in the bottle. Container recipes change the bottle itself, such as a potion into a
+    splash potion.
+)doc")
+        .def_property_readonly("input", [](const BrewingRecipe &self) { return wrap_ingredient(self.getInput()); },
+                               "The input this recipe consumes.")
+        .def_property_readonly("reagent", [](const BrewingRecipe &self) { return wrap_ingredient(self.getReagent()); },
+                               "The reagent this recipe consumes.");
+
+    py::class_<BrewingMixRecipe, BrewingRecipe>(m, "BrewingMixRecipe", R"doc(
+    Represents a brewing mix recipe.
+
+    The bottle stays the same; the reagent changes the potion inside it.
+)doc")
+        .def(py::init<std::string, RecipeIngredient, RecipeIngredient, ItemStack, std::string>(), py::arg("recipe_id"),
+             py::arg("input"), py::arg("reagent"), py::arg("result"), py::arg("tag") = "brewing_stand",
+             R"doc(
+    Creates a brewing mix recipe.
+
+    Args:
+        recipe_id: The recipe id.
+        input: The input this recipe consumes.
+        reagent: The reagent this recipe consumes.
+        result: The result of this recipe.
+        tag: The crafting station this recipe belongs to, such as `brewing_stand`.
+)doc");
+
+    py::class_<BrewingContainerRecipe, BrewingRecipe>(m, "BrewingContainerRecipe", R"doc(
+    Represents a brewing container recipe.
+
+    The reagent changes the bottle, such as a potion into a splash potion, keeping the potion inside it.
+)doc")
+        .def(py::init<std::string, RecipeIngredient, RecipeIngredient, ItemStack, std::string>(), py::arg("recipe_id"),
+             py::arg("input"), py::arg("reagent"), py::arg("result"), py::arg("tag") = "brewing_stand",
+             R"doc(
+    Creates a brewing container recipe.
+
+    Args:
+        recipe_id: The recipe id.
+        input: The input this recipe consumes.
+        reagent: The reagent this recipe consumes.
+        result: The result of this recipe.
+        tag: The crafting station this recipe belongs to, such as `brewing_stand`.
+)doc");
+
+
     py::class_<ComplexRecipe, Recipe>(
         m, "ComplexRecipe",
         "Represents a complex recipe which has imperative server-defined behavior, eg armor dyeing.");

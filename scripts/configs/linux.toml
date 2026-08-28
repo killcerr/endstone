@@ -71,6 +71,32 @@ rip_relative = true
 rip_offset = 14
 
 [[signatures]]
+name = "PotionBrewing::mPotionMixes"
+relative = false
+extra = 0
+# 1. CraftingDataPacketPayload::fromRecipes walks mPotionMixes then mContainerMixes when filling
+#    the potion/container mix lists; find "Potion Mixes" / "Container Mixes" (packet field names)
+#    and the nearby `cmp byte [rsp+144h], 0` / `jnz` that skips those lists
+# 2. the first rip-relative load after that skip is mPotionMixes._Myfirst, the vector object
+# 3. unique at 21 bytes on 1.26.44; mContainerMixes is the next vector (0x18 later)
+# rip-relative load of mPotionMixes._Myfirst in fromRecipes
+pattern = "80 BC 24 44 01 00 00 00 0F 85 ? ? ? ? 48 8B 05 ? ? ? ?"
+rip_relative = true
+rip_offset = 17
+
+[[signatures]]
+name = "PotionBrewing::mContainerMixes"
+relative = false
+extra = 0
+# 1. immediately after the mPotionMixes empty-check in fromRecipes (see that entry)
+# 2. `mov r12, [rip+_Myfirst]; mov rdx, [rip+_Mylast]; cmp r12, rdx` is the container vector
+# 3. unique at 27 bytes on 1.26.44 once anchored on the preceding `cmp rax, rcx; jnz`
+# rip-relative load of mContainerMixes._Myfirst in fromRecipes
+pattern = "48 39 C8 0F 85 ? ? ? ? 4C 8B 25 ? ? ? ? 48 8B 15 ? ? ? ? 49 39 D4"
+rip_relative = true
+rip_offset = 12
+
+[[signatures]]
 name = "_ZN5Actor10teleportToERK4Vec3biib"
 relative = false
 extra = 0

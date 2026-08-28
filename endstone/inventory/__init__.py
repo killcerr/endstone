@@ -6,6 +6,9 @@ __getattr__, __dir__, __all__ = lazy.attach(
         "inventory": [
             "BookMeta",
             "BookMetaGeneration",
+            "BrewingContainerRecipe",
+            "BrewingMixRecipe",
+            "BrewingRecipe",
             "ComplexAliasIngredient",
             "ComplexRecipe",
             "CrossbowMeta",

@@ -131,6 +131,12 @@ inline py::typing::Union<Recipe> wrap_recipe(const Recipe &recipe)
     if (auto furnace = recipe.as<FurnaceRecipe>()) {
         return py::cast(std::move(*furnace));
     }
+    if (auto mix = recipe.as<BrewingMixRecipe>()) {
+        return py::cast(std::move(*mix));
+    }
+    if (auto container = recipe.as<BrewingContainerRecipe>()) {
+        return py::cast(std::move(*container));
+    }
     if (auto transform = recipe.as<SmithingTransformRecipe>()) {
         return py::cast(std::move(*transform));
     }
@@ -139,7 +145,6 @@ inline py::typing::Union<Recipe> wrap_recipe(const Recipe &recipe)
     }
     if (auto complex = recipe.as<ComplexRecipe>()) {
         return py::cast(std::move(*complex));
-
     }
     return py::cast(recipe);
 }
