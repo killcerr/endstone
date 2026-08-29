@@ -82,63 +82,6 @@ std::optional<endstone::Recipe> EndstoneRecipe::fromMinecraft(const ::Recipes &r
 
 namespace {
 
-::Recipe::Ingredients toMinecraftIngredients(const std::vector<std::optional<endstone::RecipeIngredient>> &ingredients)
-{
-    ::Recipe::Ingredients slots;
-    slots.reserve(ingredients.size());
-    for (const auto &ingredient : ingredients) {
-        if (ingredient) {
-            slots.push_back(EndstoneIngredient::toMinecraft(*ingredient));
-        }
-        else {
-            slots.emplace_back();
-        }
-    }
-    return slots;
-}
-
-ItemDescriptor descriptorFrom(const ItemStack &stack)
-{
-    const auto minecraft = EndstoneItemStack::toMinecraft(stack);
-    const auto *item = minecraft.getItem();
-    if (item == nullptr) {
-        return ItemDescriptor();
-    }
-    return ItemDescriptor(*item, minecraft.getAuxValue());
-}
-
-std::optional<PotionBrewing::Ingredient> brewingIngredientFrom(const RecipeIngredient &ingredient)
-{
-    const auto minecraft = EndstoneIngredient::toMinecraft(ingredient);
-    const auto *item = minecraft.getItem();
-    if (item == nullptr) {
-        return std::nullopt;
-    }
-    const auto aux = minecraft.getAuxValue();
-    return PotionBrewing::Ingredient(
-        *item, aux == ItemDescriptor::ANY_AUX_VALUE ? PotionBrewing::Ingredient::AnyData : aux);
-}
-
-endstone::ItemStack stackFrom(const ItemDescriptor &descriptor)
-{
-    const auto *item = descriptor.getItem();
-    if (item == nullptr) {
-        return endstone::ItemType::get(endstone::ItemType::Air)->createItemStack(0);
-    }
-    return EndstoneItemStack::fromMinecraft(::ItemStack(*item, 1, descriptor.getAuxValue()));
-}
-
-std::optional<RecipeIngredient> ingredientFrom(const PotionBrewing::Ingredient &ingredient)
-{
-    auto item = ItemRegistryManager::getItemRegistry().getItem(static_cast<std::int16_t>(ingredient.getItemId()));
-    if (item.isNull()) {
-        return std::nullopt;
-    }
-    const auto aux = ingredient.getData() == PotionBrewing::Ingredient::AnyData ? ItemDescriptor::ANY_AUX_VALUE
-                                                                                : ingredient.getData();
-    return EndstoneIngredient::fromMinecraft(nullptr, ::RecipeIngredient(*item, aux, 1));
-}
-
 struct PluginMix {
     ItemDescriptor from;
     PotionBrewing::Ingredient reagent;
@@ -225,7 +168,16 @@ std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
     if (const auto cooking = recipe.as<CookingRecipe>()) {
         ::Recipe::ConstructionContext context;
         context.recipe_id = cooking->getRecipeId();
-        context.ingredients = toMinecraftIngredients(cooking->getIngredients());
+        const auto &ingredients = cooking->getIngredients();
+        context.ingredients.reserve(ingredients.size());
+        for (const auto &ingredient : ingredients) {
+            if (ingredient) {
+                context.ingredients.push_back(EndstoneIngredient::toMinecraft(*ingredient));
+            }
+            else {
+                context.ingredients.emplace_back();
+            }
+        }
         context.results = ::Recipe::Results({ItemInstance(EndstoneItemStack::toMinecraft(cooking->getResult()))});
         context.tag = HashedString(cooking->getTag());
         context.unlocking_requirement =
@@ -236,7 +188,16 @@ std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
     if (const auto shapeless = recipe.as<ShapelessRecipe>()) {
         ::Recipe::ConstructionContext context;
         context.recipe_id = shapeless->getRecipeId();
-        context.ingredients = toMinecraftIngredients(shapeless->getIngredients());
+        const auto &ingredients = shapeless->getIngredients();
+        context.ingredients.reserve(ingredients.size());
+        for (const auto &ingredient : ingredients) {
+            if (ingredient) {
+                context.ingredients.push_back(EndstoneIngredient::toMinecraft(*ingredient));
+            }
+            else {
+                context.ingredients.emplace_back();
+            }
+        }
         context.results = ::Recipe::Results({ItemInstance(EndstoneItemStack::toMinecraft(shapeless->getResult()))});
         context.tag = HashedString(shapeless->getTag());
         context.unlocking_requirement =
@@ -247,7 +208,16 @@ std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
     if (const auto shaped = recipe.as<ShapedRecipe>()) {
         ::Recipe::ConstructionContext context;
         context.recipe_id = shaped->getRecipeId();
-        context.ingredients = toMinecraftIngredients(shaped->getIngredients());
+        const auto &ingredients = shaped->getIngredients();
+        context.ingredients.reserve(ingredients.size());
+        for (const auto &ingredient : ingredients) {
+            if (ingredient) {
+                context.ingredients.push_back(EndstoneIngredient::toMinecraft(*ingredient));
+            }
+            else {
+                context.ingredients.emplace_back();
+            }
+        }
         context.results = ::Recipe::Results({ItemInstance(EndstoneItemStack::toMinecraft(shaped->getResult()))});
         context.tag = HashedString(shaped->getTag());
         context.unlocking_requirement =
@@ -289,16 +259,36 @@ std::vector<endstone::Recipe> EndstoneRecipe::brewingRecipes()
     std::vector<endstone::Recipe> recipes;
     for (const auto &[plugin_id, plugin] : plugin_mixes) {
         auto input = EndstoneIngredient::fromMinecraft(nullptr, ::RecipeIngredient(plugin.from, 1));
-        auto reagent = ingredientFrom(plugin.reagent);
+        auto reagent_item =
+            ItemRegistryManager::getItemRegistry().getItem(static_cast<std::int16_t>(plugin.reagent.getItemId()));
+        if (reagent_item.isNull()) {
+            continue;
+        }
+        const auto reagent_aux = plugin.reagent.getData() == PotionBrewing::Ingredient::AnyData
+                                   ? ItemDescriptor::ANY_AUX_VALUE
+                                   : plugin.reagent.getData();
+        auto reagent = EndstoneIngredient::fromMinecraft(nullptr, ::RecipeIngredient(*reagent_item, reagent_aux, 1));
         if (!input || !reagent) {
             continue;
         }
-        recipes.push_back(BrewingMixRecipe(plugin_id, std::move(*input), std::move(*reagent), stackFrom(plugin.to)));
+        const auto *output = plugin.to.getItem();
+        const auto result = output == nullptr
+                              ? endstone::ItemType::get(endstone::ItemType::Air)->createItemStack(0)
+                              : EndstoneItemStack::fromMinecraft(::ItemStack(*output, 1, plugin.to.getAuxValue()));
+        recipes.push_back(BrewingMixRecipe(plugin_id, std::move(*input), std::move(*reagent), result));
     }
     for (const auto &[plugin_id, plugin] : plugin_containers) {
         auto input = EndstoneIngredient::fromMinecraft(
             nullptr, ::RecipeIngredient(ItemDescriptor(*plugin.from, ItemDescriptor::ANY_AUX_VALUE), 1));
-        auto reagent = ingredientFrom(plugin.reagent);
+        auto reagent_item =
+            ItemRegistryManager::getItemRegistry().getItem(static_cast<std::int16_t>(plugin.reagent.getItemId()));
+        if (reagent_item.isNull()) {
+            continue;
+        }
+        const auto reagent_aux = plugin.reagent.getData() == PotionBrewing::Ingredient::AnyData
+                                   ? ItemDescriptor::ANY_AUX_VALUE
+                                   : plugin.reagent.getData();
+        auto reagent = EndstoneIngredient::fromMinecraft(nullptr, ::RecipeIngredient(*reagent_item, reagent_aux, 1));
         if (!input || !reagent) {
             continue;
         }
@@ -314,15 +304,27 @@ std::vector<endstone::Recipe> EndstoneRecipe::brewingRecipes()
             continue;
         }
         auto input = EndstoneIngredient::fromMinecraft(nullptr, ::RecipeIngredient(mix.getFrom(), 1));
-        auto reagent = ingredientFrom(mix.getIngredient());
+        auto reagent_item =
+            ItemRegistryManager::getItemRegistry().getItem(static_cast<std::int16_t>(mix.getIngredient().getItemId()));
+        if (reagent_item.isNull()) {
+            continue;
+        }
+        const auto reagent_aux = mix.getIngredient().getData() == PotionBrewing::Ingredient::AnyData
+                                   ? ItemDescriptor::ANY_AUX_VALUE
+                                   : mix.getIngredient().getData();
+        auto reagent = EndstoneIngredient::fromMinecraft(nullptr, ::RecipeIngredient(*reagent_item, reagent_aux, 1));
         if (!input || !reagent) {
             continue;
         }
-        recipes.push_back(BrewingMixRecipe(
-            std::format("minecraft:brewing_mix/{}:{}+{}:{}/{}:{}", mix.getFrom().getFullName(),
-                        mix.getFrom().getAuxValue(), mix.getIngredient().getItemId(), mix.getIngredient().getData(),
-                        mix.getTo().getFullName(), mix.getTo().getAuxValue()),
-            std::move(*input), std::move(*reagent), stackFrom(mix.getTo())));
+        const auto *output = mix.getTo().getItem();
+        const auto result = output == nullptr
+                              ? endstone::ItemType::get(endstone::ItemType::Air)->createItemStack(0)
+                              : EndstoneItemStack::fromMinecraft(::ItemStack(*output, 1, mix.getTo().getAuxValue()));
+        recipes.push_back(BrewingMixRecipe(std::format("minecraft:brewing_mix/{}:{}+{}:{}/{}:{}",
+                                                       mix.getFrom().getFullName(), mix.getFrom().getAuxValue(),
+                                                       mix.getIngredient().getItemId(), mix.getIngredient().getData(),
+                                                       mix.getTo().getFullName(), mix.getTo().getAuxValue()),
+                                           std::move(*input), std::move(*reagent), result));
     }
     for (const auto &mix : PotionBrewing::getContainerMixes()) {
         const auto claimed =
@@ -335,7 +337,15 @@ std::vector<endstone::Recipe> EndstoneRecipe::brewingRecipes()
         }
         auto input = EndstoneIngredient::fromMinecraft(
             nullptr, ::RecipeIngredient(ItemDescriptor(mix.getFrom(), ItemDescriptor::ANY_AUX_VALUE), 1));
-        auto reagent = ingredientFrom(mix.getIngredient());
+        auto reagent_item =
+            ItemRegistryManager::getItemRegistry().getItem(static_cast<std::int16_t>(mix.getIngredient().getItemId()));
+        if (reagent_item.isNull()) {
+            continue;
+        }
+        const auto reagent_aux = mix.getIngredient().getData() == PotionBrewing::Ingredient::AnyData
+                                   ? ItemDescriptor::ANY_AUX_VALUE
+                                   : mix.getIngredient().getData();
+        auto reagent = EndstoneIngredient::fromMinecraft(nullptr, ::RecipeIngredient(*reagent_item, reagent_aux, 1));
         if (!input || !reagent) {
             continue;
         }
@@ -353,52 +363,61 @@ bool EndstoneRecipe::registerBrewing(const Recipe &recipe)
     if (ingredients.size() < 2 || !ingredients[0] || !ingredients[1]) {
         return false;
     }
-    auto reagent = brewingIngredientFrom(*ingredients[1]);
-    if (!reagent) {
+
+    const auto reagent_minecraft = EndstoneIngredient::toMinecraft(*ingredients[1]);
+    const auto *reagent_item = reagent_minecraft.getItem();
+    if (reagent_item == nullptr) {
         return false;
     }
+    const auto reagent_aux = reagent_minecraft.getAuxValue();
+    const PotionBrewing::Ingredient reagent(
+        *reagent_item, reagent_aux == ItemDescriptor::ANY_AUX_VALUE ? PotionBrewing::Ingredient::AnyData : reagent_aux);
 
     if (recipe.is<BrewingMixRecipe>()) {
-        auto from = EndstoneIngredient::toMinecraft(*ingredients[0]);
-        auto to = descriptorFrom(recipe.getResult());
-        if (from.getItem() == nullptr || to.getItem() == nullptr) {
+        const auto from = EndstoneIngredient::toMinecraft(*ingredients[0]);
+        const auto result_minecraft = EndstoneItemStack::toMinecraft(recipe.getResult());
+        const auto *result_item = result_minecraft.getItem();
+        if (from.getItem() == nullptr || result_item == nullptr) {
             return false;
         }
+        const ItemDescriptor to(*result_item, result_minecraft.getAuxValue());
+
         unregisterBrewing(recipe.getRecipeId());
-        const auto key = std::format("{}:{}+{}:{}/{}:{}", from.getFullName(), from.getAuxValue(),
-                                     reagent->getItemId(), reagent->getData(), to.getFullName(), to.getAuxValue());
+        const auto key = std::format("{}:{}+{}:{}/{}:{}", from.getFullName(), from.getAuxValue(), reagent.getItemId(),
+                                     reagent.getData(), to.getFullName(), to.getAuxValue());
         const auto exists = std::ranges::any_of(PotionBrewing::getPotionMixes(), [&](const auto &mix) {
-            return mix.getFrom().sameItem(from, true) && mix.getIngredient() == *reagent &&
+            return mix.getFrom().sameItem(from, true) && mix.getIngredient() == reagent &&
                    mix.getTo().sameItem(to, true);
         });
         if (!exists) {
-            PotionBrewing::addPotionMix(from, *reagent, to);
+            PotionBrewing::addPotionMix(from, reagent, to);
             plugin_added_mix_keys.insert(key);
         }
-        plugin_mixes.insert_or_assign(recipe.getRecipeId(), PluginMix{std::move(from), *reagent, std::move(to)});
+        plugin_mixes.insert_or_assign(recipe.getRecipeId(), PluginMix{from, reagent, to});
         return true;
     }
 
     if (recipe.is<BrewingContainerRecipe>()) {
-        auto from_desc = EndstoneIngredient::toMinecraft(*ingredients[0]);
-        auto to_desc = descriptorFrom(recipe.getResult());
-        const auto *from = from_desc.getItem();
-        const auto *to = to_desc.getItem();
+        const auto from_descriptor = EndstoneIngredient::toMinecraft(*ingredients[0]);
+        const auto result_minecraft = EndstoneItemStack::toMinecraft(recipe.getResult());
+        const auto *from = from_descriptor.getItem();
+        const auto *to = result_minecraft.getItem();
         if (from == nullptr || to == nullptr) {
             return false;
         }
+
         unregisterBrewing(recipe.getRecipeId());
-        const auto key = std::format("{}/{}:{}/{}", from->getFullItemName(), reagent->getItemId(),
-                                     reagent->getData(), to->getFullItemName());
+        const auto key = std::format("{}/{}:{}/{}", from->getFullItemName(), reagent.getItemId(), reagent.getData(),
+                                     to->getFullItemName());
         const auto exists = std::ranges::any_of(PotionBrewing::getContainerMixes(), [&](const auto &mix) {
-            return mix.getFrom().getId() == from->getId() && mix.getIngredient() == *reagent &&
+            return mix.getFrom().getId() == from->getId() && mix.getIngredient() == reagent &&
                    mix.getTo().getId() == to->getId();
         });
         if (!exists) {
-            PotionBrewing::addContainerRecipe(*from, *reagent, *to);
+            PotionBrewing::addContainerRecipe(*from, reagent, *to);
             plugin_added_container_keys.insert(key);
         }
-        plugin_containers.insert_or_assign(recipe.getRecipeId(), PluginContainer{from, *reagent, to});
+        plugin_containers.insert_or_assign(recipe.getRecipeId(), PluginContainer{from, reagent, to});
         return true;
     }
 

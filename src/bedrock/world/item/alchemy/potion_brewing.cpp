@@ -28,45 +28,30 @@ namespace {
 using IngredientSet = std::unordered_set<PotionBrewing::Ingredient>;
 using IngredientVector = std::vector<PotionBrewing::Ingredient>;
 
-constexpr std::size_t ValidIngredientsOffset = 0x48;
-constexpr std::size_t ValidRecipeInputsOffset = 0x88;
-constexpr std::size_t ValidContainersOffset = 0xC8;
-
-std::byte *potionBrewingStorage()
-{
-    static auto *storage = BEDROCK_VAR(std::byte *, "PotionBrewing::mPotionMixes");
-    return storage;
-}
-
-template <typename T>
-T &storageAt(const std::size_t offset)
-{
-    return *reinterpret_cast<T *>(potionBrewingStorage() + offset);
-}
 
 IngredientSet &validIngredients()
 {
-    return storageAt<IngredientSet>(ValidIngredientsOffset);
+    return *BEDROCK_VAR(IngredientSet *, "PotionBrewing::mValidIngredients");
 }
 
 IngredientSet &validRecipeInputs()
 {
-    return storageAt<IngredientSet>(ValidRecipeInputsOffset);
+    return *BEDROCK_VAR(IngredientSet *, "PotionBrewing::mValidRecipeInputs");
 }
 
 IngredientVector &validContainers()
 {
-    return storageAt<IngredientVector>(ValidContainersOffset);
+    return *BEDROCK_VAR(IngredientVector *, "PotionBrewing::mValidContainers");
 }
 
 std::vector<PotionBrewing::Mix<ItemDescriptor>> &potionMixes()
 {
-    return storageAt<std::vector<PotionBrewing::Mix<ItemDescriptor>>>(0);
+    return *BEDROCK_VAR(std::vector<PotionBrewing::Mix<ItemDescriptor>> *, "PotionBrewing::mPotionMixes");
 }
 
 std::vector<PotionBrewing::Mix<const Item &>> &containerMixes()
 {
-    return storageAt<std::vector<PotionBrewing::Mix<const Item &>>>(0x18);
+    return *BEDROCK_VAR(std::vector<PotionBrewing::Mix<const Item &>> *, "PotionBrewing::mContainerMixes");
 }
 
 const Item *itemById(int id)

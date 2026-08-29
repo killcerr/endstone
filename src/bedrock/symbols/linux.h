@@ -11,12 +11,15 @@
 
 namespace endstone::runtime {
 
-static constexpr std::array<std::pair<std::string_view, std::size_t>, 81> symbols = {{
+static constexpr std::array<std::pair<std::string_view, std::size_t>, 84> symbols = {{
     {"BlockState::StateListNode::mHead", 245468000},
     {"Enchant::mEnchants", 245294016},
     {"MobEffect::mMobEffects", 245274360},
     {"Potion::mPotionsById", 245353632},
     {"PotionBrewing::mPotionMixes", 245355448},
+    {"PotionBrewing::mValidIngredients", 245355520},
+    {"PotionBrewing::mValidRecipeInputs", 245355584},
+    {"PotionBrewing::mValidContainers", 245355648},
     {"PotionBrewing::mContainerMixes", 245355472},
     {"getI18n::result", 244110448},
     // Actor

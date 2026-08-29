@@ -115,6 +115,33 @@ rip_relative = true
 rip_offset = 19
 
 [[signatures]]
+name = "PotionBrewing::mValidIngredients"
+relative = false
+extra = 72
+# mValidIngredients is 0x48 bytes after mPotionMixes in PotionBrewing's static storage.
+pattern = "4C 89 C3 48 89 D7 48 89 CE 4C 8B 35 ? ? ? ? 4C 8B 3D ? ? ? ? 4D 39 F7"
+rip_relative = true
+rip_offset = 19
+
+[[signatures]]
+name = "PotionBrewing::mValidRecipeInputs"
+relative = false
+extra = 136
+# mValidRecipeInputs is 0x88 bytes after mPotionMixes in PotionBrewing's static storage.
+pattern = "4C 89 C3 48 89 D7 48 89 CE 4C 8B 35 ? ? ? ? 4C 8B 3D ? ? ? ? 4D 39 F7"
+rip_relative = true
+rip_offset = 19
+
+[[signatures]]
+name = "PotionBrewing::mValidContainers"
+relative = false
+extra = 200
+# mValidContainers is 0xC8 bytes after mPotionMixes in PotionBrewing's static storage.
+pattern = "4C 89 C3 48 89 D7 48 89 CE 4C 8B 35 ? ? ? ? 4C 8B 3D ? ? ? ? 4D 39 F7"
+rip_relative = true
+rip_offset = 19
+
+[[signatures]]
 name = "PotionBrewing::mContainerMixes"
 relative = false
 extra = 0
