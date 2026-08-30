@@ -234,9 +234,6 @@ class Server:
         """
         Registers a crafting recipe.
 
-        A recipe with the same id is replaced. After a successful registration the crafting data is sent to every
-        connected player, the same way `Player.update_commands()` resends the command list.
-
         Args:
             recipe: The recipe to register.
 
@@ -248,13 +245,16 @@ class Server:
         """
         Unregisters the crafting recipe with the given id.
 
-        After a successful unregistration the crafting data is sent to every connected player.
-
         Args:
             recipe_id: The recipe id.
 
         Returns:
             True if a recipe was removed.
+        """
+
+    def update_recipes(self) -> None:
+        """
+        Send the list of crafting recipes to every connected player.
         """
 
     @property

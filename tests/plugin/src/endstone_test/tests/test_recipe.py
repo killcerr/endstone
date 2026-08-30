@@ -198,5 +198,7 @@ def test_register_and_unregister_recipe(plugin: Plugin, server: Server) -> None:
         recipe_id = recipe.recipe_id
         assert server.register_recipe(recipe)
         assert any(entry.recipe_id == recipe_id for entry in server.recipes)
+        server.update_recipes()
         assert server.unregister_recipe(recipe_id)
         assert all(entry.recipe_id != recipe_id for entry in server.recipes)
+        server.update_recipes()

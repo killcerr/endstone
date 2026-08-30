@@ -84,6 +84,7 @@ public:
     [[nodiscard]] std::vector<Recipe> getRecipes() const override;
     [[nodiscard]] bool registerRecipe(const Recipe &recipe) override;
     [[nodiscard]] bool unregisterRecipe(std::string recipe_id) override;
+    void updateRecipes() const override;
     [[nodiscard]] EndstoneLevel *getEndstoneLevel() const;
 
     [[nodiscard]] std::vector<NotNull<Player>> getOnlinePlayers() const override;

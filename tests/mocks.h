@@ -44,6 +44,7 @@ public:
     MOCK_METHOD((std::vector<endstone::Recipe>), getRecipes, (), (const, override));
     MOCK_METHOD(bool, registerRecipe, (const endstone::Recipe &), (override));
     MOCK_METHOD(bool, unregisterRecipe, (std::string), (override));
+    MOCK_METHOD(void, updateRecipes, (), (const, override));
     MOCK_METHOD((std::vector<endstone::NotNull<endstone::Player>>), getOnlinePlayers, (), (const, override));
     MOCK_METHOD(int, getMaxPlayers, (), (const, override));
     MOCK_METHOD(void, setMaxPlayers, (int), (override));

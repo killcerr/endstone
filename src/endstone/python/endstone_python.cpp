@@ -497,9 +497,6 @@ void init_server(py::classh<Server> &server)
         .def("register_recipe", &Server::registerRecipe, py::arg("recipe"), R"doc(
     Registers a crafting recipe.
 
-    A recipe with the same id is replaced. After a successful registration the crafting data is sent to every
-    connected player, the same way `Player.update_commands()` resends the command list.
-
     Args:
         recipe: The recipe to register.
 
@@ -509,14 +506,14 @@ void init_server(py::classh<Server> &server)
         .def("unregister_recipe", &Server::unregisterRecipe, py::arg("recipe_id"), R"doc(
     Unregisters the crafting recipe with the given id.
 
-    After a successful unregistration the crafting data is sent to every connected player.
-
     Args:
         recipe_id: The recipe id.
 
     Returns:
         True if a recipe was removed.
 )doc")
+        .def("update_recipes", &Server::updateRecipes,
+             "Send the list of crafting recipes to every connected player.")
         .def_property_readonly("online_players", &Server::getOnlinePlayers, "A list of all currently online players.")
         .def_property("max_players", &Server::getMaxPlayers, &Server::setMaxPlayers,
                       "The maximum amount of players which can login to this server.")

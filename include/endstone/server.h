@@ -488,9 +488,6 @@ public:
     /**
      * Registers a crafting recipe.
      *
-     * A recipe with the same id is replaced. After a successful registration the crafting data is sent to every
-     * connected player, the same way `Player::updateCommands()` resends the command list.
-     *
      * @param recipe the recipe to register
      * @return true on success, false if the recipe cannot be registered
      */
@@ -498,13 +495,16 @@ public:
 
     /**
      * Unregisters the crafting recipe with the given id.
-     *
-     * After a successful unregistration the crafting data is sent to every connected player.
-     *
+
      * @param recipe_id the recipe id
      * @return true if a recipe was removed
      */
     [[nodiscard]] virtual bool unregisterRecipe(std::string recipe_id) = 0;
+
+    /**
+     * Sends the list of crafting recipes to every connected player.
+     */
+    virtual void updateRecipes() const = 0;
 
     /**
      * Used for all administrative messages, such as an operator using a command.

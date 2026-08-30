@@ -532,13 +532,7 @@ std::vector<Recipe> EndstoneServer::getRecipes() const
 bool EndstoneServer::registerRecipe(const Recipe &recipe)
 {
     if (recipe.is<BrewingRecipe>()) {
-        if (!EndstoneRecipe::registerBrewing(recipe)) {
-            return false;
-        }
-        for (const auto &player : getOnlinePlayers()) {
-            player->updateRecipes();
-        }
-        return true;
+        return EndstoneRecipe::registerBrewing(recipe);
     }
     auto handle = EndstoneRecipe::toMinecraft(recipe);
     if (!handle) {
@@ -547,9 +541,6 @@ bool EndstoneServer::registerRecipe(const Recipe &recipe)
     auto &recipes = getEndstoneLevel()->getHandle().getRecipes();
     recipes.removeRecipe(recipe.getRecipeId());
     recipes._addItemRecipe(std::move(handle));
-    for (const auto &player : getOnlinePlayers()) {
-        player->updateRecipes();
-    }
     return true;
 }
 
@@ -557,13 +548,14 @@ bool EndstoneServer::unregisterRecipe(std::string recipe_id)
 {
     const auto brewing = EndstoneRecipe::unregisterBrewing(recipe_id);
     const auto crafting = getEndstoneLevel()->getHandle().getRecipes().removeRecipe(recipe_id);
-    if (!brewing && !crafting) {
-        return false;
-    }
+    return brewing || crafting;
+}
+
+void EndstoneServer::updateRecipes() const
+{
     for (const auto &player : getOnlinePlayers()) {
         player->updateRecipes();
     }
-    return true;
 }
 
 EndstoneLevel *EndstoneServer::getEndstoneLevel() const
