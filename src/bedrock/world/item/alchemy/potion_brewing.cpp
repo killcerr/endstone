@@ -14,216 +14,14 @@
 
 #include "bedrock/world/item/alchemy/potion_brewing.h"
 
-#include <algorithm>
-#include <cstddef>
-#include <optional>
+#include <cstdint>
 #include <unordered_set>
 #include <vector>
 
 #include "bedrock/symbol.h"
 #include "bedrock/world/item/registry/item_registry_manager.h"
 
-namespace {
-
-using IngredientSet = std::unordered_set<PotionBrewing::Ingredient>;
-using IngredientVector = std::vector<PotionBrewing::Ingredient>;
-
-
-IngredientSet &validIngredients()
-{
-    return *BEDROCK_VAR(IngredientSet *, "PotionBrewing::mValidIngredients");
-}
-
-IngredientSet &validRecipeInputs()
-{
-    return *BEDROCK_VAR(IngredientSet *, "PotionBrewing::mValidRecipeInputs");
-}
-
-IngredientVector &validContainers()
-{
-    return *BEDROCK_VAR(IngredientVector *, "PotionBrewing::mValidContainers");
-}
-
-std::vector<PotionBrewing::Mix<ItemDescriptor>> &potionMixes()
-{
-    return *BEDROCK_VAR(std::vector<PotionBrewing::Mix<ItemDescriptor>> *, "PotionBrewing::mPotionMixes");
-}
-
-std::vector<PotionBrewing::Mix<const Item &>> &containerMixes()
-{
-    return *BEDROCK_VAR(std::vector<PotionBrewing::Mix<const Item &>> *, "PotionBrewing::mContainerMixes");
-}
-
-const Item *itemById(int id)
-{
-    auto item = ItemRegistryManager::getItemRegistry().getItem(static_cast<std::int16_t>(id));
-    return item.isNull() ? nullptr : item.get();
-}
-
-std::optional<PotionBrewing::Ingredient> inputIngredient(const ItemDescriptor &from)
-{
-    const auto *item = from.getItem();
-    if (item == nullptr) {
-        return std::nullopt;
-    }
-    const auto aux = from.getAuxValue();
-    return PotionBrewing::Ingredient(
-        *item, aux == ItemDescriptor::ANY_AUX_VALUE ? PotionBrewing::Ingredient::AnyData : aux);
-}
-
-PotionBrewing::Ingredient containerIngredient(const Item &item)
-{
-    return {item, ItemDescriptor::ANY_AUX_VALUE};
-}
-
-bool sameSlot(const PotionBrewing::Ingredient &lhs, const PotionBrewing::Ingredient &rhs)
-{
-    if (lhs.getItemId() != rhs.getItemId()) {
-        return false;
-    }
-    const auto lhs_any = lhs.getData() == PotionBrewing::Ingredient::AnyData ||
-                         lhs.getData() == ItemDescriptor::ANY_AUX_VALUE;
-    const auto rhs_any = rhs.getData() == PotionBrewing::Ingredient::AnyData ||
-                         rhs.getData() == ItemDescriptor::ANY_AUX_VALUE;
-    return lhs_any || rhs_any || lhs.getData() == rhs.getData();
-}
-
-bool potionUsesIngredient(const PotionBrewing::Ingredient &ingredient)
-{
-    return std::ranges::any_of(potionMixes(), [&](const PotionBrewing::Mix<ItemDescriptor> &mix) {
-        return sameSlot(mix.getIngredient(), ingredient);
-    });
-}
-
-bool potionUsesInput(const PotionBrewing::Ingredient &ingredient)
-{
-    return std::ranges::any_of(potionMixes(), [&](const PotionBrewing::Mix<ItemDescriptor> &mix) {
-        const auto input = inputIngredient(mix.getFrom());
-        return input && sameSlot(*input, ingredient);
-    });
-}
-
-bool containerUsesInput(const PotionBrewing::Ingredient &ingredient)
-{
-    return std::ranges::any_of(containerMixes(), [&](const PotionBrewing::Mix<const Item &> &mix) {
-        return sameSlot(containerIngredient(mix.getFrom()), ingredient);
-    });
-}
-
-void insertVariants(std::unordered_set<PotionBrewing::Ingredient> &set, const Item &item,
-                    const PotionBrewing::Ingredient &ingredient)
-{
-    set.insert(ingredient);
-    if (ingredient.getData() == PotionBrewing::Ingredient::AnyData ||
-        ingredient.getData() == ItemDescriptor::ANY_AUX_VALUE) {
-        set.insert({item, 0});
-        set.insert({item, ItemDescriptor::ANY_AUX_VALUE});
-        set.insert({item, PotionBrewing::Ingredient::AnyData});
-    }
-}
-
-void eraseUnused(std::unordered_set<PotionBrewing::Ingredient> &set, const Item &item,
-                 const PotionBrewing::Ingredient &ingredient, auto still_used)
-{
-    const PotionBrewing::Ingredient variants[] = {
-        ingredient,
-        {item, 0},
-        {item, ItemDescriptor::ANY_AUX_VALUE},
-        {item, PotionBrewing::Ingredient::AnyData},
-    };
-    for (const auto &variant : variants) {
-        if (!still_used(variant)) {
-            set.erase(variant);
-        }
-    }
-}
-
-void rememberPotion(const ItemDescriptor &from, const PotionBrewing::Ingredient &ingredient)
-{
-    auto &valid_ingredients = validIngredients();
-    if (const auto *reagent = itemById(ingredient.getItemId())) {
-        insertVariants(valid_ingredients, *reagent, ingredient);
-    }
-    else {
-        valid_ingredients.insert(ingredient);
-    }
-
-    const auto input = inputIngredient(from);
-    if (!input) {
-        return;
-    }
-    auto &valid_recipe_inputs = validRecipeInputs();
-    if (const auto *item = from.getItem()) {
-        insertVariants(valid_recipe_inputs, *item, *input);
-    }
-    else {
-        valid_recipe_inputs.insert(*input);
-    }
-}
-
-void forgetPotion(const ItemDescriptor &from, const PotionBrewing::Ingredient &ingredient)
-{
-    auto &valid_ingredients = validIngredients();
-    if (const auto *reagent = itemById(ingredient.getItemId())) {
-        eraseUnused(valid_ingredients, *reagent, ingredient, potionUsesIngredient);
-    }
-    else if (!potionUsesIngredient(ingredient)) {
-        valid_ingredients.erase(ingredient);
-    }
-
-    const auto input = inputIngredient(from);
-    if (!input) {
-        return;
-    }
-    auto &valid_recipe_inputs = validRecipeInputs();
-    if (const auto *item = from.getItem()) {
-        eraseUnused(valid_recipe_inputs, *item, *input, potionUsesInput);
-    }
-    else if (!potionUsesInput(*input)) {
-        valid_recipe_inputs.erase(*input);
-    }
-}
-
-void rememberContainer(const Item &from)
-{
-    auto &valid_containers = validContainers();
-    const PotionBrewing::Ingredient variants[] = {
-        containerIngredient(from),
-        {from, PotionBrewing::Ingredient::AnyData},
-        {from, 0},
-    };
-    for (const auto &variant : variants) {
-        if (std::ranges::find(valid_containers, variant) == valid_containers.end()) {
-            valid_containers.push_back(variant);
-        }
-    }
-    insertVariants(validRecipeInputs(), from, variants[0]);
-}
-
-void forgetContainer(const Item &from)
-{
-    auto &valid_containers = validContainers();
-    const PotionBrewing::Ingredient variants[] = {
-        containerIngredient(from),
-        {from, PotionBrewing::Ingredient::AnyData},
-        {from, 0},
-    };
-    for (const auto &variant : variants) {
-        if (containerUsesInput(variant) || potionUsesInput(variant)) {
-            continue;
-        }
-        if (const auto found = std::ranges::find(valid_containers, variant); found != valid_containers.end()) {
-            valid_containers.erase(found);
-        }
-    }
-    eraseUnused(validRecipeInputs(), from, variants[0], [](const PotionBrewing::Ingredient &ingredient) {
-        return containerUsesInput(ingredient) || potionUsesInput(ingredient);
-    });
-}
-
-}  // namespace
-
-PotionBrewing::Ingredient::Ingredient(const Item &item, int data) : item_id_(item.getId()), data_(data) {}
+PotionBrewing::Ingredient::Ingredient(const Item &item, const int data) : item_id_(item.getId()), data_(data) {}
 
 PotionBrewing::Ingredient::Ingredient(const ItemInstance &item) : item_id_(item.getId()), data_(item.getAuxValue()) {}
 
@@ -234,59 +32,198 @@ bool PotionBrewing::Ingredient::operator==(const Ingredient &other) const
 
 bool PotionBrewing::Ingredient::equals(const ItemDescriptor &input) const
 {
-    if (item_id_ != input.getId()) {
-        return false;
-    }
-    return data_ == Ingredient::AnyData || data_ == ItemDescriptor::ANY_AUX_VALUE || data_ == input.getAuxValue();
+    return item_id_ == input.getId() &&
+           (data_ == Ingredient::AnyData || data_ == ItemDescriptor::ANY_AUX_VALUE || data_ == input.getAuxValue());
 }
 
 void PotionBrewing::addPotionMix(const ItemDescriptor &from, const Ingredient &ingredient, const ItemDescriptor &to)
 {
-    auto &mixes = potionMixes();
-    const auto duplicate = std::ranges::find_if(mixes, [&](const Mix<ItemDescriptor> &mix) {
-        return mix.getFrom().sameItem(from, true) && mix.getIngredient() == ingredient &&
-               mix.getTo().sameItem(to, true);
-    });
-    if (duplicate != mixes.end()) {
-        return;
+    auto &mixes = *BEDROCK_VAR(std::vector<Mix<ItemDescriptor>> *, "PotionBrewing::mPotionMixes");
+    for (const auto &mix : mixes) {
+        if (mix.getFrom().sameItem(from, true) && mix.getIngredient() == ingredient &&
+            mix.getTo().sameItem(to, true)) {
+            return;
+        }
     }
     mixes.emplace_back(from, ingredient, to);
-    rememberPotion(from, ingredient);
+
+    auto &valid_ingredients =
+        *BEDROCK_VAR(std::unordered_set<Ingredient> *, "PotionBrewing::mValidIngredients");
+    const auto reagent =
+        ItemRegistryManager::getItemRegistry().getItem(static_cast<std::int16_t>(ingredient.getItemId()));
+    if (reagent.isNull()) {
+        valid_ingredients.insert(ingredient);
+    }
+    else {
+        valid_ingredients.insert(ingredient);
+        if (ingredient.getData() == Ingredient::AnyData || ingredient.getData() == ItemDescriptor::ANY_AUX_VALUE) {
+            valid_ingredients.insert(Ingredient(*reagent, 0));
+            valid_ingredients.insert(Ingredient(*reagent, ItemDescriptor::ANY_AUX_VALUE));
+            valid_ingredients.insert(Ingredient(*reagent, Ingredient::AnyData));
+        }
+    }
+
+    const auto *from_item = from.getItem();
+    if (from_item == nullptr) {
+        return;
+    }
+    const auto from_aux = from.getAuxValue();
+    const Ingredient input(*from_item, from_aux == ItemDescriptor::ANY_AUX_VALUE ? Ingredient::AnyData : from_aux);
+    auto &valid_recipe_inputs =
+        *BEDROCK_VAR(std::unordered_set<Ingredient> *, "PotionBrewing::mValidRecipeInputs");
+    valid_recipe_inputs.insert(input);
+    if (input.getData() == Ingredient::AnyData || input.getData() == ItemDescriptor::ANY_AUX_VALUE) {
+        valid_recipe_inputs.insert(Ingredient(*from_item, 0));
+        valid_recipe_inputs.insert(Ingredient(*from_item, ItemDescriptor::ANY_AUX_VALUE));
+        valid_recipe_inputs.insert(Ingredient(*from_item, Ingredient::AnyData));
+    }
 }
 
 void PotionBrewing::addContainerRecipe(const Item &from, const Ingredient &ingredient, const Item &to)
 {
-    auto &mixes = containerMixes();
-    const auto duplicate = std::ranges::find_if(mixes, [&](const Mix<const Item &> &mix) {
-        return mix.getFrom().getId() == from.getId() && mix.getIngredient() == ingredient &&
-               mix.getTo().getId() == to.getId();
-    });
-    if (duplicate != mixes.end()) {
-        return;
+    auto &mixes = *BEDROCK_VAR(std::vector<Mix<const Item &>> *, "PotionBrewing::mContainerMixes");
+    for (const auto &mix : mixes) {
+        if (mix.getFrom().getId() == from.getId() && mix.getIngredient() == ingredient &&
+            mix.getTo().getId() == to.getId()) {
+            return;
+        }
     }
     mixes.emplace_back(from, ingredient, to);
-    rememberContainer(from);
+
+    auto &valid_containers = *BEDROCK_VAR(std::vector<Ingredient> *, "PotionBrewing::mValidContainers");
+    const Ingredient container = Ingredient(from, ItemDescriptor::ANY_AUX_VALUE);
+    const Ingredient any_data = Ingredient(from, Ingredient::AnyData);
+    const Ingredient zero_data = Ingredient(from, 0);
+    for (const auto &variant : {container, any_data, zero_data}) {
+        bool exists = false;
+        for (const auto &valid : valid_containers) {
+            if (valid == variant) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {
+            valid_containers.push_back(variant);
+        }
+    }
+
+    auto &valid_recipe_inputs =
+        *BEDROCK_VAR(std::unordered_set<Ingredient> *, "PotionBrewing::mValidRecipeInputs");
+    valid_recipe_inputs.insert(container);
+    valid_recipe_inputs.insert(any_data);
+    valid_recipe_inputs.insert(zero_data);
 }
 
 bool PotionBrewing::removePotionMix(const ItemDescriptor &from, const Ingredient &ingredient,
                                     const ItemDescriptor &to)
 {
-    auto &mixes = potionMixes();
-    const auto found = std::ranges::find_if(mixes, [&](const Mix<ItemDescriptor> &mix) {
-        return mix.getFrom().sameItem(from, true) && mix.getIngredient() == ingredient &&
-               mix.getTo().sameItem(to, true);
-    });
+    auto &mixes = *BEDROCK_VAR(std::vector<Mix<ItemDescriptor>> *, "PotionBrewing::mPotionMixes");
+    auto found = mixes.end();
+    for (auto it = mixes.begin(); it != mixes.end(); ++it) {
+        if (it->getFrom().sameItem(from, true) && it->getIngredient() == ingredient &&
+            it->getTo().sameItem(to, true)) {
+            found = it;
+            break;
+        }
+    }
     if (found == mixes.end()) {
         return false;
     }
     mixes.erase(found);
-    forgetPotion(from, ingredient);
+
+    auto &valid_ingredients =
+        *BEDROCK_VAR(std::unordered_set<Ingredient> *, "PotionBrewing::mValidIngredients");
+    const auto reagent =
+        ItemRegistryManager::getItemRegistry().getItem(static_cast<std::int16_t>(ingredient.getItemId()));
+    if (!reagent.isNull()) {
+        const Ingredient variants[] = {
+            ingredient,
+            Ingredient(*reagent, 0),
+            Ingredient(*reagent, ItemDescriptor::ANY_AUX_VALUE),
+            Ingredient(*reagent, Ingredient::AnyData),
+        };
+        for (const auto &variant : variants) {
+            bool used = false;
+            for (const auto &mix : mixes) {
+                if (mix.getIngredient().getItemId() != variant.getItemId()) {
+                    continue;
+                }
+                if (mix.getIngredient().getData() == Ingredient::AnyData ||
+                    mix.getIngredient().getData() == ItemDescriptor::ANY_AUX_VALUE ||
+                    variant.getData() == Ingredient::AnyData || variant.getData() == ItemDescriptor::ANY_AUX_VALUE ||
+                    mix.getIngredient().getData() == variant.getData()) {
+                    used = true;
+                    break;
+                }
+            }
+            if (!used) {
+                valid_ingredients.erase(variant);
+            }
+        }
+    }
+    else {
+        bool used = false;
+        for (const auto &mix : mixes) {
+            if (mix.getIngredient().getItemId() != ingredient.getItemId()) {
+                continue;
+            }
+            if (mix.getIngredient().getData() == Ingredient::AnyData ||
+                mix.getIngredient().getData() == ItemDescriptor::ANY_AUX_VALUE ||
+                ingredient.getData() == Ingredient::AnyData || ingredient.getData() == ItemDescriptor::ANY_AUX_VALUE ||
+                mix.getIngredient().getData() == ingredient.getData()) {
+                used = true;
+                break;
+            }
+        }
+        if (!used) {
+            valid_ingredients.erase(ingredient);
+        }
+    }
+
+    const auto *from_item = from.getItem();
+    if (from_item == nullptr) {
+        return true;
+    }
+    const auto from_aux = from.getAuxValue();
+    const Ingredient input(*from_item, from_aux == ItemDescriptor::ANY_AUX_VALUE ? Ingredient::AnyData : from_aux);
+    const Ingredient variants[] = {
+        input,
+        Ingredient(*from_item, 0),
+        Ingredient(*from_item, ItemDescriptor::ANY_AUX_VALUE),
+        Ingredient(*from_item, Ingredient::AnyData),
+    };
+    auto &valid_recipe_inputs =
+        *BEDROCK_VAR(std::unordered_set<Ingredient> *, "PotionBrewing::mValidRecipeInputs");
+    for (const auto &variant : variants) {
+        bool used = false;
+        for (const auto &mix : mixes) {
+            const auto *mix_item = mix.getFrom().getItem();
+            if (mix_item == nullptr) {
+                continue;
+            }
+            const auto mix_aux = mix.getFrom().getAuxValue();
+            const Ingredient mix_input(*mix_item,
+                                       mix_aux == ItemDescriptor::ANY_AUX_VALUE ? Ingredient::AnyData : mix_aux);
+            if (mix_input.getItemId() != variant.getItemId()) {
+                continue;
+            }
+            if (mix_input.getData() == Ingredient::AnyData || mix_input.getData() == ItemDescriptor::ANY_AUX_VALUE ||
+                variant.getData() == Ingredient::AnyData || variant.getData() == ItemDescriptor::ANY_AUX_VALUE ||
+                mix_input.getData() == variant.getData()) {
+                used = true;
+                break;
+            }
+        }
+        if (!used) {
+            valid_recipe_inputs.erase(variant);
+        }
+    }
     return true;
 }
 
 bool PotionBrewing::removeContainerRecipe(const Item &from, const Ingredient &ingredient, const Item &to)
 {
-    auto &mixes = containerMixes();
+    auto &mixes = *BEDROCK_VAR(std::vector<Mix<const Item &>> *, "PotionBrewing::mContainerMixes");
     std::vector<Mix<const Item &>> remaining;
     remaining.reserve(mixes.size());
     bool removed = false;
@@ -302,16 +239,65 @@ bool PotionBrewing::removeContainerRecipe(const Item &from, const Ingredient &in
         return false;
     }
     mixes.swap(remaining);
-    forgetContainer(from);
+
+    auto &valid_containers = *BEDROCK_VAR(std::vector<Ingredient> *, "PotionBrewing::mValidContainers");
+    const Ingredient variants[] = {
+        Ingredient(from, ItemDescriptor::ANY_AUX_VALUE),
+        Ingredient(from, Ingredient::AnyData),
+        Ingredient(from, 0),
+    };
+    for (const auto &variant : variants) {
+        bool used = false;
+        for (const auto &mix : mixes) {
+            if (mix.getFrom().getId() == variant.getItemId()) {
+                used = true;
+                break;
+            }
+        }
+        if (!used) {
+            for (auto it = valid_containers.begin(); it != valid_containers.end(); ++it) {
+                if (*it == variant) {
+                    valid_containers.erase(it);
+                    break;
+                }
+            }
+        }
+    }
+
+    auto &valid_recipe_inputs =
+        *BEDROCK_VAR(std::unordered_set<Ingredient> *, "PotionBrewing::mValidRecipeInputs");
+    for (const auto &variant : variants) {
+        bool used = false;
+        for (const auto &mix : mixes) {
+            if (mix.getFrom().getId() == variant.getItemId()) {
+                used = true;
+                break;
+            }
+        }
+        if (!used) {
+            const auto potion_mixes =
+                *BEDROCK_VAR(std::vector<Mix<ItemDescriptor>> *, "PotionBrewing::mPotionMixes");
+            for (const auto &mix : potion_mixes) {
+                const auto *mix_item = mix.getFrom().getItem();
+                if (mix_item != nullptr && mix_item->getId() == variant.getItemId()) {
+                    used = true;
+                    break;
+                }
+            }
+        }
+        if (!used) {
+            valid_recipe_inputs.erase(variant);
+        }
+    }
     return true;
 }
 
 const std::vector<PotionBrewing::Mix<ItemDescriptor>> &PotionBrewing::getPotionMixes()
 {
-    return potionMixes();
+    return *BEDROCK_VAR(std::vector<Mix<ItemDescriptor>> *, "PotionBrewing::mPotionMixes");
 }
 
 const std::vector<PotionBrewing::Mix<const Item &>> &PotionBrewing::getContainerMixes()
 {
-    return containerMixes();
+    return *BEDROCK_VAR(std::vector<Mix<const Item &>> *, "PotionBrewing::mContainerMixes");
 }

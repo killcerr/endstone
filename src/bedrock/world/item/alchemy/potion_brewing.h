@@ -100,8 +100,10 @@ public:
 
     static void addPotionMix(const ItemDescriptor &from, const Ingredient &ingredient, const ItemDescriptor &to);
     static void addContainerRecipe(const Item &from, const Ingredient &ingredient, const Item &to);
+    // Endstone begins
     static bool removePotionMix(const ItemDescriptor &from, const Ingredient &ingredient, const ItemDescriptor &to);
     static bool removeContainerRecipe(const Item &from, const Ingredient &ingredient, const Item &to);
+    // Endstone ends
 
     static const std::vector<Mix<ItemDescriptor>> &getPotionMixes();
     static const std::vector<Mix<const Item &>> &getContainerMixes();
