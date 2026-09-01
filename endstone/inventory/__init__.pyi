@@ -45,6 +45,7 @@ __all__ = [
     "SmithingTransformRecipe",
     "SmithingTrimRecipe",
     "SmokingRecipe",
+    "StonecuttingRecipe",
     "WritableBookMeta",
 ]
 
@@ -313,6 +314,12 @@ class Recipe:
         The crafting station this recipe belongs to, such as `crafting_table`.
         """
 
+    @property
+    def priority(self) -> int:
+        """
+        The priority of this recipe. When several recipes match, Bedrock prefers the higher one.
+        """
+
 class ShapedRecipe(Recipe):
     """
     Represents a shaped (ie normal) crafting recipe.
@@ -324,6 +331,7 @@ class ShapedRecipe(Recipe):
         ingredients: list[tuple[str, RecipeIngredient]],
         result: ItemStack,
         tag: str = "crafting_table",
+        priority: int = 0,
     ) -> None:
         """
         Creates a shaped crafting recipe.
@@ -334,6 +342,7 @@ class ShapedRecipe(Recipe):
             ingredients: The character-to-ingredient mapping.
             result: The result of this recipe.
             tag: The crafting station this recipe belongs to, such as `crafting_table`.
+            priority: The priority of this recipe. Defaults to `0`.
         """
 
     @property
@@ -346,7 +355,12 @@ class ShapelessRecipe(Recipe):
     Represents a shapeless recipe, where the arrangement of the ingredients on the crafting grid does not matter.
     """
     def __init__(
-        self, recipe_id: str, ingredients: list[RecipeIngredient], result: ItemStack, tag: str = "crafting_table"
+        self,
+        recipe_id: str,
+        ingredients: list[RecipeIngredient],
+        result: ItemStack,
+        tag: str = "crafting_table",
+        priority: int = 0,
     ) -> None:
         """
         Creates a shapeless crafting recipe.
@@ -356,6 +370,37 @@ class ShapelessRecipe(Recipe):
             ingredients: The ingredients this recipe consumes.
             result: The result of this recipe.
             tag: The crafting station this recipe belongs to, such as `crafting_table`.
+            priority: The priority of this recipe. Defaults to `0`.
+        """
+
+class StonecuttingRecipe(Recipe):
+    """
+    Represents a stonecutting recipe.
+    """
+    def __init__(
+        self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "stonecutter", priority: int = 0
+    ) -> None:
+        """
+        Creates a stonecutting recipe.
+
+        Args:
+            recipe_id: The recipe id.
+            input: The input this recipe consumes.
+            result: The result of this recipe.
+            tag: The crafting station this recipe belongs to, such as `stonecutter`.
+            priority: The priority of this recipe. Defaults to `0`.
+        """
+
+    @property
+    def input(self) -> RecipeIngredient | None:
+        """
+        The input this recipe consumes.
+        """
+
+    @property
+    def input_choice(self) -> RecipeIngredient | None:
+        """
+        The input this recipe consumes.
         """
 
 class CookingRecipe(Recipe):
@@ -381,7 +426,9 @@ class FurnaceRecipe(CookingRecipe):
     """
     Represents a furnace recipe.
     """
-    def __init__(self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "furnace") -> None:
+    def __init__(
+        self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "furnace", priority: int = 0
+    ) -> None:
         """
         Creates a furnace recipe.
 
@@ -390,13 +437,16 @@ class FurnaceRecipe(CookingRecipe):
             input: The input this recipe consumes.
             result: The result of this recipe.
             tag: The crafting station this recipe belongs to, such as `furnace`.
+            priority: The priority of this recipe. Defaults to `0`.
         """
 
 class BlastingRecipe(CookingRecipe):
     """
     Represents a blasting recipe.
     """
-    def __init__(self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "blast_furnace") -> None:
+    def __init__(
+        self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "blast_furnace", priority: int = 0
+    ) -> None:
         """
         Creates a blasting recipe.
 
@@ -405,13 +455,16 @@ class BlastingRecipe(CookingRecipe):
             input: The input this recipe consumes.
             result: The result of this recipe.
             tag: The crafting station this recipe belongs to, such as `blast_furnace`.
+            priority: The priority of this recipe. Defaults to `0`.
         """
 
 class SmokingRecipe(CookingRecipe):
     """
     Represents a smoking recipe.
     """
-    def __init__(self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "smoker") -> None:
+    def __init__(
+        self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "smoker", priority: int = 0
+    ) -> None:
         """
         Creates a smoking recipe.
 
@@ -420,13 +473,16 @@ class SmokingRecipe(CookingRecipe):
             input: The input this recipe consumes.
             result: The result of this recipe.
             tag: The crafting station this recipe belongs to, such as `smoker`.
+            priority: The priority of this recipe. Defaults to `0`.
         """
 
 class CampfireRecipe(CookingRecipe):
     """
     Represents a campfire recipe.
     """
-    def __init__(self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "campfire") -> None:
+    def __init__(
+        self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "campfire", priority: int = 0
+    ) -> None:
         """
         Creates a campfire recipe.
 
@@ -435,6 +491,7 @@ class CampfireRecipe(CookingRecipe):
             input: The input this recipe consumes.
             result: The result of this recipe.
             tag: The crafting station this recipe belongs to, such as `campfire`.
+            priority: The priority of this recipe. Defaults to `0`.
         """
 
 class BrewingRecipe(Recipe):

@@ -137,13 +137,16 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
             })
         .def_property_readonly("recipe_id", &Recipe::getRecipeId)
         .def_property_readonly("tag", &Recipe::getTag,
-                               "The crafting station this recipe belongs to, such as `crafting_table`.");
+                               "The crafting station this recipe belongs to, such as `crafting_table`.")
+        .def_property_readonly(
+            "priority", &Recipe::getPriority,
+            "The priority of this recipe. When several recipes match, Bedrock prefers the higher one.");
 
     py::class_<ShapedRecipe, Recipe>(m, "ShapedRecipe", "Represents a shaped (ie normal) crafting recipe.")
         .def(py::init<std::string, std::vector<std::string>, std::vector<std::pair<char, RecipeIngredient>>, ItemStack,
-                      std::string>(),
+                      std::string, int>(),
              py::arg("recipe_id"), py::arg("shape"), py::arg("ingredients"), py::arg("result"),
-             py::arg("tag") = "crafting_table",
+             py::arg("tag") = "crafting_table", py::arg("priority") = 0,
              R"doc(
     Creates a shaped crafting recipe.
 
@@ -153,6 +156,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         ingredients: The character-to-ingredient mapping.
         result: The result of this recipe.
         tag: The crafting station this recipe belongs to, such as `crafting_table`.
+        priority: The priority of this recipe. Defaults to `0`.
 )doc")
         .def_property_readonly("width", &ShapedRecipe::getWidth)
         .def_property_readonly("height", &ShapedRecipe::getHeight);
@@ -160,8 +164,8 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
     py::class_<ShapelessRecipe, Recipe>(m, "ShapelessRecipe", R"doc(
     Represents a shapeless recipe, where the arrangement of the ingredients on the crafting grid does not matter.
 )doc")
-        .def(py::init<std::string, std::vector<RecipeIngredient>, ItemStack, std::string>(), py::arg("recipe_id"),
-             py::arg("ingredients"), py::arg("result"), py::arg("tag") = "crafting_table",
+        .def(py::init<std::string, std::vector<RecipeIngredient>, ItemStack, std::string, int>(), py::arg("recipe_id"),
+             py::arg("ingredients"), py::arg("result"), py::arg("tag") = "crafting_table", py::arg("priority") = 0,
              R"doc(
     Creates a shapeless crafting recipe.
 
@@ -170,7 +174,27 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         ingredients: The ingredients this recipe consumes.
         result: The result of this recipe.
         tag: The crafting station this recipe belongs to, such as `crafting_table`.
+        priority: The priority of this recipe. Defaults to `0`.
 )doc");
+
+    py::class_<StonecuttingRecipe, Recipe>(m, "StonecuttingRecipe", "Represents a stonecutting recipe.")
+        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int>(), py::arg("recipe_id"),
+             py::arg("input"), py::arg("result"), py::arg("tag") = "stonecutter", py::arg("priority") = 0,
+             R"doc(
+    Creates a stonecutting recipe.
+
+    Args:
+        recipe_id: The recipe id.
+        input: The input this recipe consumes.
+        result: The result of this recipe.
+        tag: The crafting station this recipe belongs to, such as `stonecutter`.
+        priority: The priority of this recipe. Defaults to `0`.
+)doc")
+        .def_property_readonly("input", [](const StonecuttingRecipe &self) { return wrap_ingredient(self.getInput()); },
+                               "The input this recipe consumes.")
+        .def_property_readonly(
+            "input_choice", [](const StonecuttingRecipe &self) { return wrap_ingredient(self.getInputChoice()); },
+            "The input this recipe consumes.");
 
     py::class_<CookingRecipe, Recipe>(m, "CookingRecipe", R"doc(
     Represents a cooking recipe.
@@ -185,8 +209,8 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
             "The input this recipe consumes.");
 
     py::class_<FurnaceRecipe, CookingRecipe>(m, "FurnaceRecipe", "Represents a furnace recipe.")
-        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string>(), py::arg("recipe_id"), py::arg("input"),
-             py::arg("result"), py::arg("tag") = "furnace",
+        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int>(), py::arg("recipe_id"),
+             py::arg("input"), py::arg("result"), py::arg("tag") = "furnace", py::arg("priority") = 0,
              R"doc(
     Creates a furnace recipe.
 
@@ -195,11 +219,12 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         input: The input this recipe consumes.
         result: The result of this recipe.
         tag: The crafting station this recipe belongs to, such as `furnace`.
+        priority: The priority of this recipe. Defaults to `0`.
 )doc");
 
     py::class_<BlastingRecipe, CookingRecipe>(m, "BlastingRecipe", "Represents a blasting recipe.")
-        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string>(), py::arg("recipe_id"), py::arg("input"),
-             py::arg("result"), py::arg("tag") = "blast_furnace",
+        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int>(), py::arg("recipe_id"),
+             py::arg("input"), py::arg("result"), py::arg("tag") = "blast_furnace", py::arg("priority") = 0,
              R"doc(
     Creates a blasting recipe.
 
@@ -208,11 +233,12 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         input: The input this recipe consumes.
         result: The result of this recipe.
         tag: The crafting station this recipe belongs to, such as `blast_furnace`.
+        priority: The priority of this recipe. Defaults to `0`.
 )doc");
 
     py::class_<SmokingRecipe, CookingRecipe>(m, "SmokingRecipe", "Represents a smoking recipe.")
-        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string>(), py::arg("recipe_id"), py::arg("input"),
-             py::arg("result"), py::arg("tag") = "smoker",
+        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int>(), py::arg("recipe_id"),
+             py::arg("input"), py::arg("result"), py::arg("tag") = "smoker", py::arg("priority") = 0,
              R"doc(
     Creates a smoking recipe.
 
@@ -221,11 +247,12 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         input: The input this recipe consumes.
         result: The result of this recipe.
         tag: The crafting station this recipe belongs to, such as `smoker`.
+        priority: The priority of this recipe. Defaults to `0`.
 )doc");
 
     py::class_<CampfireRecipe, CookingRecipe>(m, "CampfireRecipe", "Represents a campfire recipe.")
-        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string>(), py::arg("recipe_id"), py::arg("input"),
-             py::arg("result"), py::arg("tag") = "campfire",
+        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int>(), py::arg("recipe_id"),
+             py::arg("input"), py::arg("result"), py::arg("tag") = "campfire", py::arg("priority") = 0,
              R"doc(
     Creates a campfire recipe.
 
@@ -234,6 +261,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         input: The input this recipe consumes.
         result: The result of this recipe.
         tag: The crafting station this recipe belongs to, such as `campfire`.
+        priority: The priority of this recipe. Defaults to `0`.
 )doc");
 
     py::class_<BrewingRecipe, Recipe>(m, "BrewingRecipe", R"doc(

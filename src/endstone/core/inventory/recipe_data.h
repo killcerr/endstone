@@ -41,6 +41,7 @@
 #include "endstone/inventory/smithing_transform_recipe.h"
 #include "endstone/inventory/smithing_trim_recipe.h"
 #include "endstone/inventory/smoking_recipe.h"
+#include "endstone/inventory/stonecutting_recipe.h"
 
 namespace endstone::core {
 
@@ -62,6 +63,7 @@ public:
     [[nodiscard]] const ::Recipe &getHandle() const { return *recipe_; }
     [[nodiscard]] const std::string &getRecipeId() const override { return recipe_->getRecipeId(); }
     [[nodiscard]] const std::string &getTag() const override { return recipe_->getTag().getString(); }
+    [[nodiscard]] int getPriority() const override { return recipe_->getPriority(); }
 
 protected:
     std::shared_ptr<const ::Recipe> recipe_;
@@ -105,6 +107,15 @@ public:
     [[nodiscard]] std::unique_ptr<Impl> clone() const override
     {
         return std::make_unique<EndstoneShapelessRecipe>(*this);
+    }
+};
+
+class EndstoneStonecuttingRecipe final : public EndstoneRecipeBase<endstone::StonecuttingRecipe> {
+public:
+    using EndstoneRecipeBase::EndstoneRecipeBase;
+    [[nodiscard]] std::unique_ptr<Impl> clone() const override
+    {
+        return std::make_unique<EndstoneStonecuttingRecipe>(*this);
     }
 };
 

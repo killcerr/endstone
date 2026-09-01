@@ -61,6 +61,7 @@
 #include "endstone/inventory/smithing_transform_recipe.h"
 #include "endstone/inventory/smithing_trim_recipe.h"
 #include "endstone/inventory/smoking_recipe.h"
+#include "endstone/inventory/stonecutting_recipe.h"
 #include "endstone/permissions/permissible.h"
 #include "endstone/player.h"
 
@@ -115,6 +116,7 @@ void registerTypes()
     registerType<ComplexRecipe>().base<Recipe>();
     registerType<ShapedRecipe>().base<Recipe>();
     registerType<ShapelessRecipe>().base<Recipe>();
+    registerType<StonecuttingRecipe>().base<Recipe>();
     registerType<FurnaceRecipe>().base<CookingRecipe>();
     registerType<BlastingRecipe>().base<CookingRecipe>();
     registerType<SmokingRecipe>().base<CookingRecipe>();

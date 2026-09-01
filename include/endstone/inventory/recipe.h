@@ -75,6 +75,15 @@ public:
     [[nodiscard]] const std::string &getTag() const { return impl_->getTag(); }
 
     /**
+     * Get the priority of this recipe.
+     *
+     * When several recipes match, Bedrock prefers the one with the higher priority.
+     *
+     * @return the priority
+     */
+    [[nodiscard]] int getPriority() const { return impl_->getPriority(); }
+
+    /**
      * Attempts to copy this recipe as the given type T.
      *
      * @tparam T Target type to copy as (must derive from Recipe)
@@ -102,6 +111,7 @@ protected:
         [[nodiscard]] virtual const std::vector<std::optional<RecipeIngredient>> &getIngredients() const = 0;
         [[nodiscard]] virtual const std::string &getRecipeId() const = 0;
         [[nodiscard]] virtual const std::string &getTag() const = 0;
+        [[nodiscard]] virtual int getPriority() const { return 0; }
         [[nodiscard]] virtual int getWidth() const { return 0; }
         [[nodiscard]] virtual int getHeight() const { return 0; }
         [[nodiscard]] virtual std::optional<RecipeIngredient> getSmithingIngredient(std::size_t /*index*/) const
@@ -113,9 +123,10 @@ protected:
     class SimpleImpl : public Impl {
     public:
         SimpleImpl(std::initializer_list<ClassInfo> types, std::string recipe_id, std::string tag, ItemStack result,
-                   std::vector<std::optional<RecipeIngredient>> ingredients, int width = 0, int height = 0)
+                   std::vector<std::optional<RecipeIngredient>> ingredients, int priority = 0, int width = 0,
+                   int height = 0)
             : types_(types), recipe_id_(std::move(recipe_id)), tag_(std::move(tag)), result_(std::move(result)),
-              ingredients_(std::move(ingredients)), width_(width), height_(height)
+              ingredients_(std::move(ingredients)), priority_(priority), width_(width), height_(height)
         {
         }
 
@@ -137,6 +148,7 @@ protected:
         }
         [[nodiscard]] const std::string &getRecipeId() const override { return recipe_id_; }
         [[nodiscard]] const std::string &getTag() const override { return tag_; }
+        [[nodiscard]] int getPriority() const override { return priority_; }
         [[nodiscard]] int getWidth() const override { return width_; }
         [[nodiscard]] int getHeight() const override { return height_; }
         [[nodiscard]] std::optional<RecipeIngredient> getSmithingIngredient(std::size_t index) const override
@@ -150,6 +162,7 @@ protected:
         std::string tag_;
         ItemStack result_;
         std::vector<std::optional<RecipeIngredient>> ingredients_;
+        int priority_;
         int width_;
         int height_;
     };

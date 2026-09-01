@@ -26,7 +26,7 @@ namespace endstone {
 class ShapelessRecipe : public Recipe {
 public:
     ShapelessRecipe(std::string recipe_id, std::vector<RecipeIngredient> ingredients, ItemStack result,
-                    std::string tag = "crafting_table")
+                    std::string tag = "crafting_table", int priority = 0)
         : Recipe([&] {
               std::vector<std::optional<RecipeIngredient>> slots;
               slots.reserve(ingredients.size());
@@ -35,7 +35,7 @@ public:
               }
               return std::make_unique<SimpleImpl>(
                   std::initializer_list<ClassInfo>{typeid(ShapelessRecipe), typeid(Recipe)}, std::move(recipe_id),
-                  std::move(tag), std::move(result), std::move(slots));
+                  std::move(tag), std::move(result), std::move(slots), priority);
           }())
     {
     }

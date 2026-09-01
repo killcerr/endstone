@@ -125,6 +125,9 @@ inline py::typing::Union<Recipe> wrap_recipe(const Recipe &recipe)
     if (auto shaped = recipe.as<ShapedRecipe>()) {
         return py::cast(std::move(*shaped));
     }
+    if (auto stonecutting = recipe.as<StonecuttingRecipe>()) {
+        return py::cast(std::move(*stonecutting));
+    }
     if (auto shapeless = recipe.as<ShapelessRecipe>()) {
         return py::cast(std::move(*shapeless));
     }

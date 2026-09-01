@@ -217,6 +217,7 @@ static_assert(_ITERATOR_DEBUG_LEVEL == 0,
 #include "inventory/smithing_transform_recipe.h"
 #include "inventory/smithing_trim_recipe.h"
 #include "inventory/smoking_recipe.h"
+#include "inventory/stonecutting_recipe.h"
 #include "json.h"
 #include "lang/language.h"
 #include "lang/translatable.h"

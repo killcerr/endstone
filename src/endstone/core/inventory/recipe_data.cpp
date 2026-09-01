@@ -60,6 +60,9 @@ endstone::Recipe EndstoneRecipe::fromMinecraft(std::shared_ptr<const ::Recipe> r
     if (tag == CAMPFIRE_TAG || tag == SOUL_CAMPFIRE_TAG) {
         return CampfireRecipe(std::make_unique<EndstoneCampfireRecipe>(std::move(recipe)));
     }
+    if (tag.getString() == "stonecutter") {
+        return StonecuttingRecipe(std::make_unique<EndstoneStonecuttingRecipe>(std::move(recipe)));
+    }
     if (recipe->isShapeless()) {
         return ShapelessRecipe(std::make_unique<EndstoneShapelessRecipe>(std::move(recipe)));
     }
@@ -180,6 +183,28 @@ std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
         }
         context.results = ::Recipe::Results({ItemInstance(EndstoneItemStack::toMinecraft(cooking->getResult()))});
         context.tag = HashedString(cooking->getTag());
+        context.priority = cooking->getPriority();
+        context.unlocking_requirement =
+            RecipeUnlockingRequirement(RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked);
+        return std::make_unique<::ShapelessRecipe>(std::move(context));
+    }
+
+    if (const auto stonecutting = recipe.as<StonecuttingRecipe>()) {
+        ::Recipe::ConstructionContext context;
+        context.recipe_id = stonecutting->getRecipeId();
+        const auto &ingredients = stonecutting->getIngredients();
+        context.ingredients.reserve(ingredients.size());
+        for (const auto &ingredient : ingredients) {
+            if (ingredient) {
+                context.ingredients.push_back(EndstoneIngredient::toMinecraft(*ingredient));
+            }
+            else {
+                context.ingredients.emplace_back();
+            }
+        }
+        context.results = ::Recipe::Results({ItemInstance(EndstoneItemStack::toMinecraft(stonecutting->getResult()))});
+        context.tag = HashedString(stonecutting->getTag());
+        context.priority = stonecutting->getPriority();
         context.unlocking_requirement =
             RecipeUnlockingRequirement(RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked);
         return std::make_unique<::ShapelessRecipe>(std::move(context));
@@ -200,6 +225,7 @@ std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
         }
         context.results = ::Recipe::Results({ItemInstance(EndstoneItemStack::toMinecraft(shapeless->getResult()))});
         context.tag = HashedString(shapeless->getTag());
+        context.priority = shapeless->getPriority();
         context.unlocking_requirement =
             RecipeUnlockingRequirement(RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked);
         return std::make_unique<::ShapelessRecipe>(std::move(context));
@@ -220,6 +246,7 @@ std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
         }
         context.results = ::Recipe::Results({ItemInstance(EndstoneItemStack::toMinecraft(shaped->getResult()))});
         context.tag = HashedString(shaped->getTag());
+        context.priority = shaped->getPriority();
         context.unlocking_requirement =
             RecipeUnlockingRequirement(RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked);
         return std::make_unique<::ShapedRecipe>(std::move(context), shaped->getWidth(), shaped->getHeight(), true);

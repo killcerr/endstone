@@ -26,11 +26,12 @@ namespace endstone {
  */
 class CampfireRecipe : public CookingRecipe {
 public:
-    CampfireRecipe(std::string recipe_id, RecipeIngredient input, ItemStack result, std::string tag = "campfire")
+    CampfireRecipe(std::string recipe_id, RecipeIngredient input, ItemStack result, std::string tag = "campfire",
+                   int priority = 0)
         : CookingRecipe(std::make_unique<SimpleImpl>(
               std::initializer_list<ClassInfo>{typeid(CampfireRecipe), typeid(CookingRecipe), typeid(Recipe)},
               std::move(recipe_id), std::move(tag), std::move(result),
-              std::vector<std::optional<RecipeIngredient>>{std::move(input)}))
+              std::vector<std::optional<RecipeIngredient>>{std::move(input)}, priority))
     {
     }
     CampfireRecipe(const CampfireRecipe &other) = default;
