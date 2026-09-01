@@ -764,8 +764,21 @@ class StubGen:
         body_start = self._output.tell()
         if cls.docstring and self.include_docstrings and cls.docstring.value:
             self.put_docstr(cls.docstring.value)
-        self.apply_pattern(self.prefix + ".__prefix__", None)
-        for member in cls.members.values():
+        # A nested enum must precede methods whose default expressions refer to
+        # it; otherwise the generated class body evaluates the default too early.
+        nested_names = {member.name for member in cls.members.values() if member.kind == Kind.CLASS}
+        needs_nested_first = any(
+            member.kind == Kind.FUNCTION
+            and any(
+                any(f"{nested}." in signature for nested in nested_names)
+                for signature, _ in getattr(member, "_pybind11_signature_", [])
+            )
+            for member in cls.members.values()
+        )
+        members = list(cls.members.values())
+        if needs_nested_first:
+            members.sort(key=lambda member: member.kind != Kind.CLASS)
+        for member in members:
             self.put(member)
         self.apply_pattern(self.prefix + ".__suffix__", None)
         if self._output.tell() == body_start:

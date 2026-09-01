@@ -124,6 +124,66 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
     not an item tag, and the items are not reported.
 )doc");
 
+    auto recipe_unlocking = py::class_<RecipeUnlockingRequirement>(
+        m, "RecipeUnlockingRequirement", R"doc(
+    How a recipe is unlocked in the recipe book.
+
+    A recipe is unlocked either by a context, or by picking up one of a list of items. The two are exclusive: a
+    context-unlocked recipe has no unlocking ingredients, and an ingredient-unlocked recipe has context `NONE`.
+)doc");
+    py::native_enum<RecipeUnlockingRequirement::UnlockingContext>(
+        recipe_unlocking, "UnlockingContext", "enum.Enum",
+        "A situation that unlocks a recipe without a specific item.")
+        .value("NONE", RecipeUnlockingRequirement::UnlockingContext::None,
+               "Not unlocked by a context. Used when the recipe is unlocked by ingredients instead.")
+        .value("ALWAYS_UNLOCKED", RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked,
+               "Unlocked as soon as the player joins.")
+        .value("PLAYER_IN_WATER", RecipeUnlockingRequirement::UnlockingContext::PlayerInWater,
+               "Unlocked when the player is in water.")
+        .value("PLAYER_HAS_MANY_ITEMS", RecipeUnlockingRequirement::UnlockingContext::PlayerHasManyItems,
+               "Unlocked when the player is carrying many items.")
+        .export_values()
+        .finalize();
+    recipe_unlocking
+        .def(py::init<RecipeUnlockingRequirement::UnlockingContext>(),
+             py::arg_v("context", RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked),
+             R"doc(
+    Creates a requirement unlocked by a context.
+
+    Plugin recipes default to `ALWAYS_UNLOCKED`.
+
+    Args:
+        context: The unlocking context.
+)doc")
+        .def(py::init<std::vector<RecipeIngredient>>(), py::arg("unlocking_ingredients"),
+             R"doc(
+    Creates a requirement unlocked by picking up any of the given items.
+
+    The context is `NONE`.
+
+    Args:
+        unlocking_ingredients: The items that unlock this recipe.
+)doc")
+        .def_property_readonly("is_unlockable", &RecipeUnlockingRequirement::isUnlockable,
+                               "Whether this recipe can be unlocked at all.")
+        .def_property_readonly("is_unlocked_by_context", &RecipeUnlockingRequirement::isUnlockedByContext,
+                               "Whether this recipe is unlocked by a context rather than by items.")
+        .def_property_readonly("is_unlocked_by_ingredients", &RecipeUnlockingRequirement::isUnlockedByIngredients,
+                               "Whether this recipe is unlocked by picking up items.")
+        .def_property_readonly("context", &RecipeUnlockingRequirement::getContext,
+                               "The context that unlocks this recipe, or `NONE` when unlocked by ingredients.")
+        .def_property_readonly(
+            "ingredients",
+            [](const RecipeUnlockingRequirement &self) {
+                py::typing::List<RecipeIngredient> out;
+                for (const auto &ingredient : self.getIngredients()) {
+                    out.append(wrap_ingredient(std::optional<RecipeIngredient>(ingredient)));
+                }
+                return out;
+            },
+            "The items that unlock this recipe. Empty when unlocked by a context.");
+
+
     py::class_<Recipe>(m, "Recipe", "Represents some type of crafting recipe.")
         .def_property_readonly("result", &Recipe::getResult, "The result of this recipe.")
         .def_property_readonly(
@@ -140,13 +200,16 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
                                "The crafting station this recipe belongs to, such as `crafting_table`.")
         .def_property_readonly(
             "priority", &Recipe::getPriority,
-            "The priority of this recipe. When several recipes match, Bedrock prefers the higher one.");
+            "The priority of this recipe. When several recipes match, Bedrock prefers the higher one.")
+        .def_property_readonly("unlocking_requirement", &Recipe::getUnlockingRequirement,
+                               "How this recipe is unlocked in the recipe book.");
 
     py::class_<ShapedRecipe, Recipe>(m, "ShapedRecipe", "Represents a shaped (ie normal) crafting recipe.")
         .def(py::init<std::string, std::vector<std::string>, std::vector<std::pair<char, RecipeIngredient>>, ItemStack,
-                      std::string, int>(),
+                      std::string, int, RecipeUnlockingRequirement>(),
              py::arg("recipe_id"), py::arg("shape"), py::arg("ingredients"), py::arg("result"),
              py::arg("tag") = "crafting_table", py::arg("priority") = 0,
+             py::arg_v("unlocking", RecipeUnlockingRequirement(), "RecipeUnlockingRequirement()"),
              R"doc(
     Creates a shaped crafting recipe.
 
@@ -157,6 +220,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         result: The result of this recipe.
         tag: The crafting station this recipe belongs to, such as `crafting_table`.
         priority: The priority of this recipe. Defaults to `0`.
+        unlocking: How this recipe is unlocked in the recipe book. Defaults to always unlocked.
 )doc")
         .def_property_readonly("width", &ShapedRecipe::getWidth)
         .def_property_readonly("height", &ShapedRecipe::getHeight);
@@ -164,8 +228,11 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
     py::class_<ShapelessRecipe, Recipe>(m, "ShapelessRecipe", R"doc(
     Represents a shapeless recipe, where the arrangement of the ingredients on the crafting grid does not matter.
 )doc")
-        .def(py::init<std::string, std::vector<RecipeIngredient>, ItemStack, std::string, int>(), py::arg("recipe_id"),
-             py::arg("ingredients"), py::arg("result"), py::arg("tag") = "crafting_table", py::arg("priority") = 0,
+        .def(py::init<std::string, std::vector<RecipeIngredient>, ItemStack, std::string, int,
+                      RecipeUnlockingRequirement>(),
+             py::arg("recipe_id"), py::arg("ingredients"), py::arg("result"), py::arg("tag") = "crafting_table",
+             py::arg("priority") = 0,
+             py::arg_v("unlocking", RecipeUnlockingRequirement(), "RecipeUnlockingRequirement()"),
              R"doc(
     Creates a shapeless crafting recipe.
 
@@ -175,11 +242,14 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         result: The result of this recipe.
         tag: The crafting station this recipe belongs to, such as `crafting_table`.
         priority: The priority of this recipe. Defaults to `0`.
+        unlocking: How this recipe is unlocked in the recipe book. Defaults to always unlocked.
 )doc");
 
     py::class_<StonecuttingRecipe, Recipe>(m, "StonecuttingRecipe", "Represents a stonecutting recipe.")
-        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int>(), py::arg("recipe_id"),
-             py::arg("input"), py::arg("result"), py::arg("tag") = "stonecutter", py::arg("priority") = 0,
+        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int, RecipeUnlockingRequirement>(),
+             py::arg("recipe_id"), py::arg("input"), py::arg("result"), py::arg("tag") = "stonecutter",
+             py::arg("priority") = 0,
+             py::arg_v("unlocking", RecipeUnlockingRequirement(), "RecipeUnlockingRequirement()"),
              R"doc(
     Creates a stonecutting recipe.
 
@@ -189,6 +259,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         result: The result of this recipe.
         tag: The crafting station this recipe belongs to, such as `stonecutter`.
         priority: The priority of this recipe. Defaults to `0`.
+        unlocking: How this recipe is unlocked in the recipe book. Defaults to always unlocked.
 )doc")
         .def_property_readonly("input", [](const StonecuttingRecipe &self) { return wrap_ingredient(self.getInput()); },
                                "The input this recipe consumes.")
@@ -209,8 +280,10 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
             "The input this recipe consumes.");
 
     py::class_<FurnaceRecipe, CookingRecipe>(m, "FurnaceRecipe", "Represents a furnace recipe.")
-        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int>(), py::arg("recipe_id"),
-             py::arg("input"), py::arg("result"), py::arg("tag") = "furnace", py::arg("priority") = 0,
+        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int, RecipeUnlockingRequirement>(),
+             py::arg("recipe_id"), py::arg("input"), py::arg("result"), py::arg("tag") = "furnace",
+             py::arg("priority") = 0,
+             py::arg_v("unlocking", RecipeUnlockingRequirement(), "RecipeUnlockingRequirement()"),
              R"doc(
     Creates a furnace recipe.
 
@@ -220,11 +293,14 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         result: The result of this recipe.
         tag: The crafting station this recipe belongs to, such as `furnace`.
         priority: The priority of this recipe. Defaults to `0`.
+        unlocking: How this recipe is unlocked in the recipe book. Defaults to always unlocked.
 )doc");
 
     py::class_<BlastingRecipe, CookingRecipe>(m, "BlastingRecipe", "Represents a blasting recipe.")
-        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int>(), py::arg("recipe_id"),
-             py::arg("input"), py::arg("result"), py::arg("tag") = "blast_furnace", py::arg("priority") = 0,
+        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int, RecipeUnlockingRequirement>(),
+             py::arg("recipe_id"), py::arg("input"), py::arg("result"), py::arg("tag") = "blast_furnace",
+             py::arg("priority") = 0,
+             py::arg_v("unlocking", RecipeUnlockingRequirement(), "RecipeUnlockingRequirement()"),
              R"doc(
     Creates a blasting recipe.
 
@@ -234,11 +310,14 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         result: The result of this recipe.
         tag: The crafting station this recipe belongs to, such as `blast_furnace`.
         priority: The priority of this recipe. Defaults to `0`.
+        unlocking: How this recipe is unlocked in the recipe book. Defaults to always unlocked.
 )doc");
 
     py::class_<SmokingRecipe, CookingRecipe>(m, "SmokingRecipe", "Represents a smoking recipe.")
-        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int>(), py::arg("recipe_id"),
-             py::arg("input"), py::arg("result"), py::arg("tag") = "smoker", py::arg("priority") = 0,
+        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int, RecipeUnlockingRequirement>(),
+             py::arg("recipe_id"), py::arg("input"), py::arg("result"), py::arg("tag") = "smoker",
+             py::arg("priority") = 0,
+             py::arg_v("unlocking", RecipeUnlockingRequirement(), "RecipeUnlockingRequirement()"),
              R"doc(
     Creates a smoking recipe.
 
@@ -248,11 +327,14 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         result: The result of this recipe.
         tag: The crafting station this recipe belongs to, such as `smoker`.
         priority: The priority of this recipe. Defaults to `0`.
+        unlocking: How this recipe is unlocked in the recipe book. Defaults to always unlocked.
 )doc");
 
     py::class_<CampfireRecipe, CookingRecipe>(m, "CampfireRecipe", "Represents a campfire recipe.")
-        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int>(), py::arg("recipe_id"),
-             py::arg("input"), py::arg("result"), py::arg("tag") = "campfire", py::arg("priority") = 0,
+        .def(py::init<std::string, RecipeIngredient, ItemStack, std::string, int, RecipeUnlockingRequirement>(),
+             py::arg("recipe_id"), py::arg("input"), py::arg("result"), py::arg("tag") = "campfire",
+             py::arg("priority") = 0,
+             py::arg_v("unlocking", RecipeUnlockingRequirement(), "RecipeUnlockingRequirement()"),
              R"doc(
     Creates a campfire recipe.
 
@@ -262,6 +344,7 @@ void init_inventory(py::module_ &m, py::class_<ItemStack> &item_stack)
         result: The result of this recipe.
         tag: The crafting station this recipe belongs to, such as `campfire`.
         priority: The priority of this recipe. Defaults to `0`.
+        unlocking: How this recipe is unlocked in the recipe book. Defaults to always unlocked.
 )doc");
 
     py::class_<BrewingRecipe, Recipe>(m, "BrewingRecipe", R"doc(

@@ -28,11 +28,12 @@ namespace endstone {
 class StonecuttingRecipe : public Recipe {
 public:
     StonecuttingRecipe(std::string recipe_id, RecipeIngredient input, ItemStack result,
-                       std::string tag = "stonecutter", int priority = 0)
+                       std::string tag = "stonecutter", int priority = 0,
+                       RecipeUnlockingRequirement unlocking = RecipeUnlockingRequirement())
         : Recipe(std::make_unique<SimpleImpl>(
               std::initializer_list<ClassInfo>{typeid(StonecuttingRecipe), typeid(Recipe)}, std::move(recipe_id),
               std::move(tag), std::move(result), std::vector<std::optional<RecipeIngredient>>{std::move(input)},
-              priority))
+              priority, 0, 0, std::move(unlocking)))
     {
     }
     StonecuttingRecipe(const StonecuttingRecipe &other) = default;

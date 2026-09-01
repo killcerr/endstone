@@ -39,6 +39,7 @@ __all__ = [
     "PotionMeta",
     "Recipe",
     "RecipeIngredient",
+    "RecipeUnlockingRequirement",
     "ShapedRecipe",
     "ShapelessRecipe",
     "SmithingRecipe",
@@ -294,6 +295,110 @@ class ComplexAliasIngredient(RecipeIngredient):
         not an item tag, and the items are not reported.
         """
 
+class RecipeUnlockingRequirement:
+    """
+    How a recipe is unlocked in the recipe book.
+
+    A recipe is unlocked either by a context, or by picking up one of a list of items. The two are exclusive: a
+    context-unlocked recipe has no unlocking ingredients, and an ingredient-unlocked recipe has context `NONE`.
+    """
+    class UnlockingContext(enum.Enum):
+        """
+        A situation that unlocks a recipe without a specific item.
+        """
+
+        NONE = 0
+        """
+        Not unlocked by a context. Used when the recipe is unlocked by ingredients instead.
+        """
+
+        ALWAYS_UNLOCKED = 1
+        """
+        Unlocked as soon as the player joins.
+        """
+
+        PLAYER_IN_WATER = 2
+        """
+        Unlocked when the player is in water.
+        """
+
+        PLAYER_HAS_MANY_ITEMS = 3
+        """
+        Unlocked when the player is carrying many items.
+        """
+
+    @typing.overload
+    def __init__(self, context: UnlockingContext = UnlockingContext.ALWAYS_UNLOCKED) -> None:
+        """
+        Creates a requirement unlocked by a context.
+
+        Plugin recipes default to `ALWAYS_UNLOCKED`.
+
+        Args:
+            context: The unlocking context.
+        """
+
+    @typing.overload
+    def __init__(self, unlocking_ingredients: list[RecipeIngredient]) -> None:
+        """
+        Creates a requirement unlocked by picking up any of the given items.
+
+        The context is `NONE`.
+
+        Args:
+            unlocking_ingredients: The items that unlock this recipe.
+        """
+
+    NONE = UnlockingContext.NONE
+    """
+    Not unlocked by a context. Used when the recipe is unlocked by ingredients instead.
+    """
+
+    ALWAYS_UNLOCKED = UnlockingContext.ALWAYS_UNLOCKED
+    """
+    Unlocked as soon as the player joins.
+    """
+
+    PLAYER_IN_WATER = UnlockingContext.PLAYER_IN_WATER
+    """
+    Unlocked when the player is in water.
+    """
+
+    PLAYER_HAS_MANY_ITEMS = UnlockingContext.PLAYER_HAS_MANY_ITEMS
+    """
+    Unlocked when the player is carrying many items.
+    """
+
+    @property
+    def is_unlockable(self) -> bool:
+        """
+        Whether this recipe can be unlocked at all.
+        """
+
+    @property
+    def is_unlocked_by_context(self) -> bool:
+        """
+        Whether this recipe is unlocked by a context rather than by items.
+        """
+
+    @property
+    def is_unlocked_by_ingredients(self) -> bool:
+        """
+        Whether this recipe is unlocked by picking up items.
+        """
+
+    @property
+    def context(self) -> UnlockingContext:
+        """
+        The context that unlocks this recipe, or `NONE` when unlocked by ingredients.
+        """
+
+    @property
+    def ingredients(self) -> list[RecipeIngredient]:
+        """
+        The items that unlock this recipe. Empty when unlocked by a context.
+        """
+
 class Recipe:
     """
     Represents some type of crafting recipe.
@@ -320,6 +425,12 @@ class Recipe:
         The priority of this recipe. When several recipes match, Bedrock prefers the higher one.
         """
 
+    @property
+    def unlocking_requirement(self) -> RecipeUnlockingRequirement:
+        """
+        How this recipe is unlocked in the recipe book.
+        """
+
 class ShapedRecipe(Recipe):
     """
     Represents a shaped (ie normal) crafting recipe.
@@ -332,6 +443,7 @@ class ShapedRecipe(Recipe):
         result: ItemStack,
         tag: str = "crafting_table",
         priority: int = 0,
+        unlocking: RecipeUnlockingRequirement = RecipeUnlockingRequirement(),
     ) -> None:
         """
         Creates a shaped crafting recipe.
@@ -343,6 +455,7 @@ class ShapedRecipe(Recipe):
             result: The result of this recipe.
             tag: The crafting station this recipe belongs to, such as `crafting_table`.
             priority: The priority of this recipe. Defaults to `0`.
+            unlocking: How this recipe is unlocked in the recipe book. Defaults to always unlocked.
         """
 
     @property
@@ -361,6 +474,7 @@ class ShapelessRecipe(Recipe):
         result: ItemStack,
         tag: str = "crafting_table",
         priority: int = 0,
+        unlocking: RecipeUnlockingRequirement = RecipeUnlockingRequirement(),
     ) -> None:
         """
         Creates a shapeless crafting recipe.
@@ -371,6 +485,7 @@ class ShapelessRecipe(Recipe):
             result: The result of this recipe.
             tag: The crafting station this recipe belongs to, such as `crafting_table`.
             priority: The priority of this recipe. Defaults to `0`.
+            unlocking: How this recipe is unlocked in the recipe book. Defaults to always unlocked.
         """
 
 class StonecuttingRecipe(Recipe):
@@ -378,7 +493,13 @@ class StonecuttingRecipe(Recipe):
     Represents a stonecutting recipe.
     """
     def __init__(
-        self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "stonecutter", priority: int = 0
+        self,
+        recipe_id: str,
+        input: RecipeIngredient,
+        result: ItemStack,
+        tag: str = "stonecutter",
+        priority: int = 0,
+        unlocking: RecipeUnlockingRequirement = RecipeUnlockingRequirement(),
     ) -> None:
         """
         Creates a stonecutting recipe.
@@ -389,6 +510,7 @@ class StonecuttingRecipe(Recipe):
             result: The result of this recipe.
             tag: The crafting station this recipe belongs to, such as `stonecutter`.
             priority: The priority of this recipe. Defaults to `0`.
+            unlocking: How this recipe is unlocked in the recipe book. Defaults to always unlocked.
         """
 
     @property
@@ -427,7 +549,13 @@ class FurnaceRecipe(CookingRecipe):
     Represents a furnace recipe.
     """
     def __init__(
-        self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "furnace", priority: int = 0
+        self,
+        recipe_id: str,
+        input: RecipeIngredient,
+        result: ItemStack,
+        tag: str = "furnace",
+        priority: int = 0,
+        unlocking: RecipeUnlockingRequirement = RecipeUnlockingRequirement(),
     ) -> None:
         """
         Creates a furnace recipe.
@@ -438,6 +566,7 @@ class FurnaceRecipe(CookingRecipe):
             result: The result of this recipe.
             tag: The crafting station this recipe belongs to, such as `furnace`.
             priority: The priority of this recipe. Defaults to `0`.
+            unlocking: How this recipe is unlocked in the recipe book. Defaults to always unlocked.
         """
 
 class BlastingRecipe(CookingRecipe):
@@ -445,7 +574,13 @@ class BlastingRecipe(CookingRecipe):
     Represents a blasting recipe.
     """
     def __init__(
-        self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "blast_furnace", priority: int = 0
+        self,
+        recipe_id: str,
+        input: RecipeIngredient,
+        result: ItemStack,
+        tag: str = "blast_furnace",
+        priority: int = 0,
+        unlocking: RecipeUnlockingRequirement = RecipeUnlockingRequirement(),
     ) -> None:
         """
         Creates a blasting recipe.
@@ -456,6 +591,7 @@ class BlastingRecipe(CookingRecipe):
             result: The result of this recipe.
             tag: The crafting station this recipe belongs to, such as `blast_furnace`.
             priority: The priority of this recipe. Defaults to `0`.
+            unlocking: How this recipe is unlocked in the recipe book. Defaults to always unlocked.
         """
 
 class SmokingRecipe(CookingRecipe):
@@ -463,7 +599,13 @@ class SmokingRecipe(CookingRecipe):
     Represents a smoking recipe.
     """
     def __init__(
-        self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "smoker", priority: int = 0
+        self,
+        recipe_id: str,
+        input: RecipeIngredient,
+        result: ItemStack,
+        tag: str = "smoker",
+        priority: int = 0,
+        unlocking: RecipeUnlockingRequirement = RecipeUnlockingRequirement(),
     ) -> None:
         """
         Creates a smoking recipe.
@@ -474,6 +616,7 @@ class SmokingRecipe(CookingRecipe):
             result: The result of this recipe.
             tag: The crafting station this recipe belongs to, such as `smoker`.
             priority: The priority of this recipe. Defaults to `0`.
+            unlocking: How this recipe is unlocked in the recipe book. Defaults to always unlocked.
         """
 
 class CampfireRecipe(CookingRecipe):
@@ -481,7 +624,13 @@ class CampfireRecipe(CookingRecipe):
     Represents a campfire recipe.
     """
     def __init__(
-        self, recipe_id: str, input: RecipeIngredient, result: ItemStack, tag: str = "campfire", priority: int = 0
+        self,
+        recipe_id: str,
+        input: RecipeIngredient,
+        result: ItemStack,
+        tag: str = "campfire",
+        priority: int = 0,
+        unlocking: RecipeUnlockingRequirement = RecipeUnlockingRequirement(),
     ) -> None:
         """
         Creates a campfire recipe.
@@ -492,6 +641,7 @@ class CampfireRecipe(CookingRecipe):
             result: The result of this recipe.
             tag: The crafting station this recipe belongs to, such as `campfire`.
             priority: The priority of this recipe. Defaults to `0`.
+            unlocking: How this recipe is unlocked in the recipe book. Defaults to always unlocked.
         """
 
 class BrewingRecipe(Recipe):

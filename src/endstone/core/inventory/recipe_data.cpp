@@ -83,7 +83,40 @@ std::optional<endstone::Recipe> EndstoneRecipe::fromMinecraft(const ::Recipes &r
     return fromMinecraft(by_id->second);
 }
 
+
 namespace {
+endstone::RecipeUnlockingRequirement fromMinecraftUnlocking(const std::shared_ptr<const ::Recipe> &recipe,
+                                                            const ::RecipeUnlockingRequirement &requirement)
+{
+    if (requirement.isUnlockedByIngredients()) {
+        std::vector<endstone::RecipeIngredient> ingredients;
+        ingredients.reserve(requirement.getUnlockingIngredients().size());
+        for (const auto &ingredient : requirement.getUnlockingIngredients()) {
+            auto converted = EndstoneIngredient::fromMinecraft(recipe, ingredient);
+            if (converted) {
+                ingredients.push_back(std::move(*converted));
+            }
+        }
+        return endstone::RecipeUnlockingRequirement(std::move(ingredients));
+    }
+    return endstone::RecipeUnlockingRequirement(
+        static_cast<endstone::RecipeUnlockingRequirement::UnlockingContext>(requirement.getUnlockingContext()));
+}
+
+::RecipeUnlockingRequirement toMinecraftUnlocking(const endstone::RecipeUnlockingRequirement &requirement)
+{
+    if (requirement.isUnlockedByIngredients()) {
+        std::vector<::RecipeIngredient> ingredients;
+        ingredients.reserve(requirement.getIngredients().size());
+        for (const auto &ingredient : requirement.getIngredients()) {
+            ingredients.push_back(EndstoneIngredient::toMinecraft(ingredient));
+        }
+        return ::RecipeUnlockingRequirement(std::move(ingredients));
+    }
+    return ::RecipeUnlockingRequirement(
+        static_cast<::RecipeUnlockingRequirement::UnlockingContext>(requirement.getContext()));
+}
+
 
 struct PluginMix {
     ItemDescriptor from;
@@ -148,7 +181,7 @@ std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
             ::Recipe::Results({ItemInstance(EndstoneItemStack::toMinecraft(transform->getResult()))}),
             HashedString(transform->getTag()));
         handle->setUnlockingRequirement(
-            RecipeUnlockingRequirement(RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked));
+            ::RecipeUnlockingRequirement(::RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked));
         return handle;
     }
 
@@ -164,7 +197,7 @@ std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
             EndstoneIngredient::toMinecraft(*base), EndstoneIngredient::toMinecraft(*addition),
             HashedString(trim->getTag()));
         handle->setUnlockingRequirement(
-            RecipeUnlockingRequirement(RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked));
+            ::RecipeUnlockingRequirement(::RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked));
         return handle;
     }
 
@@ -184,8 +217,7 @@ std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
         context.results = ::Recipe::Results({ItemInstance(EndstoneItemStack::toMinecraft(cooking->getResult()))});
         context.tag = HashedString(cooking->getTag());
         context.priority = cooking->getPriority();
-        context.unlocking_requirement =
-            RecipeUnlockingRequirement(RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked);
+        context.unlocking_requirement = toMinecraftUnlocking(cooking->getUnlockingRequirement());
         return std::make_unique<::ShapelessRecipe>(std::move(context));
     }
 
@@ -205,8 +237,7 @@ std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
         context.results = ::Recipe::Results({ItemInstance(EndstoneItemStack::toMinecraft(stonecutting->getResult()))});
         context.tag = HashedString(stonecutting->getTag());
         context.priority = stonecutting->getPriority();
-        context.unlocking_requirement =
-            RecipeUnlockingRequirement(RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked);
+        context.unlocking_requirement = toMinecraftUnlocking(stonecutting->getUnlockingRequirement());
         return std::make_unique<::ShapelessRecipe>(std::move(context));
     }
 
@@ -226,8 +257,7 @@ std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
         context.results = ::Recipe::Results({ItemInstance(EndstoneItemStack::toMinecraft(shapeless->getResult()))});
         context.tag = HashedString(shapeless->getTag());
         context.priority = shapeless->getPriority();
-        context.unlocking_requirement =
-            RecipeUnlockingRequirement(RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked);
+        context.unlocking_requirement = toMinecraftUnlocking(shapeless->getUnlockingRequirement());
         return std::make_unique<::ShapelessRecipe>(std::move(context));
     }
 
@@ -247,8 +277,7 @@ std::unique_ptr<::Recipe> EndstoneRecipe::toMinecraft(const Recipe &recipe)
         context.results = ::Recipe::Results({ItemInstance(EndstoneItemStack::toMinecraft(shaped->getResult()))});
         context.tag = HashedString(shaped->getTag());
         context.priority = shaped->getPriority();
-        context.unlocking_requirement =
-            RecipeUnlockingRequirement(RecipeUnlockingRequirement::UnlockingContext::AlwaysUnlocked);
+        context.unlocking_requirement = toMinecraftUnlocking(shaped->getUnlockingRequirement());
         return std::make_unique<::ShapedRecipe>(std::move(context), shaped->getWidth(), shaped->getHeight(), true);
     }
 
@@ -279,6 +308,15 @@ std::optional<endstone::RecipeIngredient> EndstoneRecipe::getSmithingIngredient(
 {
     const auto &ingredients = getIngredients();
     return index < ingredients.size() ? ingredients[index] : std::nullopt;
+}
+
+const RecipeUnlockingRequirement &EndstoneRecipe::getUnlockingRequirement() const
+{
+    if (!unlocking_built_) {
+        unlocking_ = fromMinecraftUnlocking(recipe_, recipe_->getUnlockingRequirement());
+        unlocking_built_ = true;
+    }
+    return unlocking_;
 }
 
 std::vector<endstone::Recipe> EndstoneRecipe::brewingRecipes()

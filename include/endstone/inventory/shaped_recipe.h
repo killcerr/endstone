@@ -29,7 +29,8 @@ class ShapedRecipe : public Recipe {
 public:
     ShapedRecipe(std::string recipe_id, std::vector<std::string> shape,
                  std::vector<std::pair<char, RecipeIngredient>> ingredients, ItemStack result,
-                 std::string tag = "crafting_table", int priority = 0)
+                 std::string tag = "crafting_table", int priority = 0,
+                 RecipeUnlockingRequirement unlocking = RecipeUnlockingRequirement())
         : Recipe([&] {
               int width = 0;
               const int height = static_cast<int>(shape.size());
@@ -55,7 +56,7 @@ public:
               }
               return std::make_unique<SimpleImpl>(
                   std::initializer_list<ClassInfo>{typeid(ShapedRecipe), typeid(Recipe)}, std::move(recipe_id),
-                  std::move(tag), std::move(result), std::move(slots), priority, width, height);
+                  std::move(tag), std::move(result), std::move(slots), priority, width, height, std::move(unlocking));
           }())
     {
     }

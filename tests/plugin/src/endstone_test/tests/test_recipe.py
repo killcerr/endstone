@@ -72,6 +72,7 @@ def _format_recipe(recipe: Recipe) -> str:
         f"id={recipe.recipe_id}",
         f"tag={recipe.tag}",
         f"priority={recipe.priority}",
+        f"unlocking={recipe.unlocking_requirement.context.name}",
         f"result={result.type} x{result.amount}",
     ]
     if isinstance(recipe, ShapedRecipe):

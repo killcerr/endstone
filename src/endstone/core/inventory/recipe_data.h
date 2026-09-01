@@ -36,6 +36,7 @@
 #include "endstone/inventory/item_stack.h"
 #include "endstone/inventory/recipe.h"
 #include "endstone/inventory/recipe_ingredient.h"
+#include "endstone/inventory/recipe_unlocking_requirement.h"
 #include "endstone/inventory/shaped_recipe.h"
 #include "endstone/inventory/shapeless_recipe.h"
 #include "endstone/inventory/smithing_transform_recipe.h"
@@ -64,11 +65,14 @@ public:
     [[nodiscard]] const std::string &getRecipeId() const override { return recipe_->getRecipeId(); }
     [[nodiscard]] const std::string &getTag() const override { return recipe_->getTag().getString(); }
     [[nodiscard]] int getPriority() const override { return recipe_->getPriority(); }
+    [[nodiscard]] const RecipeUnlockingRequirement &getUnlockingRequirement() const override;
 
 protected:
     std::shared_ptr<const ::Recipe> recipe_;
     mutable std::vector<std::optional<endstone::RecipeIngredient>> ingredients_;
     mutable bool ingredients_built_ = false;
+    mutable RecipeUnlockingRequirement unlocking_;
+    mutable bool unlocking_built_ = false;
 };
 
 template <typename Interface>

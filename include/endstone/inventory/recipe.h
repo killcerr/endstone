@@ -25,6 +25,7 @@
 
 #include "endstone/inventory/item_stack.h"
 #include "endstone/inventory/recipe_ingredient.h"
+#include "endstone/inventory/recipe_unlocking_requirement.h"
 #include "endstone/object.h"
 
 namespace endstone {
@@ -84,6 +85,19 @@ public:
     [[nodiscard]] int getPriority() const { return impl_->getPriority(); }
 
     /**
+     * Get how this recipe is unlocked in the recipe book.
+     *
+     * Plugin recipes default to AlwaysUnlocked. Brewing recipes are not in the recipe book, so the requirement is
+     * unused.
+     *
+     * @return the unlocking requirement
+     */
+    [[nodiscard]] const RecipeUnlockingRequirement &getUnlockingRequirement() const
+    {
+        return impl_->getUnlockingRequirement();
+    }
+
+    /**
      * Attempts to copy this recipe as the given type T.
      *
      * @tparam T Target type to copy as (must derive from Recipe)
@@ -112,6 +126,11 @@ protected:
         [[nodiscard]] virtual const std::string &getRecipeId() const = 0;
         [[nodiscard]] virtual const std::string &getTag() const = 0;
         [[nodiscard]] virtual int getPriority() const { return 0; }
+        [[nodiscard]] virtual const RecipeUnlockingRequirement &getUnlockingRequirement() const
+        {
+            static const RecipeUnlockingRequirement kDefault;
+            return kDefault;
+        }
         [[nodiscard]] virtual int getWidth() const { return 0; }
         [[nodiscard]] virtual int getHeight() const { return 0; }
         [[nodiscard]] virtual std::optional<RecipeIngredient> getSmithingIngredient(std::size_t /*index*/) const
@@ -124,9 +143,10 @@ protected:
     public:
         SimpleImpl(std::initializer_list<ClassInfo> types, std::string recipe_id, std::string tag, ItemStack result,
                    std::vector<std::optional<RecipeIngredient>> ingredients, int priority = 0, int width = 0,
-                   int height = 0)
+                   int height = 0, RecipeUnlockingRequirement unlocking = RecipeUnlockingRequirement())
             : types_(types), recipe_id_(std::move(recipe_id)), tag_(std::move(tag)), result_(std::move(result)),
-              ingredients_(std::move(ingredients)), priority_(priority), width_(width), height_(height)
+              ingredients_(std::move(ingredients)), priority_(priority), width_(width), height_(height),
+              unlocking_(std::move(unlocking))
         {
         }
 
@@ -151,6 +171,7 @@ protected:
         [[nodiscard]] int getPriority() const override { return priority_; }
         [[nodiscard]] int getWidth() const override { return width_; }
         [[nodiscard]] int getHeight() const override { return height_; }
+        [[nodiscard]] const RecipeUnlockingRequirement &getUnlockingRequirement() const override { return unlocking_; }
         [[nodiscard]] std::optional<RecipeIngredient> getSmithingIngredient(std::size_t index) const override
         {
             return index < ingredients_.size() ? ingredients_[index] : std::nullopt;
@@ -165,6 +186,7 @@ protected:
         int priority_;
         int width_;
         int height_;
+        RecipeUnlockingRequirement unlocking_;
     };
 
     explicit Recipe(std::unique_ptr<Impl> impl) : impl_(std::move(impl)) {}

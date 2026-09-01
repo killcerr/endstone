@@ -211,6 +211,7 @@ static_assert(_ITERATOR_DEBUG_LEVEL == 0,
 #include "inventory/player_inventory.h"
 #include "inventory/recipe.h"
 #include "inventory/recipe_ingredient.h"
+#include "inventory/recipe_unlocking_requirement.h"
 #include "inventory/shaped_recipe.h"
 #include "inventory/shapeless_recipe.h"
 #include "inventory/smithing_recipe.h"

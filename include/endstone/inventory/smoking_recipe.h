@@ -27,11 +27,11 @@ namespace endstone {
 class SmokingRecipe : public CookingRecipe {
 public:
     SmokingRecipe(std::string recipe_id, RecipeIngredient input, ItemStack result, std::string tag = "smoker",
-                  int priority = 0)
+                  int priority = 0, RecipeUnlockingRequirement unlocking = RecipeUnlockingRequirement())
         : CookingRecipe(std::make_unique<SimpleImpl>(
               std::initializer_list<ClassInfo>{typeid(SmokingRecipe), typeid(CookingRecipe), typeid(Recipe)},
               std::move(recipe_id), std::move(tag), std::move(result),
-              std::vector<std::optional<RecipeIngredient>>{std::move(input)}, priority))
+              std::vector<std::optional<RecipeIngredient>>{std::move(input)}, priority, 0, 0, std::move(unlocking)))
     {
     }
     SmokingRecipe(const SmokingRecipe &other) = default;
